@@ -255,8 +255,9 @@ HEALTH_UNITS = [
     dict(name="nerf_new/ (nerfstudio fork)", root=CODE / "nerf_new",
          paths=["nerfstudio"], suite=None, no_f821=True,
          note="F821 skipped: jaxtyping shape symbols"),
-    dict(name="automation/", root=CODE / "automation", paths=["."], suite=None,
-         no_vcs=True, note="queue scripts + this dashboard — NOT in git"),
+    dict(name="automation/ (top-level repo)", root=CODE / "automation",
+         paths=["."], suite=None,
+         note="queue scripts + this dashboard; in code/ top-level repo"),
 ]
 
 
@@ -287,6 +288,7 @@ def _unit_stats(u):
             if any(f == p or f.startswith(p.rstrip("/") + "/") or p == "."
                    for p in u["paths"]):
                 py.append(root / f)
+    py = [f for f in py if Path(f).exists()]   # tracked-but-deleted files
     loc = 0
     for f in py:
         try:
@@ -370,9 +372,9 @@ def code_health():
 
 
 HEALTH_FLAGS = [
-    ("automation/ + lab_notebook/ have NO version control",
-     "the June-2026 regression class — queue scripts, dashboard and notebook "
-     "can silently regress or vanish", "serious"),
+    ("automation/ + lab_notebook/ now in code/ top-level repo (2026-07-31)",
+     "was: no VCS at all (June-2026 regression class); commit-after-green "
+     "now applies to queue scripts and the notebook too", "good"),
     ("teach_repeat duplicated wholesale (interfaces/python + integration/)",
      "66 undefined-name findings in dead legacy; quarantine or rm", "warning"),
     ("nerf_new fork: uncommitted local mods, last commit 94 days old",
