@@ -1,0 +1,135 @@
+# UJAMAA — 5-Month Roadmap (July → December 2026)
+
+**Finish line:** UJAMAA public — a live web demo of the vertical slice (survey → splat →
+top-down → temporal ledger → query) plus a cleaned, open-sourced, reproducible code release.
+No hard external deadline; target launch mid-December 2026. Decided 2026-07-13.
+
+**Owner:** Paul Amayo. **Research agent:** Claude (this file is our shared source of truth —
+edit freely; Claude re-reads it when planning).
+
+---
+
+## The vertical slice (what the demo must show)
+
+One coherent story, real software end to end:
+
+1. **Tassili** — a survey becomes a queryable gaussian splat (HiGH pipeline). *Status: works
+   end-to-end; served on 8001, query on 8002.*
+2. **Bateleur** — the farm's top-down state (LIO trajectory + tree instances). *Status: page
+   exists with real exported data; timeline scrubber decorative.*
+3. **Sankofa** — the tree ledger over epochs: growth, change, anomaly. *Status: spec written
+   (ujamaa/SANKOFA_SPEC.md); 4D backbone built (01/03/04 associated, NDVI skill); ledger,
+   metrics, diff, and UI are new work.*
+4. **Adinkra** — natural-language query over the twin. *Status: query server on 8002 is the
+   seed.*
+
+Spoor / Azalai / Hapi remain design mockups in the demo (clearly labelled "coming"), unless
+time allows. Cutting scope here is the plan, not a failure.
+
+## Phases
+
+### Phase 0 — Stop the bleeding (week of Jul 13)
+- [x] Git triage (2026-07-13): `high/` — 4 commits (depth-sup, embedder unification,
+      paper_figs, gitignore); `aru_sil_core/src` (the actual repo — top level is just the
+      pixi wrapper) — 7 commits (idx bug, multi-rig, WGS84 ingest, viewer, eval tooling);
+      `highnerf/` is an empty stub. Both trees clean.
+- [x] Tagged `known-good/2026-07-13` in both repos.
+- [x] Push/backup (2026-07-13): `aru_sil_core/src` → `splat/walkthrough` + tag pushed to
+      African-Robotics-Unit/aru_sil_core; `high/` → main + tag pushed to
+      African-Robotics-Unit/aru_sil_high (new repo).
+- [ ] Dataset registry: one file listing every survey on disk (id, path, ingest state,
+      which pipeline outputs exist).
+- [ ] Decide the umbrella repo layout for the eventual release (monorepo vs per-pillar).
+
+### Phase 1 — Consolidate the backbone (mid-Jul → mid-Aug)
+- [ ] Finish 02 survey 4D association (redownload in progress) → 4-epoch ledger substrate.
+- [ ] Harden the unified pipeline: fresh survey → splat + tree registry in one command,
+      with the known gotchas fixed in code, not in memory notes (stale dataloader cache,
+      lidar-init idx matching, headland smudge if tractable).
+- [ ] Regression harness: a small fixed block + expected PSNR/metrics so pipeline changes
+      are testable.
+
+### Phase 2 — Sankofa: Record + Comparison (mid-Aug → late Sep)
+- [x] Tree ledger implementation (SANKOFA_SPEC §A) — ledger v0 built 2026-07-22:
+      677 observations / 402 canonical trees / 275 multi-epoch (ujamaa/sankofa/build_ledger.py).
+      NB terminology: ledger unit = **observation**; "row" reserved for planting rows.
+- [x] Comparison faculty v0 (§B) — compare.py: per-tree change vs row cohort + anomaly
+      flags (currently a structure-PROXY; doubles as association QA).
+- [ ] Structural + spectral metrics per tree per epoch (canopy from splat/LiDAR, NDVI series)
+      — replaces the v0 proxy; unblocks the *biological* Comparison.
+- [ ] Make Bateleur's timeline scrubber real — driven by the ledger.
+- [ ] Forecast faculty (§C) is stretch — demo can ship with Record + Comparison.
+
+**RESEARCH LEAD — semantic pose-graph refinement (opened 2026-07-23):**
+- [ ] **Cross-survey tree correspondences as semantic loop-closure constraints.**
+      Found while debugging association: 01 and 03 differ by a *common-mode* ~1.4 m
+      North offset — measured two semi-independent ways (tree correspondences 1.44 m;
+      GPS trajectory headlands 1.28 m; agreement 0.16 m) and NOT explained by
+      GPS-LIO latency (calibrated at +300 ms, only 0.06 m relative effect) or by
+      drive-direction centroid bias (displacement is unimodal). Correcting it takes
+      association from 219 pairs @1.33 m (2.0 m gate) to **272 pairs @0.56 m at a
+      TIGHTER 1.5 m gate** — more matches, better distances, the signature of a real
+      systematic error removed. **The lead:** rather than applying a measured scalar
+      shift post-hoc, feed the tree correspondences into a POSE GRAPH as semantic
+      loop-closure constraints and jointly optimise poses + associations across
+      surveys (multi-session semantic SLAM). Trees are ideal landmarks — static,
+      distinctive, already instanced with stable ids. This would (a) explain and
+      absorb the residual properly, (b) let sparse surveys like 02 (9 legs) inherit
+      geometry from dense ones, (c) generalise to every future survey without
+      per-pair calibration. Open question the graph would also settle: is the 1.4 m
+      an RTK datum/base-station difference between survey days, or a real pose error?
+
+**GPU-QUEUED (run when the E-track batch clears the GPU):**
+- [ ] **Recursive fruit hierarchy (04 first, then general).** We already have per-tree SAM3
+      masks + metric depth. Strategy: pick each tree's closest/largest-mask frames (rank by
+      depth), crop+dilate+upscale to the tree-mask bbox, re-prompt SAM3 with fruit prompts
+      ("orange"/"citrus fruit"), reject detections outside the parent mask, multi-view dedup
+      within the tree's tracked mask, back-project with depth → per-tree fruit count + size.
+      Attach as a NEW hierarchy leaf below tree (node_type `fruit`, parent = tree_id) — extends
+      the validated interpolation nesting one radius outward, so "fruiting trees in row 7" is
+      the same geometric query one level deeper. Gives Sankofa its first COUNT measurement
+      (yield precursor → Forecast §C target). PRE-STEP: single-frame SAM3-fruit validation on
+      2-3 known-fruiting tree crops before committing the full pass. OPEN: (a) fruit as leaf
+      below tree [recommended] vs own class; (b) 04-only vs general pipeline stage. Rationale +
+      04 image evidence: session 2026-07-22.
+
+### Day-long experiment trails (added 2026-07-30 — course-correction)
+Interactive one-offs drifted us from this file; standing rule: the GPU always has a
+QUEUE, planned against this roadmap, results auto-logged to the notebook. Queues:
+- [ ] **Q1 fruit ladder (roadmap "recursive fruit hierarchy"):** S2 (protected class)
+      gates auto-evaluated on completion; if fail → S3a (tally survives densification)
+      → S3b (anchor-weight sweep) as a scripted chain, one night.
+- [ ] **Q2 klapmuts splat fleet:** partition → ~32 blocks × 25 min ≈ 13 GPU-h overnight
+      → served splats on farm #2 (generalisation story for the demo).
+- [ ] **Q3 citrus checkpoint-hygiene audit:** all 76 trained blocks, feature-loss vs
+      logged value (opacity-reset corruption screen) — CPU/GPU-light, interleaves.
+- [ ] **Q4 registry re-verification under K-indexed poses:** 04 then 01/03 recluster
+      from caches; gates the Sankofa ledger (Phase 2) and 4D association.
+- [ ] **Q5 (Phase 1 debt): 02 association + dataset registry file + regression harness.**
+
+### Phase 3 — Demo software (late Sep → early Nov)
+- [ ] Convert the design bundle (`ujamaa/project/`) into the real web app for the four
+      slice pillars; wire to the live servers (splat viewer, top-down, ledger, query).
+- [ ] Public hosting story (static site + hosted demo data, or tunnel/VPS for live servers).
+- [ ] Research site (`UJAMAA Research Site.html`) → real landing page.
+
+### Phase 4 — Release engineering (Nov)
+- [ ] Repo cleanup: licenses, README per pillar, remove secrets/paths, sample dataset.
+- [ ] Reproducible install (pixi env is already the base) + a smoke-test CI.
+- [ ] Demo video / walkthrough.
+- [ ] Optional: arXiv tech report to make the release citable (keeps the paper door open).
+
+### Phase 5 — Launch (early–mid Dec)
+- [ ] Site live, repos public, video out, announcement.
+- [ ] Post-launch: triage issues, capture what a paper would need if pursued in 2027.
+
+## Operating cadence
+- **Every experiment/run** → entry in `lab_notebook/` (config, command, metrics, verdict).
+- **Commit after green**: any working result gets committed same day; recipes get tags.
+- **Weekly** (suggest Fridays): memory consolidation + tick/adjust this roadmap.
+- **Monthly**: milestone review — is the phase on track, what gets cut?
+
+## Risks
+- Single machine, no hard deadline → drift. Mitigation: this file + weekly cadence.
+- Mockup→product (Phase 3) is a different skill mix from research; timebox it.
+- 4D ledger depends on survey quality/registration; 02 must land in Phase 1.
