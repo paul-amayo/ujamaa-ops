@@ -14,6 +14,7 @@
 set -x
 ARU=/home/paperspace/code/aru_sil_core
 NS_PIXI=/home/paperspace/code/nerf_new/pixi.toml
+SAM3_PIXI=/home/paperspace/code/sam3/pixi.toml
 IS_PIXI=$ARU/src/thirdparty/InstantSplat/pixi.toml
 PYNS=/home/paperspace/code/nerf_new/.pixi/envs/default/bin/python
 ROOT=/home/paperspace/data/klapmuts
@@ -39,7 +40,7 @@ Path("/tmp/klap_sweep_frames.json").write_text(json.dumps(sorted(names)))
 print(f"{len(names)} frames for masking")
 PY
 cd $ARU
-pixi run --manifest-path $NS_PIXI python $SCR/build_sky_masks.py \
+pixi run --manifest-path $SAM3_PIXI python $SCR/build_sky_masks.py \
   --data-dir $ROOT --keep-frames /tmp/klap_sweep_frames.json || exit 1
 python3 $SCR/build_fg_masks.py --data-dir $ROOT \
   --keep-frames /tmp/klap_sweep_frames.json || exit 1

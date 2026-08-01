@@ -10,6 +10,7 @@
 set -x
 ARU=/home/paperspace/code/aru_sil_core
 NS_PIXI=/home/paperspace/code/nerf_new/pixi.toml
+SAM3_PIXI=/home/paperspace/code/sam3/pixi.toml
 IS_PIXI=$ARU/src/thirdparty/InstantSplat/pixi.toml
 PYNS=/home/paperspace/code/nerf_new/.pixi/envs/default/bin/python
 SCR=$ARU/src/scripts
@@ -19,9 +20,9 @@ CB=$D04/blocks_ns/lio_row6F/block_001
 EMB=/home/paperspace/data/high/nerf/04_13D_v2F5/ckpts/model_best.pth
 KROOT=/home/paperspace/data/klapmuts
 KEMB=/home/paperspace/data/high/nerf/klapmuts_v1/ckpts/model_best.pth
-DEADLINE=$(date -d "next saturday 22:00" +%s 2>/dev/null || date -d "tomorrow 22:00" +%s)
+DEADLINE=$(( $(date +%s) + 129600 ))   # launch + 36 h fallback
 
-echo "=== WEEKEND QUEUE: waiting for sweep sentinel (deadline Sat 22:00) ==="
+echo "=== WEEKEND QUEUE: waiting for sweep sentinel (deadline launch+36h) ==="
 until grep -q "SWEEP-ALL-DONE" $LOG/klap_psnr_sweep.log 2>/dev/null \
       || [ "$(date +%s)" -gt "$DEADLINE" ]; do sleep 300; done
 grep -q "SWEEP-ALL-DONE" $LOG/klap_psnr_sweep.log 2>/dev/null \
@@ -102,7 +103,7 @@ names = [Path(f["file_path"]).name
 Path("/tmp/fleet_frames.json").write_text(json.dumps(sorted(names)))
 PY
     cd $ARU
-    pixi run --manifest-path $NS_PIXI python $SCR/build_sky_masks.py \
+    pixi run --manifest-path $SAM3_PIXI python $SCR/build_sky_masks.py \
       --data-dir $KROOT --keep-frames /tmp/fleet_frames.json
     python3 $SCR/build_fg_masks.py --data-dir $KROOT --keep-frames /tmp/fleet_frames.json
     [ -f "$BD/semantic_v2_B/palette.json" ] || \
