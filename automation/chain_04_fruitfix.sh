@@ -16,15 +16,19 @@ ROOTB=$D/blocks_ns/lio_row6F
 EMB=/home/paperspace/data/high/nerf/04_13D_v2F5/ckpts/model_best.pth
 FLOOR=25
 
-until grep -q "CHAIN-04-ALL-DONE" $LOG/chain_04.log 2>/dev/null; do sleep 300; done
+NS_PIXI=/home/paperspace/code/nerf_new/pixi.toml
+IS_PIXI=$ARU/src/thirdparty/InstantSplat/pixi.toml
 while ps -eo cmd | grep -E "ns-train" | grep -v grep > /dev/null; do sleep 60; done
-echo "=== FRUITFIX START $(date) ==="
+echo "=== FRUITFIX START $(date) — direct (chain_04 killed; broken-ledger runs abandoned per Paul) ==="
 
 for N in 001 000 002 003 004 005; do
   BD=$ROOTB/block_$N
   echo "=== FRUITFIX BLOCK $N ==="
   ( set -e
     cd $ARU
+    [ -f "$BD/supervision_trees_r6/meta.json" ] || \
+      pixi run --manifest-path $NS_PIXI python $SCR/r6_project_idmaps.py \
+        --data-dir $D --block-dir $BD
     [ -f "$D/sam3_fruit_tree_b$N/clip_000/frame_entries.json" ] || \
       pixi run --manifest-path $SAM3_PIXI python $SCR/fruit_in_trees_ledger.py \
         --data-dir $D --block-dir $BD --out-name sam3_fruit_tree_b$N
@@ -40,6 +44,12 @@ for N in 001 000 002 003 004 005; do
       echo "SKIP-TRAIN block_$N: keeps ${KEPT:-0} <= floor $FLOOR (fruit level not viable)"
       exit 0
     fi
+    [ -f "$BD/init_da3.ply" ] || \
+      pixi run --manifest-path $IS_PIXI python $SCR/lidar_init_per_block.py \
+        --block-dir $BD --root $D --pad-x 7.5 --cross-row-median
+    [ -f "$BD/lidar_depth_morph.npz" ] || \
+      pixi run --manifest-path $NS_PIXI python $SCR/build_block_lidar_depth.py \
+        --block-dir $BD --root $D
     cd /home/paperspace/code/nerf_new
     echo "n" | MAX_JOBS=4 HIGH_EMBEDDER_CKPT=$EMB \
       LIDAR_DEPTH_NPZ=$BD/lidar_depth_morph.npz \
