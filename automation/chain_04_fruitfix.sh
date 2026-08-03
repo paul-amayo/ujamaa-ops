@@ -36,7 +36,8 @@ for N in 001 000 002 003 004 005; do
       --tree-source idmap_dir --tree-src-dir $BD/supervision_trees_r6 \
       --hierarchy $D/scene_graph_v4/marker_hierarchy_fruit5.json \
       --fruit-ledger-glob "$D/sam3_fruit_tree_b$N/clip_*/frame_entries.json" \
-      --out-dir $BD/supervision/strict_tree_v1 \
+      --filter strict_fruit_tree_v1 \
+      --out-dir $BD/supervision/strict_tree_v2 \
       | tee /tmp/fruitfix_compile_$N.txt
     KEPT=$(grep -oE "kept [0-9]+" /tmp/fruitfix_compile_$N.txt | grep -oE "[0-9]+" | head -1)
     echo "KEEPS block_$N: ${KEPT:-0}"
@@ -62,7 +63,7 @@ for N in 001 000 002 003 004 005; do
         --pipeline.model.fruit-protect True \
         --pipeline.model.sky-loss-lambda 1.0 \
         --pipeline.model.report-masked-metrics True \
-        --pipeline.datamanager.semantic-dir $BD/supervision/strict_tree_v1 \
+        --pipeline.datamanager.semantic-dir $BD/supervision/strict_tree_v2 \
         --max-num-iterations 20001 --steps-per-save 9998 \
         --vis tensorboard nerfstudio-data \
         --eval-mode interval --eval-interval 10
