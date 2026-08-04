@@ -92,100 +92,43 @@ def queue_state():
 
 
 
-# ---------- the science: pillars, questions, and how they're being solved ----
-# Curated alongside the notebook — this IS the scientific narrative.
-PILLARS = [
- dict(name="Tassili", tag="survey → queryable hierarchical splat",
-  question="Can a farm survey become a 3D field you can QUERY BY LEVEL — "
-           "section, row, tree, fruit — from one hyperbolic embedding "
-           "(depth == radius on the Lorentz manifold)?",
-  solved=[
-    ("Tree / row levels separate in the rendered field",
-     "95.8% / 99.1% cross-level pointing, IoU 0.702", "good"),
-    ("Background capture cured (v16 masked loss)",
-     "row pointing 15% → 89.9%", "good"),
-    ("Checkpoint corruption root-caused",
-     "opacity resets poison saves on 3000-step boundaries (5–7× loss)", "good"),
-  ],
-  open=[
-    ("FRUIT level collapses — the demo differentiator",
-     "scarcity ~1% of gradient; label conflict from unfired frames; "
-     "S-ladder: F4 0.0% → S1 1.1% → S2 12.0% pointing (protected class works "
-     "where it fires; coverage was reset by densification)", "serious"),
-    ("Vocabulary never chosen for separation",
-     "tree-word cosine p90 = 0.90, max 0.9993", "warning"),
-  ],
-  next="S3a (queued): supervision tally rides gsplat strategy_state so "
-       "protection survives densification — gates: fruit radius ≈7, "
-       "cross-level pointing."),
- dict(name="Bateleur", tag="top-down farm state — instances & rows",
-  question="Can a trustworthy PLANT REGISTRY (instances, rows, counts) be "
-           "built from noisy per-frame detections + LiDAR, and transfer "
-           "across sites?",
-  solved=[
-    ("Citrus registry + QA method",
-     "census audit exposed 24% undercount (112 vs 85); v4 NMS recluster "
-     "canonical", "good"),
-    ("klapmuts census (2nd site, new crop type)",
-     "866 instances; median size 0.99 m = measured pitch; 72% of points "
-     "plant-scale", "good"),
-    ("Row structure solved at the RANSAC init",
-     "14 clean rows in 0.12 s once dir gate ±10° and thr = spacing/2; "
-     "CORAL optimiser shown no-op (λ=β=0) or destructive (0.5)", "good"),
-    ("Transfer methodology: 9+ silent site/hardware constants externalised",
-     "rig.json + site.json per dataset — the paper's transfer section", "good"),
-  ],
-  open=[
-    ("Two-sided duplicates & far-side rows in census",
-     "~128 two-plant merges; rows beyond 5 m gate unmapped", "warning"),
-    ("Citrus registries under K-indexed poses",
-     "clustered with stream-indexed poses — unverified", "serious"),
-  ],
-  next="Fleet tonight: 10 klapmuts row-block splats; then registry "
-       "re-verification (Q4)."),
- dict(name="Sankofa", tag="the tree ledger across time",
-  question="Is it the SAME plant across epochs — without a shared datum — "
-           "and what changed biologically?",
-  solved=[
-    ("Absolute WGS84 association (citrus)",
-     "01/03/04 associated, 99% match; latency calibrated (+300 ms)", "good"),
-    ("Systematic 1.4 m common-mode shift found & corroborated two ways",
-     "correcting it: 219→272 pairs at a TIGHTER gate → semantic pose-graph "
-     "lead (trees as loop-closure landmarks)", "good"),
-    ("Ledger v0", "677 observations / 402 canonical trees / 275 multi-epoch",
-     "good"),
-  ],
-  open=[
-    ("GPS-free epochs (klapmuts Dec-2025)",
-     "INS is LOCAL ENU — datum unrecorded (the citrus ENU trap again); "
-     "cross-season appearance shift is large (cover/floor/fruiting all "
-     "changed)", "serious"),
-    ("Biological metrics per tree per epoch",
-     "ledger compares a structure PROXY, not phenology", "warning"),
-  ],
-  next="Localisation pre-flight: DINOv2 retrieval Dec→April; decision "
-       "image-first vs structure-first (bag lattice = landmarks)."),
- dict(name="Adinkra", tag="natural-language query over the twin",
-  question="Can plain language select geometry — 'the fruiting trees in row "
-           "7' — through the hierarchical embedding?",
-  solved=[
-    ("Relevancy formula hardened",
-     "negatives-free scoring + geodesic interpolation walk (steps=4) — "
-     "committed", "good"),
-    ("Query server live", "port 8002 against served splats", "good"),
-  ],
-  open=[
-    ("Level collapse in queries",
-     "same word can bleed across fruit/tree/row when a level is weak — "
-     "gated on Tassili's fruit fix", "warning"),
-  ],
-  next="Re-validate viewer relevancy after S3a; wire klapmuts fleet into "
-       "the query server (farm #2 demo)."),
- dict(name="Spoor · Azalai · Hapi", tag="design-stage pillars",
-  question="Deliberately 'coming soon' in the demo — scope control is the "
-           "plan, not a failure (roadmap).",
-  solved=[], open=[], next="Design mockups only until the slice ships."),
-]
+
+# ---------- the science: parsed from lab_notebook/PILLARS.md ----------
+# It used to be a Python literal in this file, which meant updating the
+# science story was a CODE edit — so it drifted 25 notebook entries behind
+# (2026-08-04). It now lives beside the notebook and is updated in the same
+# commit as the day's entry; the freshness row below polices that.
+def parse_pillars():
+    src = CODE / "lab_notebook" / "PILLARS.md"
+    if not src.exists():
+        return []
+    out, cur = [], None
+    for line in src.read_text().splitlines():
+        m = re.match(r"^## (.+?) — (.+)$", line)
+        if m:
+            if cur:
+                out.append(cur)
+            cur = dict(name=m.group(1), tag=m.group(2), question="",
+                       solved=[], open=[], next="")
+            continue
+        if cur is None:
+            continue
+        m = re.match(r"^\*\*Q:\*\* (.+)$", line)
+        if m:
+            cur["question"] = m.group(1); continue
+        m = re.match(r"^\*\*Next:\*\* (.+)$", line)
+        if m:
+            cur["next"] = m.group(1); continue
+        m = re.match(r"^- \[(good|warning|serious|critical)\] (.+?)(?: — (.+))?$", line)
+        if m:
+            st, claim, ev = m.group(1), m.group(2), m.group(3) or ""
+            (cur["solved"] if st == "good" else cur["open"]).append((claim, ev, st))
+    if cur:
+        out.append(cur)
+    return out
+
+
+PILLARS = parse_pillars()
 
 
 # ---------- legacy scoreboard (kept for the risk table) ----------
@@ -397,8 +340,7 @@ def narrative_freshness():
     so the mechanical parts (metrics, risks, queue, trail) can be current
     while the science story silently rots. Surface the drift instead.
     """
-    src = CODE / "automation" / "build_dashboard.py"
-    pill_day = sh("git log -1 --format=%cI -- automation/build_dashboard.py",
+    pill_day = sh("git log -1 --format=%cI -- lab_notebook/PILLARS.md",
                   cwd=CODE)[:10]
     nb_entries = []
     for f in sorted((CODE / "lab_notebook").glob("2026-*.md"), reverse=True):
