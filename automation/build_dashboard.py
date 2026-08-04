@@ -65,6 +65,44 @@ def parse_notebook():
     return entries[:8]
 
 
+def parse_autonomy():
+    """AUTONOMY: runs=N clean=N interventions=N debugged=N lines, per day.
+
+    Defined in lab_notebook/TESTING.md section 5. One line per day (the last
+    one on a given date wins, so a day can revise its own score)."""
+    days = {}
+    for f in sorted((CODE / "lab_notebook").glob("2026-*.md")):
+        day = None
+        for line in f.read_text().splitlines():
+            m = re.match(r"^## (\d{4}-\d{2}-\d{2})", line)
+            if m:
+                day = m.group(1)
+            a = re.match(r"^AUTONOMY:\s*(.*)$", line.strip())
+            if a and day:
+                kv = dict(re.findall(r"(\w+)=(\d+)", a.group(1)))
+                days[day] = {k: int(v) for k, v in kv.items()}
+    return sorted(days.items())[-14:]
+
+
+def parse_tassili_ledger():
+    """Open rows of the new-dataset-to-tassili table in TESTING.md."""
+    src = CODE / "lab_notebook" / "TESTING.md"
+    if not src.exists():
+        return []
+    rows, in_tab = [], False
+    for line in src.read_text().splitlines():
+        if line.startswith("| dataset |"):
+            in_tab = True
+            continue
+        if in_tab:
+            if not line.startswith("|"):
+                break
+            c = [x.strip() for x in line.strip("|").split("|")]
+            if len(c) >= 7 and not set(c[0]) <= {"-", " "}:
+                rows.append(c)
+    return rows
+
+
 # ---------- queue / log state ----------
 def tail_state(path, patterns, n=400):
     p = LOGS / path
@@ -436,6 +474,38 @@ def build():
     q_html = ("".join(f"<div class='qline'>{esc(q)}</div>" for q in qs)
               or "<div class='qline muted'>no active queue lines</div>")
 
+    auto = parse_autonomy()
+    if auto:
+        arows = []
+        for day, kv in reversed(auto):
+            r, c = kv.get("runs", 0), kv.get("clean", 0)
+            iv, dbg = kv.get("interventions", 0), kv.get("debugged", 0)
+            pct = 100 * c / r if r else 0
+            ast = ("good" if iv == 0 and dbg == 0 else
+                   "warning" if iv + dbg <= 3 else "serious")
+            arows.append(
+                f'<tr><td class="muted">{esc(day)}</td>'
+                f'<td class="val">{c}/{r} clean ({pct:.0f}%)</td>'
+                f'<td class="val">{iv}</td><td class="val">{dbg}</td>'
+                f'<td><span class="st st-{ast}">{ICON[ast]}</span></td></tr>')
+        auto_html = ('<div class="wrap"><table><tr class="muted">'
+                     '<td>day</td><td>runs clean</td><td>interventions</td>'
+                     '<td>debugged</td><td></td></tr>'
+                     + "".join(arows) + "</table></div>")
+    else:
+        auto_html = ('<div class="muted small">no AUTONOMY: lines in the '
+                     'notebook yet — format in lab_notebook/TESTING.md §5</div>')
+
+    ledger = parse_tassili_ledger()
+    open_rows = [r for r in ledger if "open" in r[4] or "pending" in r[4]]
+    led_html = ("".join(
+        f'<tr><td>{esc(r[0])}</td><td class="muted">{esc(r[1])}</td>'
+        f'<td class="val">{esc(r[4])}</td><td class="muted">{esc(r[6])}</td></tr>'
+        for r in ledger) or "")
+    led_html = (f'<div class="wrap"><table><tr class="muted"><td>dataset</td>'
+                f'<td>landed</td><td>days to tassili</td><td>notes</td></tr>'
+                f'{led_html}</table></div>') if ledger else ""
+
     notes_html = "".join(
         f"<tr><td class='muted'>{esc(d)}</td><td>{esc(t)}</td></tr>"
         for d, t in notes)
@@ -502,6 +572,10 @@ tr.why td {{ border-top:none; padding-top:0; }}
 <tr class="muted"><td>unit</td><td>LOC</td><td>test suite</td><td>breakage</td><td>hyg/KLOC</td><td>dirty</td><td>score</td></tr>
 {health_html}</table></div>
 <div class="wrap"><table>{fresh_html}{flags_html}</table></div>
+<h2>Pipeline autonomy <span class="muted tagline">— from AUTONOMY: lines in daily notebook entries (defs: lab_notebook/TESTING.md §5)</span></h2>
+{auto_html}
+<h2>New dataset &rarr; tassili <span class="muted tagline">— {len(open_rows)} open (ledger: TESTING.md §6)</span></h2>
+{led_html}
 <h2>Live queue</h2>{q_html}
 <h2>Experiment trail (lab notebook)</h2><div class="wrap"><table>{notes_html}</table></div>
 """
