@@ -1,0 +1,55 @@
+#!/bin/bash
+# UJAMAA pre-commit hook — keeps the science narrative honest.
+#
+# Rule: the lab notebook is the RECORD, PILLARS.md is the CONCLUSIONS.
+# Routine entries don't have to move the narrative, but drift shouldn't be
+# allowed to pile up silently (it reached 25 entries on 2026-08-04).
+#
+#   drift = notebook "## <date>" entries added since PILLARS.md last changed
+#   drift <  THRESHOLD : commit proceeds, prints a reminder
+#   drift >= THRESHOLD : commit BLOCKS unless PILLARS.md is also staged
+#
+# Escape hatches:  git commit --no-verify     (one-off)
+#                  UJAMAA_SKIP_PILLARS=1 git commit ...
+# Install:         automation/install_hooks.sh
+THRESHOLD=${UJAMAA_PILLARS_THRESHOLD:-5}
+[ -n "$UJAMAA_SKIP_PILLARS" ] && exit 0
+
+cd "$(git rev-parse --show-toplevel)" || exit 0
+STAGED=$(git diff --cached --name-only)
+
+# only engage when this commit touches the notebook
+echo "$STAGED" | grep -qE '^lab_notebook/[0-9]{4}-[0-9]{2}\.md$' || exit 0
+# ...and give a free pass if the narrative is being updated in the same commit
+echo "$STAGED" | grep -q '^lab_notebook/PILLARS.md$' && exit 0
+
+PILL_DAY=$(git log -1 --format=%cs -- lab_notebook/PILLARS.md 2>/dev/null)
+[ -z "$PILL_DAY" ] && exit 0   # no PILLARS history yet — nothing to police
+
+# count entry headers dated after PILLARS.md last moved, including staged ones
+DRIFT=$(git diff --cached lab_notebook/ | grep -E '^\+## [0-9]{4}-[0-9]{2}-[0-9]{2}' |
+        sed -E 's/^\+## ([0-9-]{10}).*/\1/' | awk -v d="$PILL_DAY" '$1 > d' | wc -l)
+COMMITTED=$(git grep -hE '^## [0-9]{4}-[0-9]{2}-[0-9]{2}' HEAD -- lab_notebook/ 2>/dev/null |
+        sed -E 's/^## ([0-9-]{10}).*/\1/' | awk -v d="$PILL_DAY" '$1 > d' | wc -l)
+DRIFT=$((DRIFT + COMMITTED))
+
+if [ "$DRIFT" -ge "$THRESHOLD" ]; then
+  cat <<MSG
+
+  ✗ PILLARS.md is $DRIFT notebook entries behind (threshold $THRESHOLD).
+
+    lab_notebook/PILLARS.md was last updated $PILL_DAY. Since then the
+    notebook has recorded $DRIFT dated entries. The dashboard renders
+    PILLARS.md as the science narrative — stale narrative, wrong demo story.
+
+    Fix:   edit lab_notebook/PILLARS.md, stage it, commit again
+    Skip:  git commit --no-verify        (or UJAMAA_SKIP_PILLARS=1)
+
+MSG
+  exit 1
+fi
+
+if [ "$DRIFT" -gt 0 ]; then
+  echo "  · note: PILLARS.md is $DRIFT entries behind (blocks at $THRESHOLD)"
+fi
+exit 0
