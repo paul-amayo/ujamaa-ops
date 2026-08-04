@@ -390,6 +390,32 @@ SNAME = {"good": "OK", "warning": "WATCH", "serious": "RISK",
          "critical": "CRITICAL"}
 
 
+def narrative_freshness():
+    """Is the hand-curated PILLARS block keeping up with the lab notebook?
+
+    build_dashboard runs daily from cron, but PILLARS is written by hand —
+    so the mechanical parts (metrics, risks, queue, trail) can be current
+    while the science story silently rots. Surface the drift instead.
+    """
+    src = CODE / "automation" / "build_dashboard.py"
+    pill_day = sh("git log -1 --format=%cI -- automation/build_dashboard.py",
+                  cwd=CODE)[:10]
+    nb_entries = []
+    for f in sorted((CODE / "lab_notebook").glob("2026-*.md"), reverse=True):
+        for line in f.read_text().splitlines():
+            m = re.match(r"^## (\d{4}-\d{2}-\d{2})", line)
+            if m:
+                nb_entries.append(m.group(1))
+        if nb_entries:
+            break
+    newest = max(nb_entries) if nb_entries else "—"
+    behind = 0
+    if pill_day and nb_entries:
+        behind = sum(1 for d in nb_entries if d > pill_day)
+    st = "good" if behind == 0 else "warning" if behind <= 4 else "serious"
+    return pill_day or "?", newest, behind, st
+
+
 def build():
     today = datetime.date.today()
     days = (LAUNCH - today).days
@@ -457,6 +483,13 @@ def build():
         for k, v, s in HEALTH_FLAGS)
     scored = [score for u, s, score, why, st in ch if not u.get("legacy")]
     health_min = min(scored) if scored else 0
+    pill_day, nb_newest, nb_behind, nb_st = narrative_freshness()
+    fresh_html = (
+        f'<tr><td>Science narrative (PILLARS) vs lab notebook</td>'
+        f'<td class="val">curated {esc(pill_day)} · newest entry {esc(nb_newest)}</td>'
+        f'<td><span class="st st-{nb_st}">{ICON[nb_st]} '
+        f'{"in sync" if nb_behind == 0 else str(nb_behind) + " entries ahead"}'
+        f'</span></td></tr>')
 
     q_html = ("".join(f"<div class='qline'>{esc(q)}</div>" for q in qs)
               or "<div class='qline muted'>no active queue lines</div>")
@@ -526,7 +559,7 @@ tr.why td {{ border-top:none; padding-top:0; }}
 <div class="wrap"><table>
 <tr class="muted"><td>unit</td><td>LOC</td><td>test suite</td><td>breakage</td><td>hyg/KLOC</td><td>dirty</td><td>score</td></tr>
 {health_html}</table></div>
-<div class="wrap"><table>{flags_html}</table></div>
+<div class="wrap"><table>{fresh_html}{flags_html}</table></div>
 <h2>Live queue</h2>{q_html}
 <h2>Experiment trail (lab notebook)</h2><div class="wrap"><table>{notes_html}</table></div>
 """
