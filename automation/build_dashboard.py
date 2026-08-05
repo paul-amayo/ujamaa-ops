@@ -515,12 +515,19 @@ def build():
 <style>
 :root {{ --ink:#1a1a19; --muted:#6f6e66; --line:#e4e2da; --card:#faf9f5;
   --good:#1a7f37; --warning:#9a6700; --serious:#cf222e; --critical:#82071e;
-  --accent:#4969ed; }}
+  --accent:#4969ed; --page:#ffffff; }}
 @media (prefers-color-scheme: dark) {{
   :root {{ --ink:#e8e6df; --muted:#a09e94; --line:#3a3934; --card:#232320;
-    --good:#3fb950; --warning:#d29922; --serious:#f85149; --critical:#ff7b72; }}
-  body {{ background:#191917; }} }}
-body {{ font:15px/1.5 -apple-system,'Segoe UI',sans-serif; color:var(--ink);
+    --good:#3fb950; --warning:#d29922; --serious:#f85149; --critical:#ff7b72;
+    --page:#191917; }} }}
+/* viewer theme toggle must override the OS preference in BOTH directions */
+:root[data-theme="dark"] {{ --ink:#e8e6df; --muted:#a09e94; --line:#3a3934;
+  --card:#232320; --good:#3fb950; --warning:#d29922; --serious:#f85149;
+  --critical:#ff7b72; --page:#191917; }}
+:root[data-theme="light"] {{ --ink:#1a1a19; --muted:#6f6e66; --line:#e4e2da;
+  --card:#faf9f5; --good:#1a7f37; --warning:#9a6700; --serious:#cf222e;
+  --critical:#82071e; --page:#ffffff; }}
+body {{ font:15px/1.5 -apple-system,'Segoe UI',sans-serif; color:var(--ink); background:var(--page);
   max-width:1080px; margin:2rem auto; padding:0 1.2rem; }}
 h1 {{ font-size:1.5rem; margin-bottom:.2rem; }}
 h2 {{ font-size:1.05rem; margin:1.6rem 0 .6rem; }}
