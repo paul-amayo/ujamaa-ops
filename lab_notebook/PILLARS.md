@@ -54,12 +54,13 @@ Format (parsed by automation/build_dashboard.py):
 
 ## Cross-cutting — reconstruction quality
 **Q:** Is the underlying splat good enough for any of the above to mean anything?
-- [serious] Held-out views are far worse than training views at BOTH sites — the gap is the single biggest open risk to the demo
+- [resolved] The train/eval gap is REFRAMED, not a bug — eval frames sit 25 cm from train neighbours (interpolation test) and the product is a flythrough near the trajectory. Doctrine: headline = train TREE/FRUIT PSNR; eval demoted to breakage check; floaters (geometry gate) are the real off-axis risk
 - [good] Block length matters, but NOT uniformly — klapmuts eval 11.3 → 16.2 dB going 47.9 → 19 m, while citrus eval FALLS 11.6 → 7.2 dB over the same shortening; the cap is a klapmuts-shaped result, not a law
 - [good] Sky supervision earns its place — eval FG 9.49 → 10.51 dB and 33% fewer gaussians (the sky floaters are gone)
-- [good] A splatfacto-equivalent baseline path exists for fast honest baselines — enable-high-features False, high-loss 0, empty semantic dir, no depth, no masks
-- [serious] LiDAR depth supervision was MISALIGNED from S6 to s9b and across the whole klapmuts sweep — the npz was indexed by split-local image_idx while its rows are in block order (median 7 frames / ~1.75 m off); fixed by name-alignment in HighDataManager
-**Next:** first correctly-supervised depth run is in flight; then pose refinement and eval-peak early stopping.
+- [serious] Depth supervision is a BUST after two invalid measurements — misaligned rows (S6..s9b + klapmuts sweep), then a metres-vs-internal-units loss in both "aligned" runs; the honest units-fixed result was +0.34 eval FG for −1.7 train FG. Direction retired; z-buffered survey-cache depth maps + tested camera_convention.py remain as assets
+- [good] LOD-on-trees is the working lever — tree-weighted photometric L1 (bg=0.0 winner): train TREE 17.92 → 19.14, FRUIT 12.31 → 13.14, 15% fewer gaussians; ground keeps only 7–8% of budget in every run so eradicating it buys nothing
+- [good] scene.json manifests exist (TESTING.md §3, implemented) — 04's pins the treelod_bg00_v1 recipe as THE scene baseline; scene_baseline.sh runs whatever the manifest declares
+**Next:** baseline+high-features regression run in flight (feature field as single variable); then fruit-protect rung, floater gate, and a second block for replication.
 
 ## Spoor · Azalai · Hapi — design-stage pillars
 **Q:** Deliberately "coming soon" in the demo — scope control is the plan, not a failure.
