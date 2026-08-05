@@ -60,8 +60,12 @@ PSNR is appearance; geometry can be badly wrong under decent FG-PSNR.
 5. **Cross-view fruit consistency**: frame-A fruit px → splat depth →
    frame B; distance to B's fruit masks (tracks the ~100 px issue).
 
-Headline appearance number wherever sky supervision is on: **FG-PSNR only**
-(plus FRUIT PSNR on fruit scenes). Full-image PSNR is retired.
+Headline appearance numbers wherever sky supervision is on: **train-split
+TREE + FRUIT PSNR** (the product is a flythrough near the trajectory; train
+views are what the viewer shows). Full-image PSNR is retired. Eval PSNR at
+this dataset's ~25 cm keyframe spacing is an INTERPOLATION test — gross-
+breakage check only, never a tuning target (2026-08-05). The off-axis risk
+of trajectory overfitting is floaters — gate 1, not PSNR.
 
 ## 5. Pipeline autonomy score (daily)
 
