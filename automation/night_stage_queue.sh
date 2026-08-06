@@ -53,7 +53,12 @@ for SPEC in "04_13D_Jackal:lio_row6F" "05_13D_Jackal:lio_row" \
   for B in $ROOT/$S/blocks_ns/$SCHEME/block_[0-9][0-9][0-9]; do
     N=$(basename $B)
     [ -f "$B/transforms.json" ] || { echo "NIGHT-SKIP $S/$N: no transforms"; continue; }
-    [ -d "$B/splat_runs_STAGE1/stage1_bg00" ] && { echo "NIGHT-SKIP $S/$N: done"; continue; }
+    # done = a saved CHECKPOINT exists, not just the run dir — a failed
+    # launch creates the dir in seconds (2026-08-06 crash-loop: an orphaned
+    # trainer held the GPU and 6 blocks "completed" in 30 s each)
+    if ls $B/splat_runs_STAGE1/stage1_bg00/high/*/nerfstudio_models/*.ckpt >/dev/null 2>&1; then
+      echo "NIGHT-SKIP $S/$N: done"; continue
+    fi
     TW=""
     [ -f "$B/supervision/strict_tree_v2/manifest.json" ] && TW=$B/supervision/strict_tree_v2
     T0=$(date +%s)
