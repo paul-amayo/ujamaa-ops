@@ -67,6 +67,27 @@ this dataset's ~25 cm keyframe spacing is an INTERPOLATION test — gross-
 breakage check only, never a tuning target (2026-08-05). The off-axis risk
 of trajectory overfitting is floaters — gate 1, not PSNR.
 
+## 4b. FRUIT SIGN-OFF (2026-08-06) — the full battery, or it did not happen
+
+No fruit-bearing checkpoint is quoted, served, or promoted without ALL of
+these, in one report (`automation/fruit_signoff.sh <run_dir>`):
+
+| # | test | tool | pass bar |
+|---|------|------|----------|
+| 1 | appearance vs scene baseline | score_splat (train FG/TREE/FRUIT) + kf_542 render | >= baseline − noise; stage2 runs: geometry tensors BIT-IDENTICAL |
+| 2 | per-level rendered NORM | fruit_signoff norms check | fruit-px norms move toward 7.15, trees hold ~4.67 (depth diagnostic) |
+| 3 | NO-WALK cross-level pointing | fruit_pointing_map --no-walk | THE headline: recall@fruit px at FP ~0 |
+| 4 | walked pointing + FP anatomy | fruit_pointing_map | reference/query semantics; own-fruit fraction reported |
+| 5 | ceiling control | fruit_pointing_map --gt-features | must stay 100/100/0 (scoring-path canary) |
+| 6 | full relevancy eval | eval_r6_relevancy --no-negatives | object/row pointing, within-level fruit, IoU/AUC-PR, multi-frame |
+| 7 | aligned gates | logs/aligned_gates.py | mass/coverage vs the run's OWN supervision |
+| 8 | cross-view consistency | logs/s9b_542_to_543-style | fruit px projected 542->543 land on same tree (~100 px issue) |
+
+Sign-off = the table filled with numbers + Paul's explicit OK recorded in
+the notebook entry. Partial suites are labelled PARTIAL and cannot sign off.
+History that mandates this: within-level pointing quoted as cross-level
+(2026-08-06), walk degeneracy faking 88.6%, level collapse scoring 96%.
+
 ## 5. Pipeline autonomy score (daily)
 
 Every day's notebook entry set ends with one machine-parsed line:
