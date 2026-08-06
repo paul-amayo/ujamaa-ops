@@ -14,12 +14,12 @@
 set -x
 BD=/home/paperspace/data/citrus_all/04_13D_Jackal/blocks_ns/lio_row6F/block_001_L095_sky
 SUP=/home/paperspace/data/citrus_all/04_13D_Jackal/blocks_ns/lio_row6F/block_001/supervision/strict_tree_v2
-EMB=/home/paperspace/data/high/nerf/04_13D_v2F5/ckpts/model_best.pth
+EMB=${STAGE2_EMBEDDER:-/home/paperspace/data/high/nerf/04_13D_v2F5/ckpts/model_best.pth}
 cd /home/paperspace/code/nerf_new
 T0=$(date +%s)
 echo "n" | MAX_JOBS=4 HIGH_EMBEDDER_CKPT=$EMB CANARY_EVERY=1000 \
   pixi run ns-train high \
-    --data $BD --output-dir $BD/splat_runs_FEATFIX --experiment-name stage2_fruitchild \
+    --data $BD --output-dir $BD/splat_runs_FEATFIX --experiment-name ${STAGE2_NAME:-stage2_fruitchild} \
     --load-dir $BD/stage2_init/nerfstudio_models \
     --pipeline.model.freeze-geometry True \
     --pipeline.model.high-loss-weight 1.0 \

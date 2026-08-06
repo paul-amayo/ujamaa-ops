@@ -7,7 +7,7 @@ set -uo pipefail
 RD=$(readlink -f "$1")
 REPORT=${2:-/home/paperspace/logs/fruit_signoff_$(basename $RD).txt}
 B=/home/paperspace/data/citrus_all/04_13D_Jackal/blocks_ns/lio_row6F
-H=/home/paperspace/data/high/nerf/04_13D_v2F5/ckpts/model_best.pth
+H=${SIGNOFF_EMBEDDER:-/home/paperspace/data/high/nerf/04_13D_v2F5/ckpts/model_best.pth}
 HJ=/home/paperspace/data/citrus_all/04_13D_Jackal/scene_graph_v4/marker_hierarchy_fruit5.json
 SUP=$B/block_001/supervision/strict_tree_v2
 CFG=$(ls -t $RD/high/*/config.yml | head -1)
