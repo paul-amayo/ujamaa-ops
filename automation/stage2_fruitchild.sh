@@ -20,7 +20,7 @@ T0=$(date +%s)
 echo "n" | MAX_JOBS=4 HIGH_EMBEDDER_CKPT=$EMB CANARY_EVERY=1000 \
   pixi run ns-train high \
     --data $BD --output-dir $BD/splat_runs_FEATFIX --experiment-name ${STAGE2_NAME:-stage2_fruitchild} \
-    --load-dir $BD/stage2_init/nerfstudio_models \
+    --load-dir ${STAGE2_INIT_DIR:-$BD/stage2_init/nerfstudio_models} \
     --pipeline.model.freeze-geometry True \
     --pipeline.model.high-loss-weight 1.0 \
     --pipeline.model.high-loss-fruit-weight 10.0 \
