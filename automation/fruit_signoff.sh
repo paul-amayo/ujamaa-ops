@@ -27,6 +27,9 @@ pixi run python /home/paperspace/code/automation/score_splat.py "$RD" 2>/dev/nul
 pixi run python /home/paperspace/logs/render_one_base.py "$RD" kf_000542.png \
   $FIG/signoff_${TAG}_542.png /home/paperspace/data/citrus_all/04_13D_Jackal/kf_images 2>/dev/null | tail -1
 
+# NOTE norms targets are EMBEDDER-DEPENDENT: v2F5 fruit ~7.14; v3vocab1k fruit
+# ~7.58, trees 4.5-5.3 per-word. aligned_gates prints the stale 7.14 label —
+# read it against the pinned embedder's radius (2026-08-07 fw2 false alarm).
 echo; echo "--- [2+3+4] POINTING MAPS (no-walk = headline, walked, anatomy) ---"
 for MODE in "--no-walk" ""; do
   HIGH_EMBEDDER_CKPT=$H pixi run python \
