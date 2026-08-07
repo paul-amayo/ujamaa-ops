@@ -12,8 +12,8 @@
 # Verdict tooling: fruit_pointing_map.py in BOTH walk and --no-walk modes;
 # the number that must move is NO-WALK recall (0% -> up) at no-walk FP ~0.
 set -x
-BD=/home/paperspace/data/citrus_all/04_13D_Jackal/blocks_ns/lio_row6F/block_001_L095_sky
-SUP=/home/paperspace/data/citrus_all/04_13D_Jackal/blocks_ns/lio_row6F/block_001/supervision/strict_tree_v2
+BD=${STAGE2_BD:-/home/paperspace/data/citrus_all/04_13D_Jackal/blocks_ns/lio_row6F/block_001_L095_sky}
+SUP=${STAGE2_SUP:-/home/paperspace/data/citrus_all/04_13D_Jackal/blocks_ns/lio_row6F/block_001/supervision/strict_tree_v2}
 EMB=${STAGE2_EMBEDDER:-/home/paperspace/data/high/nerf/04_13D_v2F5/ckpts/model_best.pth}
 cd /home/paperspace/code/nerf_new
 T0=$(date +%s)
