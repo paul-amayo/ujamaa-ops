@@ -52,21 +52,12 @@ HIGH_EMBEDDER_CKPT=$H pixi run python \
   --out-dir /tmp/signoff_r6 2>/dev/null \
   | grep -aE "POINTING|FRUIT-PIXEL|MEAN IoU|fruit@"
 
-echo; echo "--- [7] ALIGNED GATES (own supervision) ---"
-if [ -f /home/paperspace/logs/aligned_gates.py ]; then
-  pixi run python /home/paperspace/logs/aligned_gates.py "$CFG" 2>/dev/null | tail -6 \
-    || echo "aligned_gates run failed — mark PARTIAL"
-else
-  echo "aligned_gates.py missing — mark PARTIAL"
-fi
-
-echo; echo "--- [8] CROSS-VIEW CONSISTENCY (542 -> 543) ---"
-if [ -f /home/paperspace/logs/s9b_542_to_543.py ]; then
-  pixi run python /home/paperspace/logs/s9b_542_to_543.py "$CFG" 2>/dev/null | tail -4 \
-    || echo "cross-view script needs config wiring — mark PARTIAL"
-else
-  echo "s9b_542_to_543.py missing — mark PARTIAL"
-fi
+echo; echo "--- [7] ALIGNED GATES (own supervision; embedder = \$H) ---"
+HIGH_EMBEDDER_CKPT=$H pixi run python \
+  /home/paperspace/code/aru_sil_core/src/scripts/aligned_gates.py "$CFG" 2>/dev/null | tail -6 \
+  || echo "aligned_gates run failed — mark PARTIAL"
+# test 8 (cross-view 542->543) DROPPED 2026-08-07 (Paul): cross-view geometry
+# is out of scope; per-view performance gauges the field. TESTING.md updated.
 
 echo; echo "=============================================================="
 echo "SIGN-OFF: [ ] Paul approved (record in notebook)   [ ] PARTIAL"

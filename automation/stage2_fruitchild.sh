@@ -23,7 +23,7 @@ echo "n" | MAX_JOBS=4 HIGH_EMBEDDER_CKPT=$EMB CANARY_EVERY=1000 \
     --load-dir ${STAGE2_INIT_DIR:-$BD/stage2_init/nerfstudio_models} \
     --pipeline.model.freeze-geometry True \
     --pipeline.model.high-loss-weight 1.0 \
-    --pipeline.model.high-loss-fruit-weight 10.0 \
+    --pipeline.model.high-loss-fruit-weight ${STAGE2_FRUIT_W:-10.0} \
     --pipeline.model.fruit-protect True \
     --pipeline.datamanager.semantic-dir $SUP \
     --pipeline.model.rasterize-mode antialiased \
