@@ -20,6 +20,11 @@ if [ -f /home/paperspace/logs/QUEUE_HOLD ]; then
   echo "NIGHT-HOLD: queue on hold ($(cat /home/paperspace/logs/QUEUE_HOLD))"
   exit 0
 fi
+# KLAPMUTS-FIRST gate (Paul 2026-08-07): if the flag exists, the klapmuts
+# queue runs first and chains back into this script when done.
+if [ -f /home/paperspace/logs/KLAP_FIRST ]; then
+  exec /home/paperspace/code/automation/klap_first_queue.sh
+fi
 cd /home/paperspace/code/nerf_new
 EMPTY=/home/paperspace/logs/empty_semantic; mkdir -p $EMPTY
 EMB=/home/paperspace/data/high/nerf/04_13D_v2F5/ckpts/model_best.pth
