@@ -81,6 +81,7 @@ these, in one report (`automation/fruit_signoff.sh <run_dir>`):
 | 5 | ceiling control | fruit_pointing_map --gt-features | must stay 100/100/0 (scoring-path canary) |
 | 6 | full relevancy eval | eval_r6_relevancy --no-negatives | object/row pointing, within-level fruit, IoU/AUC-PR, multi-frame |
 | 7 | aligned gates | aru_sil_core/src/scripts/aligned_gates.py (HIGH_EMBEDDER_CKPT must match the run) | mass/coverage vs the run's OWN supervision |
+| 8 | CONTAINMENT ladder | aru_sil_core/src/scripts/containment_eval.py | per-view row/tree/fruit best-IoU masks from single bare words (the paper-highlight test); words via live table, never literals |
 
 Test 8 (cross-view 542->543 consistency) was DROPPED 2026-08-07 on Paul's
 call: cross-view geometry is out of scope for the field verdict; per-view

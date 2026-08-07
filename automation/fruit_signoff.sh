@@ -59,8 +59,15 @@ echo; echo "--- [7] ALIGNED GATES (own supervision; embedder = \$H) ---"
 HIGH_EMBEDDER_CKPT=$H pixi run python \
   /home/paperspace/code/aru_sil_core/src/scripts/aligned_gates.py "$CFG" 2>/dev/null | tail -6 \
   || echo "aligned_gates run failed — mark PARTIAL"
-# test 8 (cross-view 542->543) DROPPED 2026-08-07 (Paul): cross-view geometry
-# is out of scope; per-view performance gauges the field. TESTING.md updated.
+# old test 8 (cross-view 542->543) DROPPED 2026-08-07 (Paul). New test 8:
+echo; echo "--- [8] CONTAINMENT ladder (per-view row/tree/fruit IoU) ---"
+HIGH_EMBEDDER_CKPT=$H pixi run python \
+  /home/paperspace/code/aru_sil_core/src/scripts/containment_eval.py \
+  --config $CFG --hyper-ckpt $H --hierarchy-json $HJ --supervision-dir $SUP \
+  --frame kf_000542.png \
+  --kf-images /home/paperspace/data/citrus_all/04_13D_Jackal/kf_images \
+  --out $FIG/signoff_${TAG}_containment.png 2>/dev/null | grep -aE "TREE|FRUIT|ROW|SAVED" \
+  || echo "containment_eval failed — mark PARTIAL" 
 
 echo; echo "=============================================================="
 echo "SIGN-OFF: [ ] Paul approved (record in notebook)   [ ] PARTIAL"

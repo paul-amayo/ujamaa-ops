@@ -98,4 +98,8 @@ for MODE in "--no-walk" ""; do
     2>/dev/null | grep -aE "CROSS-LEVEL|FP anatomy"
 done
 HIGH_EMBEDDER_CKPT=$EMB pixi run python $ARU/aligned_gates.py "$CFG" 2>/dev/null | tail -6
+HIGH_EMBEDDER_CKPT=$EMB pixi run python $ARU/containment_eval.py \
+  --config $CFG --hyper-ckpt $EMB --hierarchy-json $HJ --supervision-dir $SUP \
+  --frame $FR --kf-images $(dirname $(dirname $(dirname $BD)))/kf_images \
+  --out $FIG/repl_${N}_containment.png 2>/dev/null | grep -aE "TREE|FRUIT|ROW|SAVED"
 echo "REPL-DONE $N"
