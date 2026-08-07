@@ -18,8 +18,9 @@ Format (parsed by automation/build_dashboard.py):
 - [good] Measurement ruler fixed — gates now score each run against ITS OWN supervision; the old template scored residue-paint positions and under-measured every clean-label run
 - [serious] Fruit identity is not attached to fruit GEOMETRY — carriers sit on the right viewing ray at the wrong depth (on-orange in kf_542, on foliage in kf_543, ~79 px away, colour R-B 8.7 vs 65.1 at true fruit)
 - [serious] The reconstruction substrate is view-overfit — train FG ~21 dB vs eval FG ~10 dB on the same block; every semantic number sits on top of this
-- [warning] Vocabulary was never chosen for separation — tree-word cosine p90 0.90, max 0.9993
-**Next:** fix the substrate before more semantics — depth supervision (now correctly aligned), pose refinement, early stop at the eval peak; then re-test protection with min_frames as a multi-view consistency filter.
+- [good] Vocabulary redesigned for separation (v4_1k: 1024 tree + 64 fruit, farthest-point CLIP) — swap + embedder retrain landed 2026-08-06: tree->row retrieval 100% (beats 99.03), fruit->tree 100%; max collision 0.65 vs old 0.92/1.00
+- [good] **PAPER HIGHLIGHT (Paul 2026-08-07): census-init makes the whole hierarchy queryable per-view** — single bare words segment row (IoU 0.80/0.87) ⊃ tree (0.80-0.91) ⊃ fruit (recall 0.94, absent fruit correctly empty) in kf_542 via containment; no-walk cross-level pointing 98.9/98.9 at FP 10.4%
+**Next:** fruit-weight retune post-init (overshoot 7.485 vs 7.14), replicate census-init on a second block, then serve a census-init splat on tassili.
 
 ## Bateleur — top-down farm state: instances and rows
 **Q:** Can a trustworthy PLANT REGISTRY (instances, rows, counts) be built from noisy per-frame detections + LiDAR, and transfer across sites?
@@ -49,9 +50,9 @@ Format (parsed by automation/build_dashboard.py):
 - [good] Per-panel agents live in the ujamaa repo (ollama Gemma 4); sankofa panel wired to the ledger digest
 - [good] The scoring mechanics are now fully dissected — per-step walk decomposition tools; walked max-over-steps is LEVEL-BLIND by construction (extends every pixel to all depths; ceiling glows the whole parent mask at 1.0)
 - [good] CONTAINMENT scoring discovered (the walk function's own extrapolation mask, previously unused): match ancestors + own point only. Open-vocab masks-inside-masks: "cassette" -> tree-84 mask IoU 0.847; "nectar" -> fruit blobs inside it (recall 0.77); absent fruit ("persimmon" in 542) -> correctly EMPTY where walked scoring would fabricate the whole canopy
-- [serious] Containment quality tracks per-tree radial health — deflated tree 73 segments at IoU 0.22 (spills into 84); depth-corrected 84 at 0.85. Per-level norm maintenance is the gate
+- [resolved] Containment quality tracked per-tree radial health — and "radial health" turned out to be UNFINISHED GROWTH from zero-init, not decay: census-init lifts tree 73 containment 0.27 -> 0.80, tree 84 -> 0.911, rows 0.80/0.87 (2026-08-07)
 - [good] Vocabulary opened: v4_1k proposal (1024 tree + 64 fruit, wordfreq-filtered farthest-point CLIP sampling) — max collision 0.65 vs current 0.92/1.00; found 'copper'+'coral' in BOTH current lists; 416 words < klapmuts 866 objects
-**Next:** Paul strike-list on v4_1k -> embedder retrain (with level_target_norms ON) -> stage2 -> full sign-off; containment as a named viewer mode.
+**Next:** containment as a named viewer mode (tassili panel); row/section words get the farthest-point treatment; level_target_norms stays a deliberately-unused variable.
 
 ## Cross-cutting — reconstruction quality
 **Q:** Is the underlying splat good enough for any of the above to mean anything?
@@ -62,9 +63,9 @@ Format (parsed by automation/build_dashboard.py):
 - [good] LOD-on-trees is the working lever — tree-weighted photometric L1 (bg=0.0 winner): train TREE 17.92 → 19.14, FRUIT 12.31 → 13.14, 15% fewer gaussians; ground keeps only 7–8% of budget in every run so eradicating it buys nothing
 - [good] scene.json manifests exist (TESTING.md §3, implemented) — 04's pins the treelod_bg00_v1 recipe as THE scene baseline; scene_baseline.sh runs whatever the manifest declares
 - [good] Two-stage recipe VALIDATED end-to-end — stage2_fruitchild: appearance BIT-IDENTICAL to bg00 (19.14/13.14) + fruit level real at its own radius: NO-WALK pointing 94.6% recall / 3.5% FP (was 0/0), fruit-px norms 6.7 -> target 7.15. Three resume-era bugs found+fixed on the way (optimizer orphaning, freeze-dies-at-load, canary info clobber)
-- [serious] Tree level radially DEFLATED (px median 1.8-2.4 vs 4.67 target; blending shrinkage) — the next norm-maintenance target after fruit
-- [good] FRUIT SIGN-OFF battery formalized (TESTING.md 4b, fruit_signoff.sh): 8 tests incl. no-walk cross-level pointing (the headline), ceiling control, FP anatomy; partial suites cannot sign off
-**Next:** cross-view identity (test 8, still failing) and tree-level norm maintenance; then second block replication.
+- [resolved] "Radial deflation" was ZERO-INIT UNDERTRAINING, proven by the census-init experiment — per-gaussian interaction census (autograd through the rasterizer = exact blend weights) -> majority-label feature init -> one 44-min refine puts trees 73/60/84 at cos 1.00/1.00/0.99 with radius on target to 2 decimals (were 0.57/0.50/0.67 at half radius). Zero-init stage2 retired; census-init is the standing recipe. Collision/coverage/distance/conflict were all measured and eliminated first (2026-08-07)
+- [good] FRUIT SIGN-OFF battery formalized (TESTING.md 4b, fruit_signoff.sh): 7 tests incl. no-walk cross-level pointing (the headline), ceiling control, FP anatomy; partial suites cannot sign off. Test 8 (cross-view) DROPPED 2026-08-07 (Paul: per-view performance gauges the field); test 7 rewired after its v2F5-hardcoded embedder produced a 0.0% artifact
+**Next:** fw2 rerun (fruit-weight 2.0 post-init) -> battery -> sign-off sheet to Paul; then second block replication.
 
 ## Spoor · Azalai · Hapi — design-stage pillars
 **Q:** Deliberately "coming soon" in the demo — scope control is the plan, not a failure.
