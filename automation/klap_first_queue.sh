@@ -38,12 +38,11 @@ for N in 000 001 002 003 004 005 006 007 008 009; do
       --filter strict_fruit_tree_v1 \
       --out-dir "$BD/supervision/trees_only" \
       || { echo "KLAP-FAIL $N: tree compile"; continue; }
-  # berry ledger: SAM3 image mode, prompted inside sack bboxes
-  [ -f "$ROOT/sam3_berry_b$N/clip_000/frame_entries.json" ] || \
-    pixi run --manifest-path $SAM3_PIXI python $SCR/fruit_in_trees_ledger.py \
-      --data-dir "$ROOT" --block-dir "$BD" --out-name sam3_berry_b$N \
-      --prompt berry --tree-idmap-dir "$BD/supervision/trees_only" \
-      || echo "KLAP-WARN $N: berry ledger failed (tree-only supervision stands)"
+  # berry ledger DISABLED 2026-08-07 (Paul): berries do NOT lie inside sack
+  # masks — sacks are the grow-bags at the base, the plant (and its berries)
+  # sits ABOVE the bag, so in-parent prompting + overlap>=0.5 rejects all.
+  # Recipe needs an upward-extended search column / plant-mask level first.
+  echo "KLAP-SKIP $N: berry ledger (sack-geometry recipe invalid, see 2026-08-07)"
   # final compile: sack trees + whatever berries survived the strict filter
   python3 $SCR/compile_supervision.py --block-dir "$BD" \
     --tree-source colour_png_bridge \
