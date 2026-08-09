@@ -26,6 +26,7 @@ Format (parsed by automation/build_dashboard.py):
 **Q:** Can a trustworthy PLANT REGISTRY (instances, rows, counts) be built from noisy per-frame detections + LiDAR, and transfer across sites?
 - [good] Citrus registry + QA method — census audit exposed a 24% undercount (112 vs 85); v4 NMS recluster canonical
 - [good] klapmuts census, second site and new crop — 866 instances, median size 0.99 m = measured pitch
+- [good] klapmuts training substrate BUILT (2026-08-08 overnight): sack supervision compiled for all 10 row blocks (v4_1k word table), embedder klapmuts_v2vocab1k retrained, bg00 stage-1 fleet done — census-init stage2 is one command away (block-length question open)
 - [good] Row structure solved at the RANSAC init — 14 clean rows in 0.12 s with dir gate ±10° and thr = spacing/2; the CORAL optimiser is a no-op at λ=β=0 and destructive at 0.5
 - [good] The top-down hierarchy is the identity authority — per-frame tree supervision is now its PROJECTION (mask shape from SAM3, identity from LiDAR-snapped census clusters), not a re-derivation
 - [good] Transfer methodology — 9+ silent site/hardware constants externalised to rig.json + site.json per dataset
@@ -36,6 +37,9 @@ Format (parsed by automation/build_dashboard.py):
 
 ## Sankofa — the tree ledger across time
 **Q:** Is it the SAME plant across epochs — without a shared datum — and what changed biologically?
+- [good] **Dec-2025 mcap ingest UNBLOCKED (2026-08-09)** — rosbags AnyReader opens the mcap natively and husky_bag_to_monolithic was ALREADY WRITTEN for the A300 topics (Paul's call: no new scripts). Round-trip proven; full ZED stack incl. registered depth; LiDAR is PointCloud2 (July's PointCloud fear was wrong); INS+ZED odom agree to 1.7% over a 44 m row pass at 0.78 m/s; INS z drifts 3.8 m (LiDAR owns the vertical)
+- [good] Per-epoch prompts are a SCENE FACT (scene.json prompts.dec_2025) — Dec bags answer to 'plant pot'/'grow bag' (12 dets) and NOT 'sack' (0); Jan is the mirror (sacks yes, berries none). Berry association measured: berry-in-PLANT containment 92.9% px vs pot-column 28.8% — recipe = berry ⊂ plant ⊂ (pot adjacency | 3D census snap)
+- [good] Dec SAM3 ledgers banked: 290/290 frames (plant pot / plant / berry) in sam3_ledger_v0 — the ingest-independent half of the Dec fruit level
 - [good] Absolute WGS84 association on citrus — 01/03/04 associated at 99% match, latency calibrated (+300 ms)
 - [good] Systematic 1.4 m common-mode shift found and corroborated two ways — correcting it took 219 → 272 pairs at a TIGHTER gate, which is the semantic pose-graph lead
 - [good] Ledger v0 — 677 observations / 402 canonical trees / 275 multi-epoch
@@ -64,8 +68,10 @@ Format (parsed by automation/build_dashboard.py):
 - [good] scene.json manifests exist (TESTING.md §3, implemented) — 04's pins the treelod_bg00_v1 recipe as THE scene baseline; scene_baseline.sh runs whatever the manifest declares
 - [good] Two-stage recipe VALIDATED end-to-end — stage2_fruitchild: appearance BIT-IDENTICAL to bg00 (19.14/13.14) + fruit level real at its own radius: NO-WALK pointing 94.6% recall / 3.5% FP (was 0/0), fruit-px norms 6.7 -> target 7.15. Three resume-era bugs found+fixed on the way (optimizer orphaning, freeze-dies-at-load, canary info clobber)
 - [resolved] "Radial deflation" was ZERO-INIT UNDERTRAINING, proven by the census-init experiment — per-gaussian interaction census (autograd through the rasterizer = exact blend weights) -> majority-label feature init -> one 44-min refine puts trees 73/60/84 at cos 1.00/1.00/0.99 with radius on target to 2 decimals (were 0.57/0.50/0.67 at half radius). Zero-init stage2 retired; census-init is the standing recipe. Collision/coverage/distance/conflict were all measured and eliminated first (2026-08-07)
-- [good] FRUIT SIGN-OFF battery formalized (TESTING.md 4b, fruit_signoff.sh): 7 tests incl. no-walk cross-level pointing (the headline), ceiling control, FP anatomy; partial suites cannot sign off. Test 8 (cross-view) DROPPED 2026-08-07 (Paul: per-view performance gauges the field); test 7 rewired after its v2F5-hardcoded embedder produced a 0.0% artifact
-**Next:** fw2 rerun (fruit-weight 2.0 post-init) -> battery -> sign-off sheet to Paul; then second block replication.
+- [good] **FIRST FRUIT SIGN-OFF GRANTED (Paul, 2026-08-07)** — stage2_censusinit_fw2 is block_001's canonical fruit checkpoint; battery = 8 real tests (cross-view dropped, containment ladder added as test 8 after it shipped missing from the block_003 verdict)
+- [good] Census-init REPLICATED on block_003 — no-walk 100/100 at FP 14.7%; containment tree 0.919 / row 0.859; the weak-tree pattern (tree 11, 0.46) persists cross-block
+- [resolved] Fruit halo is REFINEMENT-born, not init-born — margin-init (fruit share >= 0.6) produced a field identical to 3 decimals (17 demoted gaussians re-converge). Fruit verdicts: blob-level metric + competition masks; px-IoU retired for ~8 px objects
+**Next:** loss-side fruit gradient gating if the halo ever matters; second-site census-init (klapmuts, all prerequisites banked).
 
 ## Spoor · Azalai · Hapi — design-stage pillars
 **Q:** Deliberately "coming soon" in the demo — scope control is the plan, not a failure.
