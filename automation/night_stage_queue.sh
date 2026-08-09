@@ -72,6 +72,29 @@ for SPEC in "04_13D_Jackal:lio_row6F" "05_13D_Jackal:lio_row" \
     fi
     TW=""
     [ -f "$B/supervision/strict_tree_v2/manifest.json" ] && TW=$B/supervision/strict_tree_v2
+    # mask consistency fixup (2026-08-08): nerfstudio asserts masks are
+    # all-or-none per split; 01/03-era transforms carry mask_path for only
+    # SOME frames -> instant AssertionError crash-loop. If coverage is
+    # partial or any file is missing, strip mask_path everywhere (.orig kept).
+    python3 - "$B" << 'PYFIX'
+import json, sys
+from pathlib import Path
+B = Path(sys.argv[1]); tj = B / "transforms.json"
+d = json.loads(tj.read_text())
+fr = d.get("frames", [])
+withm = [f for f in fr if f.get("mask_path")]
+ok = withm and len(withm) == len(fr) and all(
+    (B / f["mask_path"]).exists() or Path(f["mask_path"]).exists() for f in withm)
+if withm and not ok:
+    bak = B / "transforms.json.premaskfix"
+    if not bak.exists():
+        bak.write_text(tj.read_text())
+    for f in fr:
+        f.pop("mask_path", None)
+    tj.write_text(json.dumps(d, indent=1))
+    print(f"NIGHT-MASKFIX {B.name}: stripped partial mask_path "
+          f"({len(withm)}/{len(fr)} frames had one)")
+PYFIX
     T0=$(date +%s)
     echo "n" | MAX_JOBS=4 CANARY_EVERY=2000 \
       TREE_WEIGHT_DIR=$TW TREE_WEIGHT_BG=0.0 \
