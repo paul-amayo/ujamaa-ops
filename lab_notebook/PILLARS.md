@@ -20,7 +20,8 @@ Format (parsed by automation/build_dashboard.py):
 - [serious] The reconstruction substrate is view-overfit — train FG ~21 dB vs eval FG ~10 dB on the same block; every semantic number sits on top of this
 - [good] Vocabulary redesigned for separation (v4_1k: 1024 tree + 64 fruit, farthest-point CLIP) — swap + embedder retrain landed 2026-08-06: tree->row retrieval 100% (beats 99.03), fruit->tree 100%; max collision 0.65 vs old 0.92/1.00
 - [good] **PAPER HIGHLIGHT (Paul 2026-08-07): census-init makes the whole hierarchy queryable per-view** — single bare words segment row (IoU 0.80/0.87) ⊃ tree (0.80-0.91) ⊃ fruit (recall 0.94, absent fruit correctly empty) in kf_542 via containment; no-walk cross-level pointing 98.9/98.9 at FP 10.4%
-**Next:** fruit-weight retune post-init (overshoot 7.485 vs 7.14), replicate census-init on a second block, then serve a census-init splat on tassili.
+- [good] Paper Figure 1 exists (five iterations under Paul's art direction, 2026-08-09..12) — (a) NAIP aerial band: real 0.6 m imagery, epoch-1 dots + epoch-2 rings on individual visible canopies, 1,250+ plants / 3 sites / 5 epochs; (b) SAM3+CLIP baseline clash: flat scores, the ordinal query ranks the third tree LOWEST; (c) HiGH multi-place multi-level relevancy + no-response panel; hero drafts A/B banked (perpendicular novel views substrate-limited); source promoted to high/paper_figs/fig_teaser.py
+**Next:** serve a census-init splat on tassili; klapmuts census-init stage2 once Paul picks block length; LERF-3D trained baseline for the experiments section.
 
 ## Bateleur — top-down farm state: instances and rows
 **Q:** Can a trustworthy PLANT REGISTRY (instances, rows, counts) be built from noisy per-frame detections + LiDAR, and transfer across sites?
@@ -40,14 +41,15 @@ Format (parsed by automation/build_dashboard.py):
 - [good] **Dec-2025 mcap ingest UNBLOCKED (2026-08-09)** — rosbags AnyReader opens the mcap natively and husky_bag_to_monolithic was ALREADY WRITTEN for the A300 topics (Paul's call: no new scripts). Round-trip proven; full ZED stack incl. registered depth; LiDAR is PointCloud2 (July's PointCloud fear was wrong); INS+ZED odom agree to 1.7% over a 44 m row pass at 0.78 m/s; INS z drifts 3.8 m (LiDAR owns the vertical)
 - [good] Per-epoch prompts are a SCENE FACT (scene.json prompts.dec_2025) — Dec bags answer to 'plant pot'/'grow bag' (12 dets) and NOT 'sack' (0); Jan is the mirror (sacks yes, berries none). Berry association measured: berry-in-PLANT containment 92.9% px vs pot-column 28.8% — recipe = berry ⊂ plant ⊂ (pot adjacency | 3D census snap)
 - [good] Dec SAM3 ledgers banked: 290/290 frames (plant pot / plant / berry) in sam3_ledger_v0 — the ingest-independent half of the Dec fruit level
+- [good] DEC TOP-DOWN REGISTRY (2026-08-09) — SAM3 ledgers × native ZED depth × odom fused to world coordinates: 199 pot clusters (166 solid vs ~176 expected) + 299 berry observations; berry mass sits in the 5–10 m stretch (real non-uniform fruiting), fallen ground berries auto-rejected by the plant gate
 - [good] Absolute WGS84 association on citrus — 01/03/04 associated at 99% match, latency calibrated (+300 ms)
 - [good] Systematic 1.4 m common-mode shift found and corroborated two ways — correcting it took 219 → 272 pairs at a TIGHTER gate, which is the semantic pose-graph lead
 - [good] Ledger v0 — 677 observations / 402 canonical trees / 275 multi-epoch
 - [good] Dec-2025 A300 routing settled — the bag carries 3D LiDAR + INS odom + ZED stereo, so it goes the LIO/odometry route; COLMAP would discard the LiDAR and return scale-free poses
 - [good] Blueberries are detectable — SAM3 image mode on dec_0144 gives 58 masks for 'berry' at fill 0.76, geometry close to citrus oranges, so the in-tree recipe should transfer; qualified multi-word prompts return nothing
-- [serious] Dec-2025 ingest is net-new — ROS2 mcap, sensor_msgs/PointCloud (not PointCloud2), no raw IMU topic, A300 lidar→camera extrinsics unknown
+- [warning] A300 lidar→camera extrinsics still unmeasured — needed for the LiDAR-init path on Dec blocks (the rest of the "net-new ingest" fear retired 2026-08-09: mcap reads natively, cloud IS PointCloud2, existing husky tool wrote the monolithics)
 - [warning] The ledger compares a structure PROXY, not phenology
-**Next:** build the mcap reader (images + INS-odom poses + cloud) → kf20cm dump → blocks → LiDAR init; DINOv2 Dec→April retrieval pre-flight still unrun.
+**Next:** kf20cm keyframe cut from odom (~220 kf) → blocks → LiDAR init → census snap → berry-in-plant supervision (ledgers banked, ~15 px plant-mask dilation in the compile); DINOv2 Dec→April retrieval pre-flight still unrun.
 
 ## Adinkra — natural-language query over the twin
 **Q:** Can plain language select geometry — "the fruiting trees in row 7" — through the hierarchical embedding?
