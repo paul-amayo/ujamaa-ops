@@ -48,6 +48,7 @@ Format (parsed by automation/build_dashboard.py):
 - [good] Dec-2025 A300 routing settled — the bag carries 3D LiDAR + INS odom + ZED stereo, so it goes the LIO/odometry route; COLMAP would discard the LiDAR and return scale-free poses
 - [good] Blueberries are detectable — SAM3 image mode on dec_0144 gives 58 masks for 'berry' at fill 0.76, geometry close to citrus oranges, so the in-tree recipe should transfer; qualified multi-word prompts return nothing
 - [warning] A300 lidar→camera extrinsics still unmeasured — needed for the LiDAR-init path on Dec blocks (the rest of the "net-new ingest" fear retired 2026-08-09: mcap reads natively, cloud IS PointCloud2, existing husky tool wrote the monolithics)
+- [warning] ledger_v1 georeference caveat (Paul caught it in Fig 1, 2026-08-12) — lat/lon is anchored PER SURVEY (01's WGS84 anchor sits 6.6 m west of 03's; 03 lands on NAIP canopies) and en_13b_frame still carries the uncorrected +1.45 m common-mode shift; consumers must datum-correct (272 matched pairs give the translation, residual 0.56 m) until the builder stores one datum
 - [warning] The ledger compares a structure PROXY, not phenology
 **Next:** kf20cm keyframe cut from odom (~220 kf) → blocks → LiDAR init → census snap → berry-in-plant supervision (ledgers banked, ~15 px plant-mask dilation in the compile); DINOv2 Dec→April retrieval pre-flight still unrun.
 
