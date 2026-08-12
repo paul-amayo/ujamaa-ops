@@ -1,0 +1,9 @@
+{
+ "block": "/home/paperspace/data/citrus_all/04_13D_Jackal/blocks_ns/lio_row6F/block_001_L095_sky",
+ "iters": 2000,
+ "metric": "Train Metrics Dict/psnr_fg",
+ "train_psnr_fg": 12.28,
+ "gauss": 476200.0,
+ "tol_psnr_db": 0.5,
+ "tol_gauss_frac": 0.1
+}

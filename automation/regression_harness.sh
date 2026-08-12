@@ -150,39 +150,54 @@ echo "n" | MAX_JOBS=4 pixi run ns-train high \
         note "regression B: TRAIN FAILED (see regression_probe.log)"; exit 1; }
 
 RESULT=$(pixi run --manifest-path "$NS_PIXI" python - "$PROBE_DIR/$EXP" << 'EOF'
-import glob, sys
+import glob, math, sys
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 evs = sorted(glob.glob(sys.argv[1] + '/high/*/events.out.tfevents.*'))
 ea = EventAccumulator(evs[-1]); ea.Reload()
 tags = ea.Tags()['scalars']
-def last(sub):
-    t = [x for x in tags if sub.lower() in x.lower()]
-    return (t[0], ea.Scalars(t[0])[-1].value) if t else (None, float('nan'))
-pt, pv = last('Train PSNR')
-gt, gv = last('gaussian_count') if any('gaussian_count' in x for x in tags) else last('num_points')
+def last(*cands):
+    # first candidate that matches a tag (train-side tags preferred by order)
+    for sub in cands:
+        t = [x for x in tags if sub.lower() in x.lower()]
+        if t:
+            return ea.Scalars(t[0])[-1].value
+    return float('nan')
+# doctrine: headline = train FG PSNR (never full-image once sky masks exist)
+pv = last('Train Metrics Dict/psnr_fg', 'psnr_fg')
+gv = last('Train Metrics Dict/gaussian_count', 'gaussian_count', 'num_points')
+if math.isnan(pv) or math.isnan(gv):
+    print(f"TAG-MISS: scalars present: {sorted(tags)}", file=sys.stderr)
+    sys.exit(3)
 print(f"{pv:.2f} {gv:.0f}")
 EOF
 )
+[ $? -ne 0 ] && { note "regression B: metric extraction failed (TAG-MISS)"; exit 1; }
 PSNR=$(echo "$RESULT" | awk '{print $1}')
 GAUSS=$(echo "$RESULT" | awk '{print $2}')
-echo "  probe: train PSNR@2k=$PSNR gauss=$GAUSS"
+echo "  probe: train FG-PSNR@2k=$PSNR gauss=$GAUSS"
 
 if [ "$CALIBRATE" = "1" ] || [ ! -f "$EXPECTED" ]; then
     python3 -c "
-import json
-json.dump({'block': '$BLOCK', 'iters': 2000,
-           'train_psnr': float('$PSNR'), 'gauss': float('$GAUSS'),
-           'tol_psnr_db': 0.5, 'tol_gauss_frac': 0.10}, open('$EXPECTED','w'), indent=1)"
-    note "regression CALIBRATED: PSNR@2k=$PSNR gauss=$GAUSS -> $EXPECTED"
+import json, math, sys
+p, g = float('$PSNR'), float('$GAUSS')
+if math.isnan(p) or math.isnan(g):
+    sys.exit('refusing to calibrate on nan')
+json.dump({'block': '$BLOCK', 'iters': 2000, 'metric': 'Train Metrics Dict/psnr_fg',
+           'train_psnr_fg': p, 'gauss': g,
+           'tol_psnr_db': 0.5, 'tol_gauss_frac': 0.10}, open('$EXPECTED','w'), indent=1)" \
+        || { note "regression CALIBRATION REFUSED (nan)"; exit 1; }
+    note "regression CALIBRATED: FG-PSNR@2k=$PSNR gauss=$GAUSS -> $EXPECTED"
     exit $FAIL
 fi
 python3 - "$PSNR" "$GAUSS" << 'EOF' || FAIL=1
-import json, sys
+import json, math, sys
 psnr, gauss = float(sys.argv[1]), float(sys.argv[2])
 e = json.load(open('/home/paperspace/code/automation/regression_expected.json'))
-dp = abs(psnr - e['train_psnr']); dg = abs(gauss - e['gauss']) / max(e['gauss'], 1)
+if math.isnan(psnr) or math.isnan(gauss):
+    print("  nan metrics — FAIL"); sys.exit(1)
+dp = abs(psnr - e['train_psnr_fg']); dg = abs(gauss - e['gauss']) / max(e['gauss'], 1)
 ok = dp <= e['tol_psnr_db'] and dg <= e['tol_gauss_frac']
-print(f"  vs expected: dPSNR {dp:.2f} dB (tol {e['tol_psnr_db']}), dgauss {100*dg:.1f}% (tol {100*e['tol_gauss_frac']:.0f}%) -> {'OK' if ok else 'FAIL'}")
+print(f"  vs expected: dFG-PSNR {dp:.2f} dB (tol {e['tol_psnr_db']}), dgauss {100*dg:.1f}% (tol {100*e['tol_gauss_frac']:.0f}%) -> {'OK' if ok else 'FAIL'}")
 sys.exit(0 if ok else 1)
 EOF
 [ $? -ne 0 ] && FAIL=1
