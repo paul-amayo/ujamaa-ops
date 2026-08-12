@@ -53,12 +53,30 @@ time allows. Cutting scope here is the plan, not a failure.
       the umbrella.
 
 ### Phase 1 — Consolidate the backbone (mid-Jul → mid-Aug)
-- [ ] Finish 02 survey 4D association (redownload in progress) → 4-epoch ledger substrate.
-- [ ] Harden the unified pipeline: fresh survey → splat + tree registry in one command,
-      with the known gotchas fixed in code, not in memory notes (stale dataloader cache,
-      lidar-init idx matching, headland smudge if tractable).
-- [ ] Regression harness: a small fixed block + expected PSNR/metrics so pipeline changes
-      are testable.
+- [x] 02 survey 4D association (2026-08-12) → ledger has all four surveys:
+      854 observations / 452 canonical trees. 02 registry: 177 trees from the
+      one-command registry path. Association (absolute WGS84, no offsets):
+      02↔03 = 136 pairs @0.77 m median at a 1.5 m gate (81% of 02) after the
+      corroborated day-datum shift; 02↔01 (same afternoon, 3 min apart) = 131
+      pairs @0.97 m with only a 0.66 m residual shift. The three anchor deltas
+      close a triangle to 4 cm — per-DAY RTK datums, fresh evidence for the
+      semantic pose-graph lead. NOTE: 02 is a SAME-DAY repeat of 01 (first
+      frame 3 min after 01's last), so it is a zero-growth CONTROL epoch, not
+      a growth epoch; ledger_v2 re-anchors it onto the 03 datum (0.79 m true
+      scatter). 02's row-fit collapsed (n_rows=1, sparse 9-leg coverage) —
+      row_id for 02 is unusable until re-fit; association is unaffected.
+- [x] Unified pipeline hardened (2026-08-12), proven by running 02 fresh:
+      K-domain single-selector (kf mono is the authority; json ts-derived by
+      `kf_json_from_mono.py`; hard count gate in [0c]), kf_images extraction
+      now a pipeline step, the never-matching SAM3 keep-set removed,
+      `--registry-only` gives fresh-survey→tree-registry in one command.
+      Already in code from July: lidar-init ts-match, content-keyed caches.
+      Still open by choice: headland smudge; legacy K-skew on 03/04/05 is
+      surfaced by the harness (Q4 owns re-verification).
+- [x] Regression harness (2026-08-12): `automation/regression_harness.sh` —
+      Tier A (CPU): K-domain consistency, ledger_v2 datum invariants, embedder
+      round-trip; Tier B (GPU): block_001 scene-baseline probe @2k iters vs
+      committed expected values. Tier A PASSING; Tier B calibrated same day.
 
 ### Phase 2 — Sankofa: Record + Comparison (mid-Aug → late Sep)
 - [x] Tree ledger implementation (SANKOFA_SPEC §A) — ledger v0 built 2026-07-22:
