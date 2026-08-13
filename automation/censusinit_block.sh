@@ -10,8 +10,9 @@
 # Embedder: v3vocab1k. Requires compiled supervision with the CURRENT vocab.
 set -uo pipefail
 BD=$(readlink -f "$1"); SUP=$(readlink -f "$2"); N=$(basename $BD)
-EMB=/home/paperspace/data/high/nerf/04_13D_v3vocab1k/ckpts/model_best.pth
-HJ=/home/paperspace/data/citrus_all/04_13D_Jackal/scene_graph_v4/marker_hierarchy_fruit5.json
+# Env-overridable for non-04 surveys (unified pipeline passes both):
+EMB=${CENSUS_EMBEDDER:-/home/paperspace/data/high/nerf/04_13D_v3vocab1k/ckpts/model_best.pth}
+HJ=${CENSUS_HIERARCHY:-/home/paperspace/data/citrus_all/04_13D_Jackal/scene_graph_v4/marker_hierarchy_fruit5.json}
 ARU=/home/paperspace/code/aru_sil_core/src/scripts
 FIG=/home/paperspace/code/lab_notebook/figs
 SCRATCH=/tmp/claude-1000/-home-paperspace-code/c47d8606-c5fe-4343-ae48-8faa25cdc994/scratchpad
