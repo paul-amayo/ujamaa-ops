@@ -91,6 +91,10 @@ EOF
 
 # ---------- A3: embedder round-trip ----------
 echo "== A3 embedder round-trip (v3vocab1k, CPU) =="
+# cwd MUST be nerf_new: with cwd=/home/paperspace/code, `import lerf` inside
+# nerfstudio plugin discovery resolves to the OLD /home/paperspace/code/lerf
+# checkout and dies on LERFModelConfig (bit the night queue 2026-08-13).
+cd "$CODE/nerf_new"
 pixi run --manifest-path "$NS_PIXI" python - << 'EOF' || FAIL=1
 import sys
 sys.path.insert(0, '/home/paperspace/code/aru_sil_core/src/scripts')
