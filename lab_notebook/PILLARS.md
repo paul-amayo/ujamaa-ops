@@ -34,7 +34,7 @@ Format (parsed by automation/build_dashboard.py):
 - [warning] 02's row fit collapsed (n_rows=1) on its sparse 9-leg coverage — 02 row_id unusable until re-fit; association/ledger unaffected (centroid-based)
 - [warning] LEGACY blocks predate the block-length rule — citrus 04 31.9 m, klapmuts 44-50 m, citrus 05 57-64 m. The rule now EXISTS and is enforced for new builds (Paul 2026-08-13: ~100 kf == ~20 m, site-independent; pipeline default). Re-cut legacy configs when their stage2 work re-runs; the canonical 04 fruit substrate still sits on 31.9 m blocks
 - [warning] Two-sided duplicates and far-side rows remain in the census — ~128 two-plant merges
-- [serious] Citrus registries have never been re-verified under K-indexed poses
+- [resolved] Q4 CLOSED (2026-08-13 night queue) — registries re-verified under mono-K poses via non-destructive recluster (sam3_v2_q4 symlink workspace): 03 reproduces 295/295 trees at 3 mm median centroid delta (despite its 40% selector-disagreement surface — per-tree aggregation over hundreds of detections averages the ~10 cm per-frame lottery out), 05 exact, 04 74/75 with ONE borderline tree (n_lidar/n_obs gate flicker) to eyeball. The pose-value audit separately showed mm-agreement wherever selectors coincided
 **Next:** finish the 05 length baseline (third site), then set block length PER SITE and enforce it in build_row_blocks.
 
 ## Sankofa — the tree ledger across time
