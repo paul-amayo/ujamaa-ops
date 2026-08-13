@@ -82,8 +82,8 @@ def survey_row(root: Path, ledger_obs: dict) -> dict:
              ((root / "laser.monolithic").exists(), "lidar"),
              ((root / "gps.monolithic").exists(), "gps")]
     r["monolithics"] = "+".join(n for ok, n in flags if ok) or False
-    r["lio"] = (root / "lio_image_poses.json").exists()
-    r["kf20cm"] = (root / "lio_image_poses_kf20cm.json").exists()
+    r["lio"] = (root / "transform_lio.monolithic").exists()
+    r["kf20cm"] = (root / "image_left_kf20cm.monolithic").exists()
     r["kf_pngs"] = count(root / "kf_images", "kf_*.png")
     r["markers"] = bool(list(root.glob("scene_graph*/markers_v2*.monolithic")))
     r["hierarchy"] = hierarchy_stats(root)
@@ -141,8 +141,9 @@ def main():
                                          [(any(mono_dir.glob("image_left*.monolithic")), "img"),
                                           ((mono_dir / "laser.monolithic").exists(), "lidar")]
                                          if ok) or False,
-                 "lio": (mono_dir / "lio_image_poses.json").exists(),
-                 "kf20cm": (mono_dir / "lio_image_poses_kf20cm.json").exists(),
+                 "lio": (mono_dir / "transform_lio.monolithic").exists()
+                        or (mono_dir / "zed_transform.monolithic").exists(),
+                 "kf20cm": (mono_dir / "image_left_kf20cm.monolithic").exists(),
                  "kf_pngs": count(dec / "kf_images", "kf_*.png"),
                  "markers": bool(count(dec / "sam3_ledger_v0", "*.npz")),
                  "hierarchy": (f"SAM3 ledger {count(dec / 'sam3_ledger_v0', '*.npz')} frames"
@@ -158,7 +159,7 @@ def main():
          "re-run the generator after ingest/pipeline milestones and commit the diff.",
          f"Ledger source: `{ledger_obs.get('_file', 'none')}`.",
          "",
-         "| survey | size | stage | bag | monos | LIO | kf20cm | kf PNGs | markers | hierarchy | masks | blocks | splats | ledger obs |",
+         "| survey | size | stage | bag | monos | lio mono | kf mono | kf PNGs | markers | hierarchy | masks | blocks | splats | ledger obs |",
          "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     yn = lambda b: (b if isinstance(b, str) else "y") if b else "—"
     for r in rows:

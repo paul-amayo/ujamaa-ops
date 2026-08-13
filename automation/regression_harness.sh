@@ -36,36 +36,36 @@ esac; done
 FAIL=0
 note() { echo "$1"; echo "$(date -u +%FT%TZ) $1" >> "$LOG"; }
 
-# ---------- A1: K-domain consistency ----------
-echo "== A1 K-domain consistency =="
-python3 - << 'EOF' || FAIL=1
-import json, sys
+# ---------- A1: K-domain consistency (monos-only, 2026-08-13) ----------
+# The pose jsons are dead. The invariant is now: kf_images materialises the
+# kf MONOLITHIC 1:1 (K count from kf_domain == PNG count). First run per
+# survey builds the kf_domain pose cache (~1-2 min); cached after.
+echo "== A1 K-domain consistency (kf monolithic vs kf_images) =="
+pixi run --manifest-path "$NS_PIXI" python - << 'EOF' || FAIL=1
+import sys
 from pathlib import Path
-bad = 0
+sys.path.insert(0, '/home/paperspace/code/aru_sil_core/src/scripts')
+import kf_domain
+bad = []
 for root in sorted(Path('/home/paperspace/data/citrus_all').glob('*_Jackal')):
-    kf_json = root / 'lio_image_poses_kf20cm.json'
+    kf_mono = root / 'image_left_kf20cm.monolithic'
     kf_dir = root / 'kf_images'
-    if not (kf_json.exists() and kf_dir.is_dir()):
+    if not (kf_mono.exists() and kf_dir.is_dir()):
         continue
-    nj = len(json.load(open(kf_json)))
+    try:
+        nk = len(kf_domain.load(root).names)
+    except Exception as e:
+        print(f"  {root.name}: kf_domain load FAILED ({e})")
+        bad.append(root.name)
+        continue
     np_ = len(list(kf_dir.glob('kf_*.png')))
-    ok = nj == np_
-    print(f"  {root.name}: json {nj} vs kf_images {np_} {'OK' if ok else 'MISMATCH'}")
-    bad += (not ok)
-# known-legacy skew is allowed to persist until Q4 re-verification, but it
-# must be VISIBLE — fail only if a previously-consistent survey regresses.
-LEGACY = {'01_13B_Jackal', '03_13B_Jackal', '04_13D_Jackal', '05_13D_Jackal'}
-hard = [str(r) for r in []]
-for root in sorted(Path('/home/paperspace/data/citrus_all').glob('*_Jackal')):
-    kf_json, kf_dir = root / 'lio_image_poses_kf20cm.json', root / 'kf_images'
-    if kf_json.exists() and kf_dir.is_dir():
-        if len(json.load(open(kf_json))) != len(list(kf_dir.glob('kf_*.png'))) \
-                and root.name not in LEGACY:
-            hard.append(root.name)
-if hard:
-    print(f"  FAIL: non-legacy K-domain mismatch: {hard}")
+    ok = nk == np_
+    print(f"  {root.name}: kf mono {nk} vs kf_images {np_} {'OK' if ok else 'MISMATCH'}")
+    if not ok:
+        bad.append(root.name)
+if bad:
+    print(f"  FAIL: {bad} — re-extract with extract_kf_pngs.py")
     sys.exit(1)
-print(f"  ({bad} legacy skews visible — Q4 owns them)")
 EOF
 [ $? -ne 0 ] && FAIL=1
 
