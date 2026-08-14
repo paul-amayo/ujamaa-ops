@@ -8,7 +8,7 @@ ROOT=/home/paperspace/data/klapmuts
 BD=$ROOT/blocks_ns/lio_row/block_004
 EMB=/home/paperspace/data/high/nerf/klapmuts_v1/ckpts/model_best.pth
 echo "=== STAGE D: lidar init + depth ==="
-[ -f "$BD/init_da3.ply" ] || \
+[ -f "$BD/init_lidar.ply" ] || [ -f "$BD/init_da3.ply" ] || \
 pixi run --manifest-path $IS_PIXI python src/scripts/lidar_init_per_block.py \
   --block-dir "$BD" --root "$ROOT" --pad-x 7.5 --cross-row-median || exit 1
 [ -f "$BD/lidar_depth_morph.npz" ] || \

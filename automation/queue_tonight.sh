@@ -3,7 +3,7 @@
 # Durable paths only. Each stage logs to ~/logs and hard-stops on failure.
 set -x
 LOGS=/home/paperspace/logs
-B004=/home/paperspace/data/klapmuts/blocks_ns/lio_row/block_004
+B004=/home/paperspace/data/klapmuts/apr_2026_zed/blocks_ns/lio_row/block_004
 
 # 1. wait for the pilot (already running via klap_pilot_de_run.sh)
 until grep -qaE "PILOT-DONE" $LOGS/klap_pilot_de2.log 2>/dev/null; do
@@ -58,7 +58,7 @@ for N in 000 001 002 003 005 006 007 008 009; do
   $PYNS src/scripts/save_semantic_pngs_fast.py --block-dir "$BD" --root "$ROOT" \
     --semantic-monolithic "$ROOT/filtered_semantic_v2.monolithic" \
     --global-ids "$ROOT/sam3_sack/global_ids.json" || continue
-  [ -f "$BD/init_da3.ply" ] || \
+  [ -f "$BD/init_lidar.ply" ] || [ -f "$BD/init_da3.ply" ] || \
   pixi run --manifest-path $IS_PIXI python src/scripts/lidar_init_per_block.py \
     --block-dir "$BD" --root "$ROOT" --pad-x 7.5 --cross-row-median || continue
   [ -f "$BD/lidar_depth_morph.npz" ] || \

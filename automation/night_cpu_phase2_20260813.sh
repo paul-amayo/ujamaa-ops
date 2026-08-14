@@ -89,7 +89,7 @@ if [ ! -d "$KL/blocks_ns/lio_row100_preview/block_000" ]; then
 fi
 python3 - << 'EOF' >> "$LOGS/klap_row100_preview.log" 2>&1
 import glob, json, os
-blocks = sorted(glob.glob('/home/paperspace/data/klapmuts/blocks_ns/lio_row100_preview/block_*/transforms.json'))
+blocks = sorted(glob.glob('/home/paperspace/data/klapmuts/apr_2026_zed/blocks_ns/lio_row100_preview/block_*/transforms.json'))
 tot = with_mask = 0
 for b in blocks:
     for fr in json.load(open(b))['frames']:

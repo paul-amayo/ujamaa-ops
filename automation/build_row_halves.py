@@ -59,7 +59,7 @@ for i, pf in enumerate(halves):
         if mp.exists():
             fr["mask_path"] = str(mp)
         frames.append(fr)
-    tj = dict(intr); tj["ply_file_path"] = "init_da3.ply"; tj["frames"] = frames
+    tj = dict(intr); tj["ply_file_path"] = "init_lidar.ply"; tj["frames"] = frames
     (bd / "transforms.json").write_text(json.dumps(tj, indent=2))
     print(f"  block_{i:03d}: {len(frames)}f  kf {names[pf[0]]}..{names[pf[-1]]}  X~{P[pf,a].mean():.1f}m")
 print(f"\nwrote {len(halves)} blocks to {OUTCFG}")

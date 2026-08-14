@@ -69,7 +69,7 @@ patch_masks ${BD}_L049
 
 echo "=== STAGE D: lidar init + depth for variants ==="
 for V in ${BD}_L097 ${BD}_L049; do
-  [ -f "$V/init_da3.ply" ] || \
+  [ -f "$V/init_lidar.ply" ] || [ -f "$V/init_da3.ply" ] || \
   pixi run --manifest-path $IS_PIXI python $SCR/lidar_init_per_block.py \
     --block-dir "$V" --root "$ROOT" --pad-x 7.5 --cross-row-median || exit 1
   [ -f "$V/lidar_depth_morph.npz" ] || \

@@ -1,5 +1,5 @@
 echo "=== STAGE D: lidar init + depth ==="
-[ -f "$BD/init_da3.ply" ] || \
+[ -f "$BD/init_lidar.ply" ] || [ -f "$BD/init_da3.ply" ] || \
 pixi run --manifest-path $IS_PIXI python src/scripts/lidar_init_per_block.py \
   --block-dir "$BD" --root "$ROOT" --pad-x 7.5 --cross-row-median || exit 1
 [ -f "$BD/lidar_depth_morph.npz" ] || \

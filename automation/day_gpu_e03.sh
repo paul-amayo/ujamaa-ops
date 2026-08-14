@@ -31,7 +31,7 @@ for BD in "$CFGDIR"/block_*; do
       --semantic-monolithic "$ROOT/filtered_semantic_v2_B.monolithic" \
       --marker-monolithic "$ROOT/scene_graph/markers_v2_B.monolithic"
 
-  [ -f "$BD/init_da3.ply" ] || \
+  [ -f "$BD/init_lidar.ply" ] || [ -f "$BD/init_da3.ply" ] || \
     pixi run --manifest-path "$IS_PIXI" python "$ARU/src/scripts/lidar_init_per_block.py" \
       --block-dir "$BD" --root "$ROOT" --pad-x 7.5 --cross-row-median
 

@@ -9,7 +9,7 @@
 # Splatfacto-equivalent path (no high features, no CLIP, no depth, no masks).
 set -x
 CRB=/home/paperspace/data/citrus_all/04_13D_Jackal/blocks_ns/lio_row6F
-KRB=/home/paperspace/data/klapmuts/blocks_ns/lio_row
+KRB=/home/paperspace/data/klapmuts/apr_2026_zed/blocks_ns/lio_row
 EMPTY=/home/paperspace/logs/empty_semantic; mkdir -p $EMPTY
 run () {  # blockdir name
   local BD=$1 NAME=$2

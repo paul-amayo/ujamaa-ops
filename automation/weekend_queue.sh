@@ -109,7 +109,7 @@ PY
     [ -f "$BD/semantic_v2_B/palette.json" ] || \
       python3 $SCR/save_semantic_pngs_fast.py --block-dir $BD --root $KROOT \
         --semantic-monolithic $KROOT/filtered_semantic_v2.monolithic
-    [ -f "$BD/init_da3.ply" ] || \
+    [ -f "$BD/init_lidar.ply" ] || [ -f "$BD/init_da3.ply" ] || \
       pixi run --manifest-path $IS_PIXI python $SCR/lidar_init_per_block.py \
         --block-dir $BD --root $KROOT --pad-x 7.5 --cross-row-median
     if [ "$DEPTH" = 1 ]; then

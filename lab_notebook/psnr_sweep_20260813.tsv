@@ -1,0 +1,655 @@
+survey	config	block	run	date	max_step	train_psnr	train_fg	peak_fg	peak_fg_step	eval_psnr	eval_fg	gauss
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_000	splat_runs_lio_only_v2/lio_v2_block_000/high/2026-07-08_102325	2026-07-08	5000	10.44	19.20	24.30	4920			608161.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_001	splat_runs_lio_only_v2/lio_v2_block_001/high/2026-07-08_111852	2026-07-08	5000	9.79	19.95	23.57	1900	9.24	17.15	906973.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_002	splat_runs_lio_only_v2/lio_v2_block_002/high/2026-07-08_114135	2026-07-08	5000	10.95	19.66	22.78	2960	9.90	16.41	840183.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_003	splat_runs_lio_only_v2/lio_v2_block_003/high/2026-07-08_120543	2026-07-08	5000	16.63	17.70	22.06	920	14.72	18.59	1270517.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_004	splat_runs_lio_only_v2/lio_v2_block_004/high/2026-07-08_123317	2026-07-08	5000	11.03	19.63	23.22	4840	11.76	16.12	891517.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_005	splat_runs_lio_only_v2/lio_v2_block_005/high/2026-07-08_125802	2026-07-08	5000	9.68	18.79	23.46	4880	11.13	17.10	1205471.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_006	splat_runs_lio_only_v2/lio_v2_block_006/high/2026-07-08_132052	2026-07-08	5000	11.58	19.70	22.80	4790	9.09	18.17	1040207.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_007	splat_runs_lio_only_v2/lio_v2_block_007/high/2026-07-08_134610	2026-07-08	5000	13.56	17.12	22.67	4930	10.76	17.91	1132356.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_008	splat_runs_lio_only_v2/lio_v2_block_008/high/2026-07-08_141047	2026-07-08	5000	9.29	21.19	22.86	4670	14.09	16.82	1040711.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_009	splat_runs_lio_only_v2/lio_v2_block_009/high/2026-07-08_143703	2026-07-08	5000	10.28	22.25	23.82	4820	12.65	18.24	918707.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_010	splat_runs_lio_only_v2/lio_v2_block_010/high/2026-07-08_150145	2026-07-08	5000	8.99	18.41	22.25	1870	10.12	16.34	1005534.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_011	splat_runs_lio_only_v2/lio_v2_block_011/high/2026-07-08_152455	2026-07-08	5000	9.50	20.67	23.06	4690	10.42	17.56	732563.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_012	splat_runs_lio_only_v2/lio_v2_block_012/high/2026-07-08_155012	2026-07-08	5000	11.78	20.24	23.38	2710	10.95	19.27	871457.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_013	splat_runs_lio_only_v2/lio_v2_block_013/high/2026-07-08_161411	2026-07-08	5000	12.21	18.48	23.17	2590	9.84	17.98	967425.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_014	splat_runs_lio_only_v2/lio_v2_block_014/high/2026-07-08_163735	2026-07-08	5000	11.57	21.59	23.48	4870	12.80	20.41	790139.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_015	splat_runs_lio_only_v2/lio_v2_block_015/high/2026-07-08_170342	2026-07-08	5000	11.29	18.01	22.31	3850	10.71	18.72	426605.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_016	splat_runs_lio_only_v2/lio_v2_block_016/high/2026-07-08_172840	2026-07-08	5000	11.29	20.73	22.79	4530	11.28	18.63	544442.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_017	splat_runs_lio_only_v2/lio_v2_block_017/high/2026-07-08_175221	2026-07-08	5000	10.26	21.46	23.56	2660	10.64	20.21	650787.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_018	splat_runs_lio_only_v2/lio_v2_block_018/high/2026-07-09_081009	2026-07-09	5000	14.42	20.33	23.87	2940	12.25	21.08	880809.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_019	splat_runs_lio_only_v2/lio_v2_block_019/high/2026-07-09_083604	2026-07-09	5000	11.80	20.29	23.05	4430	11.92	17.70	821463.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_020	splat_runs_lio_only_v2/lio_v2_block_020/high/2026-07-09_090014	2026-07-09	5000	11.50	22.50	23.29	4920	14.87	19.57	709779.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_021	splat_runs_lio_only_v2/lio_v2_block_021/high/2026-07-09_092635	2026-07-09	5000	10.83	15.58	22.44	4760	10.22	16.17	407190.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_022	splat_runs_lio_only_v2/lio_v2_block_022/high/2026-07-09_095048	2026-07-09	5000	13.64	20.28	22.77	2810	11.24	17.79	598095.00
+01_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_023	splat_runs_lio_only_v2/lio_v2_block_023/high/2026-07-09_101610	2026-07-09	5000	11.43	22.20	23.13	3770	11.52	16.09	602966.00
+01_13B_Jackal	lio_row	block_000	splat_runs_C_20k/abC_block_000/high/2026-07-10_103334	2026-07-10	20000	11.12	22.24	25.14	18840	13.02	19.92	1166630.00
+01_13B_Jackal	lio_row	block_000	splat_runs_R_20k/R20k_block_000/high/2026-07-13_185155	2026-07-13	20000	11.11	21.75	25.04	18840	12.86	20.22	1140451.00
+01_13B_Jackal	lio_row	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_035525	2026-08-09	1999	10.21	11.83	19.10	1760	10.39	12.61	660246.00
+01_13B_Jackal	lio_row	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_081601	2026-08-09	1999	10.69	12.77	18.37	790	10.52	13.43	662818.00
+01_13B_Jackal	lio_row	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_165015	2026-08-09	1999	10.74	12.66	18.68	1760	10.76	12.99	654608.00
+01_13B_Jackal	lio_row	block_000	splat_runs_ab4_20k/ab4_block_000/high/2026-07-10_063845	2026-07-10	20000	11.60	21.40	25.16	15690	9.99	10.36	882456.00
+01_13B_Jackal	lio_row	block_000	splat_runs_abC_20k/abC_block_000/high/2026-07-10_103334	2026-07-10	20000	11.12	22.24	25.14	18840	13.02	19.92	1166630.00
+01_13B_Jackal	lio_row	block_000	splat_runs_abD_20k/abD_block_000/high/2026-07-10_115802	2026-07-10	20000	12.27	22.81	25.48	19700	12.06	17.23	1068379.00
+01_13B_Jackal	lio_row	block_000	splat_runs_c1_black020/c1_black020_block_000/high/2026-07-14_211153	2026-07-14	20000	10.97	22.13	24.95	18840	12.68	19.83	1172871.00
+01_13B_Jackal	lio_row	block_000	splat_runs_c1_randbg005/c1_randbg005_block_000/high/2026-07-14_200012	2026-07-14	20000	11.47	22.22	24.85	18840	14.81	20.06	1101932.00
+01_13B_Jackal	lio_row	block_000	splat_runs_c1_randbg020/c1_randbg020_block_000/high/2026-07-14_222520	2026-07-14	20000	11.23	22.06	24.82	17970	14.46	20.24	1109528.00
+01_13B_Jackal	lio_row	block_000	splat_runs_fixedinit_20k/fixed20k_block_000/high/2026-07-09_184311	2026-07-09	20000	10.99	22.51	24.94	19520	12.82	17.40	820664.00
+01_13B_Jackal	lio_row	block_000	splat_runs_lio_only_v2/lio_v2_block_000/high/2026-07-09_115932	2026-07-09	5000	11.30	16.80	21.94	480	13.13	19.52	1593168.00
+01_13B_Jackal	lio_row	block_001	splat_runs_20k/lio_row_b001_20k/high/2026-07-09_141950	2026-07-09	20000	11.58	23.66	24.65	19300	5.44	5.60	901941.00
+01_13B_Jackal	lio_row	block_001	splat_runs_C_20k/abC_block_001/high/2026-07-10_150213	2026-07-10	20000	11.64	23.54	23.74	18800	11.64	17.38	1416787.00
+01_13B_Jackal	lio_row	block_001	splat_runs_R_20k/R20k_block_001/high/2026-07-13_201354	2026-07-13	20000	11.58	22.62	23.25	18800	11.51	17.15	1344665.00
+01_13B_Jackal	lio_row	block_001	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_035817	2026-08-09	1999	10.94	15.40	19.34	1370	10.29	12.00	523218.00
+01_13B_Jackal	lio_row	block_001	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_081855	2026-08-09	1999	11.11	15.36	19.12	780	10.14	12.01	518548.00
+01_13B_Jackal	lio_row	block_001	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_165307	2026-08-09	1999	10.76	15.79	18.97	1370	11.20	13.92	526140.00
+01_13B_Jackal	lio_row	block_001	splat_runs_ab4_20k/ab4_block_001/high/2026-07-10_080152	2026-07-10	20000	11.92	20.39	23.86	16920	9.34	9.19	941875.00
+01_13B_Jackal	lio_row	block_001	splat_runs_abC_20k/abC_block_001/high/2026-07-10_150213	2026-07-10	20000	11.64	23.54	23.74	18800	11.64	17.38	1416787.00
+01_13B_Jackal	lio_row	block_001	splat_runs_fixedinit_20k/fixed20k_block_001/high/2026-07-09_195134	2026-07-09	20000	11.55	24.16	24.87	19300	11.73	16.60	1044499.00
+01_13B_Jackal	lio_row	block_001	splat_runs_lio_only_v2/lio_v2_block_001/high/2026-07-09_121621	2026-07-09	5000	9.94	19.51	21.03	700	5.44	5.60	1173934.00
+01_13B_Jackal	lio_row	block_002	splat_runs_C_20k/C20k_block_002/high/2026-07-10_162508	2026-07-10	20000	13.46	22.98	25.04	19090	10.10	16.15	1432547.00
+01_13B_Jackal	lio_row	block_002	splat_runs_R_20k/R20k_block_002/high/2026-07-13_213006	2026-07-13	20000	13.50	23.06	24.78	19690	10.07	16.37	1396358.00
+01_13B_Jackal	lio_row	block_002	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_040102	2026-08-09	1999	13.65	14.83	20.86	1500	11.12	13.70	537710.00
+01_13B_Jackal	lio_row	block_002	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_082143	2026-08-09	1999	12.30	13.12	21.16	1500	11.21	13.45	546106.00
+01_13B_Jackal	lio_row	block_002	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_165552	2026-08-09	1999	13.51	14.53	20.68	1500	11.06	13.38	540561.00
+01_13B_Jackal	lio_row	block_003	splat_runs_C_20k/C20k_block_003/high/2026-07-10_175935	2026-07-10	20000	10.94	23.89	26.01	19070	10.15	15.93	1268436.00
+01_13B_Jackal	lio_row	block_003	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_040349	2026-08-09	1999	12.45	17.83	20.03	1580	13.67	17.91	430221.00
+01_13B_Jackal	lio_row	block_003	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_082436	2026-08-09	1999	12.42	17.78	19.97	1580	13.70	18.05	431684.00
+01_13B_Jackal	lio_row	block_003	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_165838	2026-08-09	1999	12.37	17.44	20.29	1580	13.50	17.44	428707.00
+01_13B_Jackal	lio_row	block_004	splat_runs_C_20k/C20k_block_004/high/2026-07-10_193711	2026-07-10	20000	15.82	22.64	25.40	17550	11.52	18.32	1312755.00
+01_13B_Jackal	lio_row	block_004	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_040632	2026-08-09	1999	11.41	13.97	18.63	870	12.92	17.47	571555.00
+01_13B_Jackal	lio_row	block_004	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_082720	2026-08-09	1999	11.81	14.79	19.28	1880	13.01	17.54	577270.00
+01_13B_Jackal	lio_row	block_004	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_170122	2026-08-09	1999	11.64	14.72	18.47	1880	13.18	17.15	580386.00
+01_13B_Jackal	lio_row	block_005	splat_runs_C_20k/C20k_block_005/high/2026-07-11_003203	2026-07-11	20000	10.71	20.52	24.37	19940	10.83	17.75	1333230.00
+01_13B_Jackal	lio_row	block_005	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_040927	2026-08-09	1999	12.34	16.09	19.80	1500	12.29	16.14	524611.00
+01_13B_Jackal	lio_row	block_005	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_083013	2026-08-09	1999	12.20	15.81	19.69	1500	12.62	17.23	517826.00
+01_13B_Jackal	lio_row	block_005	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_170437	2026-08-09	1999	11.74	15.02	19.00	1500	12.61	16.67	526543.00
+01_13B_Jackal	lio_row	block_006	splat_runs_C_20k/C20k_block_006/high/2026-07-11_021423	2026-07-11	20000	12.46	23.30	25.37	17960	9.93	18.34	1481658.00
+01_13B_Jackal	lio_row	block_006	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_041221	2026-08-09	1999	11.29	14.70	18.41	1160	12.76	14.91	565056.00
+01_13B_Jackal	lio_row	block_006	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_083307	2026-08-09	1999	11.26	14.80	18.92	800	13.53	15.92	572604.00
+01_13B_Jackal	lio_row	block_006	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_170744	2026-08-09	1999	11.26	14.83	19.05	1370	13.41	16.01	558165.00
+01_13B_Jackal	lio_row	block_007	splat_runs_C_20k/C20k_block_007/high/2026-07-11_035436	2026-07-11	20000	10.84	23.59	24.50	18570	10.24	16.95	1249782.00
+01_13B_Jackal	lio_row	block_007	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_041514	2026-08-09	1999	11.18	15.09	20.23	1370	12.73	17.32	500535.00
+01_13B_Jackal	lio_row	block_007	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_083604	2026-08-09	1999	10.86	14.26	19.80	1370	12.58	16.73	489784.00
+01_13B_Jackal	lio_row	block_007	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_171045	2026-08-09	1999	11.01	14.31	19.66	1370	12.69	17.04	495317.00
+01_13B_Jackal	lio_row	block_008	splat_runs_C_20k/C20k_block_008/high/2026-07-11_053333	2026-07-11	20000	12.60	22.19	24.41	19110	9.85	17.70	1505033.00
+01_13B_Jackal	lio_row	block_008	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_041807	2026-08-09	1999	10.39	15.83	18.77	1450	12.64	16.25	559296.00
+01_13B_Jackal	lio_row	block_008	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_083856	2026-08-09	1999	10.26	16.10	18.52	1450	12.73	16.51	563502.00
+01_13B_Jackal	lio_row	block_008	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_171351	2026-08-09	1999	10.39	16.13	18.64	890	12.63	16.19	557085.00
+01_13B_Jackal	lio_row	block_009	splat_runs_C_20k/C20k_block_009/high/2026-07-11_071710	2026-07-11	20000	9.86	20.28	24.55	18730	8.61	13.01	1297390.00
+01_13B_Jackal	lio_row	block_009	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_042101	2026-08-09	1999	9.44	13.26	18.53	1370	12.17	15.42	602011.00
+01_13B_Jackal	lio_row	block_009	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_084152	2026-08-09	1999	9.74	14.35	17.93	1750	12.07	16.10	603503.00
+01_13B_Jackal	lio_row	block_009	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_171652	2026-08-09	1999	9.56	14.02	17.83	760	11.97	15.79	604238.00
+01_13B_Jackal	lio_row	block_010	splat_runs_C_20k/C20k_block_010/high/2026-07-11_085609	2026-07-11	20000	13.80	21.98	24.23	19740	9.70	13.24	1321201.00
+01_13B_Jackal	lio_row	block_010	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_042359	2026-08-09	1999	10.79	11.94	18.75	890	11.01	14.73	531450.00
+01_13B_Jackal	lio_row	block_010	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_084446	2026-08-09	1999	10.86	12.31	18.80	1000	11.43	16.25	528591.00
+01_13B_Jackal	lio_row	block_010	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_171948	2026-08-09	1999	11.37	13.37	18.49	1890	11.45	15.95	539917.00
+01_13B_Jackal	lio_row	block_011	splat_runs_C_20k/C20k_block_011/high/2026-07-11_141040	2026-07-11	20000	10.46	21.80	24.74	18340	9.49	15.55	1400885.00
+01_13B_Jackal	lio_row	block_011	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_042655	2026-08-09	1999	15.03	15.15	19.09	590	12.25	14.97	567360.00
+01_13B_Jackal	lio_row	block_011	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_084740	2026-08-09	1999	14.43	14.37	19.09	590	12.21	14.86	572628.00
+01_13B_Jackal	lio_row	block_011	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_172240	2026-08-09	1999	14.72	14.75	19.10	590	11.79	14.01	576679.00
+01_13B_Jackal	lio_row	block_012	splat_runs_C_20k/C20k_block_012/high/2026-07-11_154937	2026-07-11	20000	11.15	16.90	24.65	19100	10.05	14.78	1326075.00
+01_13B_Jackal	lio_row	block_012	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_042954	2026-08-09	1999	11.30	12.36	18.97	980	12.42	17.89	576006.00
+01_13B_Jackal	lio_row	block_012	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_085039	2026-08-09	1999	11.51	12.99	19.04	1720	12.37	17.79	562633.00
+01_13B_Jackal	lio_row	block_012	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_172536	2026-08-09	1999	11.06	12.60	19.72	980	12.37	17.73	569215.00
+01_13B_Jackal	lio_row	block_013	splat_runs_C_20k/C20k_block_013/high/2026-07-11_173054	2026-07-11	20000	9.54	21.68	24.18	19590	11.77	17.99	1268062.00
+01_13B_Jackal	lio_row	block_013	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_043254	2026-08-09	1999	10.73	12.63	18.69	750	11.93	15.99	550328.00
+01_13B_Jackal	lio_row	block_013	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_085334	2026-08-09	1999	11.43	13.76	18.40	750	11.97	15.90	554033.00
+01_13B_Jackal	lio_row	block_013	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_172831	2026-08-09	1999	11.44	14.17	18.68	750	11.84	15.72	548669.00
+01_13B_Jackal	lio_row	block_014	splat_runs_C_20k/C20k_block_014/high/2026-07-11_191007	2026-07-11	20000	10.55	21.29	25.92	19400	10.04	18.22	1376248.00
+01_13B_Jackal	lio_row	block_014	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_043549	2026-08-09	1999	12.19	17.58	19.45	970	12.50	18.07	552785.00
+01_13B_Jackal	lio_row	block_014	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_085628	2026-08-09	1999	12.15	17.43	19.09	970	12.44	17.83	553887.00
+01_13B_Jackal	lio_row	block_014	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_173125	2026-08-09	1999	12.32	18.05	19.12	770	12.53	17.80	559056.00
+01_13B_Jackal	lio_row	block_015	splat_runs_C_20k/C20k_block_015/high/2026-07-11_204842	2026-07-11	20000	9.02	22.97	24.71	18330	9.33	14.42	1277465.00
+01_13B_Jackal	lio_row	block_015	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_043846	2026-08-09	1999	11.26	17.14	19.14	800	9.97	11.66	529044.00
+01_13B_Jackal	lio_row	block_015	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_085922	2026-08-09	1999	11.23	16.75	18.97	800	9.75	11.29	536870.00
+01_13B_Jackal	lio_row	block_015	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_173418	2026-08-09	1999	11.24	16.51	18.77	800	9.81	11.42	526233.00
+01_13B_Jackal	lio_row	block_016	splat_runs_C_20k/C20k_block_016/high/2026-07-11_222742	2026-07-11	20000	10.00	22.01	25.36	19720	10.64	18.32	1219484.00
+01_13B_Jackal	lio_row	block_016	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_044143	2026-08-09	1999	11.00	14.99	19.83	890	11.86	15.80	508140.00
+01_13B_Jackal	lio_row	block_016	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_090217	2026-08-09	1999	10.84	14.68	19.47	890	12.12	16.28	510732.00
+01_13B_Jackal	lio_row	block_016	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_173711	2026-08-09	1999	10.74	14.18	19.82	890	11.57	15.25	506401.00
+01_13B_Jackal	lio_row	block_017	splat_runs_C_20k/C20k_block_017/high/2026-07-12_000851	2026-07-12	20000	9.84	23.93	25.12	19290	9.73	14.01	1129988.00
+01_13B_Jackal	lio_row	block_017	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_044436	2026-08-09	1999	10.46	13.15	19.05	1100	12.37	14.83	509427.00
+01_13B_Jackal	lio_row	block_017	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_090509	2026-08-09	1999	9.94	12.12	19.02	1390	11.88	14.52	505485.00
+01_13B_Jackal	lio_row	block_017	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_174005	2026-08-09	1999	10.31	12.99	19.22	1100	12.76	15.59	517472.00
+01_13B_Jackal	lio_row	block_018	splat_runs_C_20k/C20k_block_018/high/2026-07-12_014802	2026-07-12	20000	11.32	22.47	25.90	19100	10.76	16.55	1205488.00
+01_13B_Jackal	lio_row	block_018	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_044731	2026-08-09	1999	10.74	15.05	19.16	600	13.15	17.39	518270.00
+01_13B_Jackal	lio_row	block_018	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_090802	2026-08-09	1999	10.28	14.13	19.14	600	12.75	16.07	518506.00
+01_13B_Jackal	lio_row	block_018	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_174257	2026-08-09	1999	10.32	14.45	19.14	600	13.27	17.71	530743.00
+01_13B_Jackal	lio_row	block_019	splat_runs_C_20k/C20k_block_019/high/2026-07-12_033109	2026-07-12	20000	11.19	22.22	25.30	16230	10.14	17.80	1205889.00
+01_13B_Jackal	lio_row	block_019	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_045025	2026-08-09	1999	11.60	14.28	20.08	980	12.84	17.11	502755.00
+01_13B_Jackal	lio_row	block_019	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_091058	2026-08-09	1999	11.61	14.57	19.83	980	12.73	16.93	507300.00
+01_13B_Jackal	lio_row	block_019	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_174551	2026-08-09	1999	11.60	14.66	19.81	1750	12.87	17.26	500177.00
+01_13B_Jackal	lio_row	block_020	splat_runs_C_20k/C20k_block_020/high/2026-07-12_051255	2026-07-12	20000	9.86	20.86	25.38	19370	11.04	16.86	1242000.00
+01_13B_Jackal	lio_row	block_020	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_045320	2026-08-09	1999	9.80	12.49	19.78	780	11.80	16.51	516903.00
+01_13B_Jackal	lio_row	block_020	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_091352	2026-08-09	1999	9.48	12.02	19.81	780	11.79	16.39	515671.00
+01_13B_Jackal	lio_row	block_020	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_174844	2026-08-09	1999	9.87	13.46	19.94	780	11.82	16.59	515252.00
+01_13B_Jackal	lio_row	block_021	splat_runs_C_20k/C20k_block_021/high/2026-07-12_065555	2026-07-12	20000	9.58	19.53	24.75	19490	10.09	16.05	1346362.00
+01_13B_Jackal	lio_row	block_021	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_045612	2026-08-09	1999	10.66	12.57	19.41	960	9.97	12.78	540052.00
+01_13B_Jackal	lio_row	block_021	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_091644	2026-08-09	1999	11.21	12.79	19.12	1750	9.75	12.14	535168.00
+01_13B_Jackal	lio_row	block_021	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_175135	2026-08-09	1999	10.64	12.53	19.48	960	10.42	13.59	538171.00
+01_13B_Jackal	lio_row	block_022	splat_runs_C_20k/C20k_block_022/high/2026-07-12_083815	2026-07-12	20000	9.45	22.84	26.02	18840	10.27	17.57	1273885.00
+01_13B_Jackal	lio_row	block_022	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_045904	2026-08-09	1999	10.19	15.60	19.89	1880	12.44	17.49	523332.00
+01_13B_Jackal	lio_row	block_022	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_091937	2026-08-09	1999	10.23	15.96	19.62	1880	12.55	17.98	527621.00
+01_13B_Jackal	lio_row	block_022	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_175426	2026-08-09	1999	10.11	15.69	20.00	800	12.59	18.07	524972.00
+01_13B_Jackal	lio_row	block_023	splat_runs_C_20k/C20k_block_023/high/2026-07-12_101809	2026-07-12	20000	10.91	23.47	25.00	18860	9.94	16.71	1192216.00
+01_13B_Jackal	lio_row	block_023	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_050159	2026-08-09	1999	10.88	13.00	20.00	1410	10.95	15.75	478801.00
+01_13B_Jackal	lio_row	block_023	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_092232	2026-08-09	1999	11.45	13.95	19.85	930	11.07	15.86	477163.00
+01_13B_Jackal	lio_row	block_023	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_175720	2026-08-09	1999	11.06	13.50	20.22	930	11.21	16.48	479151.00
+01_13B_Jackal	lio_row	block_024	splat_runs_C_20k/C20k_block_024/high/2026-07-12_115746	2026-07-12	20000	10.61	21.14	25.24	18750	9.79	18.17	1241796.00
+01_13B_Jackal	lio_row	block_024	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_050453	2026-08-09	1999	10.24	16.03	19.57	1410	10.68	14.22	491092.00
+01_13B_Jackal	lio_row	block_024	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_092526	2026-08-09	1999	10.19	15.55	19.89	1410	11.37	16.53	485669.00
+01_13B_Jackal	lio_row	block_024	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_180013	2026-08-09	1999	10.26	16.20	19.88	1410	11.31	16.26	490639.00
+01_13B_Jackal	lio_row	block_025	splat_runs_C_20k/C20k_block_025/high/2026-07-12_133628	2026-07-12	20000	10.39	23.58	25.21	19620	11.29	16.69	1210092.00
+01_13B_Jackal	lio_row	block_025	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_050746	2026-08-09	1999	11.14	15.17	18.27	930	12.27	16.15	504922.00
+01_13B_Jackal	lio_row	block_025	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_092818	2026-08-09	1999	10.99	14.57	18.90	1030	12.10	16.06	504748.00
+01_13B_Jackal	lio_row	block_025	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_180305	2026-08-09	1999	11.14	15.29	18.49	1510	12.34	16.37	502452.00
+01_13B_Jackal	lio_row	block_026	splat_runs_C_20k/C20k_block_026/high/2026-07-12_151610	2026-07-12	20000	9.02	20.49	25.60	18550	11.49	17.64	1163367.00
+01_13B_Jackal	lio_row	block_026	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_051040	2026-08-09	1999	10.68	15.76	19.07	530	13.06	16.96	489911.00
+01_13B_Jackal	lio_row	block_026	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_093111	2026-08-09	1999	10.79	16.16	19.56	1130	13.21	17.39	482874.00
+01_13B_Jackal	lio_row	block_026	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_180555	2026-08-09	1999	10.74	15.99	19.07	530	13.28	17.68	483924.00
+01_13B_Jackal	lio_row	block_027	splat_runs_C_20k/C20k_block_027/high/2026-07-12_165730	2026-07-12	20000	11.49	22.53	26.03	19730	10.91	18.18	1262442.00
+01_13B_Jackal	lio_row	block_027	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_051335	2026-08-09	1999	11.69	17.81	20.16	1040	12.39	16.31	494316.00
+01_13B_Jackal	lio_row	block_027	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_093406	2026-08-09	1999	11.46	16.91	20.20	1040	12.34	16.14	498627.00
+01_13B_Jackal	lio_row	block_027	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_180848	2026-08-09	1999	11.06	15.39	19.98	1040	12.47	16.55	500213.00
+01_13B_Jackal	lio_row	block_028	splat_runs_C_20k/C20k_block_028/high/2026-07-12_184104	2026-07-12	20000	11.44	25.25	25.45	19630	10.29	13.06	1249444.00
+01_13B_Jackal	lio_row	block_028	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_051628	2026-08-09	1999	11.07	15.24	18.54	970	12.74	16.93	518098.00
+01_13B_Jackal	lio_row	block_028	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_093659	2026-08-09	1999	11.27	15.88	18.78	680	12.26	15.56	514536.00
+01_13B_Jackal	lio_row	block_028	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_181139	2026-08-09	1999	11.44	16.29	19.31	710	12.87	17.18	515490.00
+01_13B_Jackal	lio_row	block_029	splat_runs_C_20k/C20k_block_029/high/2026-07-12_202258	2026-07-12	20000	13.04	23.17	24.88	19730	9.41	15.52	1337219.00
+01_13B_Jackal	lio_row	block_029	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_051929	2026-08-09	1999	11.41	14.71	20.27	1410	12.49	17.23	534824.00
+01_13B_Jackal	lio_row	block_029	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_093954	2026-08-09	1999	11.55	14.89	19.80	930	12.31	16.57	534108.00
+01_13B_Jackal	lio_row	block_029	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_181433	2026-08-09	1999	11.58	14.99	19.44	930	12.54	17.19	539288.00
+01_13B_Jackal	lio_row	block_030	splat_runs_C_20k/C20k_block_030/high/2026-07-12_220315	2026-07-12	20000	11.32	23.71	24.82	18870	10.58	14.27	1263276.00
+01_13B_Jackal	lio_row	block_030	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_052224	2026-08-09	1999	12.43	16.37	20.24	600	11.86	15.18	535730.00
+01_13B_Jackal	lio_row	block_030	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_094245	2026-08-09	1999	12.15	15.68	20.24	600	12.17	15.55	525079.00
+01_13B_Jackal	lio_row	block_030	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_181727	2026-08-09	1999	12.46	16.50	20.25	600	12.10	15.53	527074.00
+01_13B_Jackal	lio_row	block_031	splat_runs_C_20k/C20k_block_031/high/2026-07-12_234601	2026-07-13	20000	11.62	20.22	23.70	15730	8.55	17.75	1470627.00
+01_13B_Jackal	lio_row	block_031	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_052520	2026-08-09	1999	12.75	13.44	17.83	830	7.89	8.81	608743.00
+01_13B_Jackal	lio_row	block_031	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_094542	2026-08-09	1999	13.94	15.62	18.34	680	8.31	9.74	612999.00
+01_13B_Jackal	lio_row	block_031	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_182023	2026-08-09	1999	12.21	13.36	17.97	960	8.94	11.07	616175.00
+01_13B_Jackal	lio_row	block_032	splat_runs_C_20k/C20k_block_032/high/2026-07-13_013232	2026-07-13	20000	10.94	21.25	24.20	18360	9.83	17.07	1211677.00
+01_13B_Jackal	lio_row	block_032	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_052830	2026-08-09	1999	12.52	13.80	20.70	1280	10.47	14.85	626614.00
+01_13B_Jackal	lio_row	block_032	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_094852	2026-08-09	1999	12.84	13.17	20.29	1280	10.13	13.49	628841.00
+01_13B_Jackal	lio_row	block_032	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_182332	2026-08-09	1999	11.90	11.97	20.94	1280	10.50	14.78	628632.00
+01_13B_Jackal	lio_row	block_033	splat_runs_C_20k/C20k_block_033/high/2026-07-13_031544	2026-07-13	20000	9.00	20.06	22.03	19440	10.08	13.88	1625641.00
+01_13B_Jackal	lio_row	block_033	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_053134	2026-08-09	1999	14.22	14.54	18.39	470	11.53	14.69	571962.00
+01_13B_Jackal	lio_row	block_033	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_095150	2026-08-09	1999	15.09	15.96	18.40	470	11.38	14.28	565343.00
+01_13B_Jackal	lio_row	block_033	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_182636	2026-08-09	1999	14.31	14.83	18.39	470	11.41	14.46	560795.00
+01_13B_Jackal	lio_row	block_034	splat_runs_C_20k/C20k_block_034/high/2026-07-13_045858	2026-07-13	20000	8.62	19.61	25.03	19300	10.96	20.89	1298901.00
+01_13B_Jackal	lio_row	block_034	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_053426	2026-08-09	1999	13.06	14.78	19.52	830	10.55	16.45	511286.00
+01_13B_Jackal	lio_row	block_034	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_095442	2026-08-09	1999	13.33	15.38	19.62	830	10.48	16.20	512408.00
+01_13B_Jackal	lio_row	block_034	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_182928	2026-08-09	1999	12.06	13.32	19.62	830	10.59	15.67	516196.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_000	splat_runs_ablation_pass0/ablation_pass0/high/2026-05-15_230251	2026-05-15	5000	6.54	27.58	32.87	4970			784412.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_000	splat_runs_ablation_pass0_lio/ablation_pass0_lio/high/2026-05-15_234533	2026-05-15	5000	6.66	26.70	30.71	4790			1207377.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_000	splat_runs_high_full_v16_unified/high_full_v16_unified/high/2026-05-15_210657	2026-05-15	5000	6.39	25.46	27.34	4490	7.01	23.40	1287901.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_000	splat_runs_lio_only/high_lio_only/high/2026-05-15_223948	2026-05-15	5000	6.41	22.96	26.97	4160	7.48	20.83	902988.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_000	splat_runs_lio_only_v2/high_lio_only_v2/high/2026-05-16_002503	2026-05-16	5000	6.43	25.38	27.88	3690	7.18	23.64	1375701.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_000	splat_runs_noinit/high_noinit/high/2026-05-15_220932	2026-05-15	5000	6.51	25.35	26.78	4490	7.12	22.72	473102.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_000	splat_runs_perpass/perpass_block_000/high/2026-05-16_213123	2026-05-16	5000	6.19	27.77	30.50	4360	7.15	25.52	1409806.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_001	splat_runs_lio_only_v2/lio_v2_block_001/high/2026-05-16_005352	2026-05-16	5000	6.10	23.15	28.44	3750	6.08	23.20	1385472.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_001	splat_runs_perpass/perpass_block_001/high/2026-05-16_214409	2026-05-16	5000	5.92	23.59	30.70	4840	6.01	26.09	1419779.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_002	splat_runs_lio_only_v2/lio_v2_block_002/high/2026-05-16_011930	2026-05-16	5000	7.24	25.03	27.23	3980	7.61	23.96	1530773.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_002	splat_runs_perpass/perpass_block_002/high/2026-05-16_215747	2026-05-16	5000	7.15	25.40	30.37	4950	7.60	23.70	1546769.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_003	splat_runs_lio_only_v2/lio_v2_block_003/high/2026-05-16_014044	2026-05-16	5000	8.16	26.12	30.28	4970	9.10	22.00	1062528.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_003	splat_runs_perpass/perpass_block_003/high/2026-05-16_221048	2026-05-16	5000	8.01	28.31	32.54	4970	8.88	25.59	1082095.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_004	splat_runs_lio_only_v2/lio_v2_block_004/high/2026-05-16_015928	2026-05-16	5000	6.61	28.12	28.74	4590	8.94	23.74	1104621.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_004	splat_runs_perpass/perpass_block_004/high/2026-05-16_222056	2026-05-16	5000	6.51	31.11	32.13	4840	8.79	26.85	1121995.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_005	splat_runs_lio_only_v2/lio_v2_block_005/high/2026-05-16_021851	2026-05-16	5000	6.71	27.00	29.21	4480	6.38	21.93	1072634.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_005	splat_runs_perpass/perpass_block_005/high/2026-05-16_223145	2026-05-16	5000	6.53	29.71	32.07	4520	6.34	25.66	1089493.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_006	splat_runs_lio_only_v2/lio_v2_block_006/high/2026-05-16_023911	2026-05-16	5000	8.49	18.96	30.39	4200	6.29	22.54	1481314.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_006	splat_runs_perpass/perpass_block_006/high/2026-05-16_224242	2026-05-16	5000	7.95	20.71	32.12	4940	6.18	25.37	1462609.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_007	splat_runs_lio_only_v2/lio_v2_block_007/high/2026-05-16_025721	2026-05-16	5000	6.93	28.13	29.14	4270	9.50	23.39	886690.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_007	splat_runs_perpass/perpass_block_007/high/2026-05-16_225307	2026-05-16	5000	6.45	30.75	30.82	2810	9.41	22.36	904517.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_008	splat_runs_lio_only_v2/lio_v2_block_008/high/2026-05-16_031544	2026-05-16	5000	6.84	25.38	29.21	4460	6.97	19.72	1388625.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_008	splat_runs_perpass/perpass_block_008/high/2026-05-16_230251	2026-05-16	5000	6.54	30.12	30.64	4450	6.83	25.73	1433462.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_009	splat_runs_lio_only_v2/lio_v2_block_009/high/2026-05-16_033520	2026-05-16	5000	8.09	26.72	27.51	4920	7.46	22.57	1540473.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_009	splat_runs_perpass/perpass_block_009/high/2026-05-16_231355	2026-05-16	5000	8.00	29.13	29.71	4120	7.31	24.65	1562556.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_010	splat_runs_lio_only_v2/lio_v2_block_010/high/2026-05-16_035528	2026-05-16	5000	9.08	24.77	27.93	4970	7.58	24.39	1715860.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_010	splat_runs_perpass/perpass_block_010/high/2026-05-16_232541	2026-05-16	5000	8.67	26.86	31.55	4930	7.48	27.05	1643509.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_011	splat_runs_lio_only_v2/lio_v2_block_011/high/2026-05-16_041402	2026-05-16	5000	9.06	24.76	28.26	4970	9.10	20.98	1033115.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_011	splat_runs_perpass/perpass_block_011/high/2026-05-16_233611	2026-05-16	5000	8.67	29.69	31.98	4960	9.67	23.95	1018417.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_012	splat_runs_lio_only_v2/lio_v2_block_012/high/2026-05-16_043238	2026-05-16	5000	9.22	26.68	27.74	4790	9.10	22.95	1283557.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_012	splat_runs_perpass/perpass_block_012/high/2026-05-16_234627	2026-05-16	5000	8.98	30.81	30.81	4990	8.75	25.08	1310936.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_013	splat_runs_lio_only_v2/lio_v2_block_013/high/2026-05-16_045210	2026-05-16	5000	8.08	24.53	26.97	4770	9.09	20.86	1224026.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_013	splat_runs_perpass/perpass_block_013/high/2026-05-16_235742	2026-05-17	5000	7.86	29.28	30.37	4350	8.99	25.37	1223083.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_014	splat_runs_lio_only_v2/lio_v2_block_014/high/2026-05-16_051154	2026-05-16	5000	6.39	24.65	29.65	4720	7.01	23.51	1109579.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_014	splat_runs_perpass/perpass_block_014/high/2026-05-17_000827	2026-05-17	5000	6.14	25.00	31.83	4920	7.14	25.82	1135780.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_015	splat_runs_lio_only_v2/lio_v2_block_015/high/2026-05-16_052849	2026-05-16	5000	8.22	25.01	27.57	4930	7.87	21.29	1017788.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_015	splat_runs_perpass/perpass_block_015/high/2026-05-17_001753	2026-05-17	5000	8.07	27.55	29.57	4370	7.67	20.75	986789.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_016	splat_runs_lio_only_v2/lio_v2_block_016/high/2026-05-16_054741	2026-05-16	5000	7.94	23.99	26.33	770	7.10	20.88	1652970.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_016	splat_runs_perpass/perpass_block_016/high/2026-05-17_002837	2026-05-17	5000	8.12	24.23	27.79	1430	7.34	26.58	1634996.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_017	splat_runs_lio_only_v2/lio_v2_block_017/high/2026-05-16_060731	2026-05-16	5000	9.25	21.34	26.70	4250	7.47	19.39	1643440.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_017	splat_runs_perpass/perpass_block_017/high/2026-05-17_004033	2026-05-17	5000	8.98	23.59	27.88	1980	7.70	19.91	1542144.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_018	splat_runs_lio_only_v2/lio_v2_block_018/high/2026-05-16_062618	2026-05-16	5000	9.11	24.33	27.88	840	9.04	22.22	1302492.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_018	splat_runs_perpass/perpass_block_018/high/2026-05-17_005118	2026-05-17	5000	8.42	27.86	31.09	2990	9.00	24.82	1260279.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_019	splat_runs_lio_only_v2/lio_v2_block_019/high/2026-05-16_064436	2026-05-16	5000	11.80	23.62	28.85	4940	11.35	21.65	1298077.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_019	splat_runs_perpass/perpass_block_019/high/2026-05-17_010113	2026-05-17	5000	11.03	25.68	31.44	4930	10.91	23.54	1298206.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_020	splat_runs_lio_only_v2/lio_v2_block_020/high/2026-05-16_070416	2026-05-16	5000	8.98	26.22	28.04	590	8.38	18.84	1249756.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_020	splat_runs_perpass/perpass_block_020/high/2026-05-17_011230	2026-05-17	5000	8.57	31.49	31.49	4990	7.65	21.91	1187274.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_021	splat_runs_lio_only_v2/lio_v2_block_021/high/2026-05-16_072327	2026-05-16	5000	6.26	24.71	28.70	2600	8.12	23.59	1108114.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_021	splat_runs_perpass/perpass_block_021/high/2026-05-17_012328	2026-05-17	5000	6.18	25.05	30.49	4840	7.17	24.08	1086782.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_022	splat_runs_lio_only_v2/lio_v2_block_022/high/2026-05-16_074027	2026-05-16	3	9.05	19.99	19.99	0			213186.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_022	splat_runs_perpass/perpass_block_022/high/2026-05-17_013243	2026-05-17	3	8.98	19.62	19.62	0			213186.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_023	splat_runs_lio_only_v2/lio_v2_block_023/high/2026-05-16_075102	2026-05-16	5000	11.44	19.07	31.12	4660	6.77	21.01	1607952.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_023	splat_runs_perpass/perpass_block_023/high/2026-05-17_013459	2026-05-17	5000	10.76	26.28	31.22	4980	6.88	23.24	1512520.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_024	splat_runs_lio_only_v2/lio_v2_block_024/high/2026-05-16_081043	2026-05-16	5000	8.05	22.02	27.39	4980	8.57	20.05	1518704.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_024	splat_runs_perpass/perpass_block_024/high/2026-05-17_014649	2026-05-17	5000	8.32	22.67	27.83	4660	8.46	19.92	1485834.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_025	splat_runs_lio_only_v2/lio_v2_block_025/high/2026-05-16_083106	2026-05-16	5000	9.21	19.01	27.59	430	6.30	21.84	1886844.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_025	splat_runs_perpass/perpass_block_025/high/2026-05-17_015849	2026-05-17	5000	9.21	20.05	31.64	4930	6.01	27.29	1789548.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_026	splat_runs_lio_only_v2/lio_v2_block_026/high/2026-05-16_085627	2026-05-16	5000	6.14	27.60	28.64	4670	11.73	18.32	1045163.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_026	splat_runs_perpass/perpass_block_026/high/2026-05-17_020932	2026-05-17	5000	5.99	29.58	32.04	4970	12.07	21.37	1045174.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_027	splat_runs_lio_only_v2/lio_v2_block_027/high/2026-05-16_092037	2026-05-16	5000	8.95	26.28	28.73	4280	10.60	19.59	1180838.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_027	splat_runs_perpass/perpass_block_027/high/2026-05-17_021946	2026-05-17	5000	8.86	29.09	31.19	4520	10.21	23.31	1168988.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_028	splat_runs_lio_only_v2/lio_v2_block_028/high/2026-05-16_094612	2026-05-16	5000	8.26	22.76	27.87	4630	7.44	22.13	1108770.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_028	splat_runs_perpass/perpass_block_028/high/2026-05-17_023107	2026-05-17	5000	8.12	27.65	30.17	4980	7.22	20.31	1149838.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_029	splat_runs_lio_only_v2/lio_v2_block_029/high/2026-05-16_101119	2026-05-16	5000	6.74	21.00	28.88	4620	7.11	22.66	1230856.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_029	splat_runs_perpass/perpass_block_029/high/2026-05-17_024127	2026-05-17	5000	6.53	21.59	31.99	4900	6.81	25.07	1234174.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_030	splat_runs_lio_only_v2/lio_v2_block_030/high/2026-05-16_103506	2026-05-16	5000	6.67	24.45	26.46	4900	8.06	19.23	1184167.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_030	splat_runs_perpass/perpass_block_030/high/2026-05-17_025109	2026-05-17	5000	6.61	26.29	27.66	4900	7.94	23.59	1191786.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_031	splat_runs_lio_only_v2/lio_v2_block_031/high/2026-05-16_110003	2026-05-16	5000	10.29	21.47	26.38	430	7.74	23.68	1728105.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_031	splat_runs_perpass/perpass_block_031/high/2026-05-17_030255	2026-05-17	5000	11.03	22.66	26.72	4640	7.73	24.86	1660313.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_032	splat_runs_lio_only_v2/lio_v2_block_032/high/2026-05-16_112730	2026-05-16	5000	13.92	19.99	27.65	4630	6.78	20.80	1876747.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_032	splat_runs_perpass/perpass_block_032/high/2026-05-17_031513	2026-05-17	5000	13.66	20.87	31.99	4700	6.72	23.01	1791827.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_033	splat_runs_lio_only_v2/lio_v2_block_033/high/2026-05-16_115348	2026-05-16	5000	8.03	24.59	28.51	4600			936612.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_033	splat_runs_perpass/perpass_block_033/high/2026-05-17_032554	2026-05-17	5000	7.98	24.75	33.37	4600			931796.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_034	splat_runs_lio_only_v2/lio_v2_block_034/high/2026-05-16_121228	2026-05-16	5000	7.22	21.57	27.25	4600			1165266.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_034	splat_runs_perpass/perpass_block_034/high/2026-05-17_033441	2026-05-17	5000	7.09	24.74	30.68	4600			1141111.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_035	splat_runs_lio_only_v2/lio_v2_block_035/high/2026-05-16_123315	2026-05-16	5000	7.18	20.67	27.80	4620	11.42	20.28	1010489.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_035	splat_runs_perpass/perpass_block_035/high/2026-05-17_034450	2026-05-17	5000	6.95	25.89	30.22	4490	11.47	22.83	1096073.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_036	splat_runs_lio_only_v2/lio_v2_block_036/high/2026-05-16_125554	2026-05-16	5000	8.17	27.10	29.76	4270	7.12	24.89	1002049.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_036	splat_runs_perpass/perpass_block_036/high/2026-05-17_035456	2026-05-17	5000	8.02	30.85	33.91	4560	7.02	28.77	1024262.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_037	splat_runs_lio_only_v2/lio_v2_block_037/high/2026-05-16_131953	2026-05-16	5000	6.65	24.64	30.80	4170	7.20	23.51	1015802.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_037	splat_runs_perpass/perpass_block_037/high/2026-05-17_040515	2026-05-17	5000	6.48	24.27	32.94	4170	7.06	27.68	1010206.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_038	splat_runs_lio_only_v2/lio_v2_block_038/high/2026-05-16_134437	2026-05-16	5000	6.05	25.55	28.48	4820	6.63	22.90	1166710.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_038	splat_runs_perpass/perpass_block_038/high/2026-05-17_041519	2026-05-17	5000	6.00	27.72	30.68	4900	6.72	24.78	1182634.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_040	splat_runs_lio_only_v2/lio_v2_block_040/high/2026-05-16_143128	2026-05-16	5000	9.81	23.30	27.95	4740	8.87	21.32	1220865.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_040	splat_runs_perpass/perpass_block_040/high/2026-05-17_043457	2026-05-17	5000	9.28	29.48	32.45	4660	8.51	27.58	1279241.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_041	splat_runs_lio_only_v2/lio_v2_block_041/high/2026-05-16_145705	2026-05-16	5000	8.80	26.13	29.46	4970	7.12	23.47	1052143.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_041	splat_runs_perpass/perpass_block_041/high/2026-05-17_044542	2026-05-17	5000	8.64	28.09	33.03	4970	7.01	25.53	1102629.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_042	splat_runs_lio_only_v2/lio_v2_block_042/high/2026-05-16_152307	2026-05-16	5000	7.63	24.86	29.96	4560	5.91	25.79	1283513.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_042	splat_runs_perpass/perpass_block_042/high/2026-05-17_045653	2026-05-17	5000	7.28	28.81	32.31	4410	5.89	28.54	1258937.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_043	splat_runs_lio_only_v2/lio_v2_block_043/high/2026-05-16_154952	2026-05-16	5000	7.41	25.22	28.01	4890	7.16	22.16	1195904.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_043	splat_runs_perpass/perpass_block_043/high/2026-05-17_050806	2026-05-17	5000	7.30	27.39	31.49	4890	7.10	25.16	1150943.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_044	splat_runs_lio_only_v2/lio_v2_block_044/high/2026-05-16_161610	2026-05-16	5000	7.17	22.56	28.99	4650	7.19	24.35	1079895.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_044	splat_runs_perpass/perpass_block_044/high/2026-05-17_051903	2026-05-17	5000	7.14	29.14	30.96	4940	6.51	24.50	1090660.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_045	splat_runs_lio_only_v2/lio_v2_block_045/high/2026-05-16_164116	2026-05-16	5000	6.54	25.06	28.38	4940	6.66	24.39	1145789.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_045	splat_runs_perpass/perpass_block_045/high/2026-05-17_052840	2026-05-17	5000	6.53	27.93	31.85	4930	6.59	24.44	1196321.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_046	splat_runs_lio_only_v2/lio_v2_block_046/high/2026-05-16_170738	2026-05-16	5000	7.98	25.65	28.05	4480	6.17	21.11	1113046.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_046	splat_runs_perpass/perpass_block_046/high/2026-05-17_053851	2026-05-17	5000	7.76	27.65	31.41	4440	5.85	24.98	1109901.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_047	splat_runs_lio_only_v2/lio_v2_block_047/high/2026-05-16_173319	2026-05-16	5000	6.66	28.01	29.75	4730	9.35	22.08	1143471.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_047	splat_runs_perpass/perpass_block_047/high/2026-05-17_054949	2026-05-17	5000	6.52	32.32	32.65	4950	9.46	25.48	1121156.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_048	splat_runs_lio_only_v2/lio_v2_block_048/high/2026-05-16_175827	2026-05-16	5000	7.32	25.71	30.85	4740	7.30	26.42	1015198.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_048	splat_runs_perpass/perpass_block_048/high/2026-05-17_060028	2026-05-17	5000	6.92	29.28	33.56	4740	7.15	27.29	1075674.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_049	splat_runs_lio_only_v2/lio_v2_block_049/high/2026-05-16_182246	2026-05-16	5000	8.51	27.14	29.77	4750	6.73	25.89	1228813.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_049	splat_runs_perpass/perpass_block_049/high/2026-05-17_061035	2026-05-17	5000	8.33	30.90	33.13	4740	6.71	26.06	1235746.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_050	splat_runs_lio_only_v2/lio_v2_block_050/high/2026-05-16_184922	2026-05-16	5000	6.27	26.27	29.75	4500	6.93	24.09	1223891.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_050	splat_runs_perpass/perpass_block_050/high/2026-05-17_062113	2026-05-17	5000	6.26	28.51	31.91	4780	6.74	23.72	1257632.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_051	splat_runs_lio_only_v2/lio_v2_block_051/high/2026-05-16_191456	2026-05-16	5000	6.84	25.75	28.26	4980	9.24	23.15	1221677.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_051	splat_runs_perpass/perpass_block_051/high/2026-05-17_063208	2026-05-17	5000	6.88	27.81	31.86	4700	9.13	27.01	1193681.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_052	splat_runs_lio_only_v2/lio_v2_block_052/high/2026-05-16_194129	2026-05-16	5000	7.52	26.39	28.65	4360	6.72	23.97	968323.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_052	splat_runs_perpass/perpass_block_052/high/2026-05-17_064252	2026-05-17	5000	7.06	26.85	30.48	3170	6.48	25.82	956439.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_053	splat_runs_lio_only_v2/lio_v2_block_053/high/2026-05-16_200641	2026-05-16	5000	9.82	24.93	28.64	4930	6.28	24.68	1198729.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_053	splat_runs_perpass/perpass_block_053/high/2026-05-17_065314	2026-05-17	5000	9.85	28.94	32.24	4890	6.24	26.99	1232309.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_054	splat_runs_lio_only_v2/lio_v2_block_054/high/2026-05-16_203344	2026-05-16	3421	5.99	28.38	29.55	2990	7.69	14.76	1092563.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_054	splat_runs_perpass/perpass_block_054/high/2026-05-17_070427	2026-05-17	5000	7.26	26.88	31.02	4030	8.78	24.90	1156984.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_055	splat_runs_perpass/perpass_block_055/high/2026-05-17_072518	2026-05-17	5000	6.09	30.66	31.10	4600	7.16	26.11	1276749.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_056	splat_runs_perpass/perpass_block_056/high/2026-05-17_075339	2026-05-17	5000	6.03	26.62	31.54	4740	7.00	22.68	1267277.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_057	splat_runs_perpass/perpass_block_057/high/2026-05-17_082047	2026-05-17	5000	9.82	26.49	30.04	4560	7.78	19.92	1163062.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_058	splat_runs_perpass/perpass_block_058/high/2026-05-17_084723	2026-05-17	5000	9.42	28.07	30.50	4900	6.03	23.06	1234201.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_059	splat_runs_perpass/perpass_block_059/high/2026-05-17_091319	2026-05-17	5000	7.56	29.66	32.79	4920	8.70	25.24	896531.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_060	splat_runs_perpass/perpass_block_060/high/2026-05-17_093747	2026-05-17	5000	5.85	30.15	32.04	4660	7.61	23.63	1140431.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_061	splat_runs_perpass/perpass_block_061/high/2026-05-17_100630	2026-05-17	5000	6.05	29.14	29.75	4980	6.64	24.45	1127575.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_062	splat_runs_perpass/perpass_block_062/high/2026-05-17_103403	2026-05-17	5000	6.27	26.86	29.52	1690	8.21	25.48	1242564.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_063	splat_runs_perpass/perpass_block_063/high/2026-05-17_105823	2026-05-17	5000	6.44	28.27	32.91	4950			740775.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_064	splat_runs_perpass/perpass_block_064/high/2026-05-17_111420	2026-05-17	5000	6.32	31.28	32.91	4800			588455.00
+03_13B_Jackal	lio_arc_size15.0_ov0.10_kf20cm_dedup	block_065	splat_runs_perpass/perpass_block_065/high/2026-05-17_113006	2026-05-17	5000	5.26	34.49	35.23	4930			553639.00
+03_13B_Jackal	lio_row_halves	block_000	splat_runs_E/E_block_000/high/2026-07-22_165801	2026-07-22	20000	9.68	25.74	29.48	2850	9.13	22.62	895506.00
+03_13B_Jackal	lio_row_halves	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_053736	2026-08-09	1999	9.73	18.99	23.51	1040	7.56	19.63	321778.00
+03_13B_Jackal	lio_row_halves	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_095750	2026-08-09	1999	9.94	18.86	24.27	1040	7.59	19.65	323972.00
+03_13B_Jackal	lio_row_halves	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_183237	2026-08-09	1999	10.02	19.24	22.84	1040	7.57	19.37	328220.00
+03_13B_Jackal	lio_row_halves	block_001	splat_runs_E/E_block_001/high/2026-07-22_181102	2026-07-22	20000	9.88	23.17	30.40	16820	8.51	23.85	712201.00
+03_13B_Jackal	lio_row_halves	block_001	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_054003	2026-08-09	1999	11.28	25.14	25.14	1990	7.36	18.66	73576.00
+03_13B_Jackal	lio_row_halves	block_001	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_100015	2026-08-09	1999	11.31	25.38	25.38	1990	7.42	18.89	79110.00
+03_13B_Jackal	lio_row_halves	block_001	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_183501	2026-08-09	1999	11.30	25.43	25.43	1990	7.36	18.67	76790.00
+03_13B_Jackal	lio_row_halves	block_002	splat_runs_E/E_block_002/high/2026-07-22_191006	2026-07-22	20000	8.82	25.31	28.34	5850	9.02	22.16	630980.00
+03_13B_Jackal	lio_row_halves	block_002	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_054221	2026-08-09	1999	11.34	19.74	23.71	1190	7.67	21.73	192821.00
+03_13B_Jackal	lio_row_halves	block_002	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_100230	2026-08-09	1999	11.32	19.93	23.53	1690	7.65	21.66	193969.00
+03_13B_Jackal	lio_row_halves	block_002	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_183718	2026-08-09	1999	11.25	20.20	23.91	1190	7.67	21.85	188950.00
+03_13B_Jackal	lio_row_halves	block_003	splat_runs_E/E_block_003/high/2026-07-22_201108	2026-07-22	20000	9.51	25.96	30.83	19610	8.01	24.38	703819.00
+03_13B_Jackal	lio_row_halves	block_003	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_054441	2026-08-09	1999	11.28	20.99	24.35	1710	8.99	21.12	131424.00
+03_13B_Jackal	lio_row_halves	block_003	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_100452	2026-08-09	1999	11.36	22.09	24.68	1710	8.94	20.54	130784.00
+03_13B_Jackal	lio_row_halves	block_003	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_183938	2026-08-09	1999	11.32	21.43	24.47	1710	8.96	20.94	124486.00
+03_13B_Jackal	lio_row_halves	block_004	splat_runs_E/E_block_004/high/2026-07-22_211155	2026-07-22	20000	9.57	23.66	27.93	5940	8.06	20.02	453424.00
+03_13B_Jackal	lio_row_halves	block_004	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_054659	2026-08-09	1999	8.81	19.82	23.51	1950	7.24	19.78	40746.00
+03_13B_Jackal	lio_row_halves	block_004	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_100710	2026-08-09	1999	9.20	20.48	23.46	1600	7.21	19.76	40357.00
+03_13B_Jackal	lio_row_halves	block_004	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_184156	2026-08-09	1999	9.27	19.97	23.55	1600	7.23	19.82	40594.00
+03_13B_Jackal	lio_row_halves	block_005	splat_runs_E/E_block_005/high/2026-07-22_220856	2026-07-22	20000	9.83	21.13	28.26	18950	11.06	18.16	711002.00
+03_13B_Jackal	lio_row_halves	block_005	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_054914	2026-08-09	1999	10.80	20.11	23.32	530	10.75	20.93	87684.00
+03_13B_Jackal	lio_row_halves	block_005	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_100927	2026-08-09	1999	10.81	19.92	23.32	530	10.73	20.80	89039.00
+03_13B_Jackal	lio_row_halves	block_005	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_184412	2026-08-09	1999	10.80	19.98	23.33	530	10.72	20.55	86800.00
+03_13B_Jackal	lio_row_halves	block_006	splat_runs_E/E_block_006/high/2026-07-22_230915	2026-07-23	20000	10.43	24.24	27.40	18820	8.23	21.51	617430.00
+03_13B_Jackal	lio_row_halves	block_006	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_055131	2026-08-09	1999	11.14	20.65	22.52	1600	9.02	20.70	52706.00
+03_13B_Jackal	lio_row_halves	block_006	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_101145	2026-08-09	1999	11.13	20.61	22.26	1600	9.06	20.49	52084.00
+03_13B_Jackal	lio_row_halves	block_006	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_184628	2026-08-09	1999	11.13	20.46	22.50	1600	9.00	20.57	50159.00
+03_13B_Jackal	lio_row_halves	block_007	splat_runs_E/E_block_007/high/2026-07-23_000757	2026-07-23	20000	9.05	22.95	28.43	18460	8.44	15.43	765575.00
+03_13B_Jackal	lio_row_halves	block_007	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_055349	2026-08-09	1999	9.18	21.33	23.66	1950	10.72	20.98	80227.00
+03_13B_Jackal	lio_row_halves	block_007	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_101403	2026-08-09	1999	9.17	21.36	23.86	1950	10.72	20.99	81535.00
+03_13B_Jackal	lio_row_halves	block_007	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_184847	2026-08-09	1999	9.16	21.42	23.81	1950	10.72	21.02	80411.00
+03_13B_Jackal	lio_row_halves	block_008	splat_runs_E/E_block_008/high/2026-07-23_010834	2026-07-23	20000	9.26	22.21	27.74	18730	8.89	20.63	616193.00
+03_13B_Jackal	lio_row_halves	block_008	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_055609	2026-08-09	1999	9.89	19.99	25.48	1780	9.79	18.76	95383.00
+03_13B_Jackal	lio_row_halves	block_008	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_101625	2026-08-09	1999	9.93	20.37	24.61	1780	9.81	18.97	95459.00
+03_13B_Jackal	lio_row_halves	block_008	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_185112	2026-08-09	1999	9.91	20.01	24.76	1780	9.80	18.78	97232.00
+03_13B_Jackal	lio_row_halves	block_009	splat_runs_E/E_block_009/high/2026-07-23_020707	2026-07-23	20000	9.24	20.87	25.65	14750	10.64	25.18	846274.00
+03_13B_Jackal	lio_row_halves	block_009	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_055830	2026-08-09	1999	10.70	18.50	20.76	530	8.35	17.54	87704.00
+03_13B_Jackal	lio_row_halves	block_009	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_101846	2026-08-09	1999	10.71	18.63	20.77	530	8.32	17.41	90210.00
+03_13B_Jackal	lio_row_halves	block_009	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_185340	2026-08-09	1999	10.69	18.47	20.76	530	8.33	17.44	90998.00
+03_13B_Jackal	lio_row_halves	block_010	splat_runs_E/E_block_010/high/2026-07-23_031445	2026-07-23	20000	10.14	23.86	27.88	19750	8.94	24.22	635608.00
+03_13B_Jackal	lio_row_halves	block_010	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_060050	2026-08-09	1999	9.78	21.01	24.28	990	7.89	21.94	104368.00
+03_13B_Jackal	lio_row_halves	block_010	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_102107	2026-08-09	1999	9.92	21.03	24.40	990	7.83	21.08	102463.00
+03_13B_Jackal	lio_row_halves	block_011	splat_runs_E/E_block_011/high/2026-07-23_042600	2026-07-23	20000	8.91	22.55	27.58	19670	8.08	17.52	807219.00
+03_13B_Jackal	lio_row_halves	block_011	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_060310	2026-08-09	1999	10.80	19.44	22.78	880	10.11	21.42	128298.00
+03_13B_Jackal	lio_row_halves	block_011	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_102327	2026-08-09	1999	10.80	19.73	22.94	880	10.10	21.41	122450.00
+03_13B_Jackal	lio_row_halves	block_012	splat_runs_E/E_block_012/high/2026-07-23_053928	2026-07-23	20000	11.55	23.37	29.58	19390	10.35	21.50	656473.00
+03_13B_Jackal	lio_row_halves	block_012	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_060531	2026-08-09	1999	9.19	19.60	23.60	1550	7.57	18.03	290155.00
+03_13B_Jackal	lio_row_halves	block_012	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_102550	2026-08-09	1999	9.16	19.74	23.83	1550	7.64	18.90	290542.00
+03_13B_Jackal	lio_row_halves	block_013	splat_runs_E/E_block_013/high/2026-07-23_205800	2026-07-23	20000	10.10	21.00	26.91	18950	7.68	16.68	703625.00
+03_13B_Jackal	lio_row_halves	block_013	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_060755	2026-08-09	1999	10.83	18.15	20.83	1640	8.58	16.67	155920.00
+03_13B_Jackal	lio_row_halves	block_013	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_102811	2026-08-09	1999	10.87	18.07	21.00	1280	8.62	16.49	154767.00
+03_13B_Jackal	lio_row_halves	block_014	splat_runs_E/E_block_014/high/2026-07-23_220528	2026-07-23	20000	11.46	24.21	28.66	18390	7.66	22.25	1071607.00
+03_13B_Jackal	lio_row_halves	block_014	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_061013	2026-08-09	1999	10.03	20.39	23.27	1170	7.79	22.14	85555.00
+03_13B_Jackal	lio_row_halves	block_014	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_103030	2026-08-09	1999	10.02	20.42	23.17	1170	7.78	21.97	86098.00
+03_13B_Jackal	lio_row_halves	block_015	splat_runs_E/E_block_015/high/2026-07-23_231832	2026-07-24	20000	10.92	25.82	29.05	18480	8.11	22.79	769513.00
+03_13B_Jackal	lio_row_halves	block_015	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_061231	2026-08-09	1999	11.91	18.71	23.33	1850	9.92	20.05	78820.00
+03_13B_Jackal	lio_row_halves	block_015	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_103249	2026-08-09	1999	11.93	18.80	23.39	1850	9.91	20.03	79407.00
+03_13B_Jackal	lio_row_halves	block_016	splat_runs_E/E_block_016/high/2026-07-24_003115	2026-07-24	20000	16.63	20.02	28.28	19620			994858.00
+03_13B_Jackal	lio_row_halves	block_016	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_061449	2026-08-09	1999	10.51	16.51	23.14	1690	8.63	19.24	99040.00
+03_13B_Jackal	lio_row_halves	block_016	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_103508	2026-08-09	1999	10.54	16.52	23.12	1690	8.61	19.13	98551.00
+03_13B_Jackal	lio_row_halves	block_017	splat_runs_E/E_block_017/high/2026-07-24_014150	2026-07-24	20000	17.31	20.57	26.21	19260			1042512.00
+03_13B_Jackal	lio_row_halves	block_017	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_061706	2026-08-09	1999	8.02	17.73	20.35	1110	9.32	16.95	108163.00
+03_13B_Jackal	lio_row_halves	block_017	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_103723	2026-08-09	1999	8.05	17.77	20.41	1110	9.31	16.96	110153.00
+03_13B_Jackal	lio_row_halves	block_018	splat_runs_E/E_block_018/high/2026-07-24_025451	2026-07-24	20000	11.96	26.38	31.95	18120			2426066.00
+03_13B_Jackal	lio_row_halves	block_018	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_061922	2026-08-09	1999	10.86	19.54	21.02	530	7.31	17.35	85832.00
+03_13B_Jackal	lio_row_halves	block_018	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_103939	2026-08-09	1999	10.81	19.15	21.02	530	7.32	17.23	82708.00
+03_13B_Jackal	lio_row_halves	block_019	splat_runs_E/E_block_019/high/2026-07-24_041358	2026-07-24	20000	15.06	24.32	30.39	19120			3140562.00
+03_13B_Jackal	lio_row_halves	block_019	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_062125	2026-08-09	1999	10.07	22.40	23.75	1530	7.59	18.46	91348.00
+03_13B_Jackal	lio_row_halves	block_019	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_104141	2026-08-09	1999	10.07	22.38	23.89	980	7.60	18.47	93003.00
+03_13B_Jackal	lio_row_halves	block_020	splat_runs_E/E_block_020/high/2026-07-24_053915	2026-07-24	20000	15.14	21.26	26.93	19050			953794.00
+03_13B_Jackal	lio_row_halves	block_020	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_062330	2026-08-09	1999	9.28	17.49	22.01	1600	9.74	20.66	83285.00
+03_13B_Jackal	lio_row_halves	block_020	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_104345	2026-08-09	1999	9.26	17.39	21.87	1600	9.75	20.74	84798.00
+03_13B_Jackal	lio_row_halves	block_021	splat_runs_E/E_block_021/high/2026-07-24_065244	2026-07-24	20000	14.05	26.55	27.70	18750			1139643.00
+03_13B_Jackal	lio_row_halves	block_021	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_062543	2026-08-09	1999	10.33	18.99	21.49	1720	8.21	17.11	79180.00
+03_13B_Jackal	lio_row_halves	block_021	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_104600	2026-08-09	1999	10.32	18.86	21.54	1720	8.21	17.12	79226.00
+03_13B_Jackal	lio_row_halves	block_022	splat_runs_E/E_block_022/high/2026-07-24_080557	2026-07-24	20000	16.78	23.55	29.03	18540			1078100.00
+03_13B_Jackal	lio_row_halves	block_022	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_062759	2026-08-09	1999	11.25	19.11	22.45	1870	9.59	16.03	93222.00
+03_13B_Jackal	lio_row_halves	block_022	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_104814	2026-08-09	1999	11.28	19.36	23.08	1870	9.59	16.01	91479.00
+03_13B_Jackal	lio_row_halves	block_023	splat_runs_E/E_block_023/high/2026-07-24_092303	2026-07-24	20000	12.04	23.15	28.50	19260			1171953.00
+03_13B_Jackal	lio_row_halves	block_023	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_063017	2026-08-09	1999	11.85	15.47	19.54	1240	11.86	16.99	90355.00
+03_13B_Jackal	lio_row_halves	block_023	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_105030	2026-08-09	1999	11.76	15.34	19.75	1240	11.89	17.08	93552.00
+03_13B_Jackal	lio_row_halves	block_024	splat_runs_E/E_block_024/high/2026-07-24_103709	2026-07-24	20000	8.87	23.79	28.18	18940	9.99	20.80	857366.00
+03_13B_Jackal	lio_row_halves	block_024	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_063233	2026-08-09	1999	9.88	21.24	22.92	530	8.41	21.57	82249.00
+03_13B_Jackal	lio_row_halves	block_024	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_105247	2026-08-09	1999	9.87	21.24	22.92	530	8.40	21.52	82604.00
+03_13B_Jackal	lio_row_halves	block_025	splat_runs_E/E_block_025/high/2026-07-24_205309	2026-07-24	20000	15.32	26.05	28.53	18830	9.03	25.47	962576.00
+03_13B_Jackal	lio_row_halves	block_025	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_063452	2026-08-09	1999	9.57	20.55	25.73	1870	7.65	20.36	88299.00
+03_13B_Jackal	lio_row_halves	block_025	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_105506	2026-08-09	1999	9.57	20.51	25.69	1870	7.65	20.34	88938.00
+03_13B_Jackal	lio_row_halves	block_026	splat_runs_E/E_block_026/high/2026-07-24_220317	2026-07-24	20000	11.53	23.69	29.61	19210	11.21	20.92	697716.00
+03_13B_Jackal	lio_row_halves	block_026	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_063711	2026-08-09	1999	8.63	20.06	23.26	590	10.12	20.05	97766.00
+03_13B_Jackal	lio_row_halves	block_026	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_105725	2026-08-09	1999	8.64	20.09	23.26	590	10.13	20.14	95638.00
+03_13B_Jackal	lio_row_halves	block_027	splat_runs_E/E_block_027/high/2026-07-24_231258	2026-07-25	20000	9.45	21.83	25.80	19680	7.11	17.33	813017.00
+03_13B_Jackal	lio_row_halves	block_027	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_063933	2026-08-09	1999	11.01	17.46	19.42	1840	8.84	15.40	86753.00
+03_13B_Jackal	lio_row_halves	block_027	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_105946	2026-08-09	1999	11.00	17.42	19.54	1240	8.84	15.37	87544.00
+03_13B_Jackal	lio_row_halves	block_028	splat_runs_E/E_block_028/high/2026-07-25_002447	2026-07-25	20000	16.88	26.32	28.86	19550			932130.00
+03_13B_Jackal	lio_row_halves	block_028	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_064153	2026-08-09	1999	10.11	17.90	23.08	1240	9.82	22.75	84565.00
+03_13B_Jackal	lio_row_halves	block_028	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_110207	2026-08-09	1999	10.12	17.93	23.14	1240	9.81	22.72	83098.00
+03_13B_Jackal	lio_row_halves	block_029	splat_runs_E/E_block_029/high/2026-07-25_013512	2026-07-25	20000	14.94	23.71	28.37	18120			642436.00
+03_13B_Jackal	lio_row_halves	block_029	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_064416	2026-08-09	1999	11.73	20.13	24.85	1240	7.55	22.47	83944.00
+03_13B_Jackal	lio_row_halves	block_029	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_110425	2026-08-09	1999	11.73	20.14	24.94	1240	7.59	22.54	85771.00
+03_13B_Jackal	lio_row_halves	block_030	splat_runs_E/E_block_030/high/2026-07-25_024414	2026-07-25	20000	7.98	23.51	27.20	19680	9.03	19.82	786799.00
+03_13B_Jackal	lio_row_halves	block_030	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_064633	2026-08-09	1999	10.34	18.56	21.53	1240	9.17	19.90	85534.00
+03_13B_Jackal	lio_row_halves	block_030	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_110642	2026-08-09	1999	10.33	18.52	21.60	1240	9.17	19.88	85192.00
+03_13B_Jackal	lio_row_halves	block_031	splat_runs_E/E_block_031/high/2026-07-25_035452	2026-07-25	20000	12.19	22.96	27.09	5070	7.36	17.41	827403.00
+03_13B_Jackal	lio_row_halves	block_031	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_064854	2026-08-09	1999	7.92	15.14	22.59	530	10.90	15.36	89535.00
+03_13B_Jackal	lio_row_halves	block_031	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_110903	2026-08-09	1999	7.92	15.13	22.59	530	10.89	15.31	92254.00
+03_13B_Jackal	lio_row_halves	block_032	splat_runs_E/E_block_032/high/2026-07-25_050723	2026-07-25	20000	10.43	22.72	28.41	17760	7.58	23.36	620691.00
+03_13B_Jackal	lio_row_halves	block_032	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_065114	2026-08-09	1999	9.83	21.58	22.17	1870	10.38	21.90	46432.00
+03_13B_Jackal	lio_row_halves	block_032	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_111124	2026-08-09	1999	9.87	22.39	22.39	1990	10.39	21.95	47556.00
+03_13B_Jackal	lio_row_halves	block_033	splat_runs_E/E_block_033/high/2026-07-25_061848	2026-07-25	20000	11.62	25.83	27.61	13890	8.22	25.35	351470.00
+03_13B_Jackal	lio_row_halves	block_033	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_065331	2026-08-09	1999	8.77	14.05	21.97	1770	9.67	19.02	17826.00
+03_13B_Jackal	lio_row_halves	block_033	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_111341	2026-08-09	1999	8.81	17.01	22.41	1770	9.58	18.13	16907.00
+03_13B_Jackal	lio_row_halves	block_034	splat_runs_E/E_block_034/high/2026-07-25_073129	2026-07-25	20000	11.04	25.39	30.31	18820	10.26	22.95	600120.00
+03_13B_Jackal	lio_row_halves	block_034	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_065549	2026-08-09	1999	9.85	20.41	23.65	920	7.47	19.50	94910.00
+03_13B_Jackal	lio_row_halves	block_034	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_111600	2026-08-09	1999	9.83	20.02	24.24	920	7.44	19.04	95129.00
+03_13B_Jackal	lio_row_halves	block_035	splat_runs_E/E_block_035/high/2026-07-25_084306	2026-07-25	20000	11.82	24.64	27.12	5670	10.31	20.41	382365.00
+03_13B_Jackal	lio_row_halves	block_035	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_065813	2026-08-09	1999	8.91	20.15	21.19	1840	9.32	16.68	27591.00
+03_13B_Jackal	lio_row_halves	block_035	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_111822	2026-08-09	1999	9.17	18.84	20.67	1840	9.26	15.76	27675.00
+03_13B_Jackal	lio_row_halves	block_036	splat_runs_E/E_block_036/high/2026-07-25_125930	2026-07-25	20000	9.81	24.77	29.76	19970	8.23	21.28	896148.00
+03_13B_Jackal	lio_row_halves	block_036	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_070032	2026-08-09	1999	10.73	20.57	23.29	1720	7.82	20.75	117449.00
+03_13B_Jackal	lio_row_halves	block_036	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_112042	2026-08-09	1999	10.79	21.13	23.41	1720	7.82	20.85	122035.00
+03_13B_Jackal	lio_row_halves	block_037	splat_runs_E/E_block_037/high/2026-07-25_141621	2026-07-25	20000	10.70	28.34	29.38	19640	9.09	27.73	935465.00
+03_13B_Jackal	lio_row_halves	block_037	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_070253	2026-08-09	1999	12.07	22.52	24.17	530	8.21	19.14	237778.00
+03_13B_Jackal	lio_row_halves	block_037	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_112303	2026-08-09	1999	12.12	22.88	24.20	530	8.23	19.18	235145.00
+03_13B_Jackal	lio_row_halves	block_038	splat_runs_E/E_block_038/high/2026-07-25_154308	2026-07-25	20000	12.30	26.89	32.12	19540	9.34	23.84	973182.00
+03_13B_Jackal	lio_row_halves	block_038	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_070516	2026-08-09	1999	8.74	21.32	23.75	1710	7.44	20.01	433484.00
+03_13B_Jackal	lio_row_halves	block_038	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_112526	2026-08-09	1999	8.62	21.04	23.93	1710	6.99	17.96	436504.00
+03_13B_Jackal	lio_row_halves	block_039	splat_runs_E/E_block_039/high/2026-07-25_170414	2026-07-25	20000	15.17	27.05	29.11	16750	10.10	22.86	1094077.00
+03_13B_Jackal	lio_row_halves	block_039	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_070751	2026-08-09	1999	11.13	16.30	24.38	1570	8.93	21.95	461140.00
+03_13B_Jackal	lio_row_halves	block_039	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_112759	2026-08-09	1999	10.91	16.57	24.10	1570	8.96	21.49	463352.00
+03_13B_Jackal	lio_row_halves	block_040	splat_runs_E/E_block_040/high/2026-07-25_183100	2026-07-25	20000	14.09	27.72	30.06	19600	7.86	20.95	1092197.00
+03_13B_Jackal	lio_row_halves	block_040	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_071024	2026-08-09	1999	10.35	23.00	23.98	1460	7.81	20.92	384950.00
+03_13B_Jackal	lio_row_halves	block_040	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_113033	2026-08-09	1999	10.30	22.92	23.80	1380	7.91	21.27	387176.00
+03_13B_Jackal	lio_row_halves	block_041	splat_runs_E/E_block_041/high/2026-07-25_195252	2026-07-25	20000	11.19	25.78	31.31	19200	11.00	25.02	856575.00
+03_13B_Jackal	lio_row_halves	block_041	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_071257	2026-08-09	1999	10.18	21.16	23.52	1270	8.76	20.28	354703.00
+03_13B_Jackal	lio_row_halves	block_041	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_113305	2026-08-09	1999	10.18	21.29	23.39	1450	8.85	20.30	351936.00
+03_13B_Jackal	lio_row_halves	block_042	splat_runs_E/E_block_042/high/2026-07-25_215024	2026-07-25	0							
+03_13B_Jackal	lio_row_halves	block_042	splat_runs_E/E_block_042/high/2026-07-26_181924	2026-07-26	20000	13.15	25.33	29.40	17800	11.29	23.76	1173648.00
+03_13B_Jackal	lio_row_halves	block_042	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_071526	2026-08-09	1999	12.91	23.24	26.41	1000	8.39	22.78	587949.00
+03_13B_Jackal	lio_row_halves	block_042	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_113533	2026-08-09	1999	12.82	23.04	26.58	1000	8.41	23.20	585429.00
+03_13B_Jackal	lio_row_halves	block_043	splat_runs_E/E_block_043/high/2026-07-26_192440	2026-07-26	20000	15.07	20.98	29.29	19070	7.95	21.22	903577.00
+03_13B_Jackal	lio_row_halves	block_043	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_071815	2026-08-09	1999	10.10	19.20	23.94	1410	8.37	21.91	464644.00
+03_13B_Jackal	lio_row_halves	block_043	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_113822	2026-08-09	1999	10.59	18.97	24.04	1750	8.36	21.94	453376.00
+03_13B_Jackal	lio_row_halves	block_044	splat_runs_E/E_block_044/high/2026-07-26_203410	2026-07-26	20000	14.42	28.92	29.37	16280	7.76	26.05	895324.00
+03_13B_Jackal	lio_row_halves	block_044	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_072051	2026-08-09	1999	9.63	19.34	24.58	1600	7.67	22.20	359324.00
+03_13B_Jackal	lio_row_halves	block_044	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_114053	2026-08-09	1999	9.72	19.46	24.08	1600	7.69	22.20	352376.00
+03_13B_Jackal	lio_row_halves	block_045	splat_runs_E/E_block_045/high/2026-07-26_213824	2026-07-26	20000	13.73	26.63	29.59	19840	8.70	27.07	802089.00
+03_13B_Jackal	lio_row_halves	block_045	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_072321	2026-08-09	1999	11.52	22.27	23.53	1200	7.80	20.71	360978.00
+03_13B_Jackal	lio_row_halves	block_045	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_114325	2026-08-09	1999	11.63	22.72	23.76	1200	7.88	20.57	358500.00
+03_13B_Jackal	lio_row_halves	block_046	splat_runs_E/E_block_046/high/2026-07-26_224636	2026-07-26	20000	14.66	26.11	29.92	18490	10.13	22.09	882735.00
+03_13B_Jackal	lio_row_halves	block_046	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_072550	2026-08-09	1999	11.68	23.30	24.09	530	7.53	20.07	411596.00
+03_13B_Jackal	lio_row_halves	block_046	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_114556	2026-08-09	1999	11.39	22.35	24.09	530	7.54	20.03	411529.00
+03_13B_Jackal	lio_row_halves	block_047	splat_runs_E/E_block_047/high/2026-07-26_235033	2026-07-27	20000	16.00	28.58	28.98	2000	11.58	21.54	870057.00
+03_13B_Jackal	lio_row_halves	block_047	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_072820	2026-08-09	1999	10.68	18.41	23.50	1890	8.39	19.93	383309.00
+03_13B_Jackal	lio_row_halves	block_047	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_114829	2026-08-09	1999	10.49	18.35	24.25	1890	8.44	20.31	390918.00
+03_13B_Jackal	lio_row_halves	block_048	splat_runs_E/E_block_048/high/2026-07-27_005813	2026-07-27	20000	15.54	26.18	28.92	19100	8.53	24.02	993746.00
+03_13B_Jackal	lio_row_halves	block_048	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_073054	2026-08-09	1999	10.59	19.52	23.80	780	7.12	22.67	399335.00
+03_13B_Jackal	lio_row_halves	block_048	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_115101	2026-08-09	1999	11.08	20.20	23.39	780	7.12	22.78	397618.00
+03_13B_Jackal	lio_row_halves	block_049	splat_runs_E/E_block_049/high/2026-07-27_020442	2026-07-27	20000	14.41	24.59	29.72	18090	9.46	23.49	853875.00
+03_13B_Jackal	lio_row_halves	block_049	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_073330	2026-08-09	1999	9.67	24.07	24.07	1990	10.81	21.85	368071.00
+03_13B_Jackal	lio_row_halves	block_049	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_115335	2026-08-09	1999	9.64	23.54	24.11	1710	10.62	22.54	350220.00
+03_13B_Jackal	lio_row_halves	block_050	splat_runs_E/E_block_050/high/2026-07-27_030826	2026-07-27	20000	13.36	25.73	29.60	2810	9.80	23.49	864033.00
+03_13B_Jackal	lio_row_halves	block_050	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_073602	2026-08-09	1999	8.56	23.19	24.62	540	7.13	19.00	421585.00
+03_13B_Jackal	lio_row_halves	block_050	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_115605	2026-08-09	1999	8.61	23.66	24.63	540	7.11	19.23	419381.00
+03_13B_Jackal	lio_row_halves	block_051	splat_runs_E/E_block_051/high/2026-07-27_041324	2026-07-27	20000	16.46	24.02	29.59	18390	7.62	17.98	826237.00
+03_13B_Jackal	lio_row_halves	block_051	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_073834	2026-08-09	1999	8.91	22.66	24.49	1720	7.80	20.69	437316.00
+03_13B_Jackal	lio_row_halves	block_051	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_115836	2026-08-09	1999	8.87	22.71	24.78	1720	7.82	21.09	436286.00
+03_13B_Jackal	lio_row_halves	block_052	splat_runs_E/E_block_052/high/2026-07-27_052223	2026-07-27	20000	16.64	22.68	29.95	2300			644100.00
+03_13B_Jackal	lio_row_halves	block_052	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_074103	2026-08-09	1999	12.44	26.83	28.09	1980	9.24	18.40	100041.00
+03_13B_Jackal	lio_row_halves	block_052	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_120105	2026-08-09	1999	12.43	26.50	26.50	1990	9.07	17.06	101544.00
+03_13B_Jackal	lio_row_halves	block_053	splat_runs_E/E_block_053/high/2026-07-27_061635	2026-07-27	20000	15.96	24.82	26.27	2980			1258663.00
+03_13B_Jackal	lio_row_halves	block_053	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_074306	2026-08-09	1999	9.42	12.88	19.26	1790	9.24	18.60	29738.00
+03_13B_Jackal	lio_row_halves	block_053	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_120308	2026-08-09	1999	9.42	12.88	19.26	1790	9.24	18.60	29738.00
+03_13B_Jackal	lio_row_halves	block_054	splat_runs_E/E_block_054/high/2026-07-27_071445	2026-07-27	20000	16.82	26.03	28.53	19150	11.30	22.33	891629.00
+03_13B_Jackal	lio_row_halves	block_054	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_074507	2026-08-09	1999	10.53	19.53	24.49	590	8.72	20.85	460591.00
+03_13B_Jackal	lio_row_halves	block_054	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_120508	2026-08-09	1999	10.52	18.71	24.49	590	8.74	20.99	456296.00
+03_13B_Jackal	lio_row_halves	block_055	splat_runs_E/E_block_055/high/2026-07-27_082125	2026-07-27	20000	13.74	24.93	28.50	19930	8.66	23.81	860722.00
+03_13B_Jackal	lio_row_halves	block_055	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_074744	2026-08-09	1999	9.32	20.78	23.24	1870	7.21	17.37	383312.00
+03_13B_Jackal	lio_row_halves	block_055	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_120744	2026-08-09	1999	9.19	20.26	23.30	1870	7.32	18.08	380947.00
+03_13B_Jackal	lio_row_halves	block_056	splat_runs_E/E_block_056/high/2026-07-27_092414	2026-07-27	20000	13.56	22.52	30.53	19620	10.02	24.76	832812.00
+03_13B_Jackal	lio_row_halves	block_056	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_075013	2026-08-09	1999	10.57	19.04	24.00	1570	7.69	19.45	433629.00
+03_13B_Jackal	lio_row_halves	block_056	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_121013	2026-08-09	1999	10.58	19.01	23.04	910	7.80	19.35	434653.00
+03_13B_Jackal	lio_row_halves	block_057	splat_runs_E/E_block_057/high/2026-07-27_102825	2026-07-27	20000	13.41	25.03	28.61	19580	10.19	21.57	861457.00
+03_13B_Jackal	lio_row_halves	block_057	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_075243	2026-08-09	1999	9.43	18.52	23.15	1320	7.46	19.25	434920.00
+03_13B_Jackal	lio_row_halves	block_057	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_121245	2026-08-09	1999	9.77	19.63	23.49	1460	7.54	19.16	435067.00
+03_13B_Jackal	lio_row_halves	block_058	splat_runs_E/E_block_058/high/2026-07-27_113542	2026-07-27	16356	12.61	26.43	28.62	15730	8.41	22.99	1075305.00
+03_13B_Jackal	lio_row_halves	block_058	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_075516	2026-08-09	1999	11.25	23.92	27.04	590	9.12	20.36	562278.00
+03_13B_Jackal	lio_row_halves	block_058	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_121515	2026-08-09	1999	11.23	23.68	27.03	590	9.13	20.92	554434.00
+03_13B_Jackal	lio_row_halves	block_059	splat_runs_E/E_block_059/high/2026-07-26_023536	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_059	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_075804	2026-08-09	1999	9.27	20.68	24.50	1350	9.47	20.95	327377.00
+03_13B_Jackal	lio_row_halves	block_059	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_121803	2026-08-09	1999	9.48	21.85	24.56	1350	9.48	20.82	324331.00
+03_13B_Jackal	lio_row_halves	block_060	splat_runs_E/E_block_060/high/2026-07-26_025424	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_060	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_080033	2026-08-09	1999	9.99	19.14	23.27	1090	7.13	20.33	446134.00
+03_13B_Jackal	lio_row_halves	block_060	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_122032	2026-08-09	1999	9.69	19.64	23.06	920	7.22	20.18	443562.00
+03_13B_Jackal	lio_row_halves	block_061	splat_runs_E/E_block_061/high/2026-07-26_031208	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_061	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_080310	2026-08-09	1999	8.70	18.68	24.56	800	8.67	19.03	446064.00
+03_13B_Jackal	lio_row_halves	block_061	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_122302	2026-08-09	1999	7.89	18.85	24.79	800	8.74	18.79	451451.00
+03_13B_Jackal	lio_row_halves	block_062	splat_runs_E/E_block_062/high/2026-07-26_033225	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_062	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_080548	2026-08-09	1999	11.89	20.82	23.70	450	10.56	21.90	440310.00
+03_13B_Jackal	lio_row_halves	block_062	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_122537	2026-08-09	1999	12.01	21.38	23.70	450	10.53	22.03	450861.00
+03_13B_Jackal	lio_row_halves	block_063	splat_runs_E/E_block_063/high/2026-07-26_035113	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_063	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_122812	2026-08-09	1999	10.38	19.22	23.89	1710	7.58	21.03	406989.00
+03_13B_Jackal	lio_row_halves	block_064	splat_runs_E/E_block_064/high/2026-07-26_040920	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_064	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_123047	2026-08-09	1999	8.38	21.59	24.52	1690	8.67	20.56	399119.00
+03_13B_Jackal	lio_row_halves	block_065	splat_runs_E/E_block_065/high/2026-07-26_042749	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_065	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_123314	2026-08-09	1999	10.25	21.66	25.64	1950	8.67	22.85	384602.00
+03_13B_Jackal	lio_row_halves	block_066	splat_runs_E/E_block_066/high/2026-07-26_044559	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_066	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_123548	2026-08-09	1999	9.39	23.77	25.98	1300	9.27	20.95	397425.00
+03_13B_Jackal	lio_row_halves	block_067	splat_runs_E/E_block_067/high/2026-07-26_050430	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_067	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_123821	2026-08-09	1999	12.23	19.67	24.02	1410	7.87	21.60	384003.00
+03_13B_Jackal	lio_row_halves	block_068	splat_runs_E/E_block_068/high/2026-07-26_052209	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_068	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_124052	2026-08-09	1999	9.34	24.89	26.08	1870	7.50	22.28	61395.00
+03_13B_Jackal	lio_row_halves	block_069	splat_runs_E/E_block_069/high/2026-07-26_053440	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_069	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_124253	2026-08-09	1999	9.49	25.98	26.50	1870	7.98	22.98	57936.00
+03_13B_Jackal	lio_row_halves	block_070	splat_runs_E/E_block_070/high/2026-07-26_054801	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_070	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_124455	2026-08-09	1999	9.99	20.18	23.41	990	9.66	21.34	379553.00
+03_13B_Jackal	lio_row_halves	block_071	splat_runs_E/E_block_071/high/2026-07-26_060554	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_071	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_124724	2026-08-09	1999	6.61	19.80	23.39	990	9.60	20.09	421231.00
+03_13B_Jackal	lio_row_halves	block_072	splat_runs_E/E_block_072/high/2026-07-26_062342	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_072	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_124952	2026-08-09	1999	9.03	25.08	25.08	1990	9.05	20.97	329306.00
+03_13B_Jackal	lio_row_halves	block_073	splat_runs_E/E_block_073/high/2026-07-26_064117	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_073	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_125223	2026-08-09	1999	9.88	22.06	23.59	910	9.48	20.59	354235.00
+03_13B_Jackal	lio_row_halves	block_074	splat_runs_E/E_block_074/high/2026-07-26_065842	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_074	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_125451	2026-08-09	1999	10.77	23.71	24.14	1720	6.99	19.00	396548.00
+03_13B_Jackal	lio_row_halves	block_075	splat_runs_E/E_block_075/high/2026-07-26_071649	2026-07-26	0							
+03_13B_Jackal	lio_row_halves	block_075	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_125722	2026-08-09	1999	10.21	22.71	23.30	1190	7.29	19.21	400736.00
+03_13B_Jackal	lio_row_halves	block_076	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_125954	2026-08-09	1999	8.93	21.00	22.95	1200	9.35	22.77	92266.00
+03_13B_Jackal	lio_row_halves	block_077	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_130214	2026-08-09	1999	10.45	20.95	26.15	1600	8.62	20.52	95639.00
+03_13B_Jackal	lio_row_halves	block_078	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_130434	2026-08-09	1999	9.45	21.91	24.89	530	7.53	22.34	95832.00
+04_13D_Jackal	lio_row6F	block_000	splat_runs_F/F_block_000/high/2026-07-24_140222	2026-07-24	20000	18.99				11.83		1447350.00
+04_13D_Jackal	lio_row6F	block_000	splat_runs_S6/fruit_s6_b000/high/2026-08-02_104444	2026-08-02	20001	14.93	20.72	23.23	18870	10.55	14.61	749570.00
+04_13D_Jackal	lio_row6F	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-05_214141	2026-08-05	15001	14.25	19.39	22.94	14680	10.28	15.79	851782.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_F/F_block_001/high/2026-07-24_151734	2026-07-24	20000	17.25				16.93		1661887.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_F2/F2_block_001/high/2026-07-24_193610	2026-07-24	20000	17.55				17.19		1621817.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_F3/F3_block_001/high/2026-07-25_112525	2026-07-25	20000	17.28				17.43		1786808.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_F4/F4_block_001/high/2026-07-25_214338	2026-07-25	0							
+04_13D_Jackal	lio_row6F	block_001	splat_runs_F4/F4_block_001/high/2026-07-26_165917	2026-07-26	20000	17.58				17.40		1641072.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_FRUIT/fruit_probe/high/2026-07-30_065017	2026-07-30	8000							
+04_13D_Jackal	lio_row6F	block_001	splat_runs_FRUIT/fruit_probe/high/2026-07-30_100251	2026-07-30	0							
+04_13D_Jackal	lio_row6F	block_001	splat_runs_S1/fruit_scratch/high/2026-07-30_110957	2026-07-30	20001	18.44				13.27		721655.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_S2/fruit_protected/high/2026-07-30_151613	2026-07-30	20001	18.19				14.34		731310.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_S3/fruit_s3a/high/2026-07-31_102824	2026-07-31	8638	15.36				14.13		769835.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_S3/fruit_s3a/high/2026-07-31_111109	2026-07-31	20001	17.61				15.12		645230.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_S4/fruit_s4_strict/high/2026-07-31_180452	2026-07-31	20001	17.68				12.16		638811.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_S5/fruit_s5_idmap/high/2026-08-01_185620	2026-08-01	20001	18.74				11.83		694241.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_S6/fruit_s6_b001/high/2026-08-02_081908	2026-08-02	20001	13.16	17.32	24.48	16430	7.19	8.81	589499.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_S7/fruit_s7_b001/high/2026-08-02_191231	2026-08-02	20001	12.87	16.61	24.54	17820	7.12	8.65	567380.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_S8/fruit_s8_densify/high/2026-08-03_065554	2026-08-03	20001	12.97	16.79	24.14	17810	7.18	8.81	622533.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_S9/fruit_s9_cascade/high/2026-08-03_095722	2026-08-03	20001	14.97	17.84	23.16	12240	7.14	8.72	571904.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_S9B/fruit_s9b_window/high/2026-08-03_154815	2026-08-03	20001	14.69	17.07	22.75	12240	7.47	9.49	572815.00
+04_13D_Jackal	lio_row6F	block_001	splat_runs_STAGE1/stage1_bg00/high/2026-08-05_225548	2026-08-06	15001	13.81	19.43	23.70	14680	10.27	11.54	680823.00
+04_13D_Jackal	lio_row6F	block_001_L049	splat_runs_BASE/citrus_b001_L049/high/2026-08-03_233638	2026-08-04	15001	24.85				10.60		884078.00
+04_13D_Jackal	lio_row6F	block_001_L073	splat_runs_BASE/citrus_b001_L073/high/2026-08-03_222333	2026-08-03	15001	22.76				9.95		1033825.00
+04_13D_Jackal	lio_row6F	block_001_L095	splat_runs_BASE/base_L095/high/2026-08-03_193647	2026-08-03	7210	11.56				15.29		308931.00
+04_13D_Jackal	lio_row6F	block_001_L095	splat_runs_BASE/citrus_b001_L095/high/2026-08-03_195510	2026-08-03	760	14.58				13.98		42684.00
+04_13D_Jackal	lio_row6F	block_001_L095	splat_runs_BASE/citrus_b001_L095/high/2026-08-03_195642	2026-08-03	15001	21.03				8.05		1151715.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_BASE/base_L095_sky/high/2026-08-04_080303	2026-08-04	15001	18.81	21.36	22.48	13950	7.45	8.22	774780.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_BASE/base_L095_sky_depth/high/2026-08-04_092615	2026-08-04	15001	16.09	17.81	21.58	14210	7.89	8.87	612230.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_BASE/base_L095_sky_zbuf/high/2026-08-04_174806	2026-08-04	15001	11.25	11.83	18.54	13680	8.27	9.43	657802.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_BASE/base_L095_sky_zbuf/high/2026-08-04_191419	2026-08-04	15001	17.34	19.62	22.58	14360	7.08	7.78	567123.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_BASELINE/baseline_plus_high/high/2026-08-05_121128	2026-08-05	0							
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_BASELINE/baseline_plus_high/high/2026-08-05_121703	2026-08-05	15001	16.52	19.35	21.65	14360	7.66	8.49	954870.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_FEATFIX/high_w03/high/2026-08-05_174824	2026-08-05	15001	17.13	20.31	21.34	14210	7.58	8.42	934904.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_FEATFIX/high_warmup6k/high/2026-08-05_162322	2026-08-05	15001	14.27	18.15	22.51	14660	8.05	9.01	657452.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_FEATFIX/stage2_censusinit_fw2/high/2026-08-07_113721	2026-08-07	20001	16.28	16.99	22.93	16490	9.29	10.84	656772.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_FEATFIX/stage2_censusinit_v1k/high/2026-08-07_094802	2026-08-07	20001	16.28	16.99	22.93	16490	9.29	10.84	656772.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_FEATFIX/stage2_frozen/high/2026-08-05_154423	2026-08-05	20001	16.28	16.99	22.93	16490	9.29	10.84	656772.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_FEATFIX/stage2_frozen_v2/high/2026-08-05_194610	2026-08-05	20001	16.88	19.70	24.83	19810	8.21	8.81	656772.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_FEATFIX/stage2_frozen_v3/high/2026-08-05_210220	2026-08-05	20001	16.28	16.99	22.93	16490	9.29	10.84	656772.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_FEATFIX/stage2_fruitchild/high/2026-08-06_130757	2026-08-06	20001	16.28	16.99	22.93	16490	9.29	10.84	656772.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_FEATFIX/stage2_fruitchild_v1k/high/2026-08-06_191110	2026-08-06	20001	16.28	16.99	22.93	16490	9.29	10.84	656772.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_REGRESSION/probe_20260812_2011/high/2026-08-12_201155	2026-08-12	999	9.54	9.60	18.99	590	10.74	15.09	247045.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_REGRESSION/probe_20260812_2018/high/2026-08-12_201907	2026-08-12	2000	9.38	12.28	18.99	590	10.36	12.94	476200.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_REGRESSION/probe_20260812_2047/high/2026-08-12_204722	2026-08-12	2000	9.58	12.62	19.00	590	10.82	13.35	477012.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_TREELOD/treelod_bg00/high/2026-08-05_055203	2026-08-05	15001	18.46	20.76	21.90	14070	7.95	8.92	656772.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_TREELOD/treelod_bg01/high/2026-08-05_043749	2026-08-05	15001	18.10	20.93	22.35	14940	7.43	8.19	746714.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_TREELOD/treelod_bg03/high/2026-08-04_204657	2026-08-04	999	10.97	10.96	18.85	590	10.89	15.46	264365.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_TREELOD/treelod_bg03/high/2026-08-04_205125	2026-08-04	999	11.07	11.05	18.85	590	10.89	15.46	266063.00
+04_13D_Jackal	lio_row6F	block_001_L095_sky	splat_runs_TREELOD/treelod_bg03/high/2026-08-05_032322	2026-08-05	15001	18.66	21.14	22.42	13950	7.12	7.81	784707.00
+04_13D_Jackal	lio_row6F	block_001_L124	splat_runs_BASE/citrus_b001_L124/high/2026-08-03_211004	2026-08-03	15001	19.86				10.56		1279880.00
+04_13D_Jackal	lio_row6F	block_002	splat_runs_F/F_block_002/high/2026-07-24_163708	2026-07-24	20000	17.95				11.48		1403235.00
+04_13D_Jackal	lio_row6F	block_002	splat_runs_S6/fruit_s6_b002/high/2026-08-02_130541	2026-08-02	20001	14.80	17.16	24.31	19840	9.73	12.14	843380.00
+04_13D_Jackal	lio_row6F	block_002	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_000942	2026-08-06	15001	15.49	17.28	24.44	12550	12.48	16.31	940764.00
+04_13D_Jackal	lio_row6F	block_003	splat_runs_F/F_block_003/high/2026-07-24_175351	2026-07-24	20000	19.90				19.71		1565715.00
+04_13D_Jackal	lio_row6F	block_003	splat_runs_FEATFIX/stage2_bootstrap/high/2026-08-07_143222	2026-08-07	1							
+04_13D_Jackal	lio_row6F	block_003	splat_runs_FEATFIX/stage2_censusinit_fw2/high/2026-08-07_144006	2026-08-07	20001	17.80	18.10	24.31	15270	9.38	10.88	783858.00
+04_13D_Jackal	lio_row6F	block_003	splat_runs_FEATFIX/stage2_censusinit_fw2_m60/high/2026-08-08_200413	2026-08-08	20001	17.80	18.10	24.31	15270	9.38	10.88	783858.00
+04_13D_Jackal	lio_row6F	block_003	splat_runs_S6/fruit_s6_b003/high/2026-08-02_152733	2026-08-02	20001	14.24	17.30	24.47	15860	7.75	9.89	675742.00
+04_13D_Jackal	lio_row6F	block_003	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_012359	2026-08-06	15001	17.68	19.99	23.35	14110	8.29	9.49	783858.00
+04_13D_Jackal	lio_row6F	block_004	splat_runs_F/F_block_004/high/2026-07-24_191119	2026-07-24	6547	19.98				16.58		1181296.00
+04_13D_Jackal	lio_row6F	block_004	splat_runs_S6/fruit_s6_b004/high/2026-08-02_175028	2026-08-02	5540	13.73	16.57	24.33	4700	9.80	14.30	803553.00
+04_13D_Jackal	lio_row6F	block_004	splat_runs_S7/fruit_s7_b004/high/2026-08-02_213428	2026-08-02	20001	14.37	18.97	27.10	17390	10.54	12.15	631966.00
+04_13D_Jackal	lio_row6F	block_004	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_023853	2026-08-06	15001	16.01	22.52	25.39	12060	10.19	11.70	850796.00
+04_13D_Jackal	lio_row6F	block_005	splat_runs_S7/fruit_s7_b005/high/2026-08-02_235910	2026-08-03	20001	16.34				9.57		780582.00
+04_13D_Jackal	lio_row6F	block_005	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_035310	2026-08-06	15001	18.87				9.21		1159246.00
+05_13D_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_000	splat_runs_high_full_v16_unified/high_full_v16_unified/high/2026-08-13_162932	2026-08-13	999	11.96	18.16	22.96	530	12.46	16.46	659452.00
+05_13D_Jackal	lio_arc_size15.0_ov0.10_kf20cm	block_000	splat_runs_high_full_v16_unified/high_full_v16_unified/high/2026-08-13_165014	2026-08-13	999	11.58	18.60	22.80	530	12.45	16.42	993462.00
+05_13D_Jackal	lio_row	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_050728	2026-08-06	10228	16.28				17.55		287323.00
+05_13D_Jackal	lio_row	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_064231	2026-08-06	15001	13.76				12.70		297943.00
+05_13D_Jackal	lio_row	block_001	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_052003	2026-08-06	499	12.99						50000.00
+05_13D_Jackal	lio_row	block_001	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_075420	2026-08-06	15001	20.90				10.13		468891.00
+05_13D_Jackal	lio_row	block_002	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_052154	2026-08-06	499	11.85						50000.00
+05_13D_Jackal	lio_row	block_002	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_090607	2026-08-06	15001	15.36				12.52		386156.00
+05_13D_Jackal	lio_row	block_003	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_052343	2026-08-06	499	14.82						50000.00
+05_13D_Jackal	lio_row	block_003	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_101744	2026-08-06	7593	13.50				9.30		373838.00
+05_13D_Jackal	lio_row	block_003	splat_runs_STAGE1/stage1_bg00/high/2026-08-07_072333	2026-08-07	15001	21.79				12.38		454969.00
+05_13D_Jackal	lio_row	block_004	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_052529	2026-08-06	499	10.73						50000.00
+05_13D_Jackal	lio_row	block_004	splat_runs_STAGE1/stage1_bg00/high/2026-08-07_083537	2026-08-07	14191	24.80				15.04		362487.00
+05_13D_Jackal	lio_row	block_004	splat_runs_STAGE1/stage1_bg00/high/2026-08-07_152215	2026-08-07	15001	14.37				11.77		373318.00
+05_13D_Jackal	lio_row	block_005	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_052717	2026-08-06	499	14.12						622978.00
+05_13D_Jackal	lio_row	block_005	splat_runs_STAGE1/stage1_bg00/high/2026-08-07_163415	2026-08-07	15001	24.80				8.57		1723086.00
+05_13D_Jackal	lio_row	block_005_L100	splat_runs_BASE/citrus05_b005_L100/high/2026-08-04_053947	2026-08-04	14599	21.43				12.64		1465534.00
+05_13D_Jackal	lio_row	block_005_L100	splat_runs_BASE/citrus05_b005_L100/high/2026-08-04_070223	2026-08-04	12997	21.53				11.08		1478337.00
+05_13D_Jackal	lio_row	block_006	splat_runs_STAGE1/stage1_bg00/high/2026-08-06_052936	2026-08-06	499	10.71						50000.00
+05_13D_Jackal	lio_row	block_006	splat_runs_STAGE1/stage1_bg00/high/2026-08-07_174923	2026-08-07	15001	19.97				13.08		474830.00
+05_13D_Jackal	lio_row	block_007	splat_runs_STAGE1/stage1_bg00/high/2026-08-07_190113	2026-08-07	15001	12.95				15.20		403000.00
+05_13D_Jackal	lio_row	block_008	splat_runs_STAGE1/stage1_bg00/high/2026-08-07_201301	2026-08-07	7744	18.21				13.36		404574.00
+05_13D_Jackal	lio_row	block_008	splat_runs_STAGE1/stage1_bg00/high/2026-08-08_204402	2026-08-08	15001	16.31				13.08		441749.00
+05_13D_Jackal	lio_row	block_009	splat_runs_STAGE1/stage1_bg00/high/2026-08-08_215552	2026-08-08	15001	15.01				13.44		319217.00
+05_13D_Jackal	lio_row	block_010	splat_runs_STAGE1/stage1_bg00/high/2026-08-08_230737	2026-08-09	15001	12.00				14.01		404178.00
+05_13D_Jackal	lio_row	block_011	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_001921	2026-08-09	15001	18.69				11.83		345628.00
+05_13D_Jackal	lio_row	block_012	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_013104	2026-08-09	15001	13.82				13.23		396579.00
+05_13D_Jackal	lio_row	block_013	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_024252	2026-08-09	15001	14.68				16.02		415667.00
+05_13D_Jackal	lio_row	block_014	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_035437	2026-08-09	499	17.34						50000.00
+05_13D_Jackal	lio_row	block_014	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_081513	2026-08-09	499	17.35						50000.00
+05_13D_Jackal	lio_row	block_014	splat_runs_STAGE1/stage1_bg00/high/2026-08-09_164924	2026-08-09	499	17.35						50000.00
+05_13D_Jackal	lio_row100	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-13_181011	2026-08-13	1999	12.52	15.07	19.24	1410	10.06	12.23	505771.00
+05_13D_Jackal	lio_row100	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-13_184619	2026-08-13	6665	12.61	18.79	21.12	6240	10.99	13.88	877646.00
+klapmuts	lio_row	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-07_203900	2026-08-07	3499	15.68				15.30		201900.00
+klapmuts	lio_row	block_000	splat_runs_STAGE1/stage1_bg00/high/2026-08-07_211824	2026-08-07	15001	17.54				13.71		298694.00
+klapmuts	lio_row	block_001	splat_runs_STAGE1/stage1_bg00/high/2026-08-07_204354	2026-08-07	999	15.81				17.28		58120.00
+klapmuts	lio_row	block_001	splat_runs_STAGE1/stage1_bg00/high/2026-08-07_223017	2026-08-07	15001	18.15				15.99		320375.00
+klapmuts	lio_row	block_002	splat_runs_STAGE1/stage1_bg00/high/2026-08-07_234236	2026-08-08	15001	13.23				13.55		366793.00
+klapmuts	lio_row	block_003	splat_runs_STAGE1/stage1_bg00/high/2026-08-08_005440	2026-08-08	15001	14.09				11.75		244765.00
+klapmuts	lio_row	block_004	splat_runs_P1/pilot_004/high/2026-07-31_080402	2026-07-31	20000	18.18				9.92		741692.00
+klapmuts	lio_row	block_004	splat_runs_STAGE1/stage1_bg00/high/2026-08-08_020637	2026-08-08	15001	16.48	19.85	20.41	14270	10.26	14.16	553557.00
+klapmuts	lio_row	block_004	splat_runs_SW/sw_35k/high/2026-08-01_150606	2026-08-01	32441	12.35				8.65		597244.00
+klapmuts	lio_row	block_004	splat_runs_SW/sw_base/high/2026-08-01_062307	2026-08-01	20000	11.21				7.89		585163.00
+klapmuts	lio_row	block_004	splat_runs_SW/sw_nodepth/high/2026-08-01_104030	2026-08-01	20000	9.42				8.03		957537.00
+klapmuts	lio_row	block_004	splat_runs_SW/sw_nosky/high/2026-08-01_083143	2026-08-01	20000	13.76				12.55		557273.00
+klapmuts	lio_row	block_004_L050	splat_runs_BASE/klap_b004_L050/high/2026-08-04_042552	2026-08-04	15001	19.71				16.42		429613.00
+klapmuts	lio_row	block_004_L075	splat_runs_BASE/klap_b004_L075/high/2026-08-04_031413	2026-08-04	15001	19.59				13.07		484436.00
+klapmuts	lio_row	block_004_L097	splat_runs_SW/sw_L097/high/2026-08-01_125144	2026-08-01	20000	15.91				8.31		458719.00
+klapmuts	lio_row	block_004_L100	splat_runs_BASE/klap_b004_L100/high/2026-08-04_004930	2026-08-04	15001	20.36				16.85		491743.00
+klapmuts	lio_row	block_004_L195	splat_runs_BASE/klap_b004_L195/high/2026-08-04_020111	2026-08-04	15001	19.53				14.87		896431.00
+klapmuts	lio_row	block_005	splat_runs_STAGE1/stage1_bg00/high/2026-08-08_031929	2026-08-08	15001	15.02				12.87		285720.00
+klapmuts	lio_row	block_006	splat_runs_STAGE1/stage1_bg00/high/2026-08-08_043127	2026-08-08	15001	15.18				15.92		252005.00
+klapmuts	lio_row	block_007	splat_runs_STAGE1/stage1_bg00/high/2026-08-08_054322	2026-08-08	15001	16.56				12.08		383106.00
+klapmuts	lio_row	block_008	splat_runs_STAGE1/stage1_bg00/high/2026-08-08_065539	2026-08-08	15001	15.72				12.51		341037.00
+klapmuts	lio_row	block_009	splat_runs_STAGE1/stage1_bg00/high/2026-08-08_080744	2026-08-08	7466	13.64				14.22		242207.00

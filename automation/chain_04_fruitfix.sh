@@ -45,7 +45,7 @@ for N in 001 000 002 003 004 005; do
       echo "SKIP-TRAIN block_$N: keeps ${KEPT:-0} <= floor $FLOOR (fruit level not viable)"
       exit 0
     fi
-    [ -f "$BD/init_da3.ply" ] || \
+    [ -f "$BD/init_lidar.ply" ] || [ -f "$BD/init_da3.ply" ] || \
       pixi run --manifest-path $IS_PIXI python $SCR/lidar_init_per_block.py \
         --block-dir $BD --root $D --pad-x 7.5 --cross-row-median
     [ -f "$BD/lidar_depth_morph.npz" ] || \

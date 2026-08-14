@@ -69,7 +69,7 @@ for f in d["frames"]:
 print(f"[{B.name}] mask_path on {n}/{len(d['frames'])}")
 PY
     echo "--- D: lidar init + depth ---"
-    [ -f "$BD/init_da3.ply" ] || \
+    [ -f "$BD/init_lidar.ply" ] || [ -f "$BD/init_da3.ply" ] || \
       pixi run --manifest-path $IS_PIXI python $SCR/lidar_init_per_block.py \
         --block-dir $BD --root $D --pad-x 7.5 --cross-row-median
     [ -f "$BD/lidar_depth_morph.npz" ] || \

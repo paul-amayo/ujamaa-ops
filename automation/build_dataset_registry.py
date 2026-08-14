@@ -128,18 +128,24 @@ def main():
         if root.is_dir():
             rows.append(survey_row(root, ledger_obs))
     if KLAP.is_dir():
-        k = survey_row(KLAP, ledger_obs)
-        k["id"] = "klapmuts (Apr-2026 ZED)"
-        rows.append(k)
-        dec = KLAP / "dec_2025_a300"
-        if dec.is_dir():
+        apr = KLAP / "apr_2026_zed"
+        if apr.is_dir():
+            k = survey_row(apr, ledger_obs)
+            k["id"] = "klapmuts apr_2026 (ZED)"
+            rows.append(k)
+        for sub, label in [("dec_2025_a300", "klapmuts dec_2025 pilot (A300 mcap)"),
+                           ("dec_2025_ten_rows", "klapmuts dec_2025 ten-rows (A300 mcap)")]:
+            dec = KLAP / sub
+            if not dec.is_dir():
+                continue
             mono_dir = dec / "monolithics"
-            d = {"id": "klapmuts dec_2025 (A300 mcap)", "path": str(dec),
+            d = {"id": label, "path": str(dec),
                  "size": du_gb(dec),
                  "combined_bag": any(dec.glob("*.mcap")) or (dec / "combined.bag").exists(),
                  "monolithics": "+".join(n for ok, n in
                                          [(any(mono_dir.glob("image_left*.monolithic")), "img"),
-                                          ((mono_dir / "laser.monolithic").exists(), "lidar")]
+                                          ((mono_dir / "laser.monolithic").exists(), "lidar"),
+                                          ((mono_dir / "gnsscorr_raw.npz").exists(), "gnss")]
                                          if ok) or False,
                  "lio": (mono_dir / "transform_lio.monolithic").exists()
                         or (mono_dir / "zed_transform.monolithic").exists(),
