@@ -129,7 +129,7 @@ def main():
             rows.append(survey_row(root, ledger_obs))
     if KLAP.is_dir():
         k = survey_row(KLAP, ledger_obs)
-        k["id"] = "klapmuts (Jan ZED)"
+        k["id"] = "klapmuts (Apr-2026 ZED)"
         rows.append(k)
         dec = KLAP / "dec_2025_a300"
         if dec.is_dir():
