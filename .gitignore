@@ -1,11 +1,12 @@
 # top-level repo tracks ONLY: automation/, lab_notebook/, CLAUDE.md,
-# UJAMAA_ROADMAP.md, DATASETS.md, this file. Everything else (sub-repos,
-# clones, envs, build trees) is ignored wholesale.
+# UJAMAA_ROADMAP.md, DATASETS.md, PROD.md, this file. Everything else
+# (sub-repos, clones, envs, build trees) is ignored wholesale.
 /*
 !/.gitignore
 !/CLAUDE.md
 !/UJAMAA_ROADMAP.md
 !/DATASETS.md
+!/PROD.md
 !/automation/
 !/lab_notebook/
 lab_notebook/dashboard.html
