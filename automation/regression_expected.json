@@ -2,9 +2,9 @@
  "block": "/home/paperspace/data/citrus_all/04_13D_Jackal/blocks_ns/lio_row6F/block_001_L095_sky",
  "iters": 2000,
  "metric": "Train Metrics Dict/psnr_fg",
- "train_psnr_fg": 12.58,
+ "train_psnr_fg": 12.78,
  "gauss": 476200.0,
- "tol_psnr_db": 0.75,
+ "tol_psnr_db": 1.5,
  "tol_gauss_frac": 0.1,
- "note": "recentred 2026-08-14 on 3 probe samples (12.28/12.62/12.85, spread 0.57); tol widened 0.5->0.75 per the calibration-day note before suspecting code"
+ "note": "2026-08-14: null measured on 3 frozen-code probes (12.23/13.07/12.73) + 4 prior = 7 samples, mean 12.78, sigma ~0.47 \u2014 single-probe tol = 3 sigma; the 12.28->13.70 drift was sampling noise, not code. For release gates use median-of-3 probes."
 }
