@@ -1,0 +1,234 @@
+#!/bin/bash
+# WEEK PROD QUEUE 2026-08-14 (Paul: "a week queue through the gpu, get all
+# the datasets to prod" + "do a block of a survey after each other, so we
+# get survey coverage and big surveys dont hold us back").
+#
+# ROUND-ROBIN GPU rotation, one canonical block per survey per slot:
+#   05_13D -> 04_13D -> klap apr -> 01_13B -> 03_13B -> 02_13B ->
+#   klap ten-rows (gated on pose verification) -> (repeat)
+# Per slot: unified pipeline (two-stage census-init, idempotent) -> machine
+# verdict (containment -> verdicts_censusinit_fw2.json) -> export+register
+# (splats.json). Every stage cache-hits, so kill/resume is free.
+# CPU SIDECAR: klapmuts ten-rows ingest (kf cut + PNG extract) — the site
+# is under active collection; ingest keeps pace with arriving data.
+#
+# Front-loaded phase A (cheap prod-cell flips): ledger refresh, bateleur
+# topdown exports, 05 verdict backfill (b004 + measured b001), export smoke
+# test, 05 block_000 raw-LIO quarantine (refined-consistent retrain).
+#
+# Markers: A*-DONE/FAIL, SLOT <survey> <block> OK/FAIL, ROUND-n-DONE,
+# WEEK-DONE. Log: /home/paperspace/logs/week_prod_20260814.log
+# Kill: ps -eo pid,pgid,args | grep "[w]eek_prod_queue" -> kill -TERM -<PGID>
+# No rm, no git push, nothing destructive (quarantines are mv).
+set -u
+LOGS=/home/paperspace/logs
+SRC=/home/paperspace/code/aru_sil_core/src/scripts
+AUTO=/home/paperspace/code/automation
+NS_PIXI=/home/paperspace/code/nerf_new/pixi.toml
+STATE=$LOGS/week_prod_20260814_state
+CITRUS=/home/paperspace/data/citrus_all
+KLAP=/home/paperspace/data/klapmuts
+END_TS=$(( $(date +%s) + 6*86400 + 12*3600 ))   # 6.5 days
+mkdir -p "$STATE"
+mark() { echo "[$(date +%m-%d\ %H:%M:%S)] $1"; }
+exec >> "$LOGS/week_prod_20260814.log" 2>&1
+mark "WEEK QUEUE START (budget to $(date -d @$END_TS '+%m-%d %H:%M'))"
+
+# refuse to double-book the GPU
+if ps -eo args | grep -qE "[n]s-train"; then
+    mark "ABORT: ns-train already running — GPU busy"; exit 1
+fi
+
+# ---------------- rotation config ------------------------------------------
+# All splat-eligible surveys rotate — including 02 (Paul 2026-08-14: no
+# reason to exclude the control epoch; stage2 is contingent on its painted
+# semantics, compile fails loudly if absent) and ten-rows (GATED: joins the
+# moment $STATE/tenrows_poses.ok appears — the INS odom is FP-ENU0-frame,
+# not camera-frame LIO; wiring transform_lio without verifying the frame
+# convention would train plausible-looking garbage, so that verification is
+# daylight work, and the gate lets it join mid-week without a restart).
+SURVEYS=(05_13D_Jackal 04_13D_Jackal apr_2026_zed 01_13B_Jackal 03_13B_Jackal 02_13B_Jackal dec_2025_ten_rows)
+root_of()  { case "$1" in
+    apr_2026_zed) echo "$KLAP/apr_2026_zed";;
+    dec_2025_ten_rows) echo "$KLAP/dec_2025_ten_rows";;
+    *) echo "$CITRUS/$1";; esac; }
+cfg_of()   { case "$1" in 04_13D_Jackal) echo lio_row6F;; *) echo lio_row100;; esac; }
+maxblk_of() { case "$1" in 04_13D_Jackal) echo 10;; 05_13D_Jackal) echo 43;; *) echo "";; esac; }
+emb_of() {  # newest canon-preference embedder ckpt for the verdict step
+    local tag
+    case "$1" in
+        01_13B_Jackal) tag=01_13B;; 02_13B_Jackal) tag=02_13B;; 03_13B_Jackal) tag=03_13B;;
+        04_13D_Jackal) echo /home/paperspace/data/high/nerf/04_13D_v3vocab1k/ckpts/model_best.pth; return;;
+        05_13D_Jackal) tag=05_13D;; apr_2026_zed|dec_2025_ten_rows) tag=klap;;
+    esac
+    ls -t /home/paperspace/data/high/nerf/${tag}*/ckpts/model_best.pth 2>/dev/null | head -1
+}
+hier_of() { ls -t "$(root_of "$1")"/scene_graph*/marker_hierarchy*.json 2>/dev/null | head -1; }
+
+# ---------------- phase A: cheap flips -------------------------------------
+if [ ! -f "$STATE/A.done" ]; then
+    mark "PHASE A start"
+    bash "$AUTO/regression_harness.sh" --cpu-only > "$LOGS/week_A0_harness.log" 2>&1 \
+        && mark "A0-DONE tier-A harness" || mark "A0-FAIL tier-A harness (continuing)"
+
+    python3 /home/paperspace/code/ujamaa/sankofa/build_ledger_v2.py \
+        > "$LOGS/week_A1_ledger.log" 2>&1 \
+        && mark "A1-DONE ledger_v2 refresh" || mark "A1-FAIL ledger_v2 refresh"
+    grep -q "05_13D" "$LOGS/week_A1_ledger.log" 2>/dev/null \
+        && mark "A1-NOTE 05 present in ledger output" \
+        || mark "A1-NOTE 05 NOT in ledger (builder needs assoc_04_05 support — daylight code work)"
+
+    for S in 01_13B_Jackal 02_13B_Jackal 03_13B_Jackal 04_13D_Jackal 05_13D_Jackal; do
+        cd /home/paperspace/code/nerf_new && pixi run python \
+            /home/paperspace/code/ujamaa/project/export_bateleur_topdown.py "$CITRUS/$S" \
+            > "$LOGS/week_A2_topdown_$S.log" 2>&1 \
+            && mark "A2-DONE topdown $S" || mark "A2-FAIL topdown $S"
+    done
+    cd /home/paperspace/code/nerf_new && pixi run python \
+        /home/paperspace/code/ujamaa/project/export_bateleur_topdown.py "$KLAP/apr_2026_zed" \
+        > "$LOGS/week_A2_topdown_apr.log" 2>&1 \
+        && mark "A2-DONE topdown apr_2026_zed" || mark "A2-FAIL topdown apr_2026_zed"
+
+    # 05 verdict backfill: block_004 (sweep gap) + block_001 (measured
+    # replaces the injected session record)
+    CFG05=$CITRUS/05_13D_Jackal/blocks_ns/lio_row100
+    for B in block_004 block_001; do
+        CENSUS_EMBEDDER=$(emb_of 05_13D_Jackal) CENSUS_HIERARCHY=$(hier_of 05_13D_Jackal) \
+        bash "$AUTO/verdict_block.sh" "$CFG05/$B" "$CFG05/$B/supervision/trees_only" \
+            && mark "A3-DONE verdict $B" || mark "A3-FAIL verdict $B"
+    done
+
+    # export smoke test on a finished block; gates rotation exports
+    bash "$AUTO/export_register_stage2.sh" "$CFG05/block_001" \
+        && { touch "$STATE/export.ok"; mark "A4-DONE export smoke (rotation exports ENABLED)"; } \
+        || mark "A4-FAIL export smoke (rotation continues TRAINING-ONLY; fix export in daylight)"
+
+    # 05 block_000: quarantine raw-LIO-stage1 runs -> refined-consistent retrain
+    B0=$CFG05/block_000
+    Q=$CITRUS/05_13D_Jackal/experimental/blocks_ns/lio_row100_block000_rawlio_runs
+    if [ -d "$B0/splat_runs_STAGE1" ] && [ ! -d "$Q" ]; then
+        mkdir -p "$Q"
+        for D in splat_runs_STAGE1 splat_runs_FEATFIX stage2_init stage2_init_census; do
+            [ -e "$B0/$D" ] && mv "$B0/$D" "$Q/$D"
+        done
+        # refined poses already swapped in transforms.json (mixed-pose was
+        # stage1-vs-stage2); keep them and retrain both stages consistent
+        mark "A5-DONE block_000 raw-LIO runs quarantined -> $Q"
+    else
+        mark "A5-SKIP block_000 quarantine ($([ -d "$Q" ] && echo already done || echo no stage1 present))"
+    fi
+    touch "$STATE/A.done"
+    mark "PHASE A complete"
+fi
+
+# ---------------- apr one-time prep: kf-named mask rebuild -----------------
+apr_prep() {
+    local R; R=$(root_of apr_2026_zed)
+    [ -f "$STATE/apr_masks.done" ] && return 0
+    mark "APR-PREP: quarantining stream-named masks (kf-named rebuild follows in pipeline [4b])"
+    mkdir -p "$R/experimental/masks_streamnamed_pre_kf_rebuild"
+    local D
+    for D in sky_masks fg_masks; do
+        if [ -L "$R/$D" ]; then
+            local TGT; TGT=$(readlink -f "$R/$D")
+            mv "$TGT" "$R/experimental/masks_streamnamed_pre_kf_rebuild/$D" 2>/dev/null
+            unlink "$R/$D" 2>/dev/null
+        elif [ -d "$R/$D" ]; then
+            mv "$R/$D" "$R/experimental/masks_streamnamed_pre_kf_rebuild/$D"
+        fi
+    done
+    touch "$STATE/apr_masks.done"
+    mark "APR-PREP done (pipeline will rebuild kf-named masks, ~40 GPU-min)"
+}
+
+# ---------------- CPU sidecar: klap ten-rows ingest ------------------------
+(
+    exec >> "$LOGS/week_cpu_sidecar.log" 2>&1
+    mark "CPU sidecar start (ten-rows ingest)"
+    TR=$KLAP/dec_2025_ten_rows/monolithics
+    if [ ! -f "$TR/image_left_kf20cm.monolithic" ]; then
+        /home/paperspace/code/aru_sil_core/build/bin/dump_keyframe_image_monolithic \
+            --IMAGE_MONO "$TR/image_left.monolithic" \
+            --TRANSFORM_MONO "$TR/zed_transform.monolithic" \
+            --MIN_DIST 0.20 \
+            --OUT_MONO "$TR/image_left_kf20cm.monolithic" \
+            && mark "CPU-DONE ten-rows kf cut" || mark "CPU-FAIL ten-rows kf cut"
+    else
+        mark "CPU-SKIP ten-rows kf mono exists"
+    fi
+    if [ -f "$TR/image_left_kf20cm.monolithic" ] \
+       && [ ! -d "$KLAP/dec_2025_ten_rows/kf_images" ]; then
+        cd /home/paperspace/code/nerf_new && pixi run python "$SRC/extract_kf_pngs.py" \
+            --data-dir "$KLAP/dec_2025_ten_rows" \
+            --mono "$TR/image_left_kf20cm.monolithic" \
+            && mark "CPU-DONE ten-rows kf_images ($(ls "$KLAP/dec_2025_ten_rows/kf_images" 2>/dev/null | wc -l) PNGs)" \
+            || mark "CPU-FAIL ten-rows extract"
+    fi
+    mark "CPU sidecar done (gps.monolithic write + hierarchy = daylight code work)"
+) &
+
+# ---------------- rotation --------------------------------------------------
+ROUND=$(cat "$STATE/round" 2>/dev/null || echo 0)
+while [ "$(date +%s)" -lt "$END_TS" ]; do
+    ROUND=$((ROUND + 1)); echo "$ROUND" > "$STATE/round"
+    ACTIVE=0
+    for S in "${SURVEYS[@]}"; do
+        [ "$(date +%s)" -ge "$END_TS" ] && break
+        R=$(root_of "$S"); C=$(cfg_of "$S")
+        NEXT=$(cat "$STATE/$S.next" 2>/dev/null || echo 0)
+        MAX=$(maxblk_of "$S")
+        # discovered max once the partition exists
+        if [ -z "$MAX" ] && [ -d "$R/blocks_ns/$C" ]; then
+            MAX=$(( $(ls -d "$R/blocks_ns/$C"/block_* 2>/dev/null \
+                     | grep -cE "block_[0-9]+$") - 1 ))
+            [ "$MAX" -ge 0 ] && echo "$MAX" > "$STATE/$S.max"
+        fi
+        [ -z "$MAX" ] && MAX=$(cat "$STATE/$S.max" 2>/dev/null || echo "")
+        if [ -n "$MAX" ] && [ "$NEXT" -gt "$MAX" ]; then
+            continue   # survey complete
+        fi
+        # ten-rows waits for the pose-domain verification marker
+        if [ "$S" = "dec_2025_ten_rows" ] && [ ! -f "$STATE/tenrows_poses.ok" ]; then
+            [ -f "$STATE/tenrows.waitnote" ] || {
+                mark "TENROWS-WAIT: pose-domain unverified (INS is ENU0-frame);"\
+" touch $STATE/tenrows_poses.ok after daylight wiring to admit it"
+                touch "$STATE/tenrows.waitnote"; }
+            continue
+        fi
+        ACTIVE=1
+        [ "$S" = "apr_2026_zed" ] && apr_prep
+        BID=$(printf '%03d' "$NEXT")
+        mark "SLOT $S block_$BID (round $ROUND)"
+        case "$R" in
+            "$CITRUS"/*)
+                bash "$SRC/run_unified_pipeline.sh" "$S" "$NEXT" "$NEXT" \
+                    > "$LOGS/week_${S}_b${BID}.log" 2>&1 ;;
+            *)
+                SURVEY_ROOT=$R bash "$SRC/run_unified_pipeline.sh" "$S" "$NEXT" "$NEXT" \
+                    > "$LOGS/week_${S}_b${BID}.log" 2>&1 ;;
+        esac
+        BD=$R/blocks_ns/$C/block_$BID
+        if ls "$BD"/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/nerfstudio_models*/*.ckpt >/dev/null 2>&1; then
+            SUP=$BD/supervision/trees_only
+            [ -f "$SUP/manifest.json" ] || SUP=$BD/supervision/strict_tree_v2
+            EMB=$(emb_of "$S"); HJ=$(hier_of "$S")
+            if [ -n "$EMB" ] && [ -n "$HJ" ] && [ -f "$SUP/manifest.json" ]; then
+                CENSUS_EMBEDDER=$EMB CENSUS_HIERARCHY=$HJ \
+                    bash "$AUTO/verdict_block.sh" "$BD" "$SUP" \
+                    || mark "SLOT $S block_$BID verdict FAIL"
+            fi
+            [ -f "$STATE/export.ok" ] && { bash "$AUTO/export_register_stage2.sh" "$BD" \
+                || mark "SLOT $S block_$BID export FAIL"; }
+            mark "SLOT $S block_$BID OK"
+        else
+            mark "SLOT $S block_$BID FAIL (no stage2 ckpt — see week_${S}_b${BID}.log)"
+        fi
+        echo $((NEXT + 1)) > "$STATE/$S.next"
+    done
+    python3 "$AUTO/build_prod_manifests.py" --migrate > "$LOGS/week_prodmd_r${ROUND}.log" 2>&1 \
+        && mark "ROUND-$ROUND-DONE (PROD.md regenerated)" \
+        || mark "ROUND-$ROUND-DONE (prod regen FAILED)"
+    [ "$ACTIVE" = "0" ] && { mark "ALL SURVEYS COMPLETE"; break; }
+done
+python3 "$AUTO/build_prod_manifests.py" --migrate > "$LOGS/week_prodmd_final.log" 2>&1
+mark "WEEK-DONE (rounds: $ROUND)"

@@ -40,6 +40,9 @@ def main():
     ap.add_argument("--config-label", default="stage2_censusinit_fw2")
     ap.add_argument("--inject", default="{}",
                     help="json literal: extra block records from session runs")
+    ap.add_argument("--merge", action="store_true",
+                    help="update blocks into an existing --out file instead of "
+                         "overwriting it (per-block append from the week queue)")
     args = ap.parse_args()
 
     blocks = {}
@@ -58,6 +61,11 @@ def main():
 
     for b, rec_ in json.loads(args.inject).items():
         blocks[b] = rec_
+
+    if args.merge and Path(args.out).exists():
+        prev = json.load(open(args.out)).get("blocks", {})
+        prev.update(blocks)
+        blocks = prev
 
     out = {
         "config": args.config_label,

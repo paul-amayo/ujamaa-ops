@@ -76,9 +76,9 @@ EMB_TAG = {"01_13B_Jackal": "01_13B", "02_13B_Jackal": "02_13B",
            "05_13D_Jackal": "05_13D", "apr_2026_zed": "klap"}
 
 NOTES = {
-    "02_13B_Jackal": "ledger control epoch — registry+ledger by design, no splat planned",
+    "02_13B_Jackal": "ledger control epoch — joined the splat rotation 2026-08-14 (stage2 contingent on painted semantics)",
     "dec_2025_a300": "pilot mcap — georef + SAM3 ledger seed",
-    "dec_2025_ten_rows": "Dec ten-rows — ingest chain in progress (task #10)",
+    "dec_2025_ten_rows": "Dec ten-rows — in week rotation, gated on pose-domain verification (INS=ENU0 frame)",
 }
 
 # ---------- classification (top-level survey entries) -----------------------
@@ -365,15 +365,18 @@ def survey_manifest(root: Path, obs: dict):
          check("registry", gids is not None,
                ("global_ids.json" + (" + Q4 reproduction verified" if q4.exists() else ""))
                if gids else "no sam3_v2/global_ids.json")]
-    td_ok, td_ev = False, "no bateleur topdown export"
-    if TOPDOWN.exists():
+    td_ok, td_ev = False, (f"no bateleur topdown export — run "
+                           f"export_bateleur_topdown.py {root}")
+    per_survey = TOPDOWN.parent / f"bateleur_orchard_topdown_{sid}.json"
+    slot = per_survey if per_survey.exists() else TOPDOWN
+    if slot.exists():
         try:
-            td = json.load(open(TOPDOWN))
+            td = json.load(open(slot))
             td_sid = td.get("survey") or td.get("source_survey")
             td_ok = td_sid == sid
-            td_ev = ("topdown export current for this survey" if td_ok else
-                     f"topdown export slot holds {td_sid or 'unlabelled survey'} "
-                     f"(single-slot; re-export with export_bateleur_topdown.py {root})")
+            td_ev = (f"topdown export {slot.name}" if td_ok else
+                     f"topdown slot holds {td_sid or 'unlabelled survey'} "
+                     f"— run export_bateleur_topdown.py {root}")
         except Exception:
             td_ev = "topdown export unreadable"
     c.append(check("topdown", td_ok, td_ev))
