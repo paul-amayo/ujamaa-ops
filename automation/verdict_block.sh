@@ -19,7 +19,10 @@ cd /home/paperspace/code/nerf_new
 CFG=$(ls -t "$BD"/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/config.yml 2>/dev/null | head -1)
 [ -n "$CFG" ] || { echo "VERDICT-SKIP $N: no stage2 config"; exit 0; }
 
-# top-tree supervision frame (most >=200 non-void semantic px)
+# top-coverage supervision frame — TREE MODE: most painted (non-void) px.
+# The censusinit step-5 criterion (ids >= 200) is fruit-only and returns
+# EMPTY on fruitless surveys (05, klap) — the known fruit-centric-battery
+# gap. Any painted id counts here.
 FR=$(pixi run python - "$SUP" << 'PY'
 import sys
 import numpy as np
@@ -28,7 +31,7 @@ from pathlib import Path
 best = (0, None)
 for f in sorted(Path(sys.argv[1]).glob('kf_*.png')):
     a = np.array(Image.open(f), np.uint16)
-    n = int(((a >= 200) & (a != 65535)).sum())
+    n = int((a != 65535).sum())
     if n > best[0]:
         best = (n, f.name)
 print(best[1] or '')

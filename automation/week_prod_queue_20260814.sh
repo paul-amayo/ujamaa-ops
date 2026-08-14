@@ -195,10 +195,15 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
                 touch "$STATE/tenrows.waitnote"; }
             continue
         fi
+        # parked surveys sit out until the marker is cleared (systemic fail)
+        if [ -f "$STATE/$S.parked" ]; then
+            continue
+        fi
         ACTIVE=1
         [ "$S" = "apr_2026_zed" ] && apr_prep
         BID=$(printf '%03d' "$NEXT")
         mark "SLOT $S block_$BID (round $ROUND)"
+        T0=$(date +%s)
         case "$R" in
             "$CITRUS"/*)
                 bash "$SRC/run_unified_pipeline.sh" "$S" "$NEXT" "$NEXT" \
@@ -207,6 +212,7 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
                 SURVEY_ROOT=$R bash "$SRC/run_unified_pipeline.sh" "$S" "$NEXT" "$NEXT" \
                     > "$LOGS/week_${S}_b${BID}.log" 2>&1 ;;
         esac
+        ELAPSED=$(( $(date +%s) - T0 ))
         BD=$R/blocks_ns/$C/block_$BID
         if ls "$BD"/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/nerfstudio_models*/*.ckpt >/dev/null 2>&1; then
             SUP=$BD/supervision/trees_only
@@ -220,15 +226,26 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
             [ -f "$STATE/export.ok" ] && { bash "$AUTO/export_register_stage2.sh" "$BD" \
                 || mark "SLOT $S block_$BID export FAIL"; }
             mark "SLOT $S block_$BID OK"
+            echo $((NEXT + 1)) > "$STATE/$S.next"   # advance ONLY on OK
+        elif [ "$ELAPSED" -lt 60 ]; then
+            # instant exit = systemic (gate/env), not a training failure:
+            # park the survey so the rotation cannot runaway-burn its blocks
+            touch "$STATE/$S.parked"
+            mark "SLOT $S block_$BID FAIL in ${ELAPSED}s — SURVEY PARKED"\
+" (fix + rm $STATE/$S.parked to resume; see week_${S}_b${BID}.log)"
         else
-            mark "SLOT $S block_$BID FAIL (no stage2 ckpt — see week_${S}_b${BID}.log)"
+            # real training failure: park too — the SAME block would retry
+            # every round otherwise; daylight triage clears it
+            touch "$STATE/$S.parked"
+            mark "SLOT $S block_$BID FAIL after ${ELAPSED}s — SURVEY PARKED"\
+" (see week_${S}_b${BID}.log; rm $STATE/$S.parked to resume)"
         fi
-        echo $((NEXT + 1)) > "$STATE/$S.next"
     done
     python3 "$AUTO/build_prod_manifests.py" --migrate > "$LOGS/week_prodmd_r${ROUND}.log" 2>&1 \
         && mark "ROUND-$ROUND-DONE (PROD.md regenerated)" \
         || mark "ROUND-$ROUND-DONE (prod regen FAILED)"
-    [ "$ACTIVE" = "0" ] && { mark "ALL SURVEYS COMPLETE"; break; }
+    [ "$ACTIVE" = "0" ] && { mark "NO ACTIVE SURVEYS (parked:"\
+" $(ls "$STATE"/*.parked 2>/dev/null | wc -l) — clear .parked markers to resume)"; break; }
 done
 python3 "$AUTO/build_prod_manifests.py" --migrate > "$LOGS/week_prodmd_final.log" 2>&1
 mark "WEEK-DONE (rounds: $ROUND)"

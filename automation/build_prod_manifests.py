@@ -209,6 +209,9 @@ def mv_shim(src: Path, dst: Path, plan, execute, shim=True):
     if src.is_symlink():  # old flat-prod link or naming shim: re-link, no move
         src.unlink()
         return
+    if dst.exists():  # never overwrite (e.g. a recreated _logs after cleanup)
+        print(f"  WARN dst exists, left {src} in place: {dst}")
+        return
     shutil.move(str(src), str(dst))
     if shim:
         src.symlink_to(os.path.relpath(dst, src.parent))
