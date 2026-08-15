@@ -179,8 +179,10 @@ for S in "${SURVEYS[@]}"; do
             while IFS= read -r MK; do
                 [ "$(stat -Lc %Y "$MK")" -lt "$(stat -Lc %Y "$MONO")" ] || continue
                 mv "$MK" "${MK}.stale_$(date +%s)" && NMV=$((NMV+1))
-            done < <(find "$R/blocks_ns/$CFG" \
+            done < <(find "$R/blocks_ns/$CFG/" \
                        \( -name ".palette_v2" -o -name "manifest.json" \) 2>/dev/null)
+            # trailing slash: blocks_ns/<cfg> is a shim into prod and bare
+            # find does not follow a symlink argument (found 0 on 03)
             mark "R5a-FIXED $S monolithics + hierarchy regenerated; $NMV stale supervision markers invalidated"
         else
             mark "R5a-STALE-UNFIXED $S regeneration failed (see preprod_${S}_markers_regen.log / _hierarchy_regen.log)"
@@ -197,7 +199,12 @@ for S in "${SURVEYS[@]}"; do
         if [ "$NB" -gt 0 ]; then
             BEST_RATIO=-1; BEST_LINE=""
             for BD in "${BLOCKS[0]}" "${BLOCKS[$((NB/2))]}"; do
-                if [ ! -f "$BD/semantic_v2_B/.palette_v2" ]; then
+                # repaint when the marker is ABSENT or OLDER than the mono
+                # (-ot, deref via readlink -f: a marker from a previous mono
+                # era must not satisfy the gate — post-regen probes once
+                # silently reused stale paint and measured the old era)
+                if [ ! -f "$BD/semantic_v2_B/.palette_v2" ] \
+                   || [ "$BD/semantic_v2_B/.palette_v2" -ot "$(readlink -f "$MONO")" ]; then
                     (cd /home/paperspace/code/nerf_new && pixi run --manifest-path "$NS_PIXI" \
                         python "$SRC/save_filtered_semantic_pngs.py" \
                         --block-dir "$BD" \
