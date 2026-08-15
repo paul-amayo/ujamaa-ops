@@ -183,19 +183,6 @@ for S in "${SURVEYS[@]}"; do
                        \( -name ".palette_v2" -o -name "manifest.json" \) 2>/dev/null)
             # trailing slash: blocks_ns/<cfg> is a shim into prod and bare
             # find does not follow a symlink argument (found 0 on 03)
-            # stage2 outputs derived from the OLD mono are superseded too:
-            # quarantine them so the block's slot retrains on the fresh
-            # chain (cache-miss = automatic requeue, no report-and-linger)
-            NS2=0
-            while IFS= read -r S2; do
-                CK=$(ls -t "$S2"/high/*/nerfstudio_models*/*.ckpt 2>/dev/null | head -1)
-                [ -n "$CK" ] && [ "$CK" -ot "$(readlink -f "$MONO")" ] || continue
-                QD=$R/experimental/stale_stage2_pre_regen_$(date +%Y%m%d)
-                mkdir -p "$QD/$(basename "$(dirname "$S2")")"
-                mv "$S2" "$QD/$(basename "$(dirname "$S2")")/" && NS2=$((NS2+1))
-            done < <(find "$R/blocks_ns/$CFG/" -maxdepth 3 -type d \
-                       -name "stage2_censusinit_fw2" 2>/dev/null)
-            [ "$NS2" -gt 0 ] && mark "R5a-REQUEUED $S $NS2 stage2 runs superseded by the fresh chain -> experimental (slots retrain)"
             mark "R5a-FIXED $S monolithics + hierarchy regenerated; $NMV stale supervision markers invalidated"
         else
             mark "R5a-STALE-UNFIXED $S regeneration failed (see preprod_${S}_markers_regen.log / _hierarchy_regen.log)"
@@ -203,6 +190,26 @@ for S in "${SURVEYS[@]}"; do
         fi
     elif [ "$HAS_REG" = "1" ]; then
         mark "R5a-PASS $S semantic monolithics postdate the registry"
+    fi
+
+    # ---- R5b stage2 supersession (ALWAYS checked, not only on regen):
+    # stage2 outputs older than the semantic mono are derived from a
+    # previous supervision era — quarantine so the block's slot retrains
+    # on the fresh chain (cache-miss = automatic requeue, never lingers)
+    if [ "$HAS_REG" = "1" ] && [ -e "$MONO" ]; then
+        NS2=0
+        while IFS= read -r S2; do
+            CK=$(ls -t "$S2"/high/*/nerfstudio_models*/*.ckpt 2>/dev/null | head -1)
+            [ -n "$CK" ] && [ "$CK" -ot "$(readlink -f "$MONO")" ] || continue
+            QD=$R/experimental/stale_stage2_pre_regen_$(date +%Y%m%d)
+            mkdir -p "$QD/$(basename "$(dirname "$S2")")"
+            mv "$S2" "$QD/$(basename "$(dirname "$S2")")/" && NS2=$((NS2+1))
+        done < <(find "$R/blocks_ns/$CFG/" -maxdepth 3 -type d \
+                   -name "stage2_censusinit_fw2" 2>/dev/null)
+        if [ "$NS2" -gt 0 ]; then
+            mark "R5b-REQUEUED $S $NS2 stage2 runs superseded by a fresher semantic mono -> experimental (slots retrain)"
+            echo 0 > "$STATE/$S.next"
+        fi
     fi
 
     # ---- R5 supervision viability (probe first + middle canonical block) --------
