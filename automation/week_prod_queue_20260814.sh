@@ -63,7 +63,7 @@ root_of()  { case "$1" in
     dec_2025_ten_rows) echo "$KLAP/dec_2025_ten_rows";;
     *) echo "$CITRUS/$1";; esac; }
 cfg_of()   { echo lio_row100; }   # pipeline ALWAYS partitions to its own CONFIG name — 04 lio_row6F assumption parked a finished 3h run
-maxblk_of() { case "$1" in 04_13D_Jackal) echo 10;; 05_13D_Jackal) echo 43;; *) echo "";; esac; }
+maxblk_of() { echo ""; }   # block counts derive from the partition ON DISK, never hardcoded — the 6F-era "11" would have silently stopped 04 at block_010 of 48
 emb_of() {  # newest canon-preference embedder ckpt for the verdict step
     local tag
     case "$1" in
