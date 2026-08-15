@@ -187,11 +187,17 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
         R=$(root_of "$S"); C=$(cfg_of "$S")
         NEXT=$(cat "$STATE/$S.next" 2>/dev/null || echo 0)
         MAX=$(maxblk_of "$S")
-        # discovered max once the partition exists
+        # discovered max once the partition exists. ZERO blocks = the
+        # partition hasn't been built yet (R7 pre-places an EMPTY cfg in
+        # prod) — that is UNKNOWN, not complete: the first slot creates the
+        # blocks. count-1=-1 once silently skipped 01 and ten-rows forever.
         if [ -z "$MAX" ] && [ -d "$R/blocks_ns/$C" ]; then
-            MAX=$(( $(ls -d "$R/blocks_ns/$C"/block_* 2>/dev/null \
-                     | grep -cE "block_[0-9]+$") - 1 ))
-            [ "$MAX" -ge 0 ] && echo "$MAX" > "$STATE/$S.max"
+            NBLK=$(ls -d "$R/blocks_ns/$C"/block_* 2>/dev/null \
+                     | grep -cE "block_[0-9]+$")
+            if [ "$NBLK" -gt 0 ]; then
+                MAX=$((NBLK - 1))
+                echo "$MAX" > "$STATE/$S.max"
+            fi
         fi
         [ -z "$MAX" ] && MAX=$(cat "$STATE/$S.max" 2>/dev/null || echo "")
         if [ -n "$MAX" ] && [ "$NEXT" -gt "$MAX" ]; then
