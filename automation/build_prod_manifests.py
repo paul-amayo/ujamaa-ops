@@ -130,13 +130,21 @@ def find_hierarchy(root: Path):
         return cands[-1], 0, 0
 
 
+CANON_CFG = "lio_row100"
+
+
 def find_prod_cfg(root: Path):
     """Blessed config = the one with canonical-block stage2 census-init runs.
     THE BAR IS THE RECIPE OF RECORD (two-stage + census init) — Paul
     2026-08-14: "if the prod pipeline is 2 stage with census init, that is
     the bar for prod". Legacy fleets (01 C-config, 03 dedup) do NOT qualify:
     they are re-trainable under the recipe and live in experimental until
-    then. Searches prod/tassili/blocks_ns too so re-runs are stable."""
+    then. Searches prod/tassili/blocks_ns too so re-runs are stable.
+
+    The CANONICAL cfg (lio_row100) pre-placed in prod by the readiness
+    recipe counts as prod even before its first stage2 — it is the
+    realisable asset UNDER CONSTRUCTION (Paul 2026-08-15), and demoting it
+    mid-week would yank the dir out from under the training queue."""
     best = (0, None)
     for base in (root / "blocks_ns", root / "prod/tassili/blocks_ns"):
         if not base.is_dir():
@@ -148,7 +156,10 @@ def find_prod_cfg(root: Path):
                      if canon_block(d.parent.parent.name)})
             if n > best[0]:
                 best = (n, cfg)
-    return best[1].resolve() if best[1] else None
+    if best[1]:
+        return best[1].resolve()
+    standing = root / "prod/tassili/blocks_ns" / CANON_CFG
+    return standing.resolve() if standing.is_dir() else None
 
 
 def stage2_state(cfg: Path):

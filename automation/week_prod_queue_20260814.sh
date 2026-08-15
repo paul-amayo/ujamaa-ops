@@ -39,6 +39,18 @@ if ps -eo args | grep -qE "[n]s-train"; then
     mark "ABORT: ns-train already running — GPU busy"; exit 1
 fi
 
+# ---------------- pre-prod readiness gate ----------------------------------
+# Paul 2026-08-15: all 7 surveys must be TRAIN READY before any training
+# slot; no parking (parking defers the problem at the cost of coverage).
+# The readiness recipe checks + fixes assets (pose aliases, kf extraction,
+# stream-mask quarantine + kf rebuild, paint-density probes) and exits 0
+# only when no RED gates remain.
+bash /home/paperspace/code/automation/preprod_readiness.sh || {
+    mark "HALT: readiness has RED gates (see readiness.json + markers above) — fix and relaunch; NO training started"
+    exit 1
+}
+mark "READINESS GREEN — entering training rotation"
+
 # ---------------- rotation config ------------------------------------------
 # All splat-eligible surveys rotate — including 02 (Paul 2026-08-14: no
 # reason to exclude the control epoch; stage2 is contingent on its painted
@@ -195,10 +207,6 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
                 touch "$STATE/tenrows.waitnote"; }
             continue
         fi
-        # parked surveys sit out until the marker is cleared (systemic fail)
-        if [ -f "$STATE/$S.parked" ]; then
-            continue
-        fi
         ACTIVE=1
         [ "$S" = "apr_2026_zed" ] && apr_prep
         BID=$(printf '%03d' "$NEXT")
@@ -227,18 +235,22 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
                 || mark "SLOT $S block_$BID export FAIL"; }
             mark "SLOT $S block_$BID OK"
             echo $((NEXT + 1)) > "$STATE/$S.next"   # advance ONLY on OK
-        elif [ "$ELAPSED" -lt 60 ]; then
-            # instant exit = systemic (gate/env), not a training failure:
-            # park the survey so the rotation cannot runaway-burn its blocks
-            touch "$STATE/$S.parked"
-            mark "SLOT $S block_$BID FAIL in ${ELAPSED}s — SURVEY PARKED"\
-" (fix + rm $STATE/$S.parked to resume; see week_${S}_b${BID}.log)"
+        elif AUD=$( (cd /home/paperspace/code/nerf_new && pixi run python \
+                "$SRC/audit_paint_density.py" --paint-dir "$BD/semantic_v2_B") 2>/dev/null | tail -1) \
+             && [ -n "$AUD" ] \
+             && [ "$(echo "$AUD" | grep -oaE 'ids=[0-9]+' | cut -d= -f2)" -lt 4 ]; then
+            # data-reality skip (not staleness): this block's paint is below
+            # the census floor (03-entry-block class) — nothing to census
+            # here; record and move on rather than halt
+            mark "SLOT $S block_$BID SUP-SPARSE ($AUD) — advancing without stage2"
+            echo $((NEXT + 1)) > "$STATE/$S.next"
         else
-            # real training failure: park too — the SAME block would retry
-            # every round otherwise; daylight triage clears it
-            touch "$STATE/$S.parked"
-            mark "SLOT $S block_$BID FAIL after ${ELAPSED}s — SURVEY PARKED"\
-" (see week_${S}_b${BID}.log; rm $STATE/$S.parked to resume)"
+            # NO PARKING (Paul 2026-08-15): a slot failure means an asset or
+            # recipe problem — HALT the whole queue loudly so it gets FIXED,
+            # instead of deferring it down the rounds
+            mark "HALT: SLOT $S block_$BID FAIL after ${ELAPSED}s — queue stopped"\
+" (see week_${S}_b${BID}.log; fix, then relaunch — resume is free)"
+            exit 1
         fi
     done
     # round-end backfill: any block with a stage2 ckpt but a missing verdict
