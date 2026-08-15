@@ -66,7 +66,9 @@ fi
 if grep -qaE "TREE" "$TMPLOG"; then
   python3 /home/paperspace/code/automation/distill_containment_verdicts.py \
     --log "$TMPLOG" --out "$OUT_JSON" --merge \
-    && echo "VERDICT-DONE $N -> $OUT_JSON"
+    --block-id "${N#block_}" --frame "$FR" \
+    && echo "VERDICT-DONE $N -> $OUT_JSON" \
+    || echo "VERDICT-PARSE-FAIL $N (TREE lines present but distiller matched none — $TMPLOG)"
 else
   echo "VERDICT-EMPTY $N (no TREE lines after retry — check $TMPLOG)"
 fi

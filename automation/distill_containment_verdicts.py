@@ -31,6 +31,11 @@ from pathlib import Path
 PAT = re.compile(
     r"\[(\d{3}) (kf_\d+\.png)\] (TREE|ROW) \d+\s+\"([a-z]+)\": "
     r"thr [\d.]+ IoU ([\d.]+) prec ([\d.]+) rec ([\d.]+)")
+# containment_eval's RAW stdout has no [NNN frame] prefix (the sweep script
+# added those) — bare lines attach to --block-id/--frame when given
+PAT_BARE = re.compile(
+    r"(TREE|ROW) \d+\s+\"([a-z]+)\": "
+    r"thr [\d.]+ IoU ([\d.]+) prec ([\d.]+) rec ([\d.]+)")
 
 
 def main():
@@ -43,21 +48,38 @@ def main():
     ap.add_argument("--merge", action="store_true",
                     help="update blocks into an existing --out file instead of "
                          "overwriting it (per-block append from the week queue)")
+    ap.add_argument("--block-id", default=None,
+                    help="block id (e.g. 001) for UNPREFIXED containment_eval "
+                         "lines — required to parse raw per-block output")
+    ap.add_argument("--frame", default=None,
+                    help="frame name recorded with --block-id entries")
     args = ap.parse_args()
 
     blocks = {}
     for line in Path(args.log).read_text(errors="replace").splitlines():
         m = PAT.search(line)
-        if not m:
+        if m:
+            b, frame, level, word, iou = m.groups()[:5]
+        elif args.block_id:
+            mb = PAT_BARE.search(line)
+            if not mb:
+                continue
+            level, word, iou = mb.groups()[:3]
+            b, frame = args.block_id, args.frame or "?"
+        else:
             continue
-        b, frame, level, word, iou, prec, rec = m.groups()
         rec_ = blocks.setdefault(b, {"frame": frame, "trees": {}, "rows": {},
-                                     "source": f"sweep log {args.log}"})
+                                     "source": f"distilled from {args.log}"})
         rec_["trees" if level == "TREE" else "rows"][word] = float(iou)
     for b, rec_ in blocks.items():
         vals = list(rec_["trees"].values())
         if vals:
             rec_["tree_iou_min"], rec_["tree_iou_max"] = min(vals), max(vals)
+
+    if not blocks and not json.loads(args.inject):
+        print(f"PARSE-ZERO: no verdict lines matched in {args.log} — refusing "
+              f"to write (pass --block-id for raw containment_eval output)")
+        raise SystemExit(2)
 
     for b, rec_ in json.loads(args.inject).items():
         blocks[b] = rec_
