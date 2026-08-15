@@ -43,7 +43,7 @@ fi
 # Paul 2026-08-15: all 7 surveys must be TRAIN READY before any training
 # slot; no parking (parking defers the problem at the cost of coverage).
 # The readiness recipe checks + fixes assets (pose aliases, kf extraction,
-# stream-mask quarantine + kf rebuild, paint-density probes) and exits 0
+# stream-mask quarantine + kf rebuild, supervision-density probes) and exits 0
 # only when no RED gates remain.
 bash /home/paperspace/code/automation/preprod_readiness.sh || {
     mark "HALT: readiness has RED gates (see readiness.json + markers above) — fix and relaunch; NO training started"
@@ -236,7 +236,7 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
             mark "SLOT $S block_$BID OK"
             echo $((NEXT + 1)) > "$STATE/$S.next"   # advance ONLY on OK
         elif AUD=$( (cd /home/paperspace/code/nerf_new && pixi run python \
-                "$SRC/audit_paint_density.py" --paint-dir "$BD/semantic_v2_B") 2>/dev/null | tail -1) \
+                "$SRC/audit_supervision_density.py" --supervision-dir "$BD/semantic_v2_B") 2>/dev/null | tail -1) \
              && [ -n "$AUD" ] \
              && [ "$(echo "$AUD" | grep -oaE 'ids=[0-9]+' | cut -d= -f2)" -lt 4 ]; then
             # data-reality skip (not staleness): this block's paint is below

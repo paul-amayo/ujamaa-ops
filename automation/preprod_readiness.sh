@@ -16,7 +16,7 @@
 #                rebuild kf-named (GPU ~40 min, build_sky/fg_masks)
 #   R4 registry  global_ids + hierarchy present; absent = BUILDS-IN-SLOT
 #                (pipeline [3][4]) — reported, not fixed here
-#   R5 paint     probe-paint FIRST + MIDDLE canonical block (painter, CPU)
+#   R5 supervision     probe-compile FIRST + MIDDLE canonical block (painter, CPU)
 #                and audit density; floors: >=4 distinct ids AND >=40%
 #                frames painted on at least one probe. Encodes the 03
 #                lesson (3-id / 27%-frames paint starved census-init to
@@ -133,7 +133,7 @@ for S in "${SURVEYS[@]}"; do
         HAS_REG=0
     fi
 
-    # ---- R5 paint viability (probe first + middle canonical block) --------
+    # ---- R5 supervision viability (probe first + middle canonical block) --------
     if [ "$HAS_REG" = "1" ] && [ -d "$R/blocks_ns/$CFG" ]; then
         BLOCKS=($(ls -d "$R/blocks_ns/$CFG"/block_* 2>/dev/null | grep -E "block_[0-9]+$" | sort))
         NB=${#BLOCKS[@]}
@@ -151,7 +151,7 @@ for S in "${SURVEYS[@]}"; do
                         && touch "$BD/semantic_v2_B/.palette_v2"
                 fi
                 READOUT=$(cd /home/paperspace/code/nerf_new && pixi run python \
-                    "$SRC/audit_paint_density.py" --paint-dir "$BD/semantic_v2_B" 2>/dev/null | tail -1)
+                    "$SRC/audit_supervision_density.py" --supervision-dir "$BD/semantic_v2_B" 2>/dev/null | tail -1)
                 mark "R5-PROBE $S $(basename "$BD"): $READOUT"
                 IDS=$(echo "$READOUT" | grep -oaE "ids=[0-9]+" | cut -d= -f2)
                 FRAC=$(echo "$READOUT" | grep -oaE "painted_pct=[0-9]+" | cut -d= -f2)
@@ -159,9 +159,9 @@ for S in "${SURVEYS[@]}"; do
                 [ "${FRAC:-0}" -gt "$BEST_FRAC" ] && BEST_FRAC=$FRAC
             done
             if [ "$BEST_IDS" -ge "$ID_FLOOR" ] && [ "$BEST_FRAC" -ge "$FRAME_FRAC_FLOOR" ]; then
-                mark "R5-PASS $S paint viable (best probe ids=$BEST_IDS painted_pct=$BEST_FRAC)"
+                mark "R5-PASS $S supervision viable (best probe ids=$BEST_IDS painted_pct=$BEST_FRAC)"
             else
-                mark "R5-RED $S paint STARVED (best probe ids=$BEST_IDS painted_pct=$BEST_FRAC; floors $ID_FLOOR/$FRAME_FRAC_FLOOR) — root-cause the survey semantic/filter before training"
+                mark "R5-RED $S supervision STARVED (best probe ids=$BEST_IDS painted_pct=$BEST_FRAC; floors $ID_FLOOR/$FRAME_FRAC_FLOOR) — root-cause the survey semantic/filter before training"
                 RED=$((RED+1))
             fi
         else

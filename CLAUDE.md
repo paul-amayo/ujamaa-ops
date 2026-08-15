@@ -12,6 +12,8 @@ reconstruction + 4D tree monitoring). Paul Amayo, UCT. Goal and milestones live 
 - **Conclusions → memory, records → notebook.** Durable findings get a memory file;
   raw run records stay in the notebook.
 - Metrics via the psnr skill (tensorboard events), not visual inspection, where possible.
+- **Terminology: "supervision", never "paint".** The colour-PNG mechanism is a deprecated
+  bridge (direct mono-id reader is the successor); name things by purpose, not mechanism.
 
 ## Environment facts
 - ns-train / ns-process-data: pixi shell in `nerf_new/` — NOT system python.
