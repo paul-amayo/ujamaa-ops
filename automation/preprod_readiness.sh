@@ -149,6 +149,47 @@ for S in "${SURVEYS[@]}"; do
         HAS_REG=0
     fi
 
+    # ---- R5a semantic-source freshness (Paul: derived artifacts must
+    # POSTDATE their inputs — "if we generate new sam3 masks we have to
+    # generate a new semantic monolithic"). DAG: sam3 registry ->
+    # {markers_v2, instance_labels_v2, filtered_semantic_v2} monolithics ->
+    # hierarchy -> per-block supervision. stat -L ALWAYS (a shim's own
+    # date is migration day and lies). Proven live: 03's mono was
+    # 2026-05-09 vs registry 2026-07-10 -> only 3 ids resolved.
+    MONO=$R/filtered_semantic_v2.monolithic
+    GIDS=$R/sam3_v2/global_ids.json
+    if [ "$HAS_REG" = "1" ] && { [ ! -e "$MONO" ] || \
+         [ "$(stat -Lc %Y "$MONO" 2>/dev/null || echo 0)" -lt "$(stat -Lc %Y "$GIDS")" ]; }; then
+        mark "R5a-STALE $S semantic monolithics predate the registry — regenerating from sam3 assets"
+        if (cd /home/paperspace/code/nerf_new && pixi run --manifest-path "$NS_PIXI" \
+              python "$SRC/markers_v2_from_sam3.py" \
+              --data-dir "$R" --use-sam3-frames \
+              --depth-back 1.5 --min-observations 2 --drift-m 0) \
+              > "$LOGS/preprod_${S}_markers_regen.log" 2>&1 \
+           && (cd /home/paperspace/code/nerf_new && pixi run --manifest-path "$NS_PIXI" \
+              python "$SRC/build_marker_hierarchy.py" \
+              --semantic-monolithic "$R/filtered_semantic_v2.monolithic" \
+              --marker-monolithic "$R/scene_graph/markers_v2.monolithic" \
+              --dominant-direction-xz "1,0" \
+              --out "$R/scene_graph/marker_hierarchy.json") \
+              > "$LOGS/preprod_${S}_hierarchy_regen.log" 2>&1; then
+            # cascade: downstream markers older than the fresh mono are
+            # stale too — mv them aside so supervision recompiles
+            NMV=0
+            while IFS= read -r MK; do
+                [ "$(stat -Lc %Y "$MK")" -lt "$(stat -Lc %Y "$MONO")" ] || continue
+                mv "$MK" "${MK}.stale_$(date +%s)" && NMV=$((NMV+1))
+            done < <(find "$R/blocks_ns/$CFG" \
+                       \( -name ".palette_v2" -o -name "manifest.json" \) 2>/dev/null)
+            mark "R5a-FIXED $S monolithics + hierarchy regenerated; $NMV stale supervision markers invalidated"
+        else
+            mark "R5a-STALE-UNFIXED $S regeneration failed (see preprod_${S}_markers_regen.log / _hierarchy_regen.log)"
+            RED=$((RED+1))
+        fi
+    elif [ "$HAS_REG" = "1" ]; then
+        mark "R5a-PASS $S semantic monolithics postdate the registry"
+    fi
+
     # ---- R5 supervision viability (probe first + middle canonical block) --------
     if [ "$HAS_REG" = "1" ] && [ -d "$R/blocks_ns/$CFG" ]; then
         BLOCKS=($(ls -d "$R/blocks_ns/$CFG"/block_* 2>/dev/null | grep -E "block_[0-9]+$" | sort))
