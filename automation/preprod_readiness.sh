@@ -16,11 +16,11 @@
 #                rebuild kf-named (GPU ~40 min, build_sky/fg_masks)
 #   R4 registry  global_ids + hierarchy present; absent = BUILDS-IN-SLOT
 #                (pipeline [3][4]) — reported, not fixed here
-#   R5 supervision     probe-compile FIRST + MIDDLE canonical block (painter, CPU)
-#                and audit density; floors: >=4 distinct ids AND >=40%
-#                frames painted on at least one probe. Encodes the 03
-#                lesson (3-id / 27%-frames paint starved census-init to
-#                tree IoU 0.168 while the splat itself was clean).
+#   R5 supervision  probe-compile FIRST + MIDDLE canonical block (CPU)
+#                and audit density AGAINST THE SURVEY OWN SAM3 REGISTRY:
+#                pass = supervised ids >= RATIO_FLOOR% of registry trees
+#                near the block path (derived bar — farms look different).
+#                Encodes the 03 lesson (3-id supervision -> IoU 0.168).
 #   R6 embedder  canon ckpt present; absent = TRAINS-IN-SLOT ([5c])
 #
 # Output: per-gate PASS/FIXED/RED/IN-SLOT lines + final READY/NOT-READY per
@@ -31,13 +31,19 @@ set -u
 LOGS=/home/paperspace/logs
 SRC=/home/paperspace/code/aru_sil_core/src/scripts
 NS_PIXI=/home/paperspace/code/nerf_new/pixi.toml
-SAM3_PIXI=${SAM3_PIXI:-/home/paperspace/code/nerf_new/pixi.toml}
+# sky/fg mask builders import sam3 — they need the SAM3 env, not nerf_new
+# (first run failed with ModuleNotFoundError: iopath under the wrong env)
+SAM3_PIXI=${SAM3_PIXI:-/home/paperspace/code/sam3/pixi.toml}
 STATE=$LOGS/week_prod_20260814_state
 CITRUS=/home/paperspace/data/citrus_all
 KLAP=/home/paperspace/data/klapmuts
 CFG=lio_row100
-ID_FLOOR=4
-FRAME_FRAC_FLOOR=40   # percent
+# Supervision bar is DERIVED, not hand-made (Paul 2026-08-15: "it must be
+# derived from the sam3 assets that were made, farms look different"):
+# a probe passes when its supervised-id count reaches RATIO_FLOOR% of the
+# trees the survey's OWN registry places within reach of the block's
+# trajectory. Dimensionless — transfers across farms.
+RATIO_FLOOR=50   # percent of expected-from-registry
 mkdir -p "$STATE"
 RJSON=$STATE/readiness.json
 mark() { echo "[$(date +%m-%d\ %H:%M:%S)] $1"; }
@@ -110,13 +116,23 @@ for S in "${SURVEYS[@]}"; do
             CNT=0
         fi
         if [ "$CNT" -lt "$K" ] || [ "$K" -eq 0 ]; then
+            # stale .done over an under-count must not survive: the pipeline
+            # [4b] gate trusts it (a false FIXED stamped one on 0 PNGs once)
+            [ -f "$R/$D/.done" ] && mv "$R/$D/.done" "$R/$D/.done.revoked_$(date +%s)"
             TOOL=build_sky_masks.py; [ "$D" = "fg_masks" ] && TOOL=build_fg_masks.py
             mark "R3-FIX $S rebuilding $D kf-named ($CNT/$K) — GPU"
             (cd /home/paperspace/code/nerf_new && pixi run --manifest-path "$SAM3_PIXI" \
                 python "$SRC/$TOOL" --data-dir "$R") \
-                > "$LOGS/preprod_${S}_${D}.log" 2>&1 \
-                && { touch "$R/$D/.done"; mark "R3-FIXED $S $D ($(ls "$R/$D/"kf_*.png 2>/dev/null | wc -l) PNGs)"; } \
-                || { mark "R3-RED $S $D rebuild failed (see preprod_${S}_${D}.log)"; RED=$((RED+1)); }
+                > "$LOGS/preprod_${S}_${D}.log" 2>&1
+            NEWCNT=$(ls "$R/$D/"kf_*.png 2>/dev/null | wc -l)
+            # FIXED means the FILES exist — an exit code is not evidence
+            if [ "$NEWCNT" -ge "$K" ] && [ "$K" -gt 0 ]; then
+                touch "$R/$D/.done"
+                mark "R3-FIXED $S $D ($NEWCNT PNGs)"
+            else
+                mark "R3-RED $S $D rebuild produced $NEWCNT/$K (see preprod_${S}_${D}.log)"
+                RED=$((RED+1))
+            fi
         else
             [ -f "$R/$D/.done" ] || touch "$R/$D/.done"
             mark "R3-PASS $S $D kf-named x$CNT"
@@ -138,7 +154,7 @@ for S in "${SURVEYS[@]}"; do
         BLOCKS=($(ls -d "$R/blocks_ns/$CFG"/block_* 2>/dev/null | grep -E "block_[0-9]+$" | sort))
         NB=${#BLOCKS[@]}
         if [ "$NB" -gt 0 ]; then
-            BEST_IDS=0; BEST_FRAC=0
+            BEST_RATIO=-1; BEST_LINE=""
             for BD in "${BLOCKS[0]}" "${BLOCKS[$((NB/2))]}"; do
                 if [ ! -f "$BD/semantic_v2_B/.palette_v2" ]; then
                     (cd /home/paperspace/code/nerf_new && pixi run --manifest-path "$NS_PIXI" \
@@ -147,25 +163,35 @@ for S in "${SURVEYS[@]}"; do
                         --semantic-monolithic "$R/filtered_semantic_v2.monolithic" \
                         --marker-monolithic "$(ls "$R"/scene_graph*/markers_v2*.monolithic | head -1)" \
                         --global-ids "$R/sam3_v2/global_ids.json") \
-                        > "$LOGS/preprod_${S}_paint_$(basename "$BD").log" 2>&1 \
+                        > "$LOGS/preprod_${S}_supervision_$(basename "$BD").log" 2>&1 \
                         && touch "$BD/semantic_v2_B/.palette_v2"
                 fi
+                # bar derived from the survey's OWN sam3 registry (expected
+                # trees near this block's path); stderr into a probe log —
+                # a silenced crash once hid a survey behind an empty readout
                 READOUT=$(cd /home/paperspace/code/nerf_new && pixi run python \
-                    "$SRC/audit_supervision_density.py" --supervision-dir "$BD/semantic_v2_B" 2>/dev/null | tail -1)
-                mark "R5-PROBE $S $(basename "$BD"): $READOUT"
-                IDS=$(echo "$READOUT" | grep -oaE "ids=[0-9]+" | cut -d= -f2)
-                FRAC=$(echo "$READOUT" | grep -oaE "painted_pct=[0-9]+" | cut -d= -f2)
-                [ "${IDS:-0}" -gt "$BEST_IDS" ] && BEST_IDS=$IDS
-                [ "${FRAC:-0}" -gt "$BEST_FRAC" ] && BEST_FRAC=$FRAC
+                    "$SRC/audit_supervision_density.py" \
+                    --supervision-dir "$BD/semantic_v2_B" \
+                    --global-ids "$R/sam3_v2/global_ids.json" \
+                    --transforms "$BD/transforms.json" \
+                    2>> "$LOGS/preprod_${S}_probe_$(basename "$BD").log" | tail -1)
+                mark "R5-PROBE $S $(basename "$BD"): ${READOUT:-AUDIT-CRASHED (see probe log)}"
+                RATIO=$(echo "$READOUT" | grep -oaE "ratio_pct=[0-9]+" | cut -d= -f2)
+                if [ -n "${RATIO:-}" ] && [ "$RATIO" -gt "$BEST_RATIO" ]; then
+                    BEST_RATIO=$RATIO; BEST_LINE=$READOUT
+                fi
             done
-            if [ "$BEST_IDS" -ge "$ID_FLOOR" ] && [ "$BEST_FRAC" -ge "$FRAME_FRAC_FLOOR" ]; then
-                mark "R5-PASS $S supervision viable (best probe ids=$BEST_IDS painted_pct=$BEST_FRAC)"
+            if [ "$BEST_RATIO" -ge "$RATIO_FLOOR" ]; then
+                mark "R5-PASS $S supervision viable vs own registry ($BEST_LINE)"
+            elif [ "$BEST_RATIO" -ge 0 ]; then
+                mark "R5-RED $S supervision STARVED vs own registry (best: $BEST_LINE; floor ratio ${RATIO_FLOOR}%) — root-cause the semantic source before training"
+                RED=$((RED+1))
             else
-                mark "R5-RED $S supervision STARVED (best probe ids=$BEST_IDS painted_pct=$BEST_FRAC; floors $ID_FLOOR/$FRAME_FRAC_FLOOR) — root-cause the survey semantic/filter before training"
+                mark "R5-RED $S supervision probes unreadable (see probe logs)"
                 RED=$((RED+1))
             fi
         else
-            mark "R5-IN-SLOT $S no $CFG partition yet (pipeline partitions in first slot; paint floor enforced at compile)"
+            mark "R5-IN-SLOT $S no $CFG partition yet (pipeline partitions in first slot; ratio floor enforced at compile)"
             NOTES="$NOTES partition-in-slot;"
         fi
     else
