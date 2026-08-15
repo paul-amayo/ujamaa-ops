@@ -39,17 +39,15 @@ if ps -eo args | grep -qE "[n]s-train"; then
     mark "ABORT: ns-train already running — GPU busy"; exit 1
 fi
 
-# ---------------- pre-prod readiness gate ----------------------------------
-# Paul 2026-08-15: all 7 surveys must be TRAIN READY before any training
-# slot; no parking (parking defers the problem at the cost of coverage).
-# The readiness recipe checks + fixes assets (pose aliases, kf extraction,
-# stream-mask quarantine + kf rebuild, supervision-density probes) and exits 0
-# only when no RED gates remain.
-bash /home/paperspace/code/automation/preprod_readiness.sh || {
-    mark "HALT: readiness has RED gates (see readiness.json + markers above) — fix and relaunch; NO training started"
-    exit 1
-}
-mark "READINESS GREEN — entering training rotation"
+# ---------------- pre-prod readiness phase ---------------------------------
+# Paul 2026-08-15: readiness MAKES surveys ready — it fixes/regenerates
+# stale prod inputs (pose aliases, kf extraction, stream-mask quarantine +
+# kf rebuild, supervision refresh + registry-derived probes) and REPORTS
+# what stayed stale. THERE IS NO HALT: surveys are self-contained; if the
+# information is there they train, and per-block in-slot guards handle the
+# rest. readiness.json carries the stale report.
+bash /home/paperspace/code/automation/preprod_readiness.sh
+mark "READINESS PHASE COMPLETE (stale report in readiness.json) — entering training rotation"
 
 # ---------------- rotation config ------------------------------------------
 # All splat-eligible surveys rotate — including 02 (Paul 2026-08-14: no
@@ -245,12 +243,14 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
             mark "SLOT $S block_$BID SUP-SPARSE ($AUD) — advancing without stage2"
             echo $((NEXT + 1)) > "$STATE/$S.next"
         else
-            # NO PARKING (Paul 2026-08-15): a slot failure means an asset or
-            # recipe problem — HALT the whole queue loudly so it gets FIXED,
-            # instead of deferring it down the rounds
-            mark "HALT: SLOT $S block_$BID FAIL after ${ELAPSED}s — queue stopped"\
-" (see week_${S}_b${BID}.log; fix, then relaunch — resume is free)"
-            exit 1
+            # self-contained surveys, no halt, no parking: record the failed
+            # block loudly, advance past it (each block is tried ONCE), and
+            # keep every other survey training. FAILED markers surface in
+            # the log + state dir for daylight triage.
+            touch "$STATE/$S.block_$BID.FAILED"
+            mark "SLOT $S block_$BID FAILED after ${ELAPSED}s — recorded"\
+" ($STATE/$S.block_$BID.FAILED; see week_${S}_b${BID}.log) — advancing"
+            echo $((NEXT + 1)) > "$STATE/$S.next"
         fi
     done
     # round-end backfill: any block with a stage2 ckpt but a missing verdict

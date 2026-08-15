@@ -243,7 +243,10 @@ for S in "${SURVEYS[@]}"; do
     RED_TOTAL=$((RED_TOTAL + RED))
 done
 
-echo " \"_generated\": \"$(date -u +%FT%TZ)\", \"_red_total\": $RED_TOTAL }" >> "$RJSON.tmp"
+echo " \"_generated\": \"$(date -u +%FT%TZ)\", \"_stale_total\": $RED_TOTAL }" >> "$RJSON.tmp"
 mv "$RJSON.tmp" "$RJSON"
-mark "READINESS ${RED_TOTAL} red gates total -> $RJSON"
-exit $([ "$RED_TOTAL" -eq 0 ] && echo 0 || echo 1)
+mark "READINESS COMPLETE: $RED_TOTAL stale/unfixed items reported -> $RJSON"
+# NO HALT (Paul 2026-08-15): readiness MAKES surveys ready and reports what
+# stayed stale; surveys are self-contained and train on the information they
+# have — per-block in-slot guards handle thin supervision. Always exit 0.
+exit 0
