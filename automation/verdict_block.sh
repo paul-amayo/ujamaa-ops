@@ -40,20 +40,33 @@ PY
 [ -n "$FR" ] || { echo "VERDICT-SKIP $N: no supervision frames"; exit 0; }
 
 ROOT_DIR=$(dirname "$(dirname "$CFGDIR")")
-# kf_images sits at the survey root (shimmed into prod/tassili)
+# kf_images sits at the survey root (shimmed into prod/tassili). stderr goes
+# INTO the tmplog — a swallowed traceback made VERDICT-EMPTY undiagnosable.
 HIGH_EMBEDDER_CKPT=$EMB pixi run python "$ARU/containment_eval.py" \
   --config "$CFG" --hyper-ckpt "$EMB" --hierarchy-json "$HJ" \
   --supervision-dir "$SUP" --frame "$FR" \
   --kf-images "$ROOT_DIR/kf_images" \
-  --out "$FIG/week_${N}_containment.png" 2>/dev/null \
-  | grep -aE "TREE|ROW|FRUIT|SAVED" | tee "$TMPLOG"
+  --out "$FIG/week_${N}_containment.png" 2>> "$TMPLOG" \
+  | grep -aE "TREE|ROW|FRUIT|SAVED" | tee -a "$TMPLOG"
 
-# block id inside the log lines is containment_eval's [NNN frame] prefix;
-# fall back to labelling by dir if the parse finds nothing
+# One retry after a drain pause: a just-exited training forest can still
+# hold VRAM for a beat, and an OOM here surfaces as an NVML INTERNAL ASSERT
+# (broken NVML masks the real message — 2026-08-15 diagnosis, V100-32G).
+if ! grep -qaE "TREE" "$TMPLOG"; then
+  echo "VERDICT-RETRY $N in 90s (first pass empty — likely VRAM not drained)"
+  sleep 90
+  HIGH_EMBEDDER_CKPT=$EMB pixi run python "$ARU/containment_eval.py" \
+    --config "$CFG" --hyper-ckpt "$EMB" --hierarchy-json "$HJ" \
+    --supervision-dir "$SUP" --frame "$FR" \
+    --kf-images "$ROOT_DIR/kf_images" \
+    --out "$FIG/week_${N}_containment.png" 2>> "$TMPLOG" \
+    | grep -aE "TREE|ROW|FRUIT|SAVED" | tee -a "$TMPLOG"
+fi
+
 if grep -qaE "TREE" "$TMPLOG"; then
   python3 /home/paperspace/code/automation/distill_containment_verdicts.py \
     --log "$TMPLOG" --out "$OUT_JSON" --merge \
     && echo "VERDICT-DONE $N -> $OUT_JSON"
 else
-  echo "VERDICT-EMPTY $N (no TREE lines — check $TMPLOG)"
+  echo "VERDICT-EMPTY $N (no TREE lines after retry — check $TMPLOG)"
 fi

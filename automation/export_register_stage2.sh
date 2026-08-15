@@ -53,8 +53,17 @@ if [ -f "$FEAT" ] && [ ! -f "$ATT" ] && [ -n "$SG" ]; then
     --out "$ATT" >> "$LOG" 2>&1 || echo "EXPORT-WARN $N: attribution failed"
 fi
 
-python3 "$SRC/merge_block_splats.py" --blocks-dir "$CFGDIR" \
-  --splat-glob 'splats/splat_cropped_stage2_censusinit_fw2.ply' \
-  --update-only >> "$LOG" 2>&1 \
-  && echo "EXPORT-DONE $N ($(du -m "$PLY" 2>/dev/null | cut -f1) MB ply$([ -f "$FEAT" ] && echo ' +features')$([ -f "$ATT" ] && echo ' +attr'))" \
-  || echo "EXPORT-FAIL $N: splats.json merge"
+# registration: stage_splat_manifests derives splats.json + index.json for
+# the whole config from disk (idempotent — restaged on every block's export).
+# merge_block_splats was the WRONG tool (it concatenates plys; the pipeline
+# [7] call of it is a vestige from a CLI three renames ago).
+if python3 "$SRC/stage_splat_manifests.py" \
+    --data-root "$ROOT_DIR" --config "$(basename "$CFGDIR")" \
+    --run stage2_censusinit_fw2 \
+    --splat-rel splats/splat_cropped_stage2_censusinit_fw2.ply \
+    >> "$LOG" 2>&1; then
+  echo "EXPORT-DONE $N ($(du -m "$PLY" 2>/dev/null | cut -f1) MB ply$([ -f "$FEAT" ] && echo ' +features')$([ -f "$ATT" ] && echo ' +attr'), splats.json restaged)"
+else
+  echo "EXPORT-FAIL $N: splats.json staging"
+  exit 1
+fi

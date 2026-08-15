@@ -52,7 +52,7 @@ root_of()  { case "$1" in
     apr_2026_zed) echo "$KLAP/apr_2026_zed";;
     dec_2025_ten_rows) echo "$KLAP/dec_2025_ten_rows";;
     *) echo "$CITRUS/$1";; esac; }
-cfg_of()   { case "$1" in 04_13D_Jackal) echo lio_row6F;; *) echo lio_row100;; esac; }
+cfg_of()   { echo lio_row100; }   # pipeline ALWAYS partitions to its own CONFIG name — 04 lio_row6F assumption parked a finished 3h run
 maxblk_of() { case "$1" in 04_13D_Jackal) echo 10;; 05_13D_Jackal) echo 43;; *) echo "";; esac; }
 emb_of() {  # newest canon-preference embedder ckpt for the verdict step
     local tag
@@ -240,6 +240,33 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
             mark "SLOT $S block_$BID FAIL after ${ELAPSED}s — SURVEY PARKED"\
 " (see week_${S}_b${BID}.log; rm $STATE/$S.parked to resume)"
         fi
+    done
+    # round-end backfill: any block with a stage2 ckpt but a missing verdict
+    # entry or registration gets swept here — GPU is quiet between rounds,
+    # which is exactly what the verdict OOM diagnosis calls for
+    for S in "${SURVEYS[@]}"; do
+        [ -f "$STATE/$S.parked" ] && continue
+        R=$(root_of "$S"); C=$(cfg_of "$S")
+        VJ=$R/blocks_ns/$C/verdicts_censusinit_fw2.json
+        for BD in "$R/blocks_ns/$C"/block_*; do
+            [ -d "$BD" ] || continue
+            BN=$(basename "$BD"); BNUM=${BN#block_}
+            echo "$BN" | grep -qE "^block_[0-9]+$" || continue
+            ls "$BD"/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/nerfstudio_models*/*.ckpt >/dev/null 2>&1 || continue
+            HAS=$(python3 -c "import json,sys; d=json.load(open('$VJ')) if __import__('os').path.exists('$VJ') else {'blocks':{}}; print(int('$BNUM' in d.get('blocks',{})))" 2>/dev/null || echo 0)
+            SUP=$BD/supervision/trees_only
+            [ -f "$SUP/manifest.json" ] || SUP=$BD/supervision/strict_tree_v2
+            if [ "$HAS" != "1" ] && [ -f "$SUP/manifest.json" ]; then
+                mark "BACKFILL verdict $S $BN"
+                CENSUS_EMBEDDER=$(emb_of "$S") CENSUS_HIERARCHY=$(hier_of "$S") \
+                    bash "$AUTO/verdict_block.sh" "$BD" "$SUP" || true
+            fi
+            if [ -f "$STATE/export.ok" ] \
+               && [ ! -f "$BD/splats/splat_cropped_stage2_censusinit_fw2.ply" ]; then
+                mark "BACKFILL export $S $BN"
+                bash "$AUTO/export_register_stage2.sh" "$BD" || true
+            fi
+        done
     done
     python3 "$AUTO/build_prod_manifests.py" --migrate > "$LOGS/week_prodmd_r${ROUND}.log" 2>&1 \
         && mark "ROUND-$ROUND-DONE (PROD.md regenerated)" \
