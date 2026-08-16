@@ -322,8 +322,27 @@ for S in "${SURVEYS[@]}"; do
         01_13B_Jackal) TAG=01_13B;; 02_13B_Jackal) TAG=02_13B;; 03_13B_Jackal) TAG=03_13B;;
         04_13D_Jackal) TAG=04_13D;; 05_13D_Jackal) TAG=05_13D;; *) TAG=klap;;
     esac
-    if ls -t /home/paperspace/data/high/nerf/${TAG}*/ckpts/model_best.pth >/dev/null 2>&1; then
-        mark "R6-PASS $S embedder present"
+    CANON_CK="/home/paperspace/data/high/nerf/${S%_Jackal}_v1g/ckpts/model_best.pth"
+    if [ -f "$CANON_CK" ]; then
+        # R6b HEALTH: present is not enough — a COLLAPSED embedder (all words
+        # mapping to one point) passes every other gate and silently kills
+        # every downstream verdict (02: mean pairwise cos 1.0000, containment
+        # recall 1.0 / precision 0.013). Quarantine it so the pipeline's [5b]
+        # gate retrains in-slot, and rewind so blocks re-run stage2.
+        if (cd /home/paperspace/code/nerf_new && pixi run python \
+              "$SRC/embedder_roundtrip.py" --ckpt "$CANON_CK") \
+              > "$LOGS/preprod_${S}_embedder_health.log" 2>&1; then
+            mark "R6-PASS $S embedder healthy ($(grep -a separation "$LOGS/preprod_${S}_embedder_health.log" | tail -1))"
+        else
+            QD=$R/experimental/collapsed_embedder_$(date +%Y%m%d)
+            mkdir -p "$QD"
+            mv "$(dirname "$(dirname "$CANON_CK")")" "$QD/" 2>/dev/null \
+              && mark "R6-QUARANTINED $S embedder FAILED health ($(grep -aE 'COLLAPSED|separation' "$LOGS/preprod_${S}_embedder_health.log" | tail -1)) -> retrains in-slot" \
+              || mark "R6-STALE-UNFIXED $S embedder unhealthy and quarantine failed (see preprod_${S}_embedder_health.log)"
+            echo 0 > "$STATE/$S.next"
+        fi
+    elif ls -t /home/paperspace/data/high/nerf/${TAG}*/ckpts/model_best.pth >/dev/null 2>&1; then
+        mark "R6-PASS $S embedder present (non-canon name)"
     else
         mark "R6-IN-SLOT $S embedder absent — [5c] trains it in the first slot"
         NOTES="$NOTES embedder-in-slot;"
