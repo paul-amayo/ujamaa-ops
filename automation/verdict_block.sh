@@ -47,14 +47,16 @@ PY
 )
 [ -n "$FR" ] || { echo "VERDICT-SKIP $N: no supervision frames"; exit 0; }
 
-ROOT_DIR=$(dirname "$(dirname "$CFGDIR")")
+SURVEY_DIR=${CFGDIR%%/prod/*}
+SURVEY=$(basename "$SURVEY_DIR")
+ROOT_DIR=$SURVEY_DIR
 # kf_images sits at the survey root (shimmed into prod/tassili). stderr goes
 # INTO the tmplog — a swallowed traceback made VERDICT-EMPTY undiagnosable.
 HIGH_EMBEDDER_CKPT=$EMB pixi run python "$ARU/containment_eval.py" \
   --config "$CFG" --hyper-ckpt "$EMB" --hierarchy-json "$HJ" \
   --supervision-dir "$SUP" --frame "$FR" \
   --kf-images "$ROOT_DIR/kf_images" \
-  --out "$FIG/week_${N}_containment.png" 2>> "$TMPLOG" \
+  --out "$FIG/week_${SURVEY}_${N}_containment.png" 2>> "$TMPLOG" \
   | grep -aE "TREE|ROW|FRUIT|SAVED" | tee -a "$TMPLOG"
 
 # One retry after a drain pause: a just-exited training forest can still
@@ -67,7 +69,7 @@ if ! grep -qaE "TREE" "$TMPLOG"; then
     --config "$CFG" --hyper-ckpt "$EMB" --hierarchy-json "$HJ" \
     --supervision-dir "$SUP" --frame "$FR" \
     --kf-images "$ROOT_DIR/kf_images" \
-    --out "$FIG/week_${N}_containment.png" 2>> "$TMPLOG" \
+    --out "$FIG/week_${SURVEY}_${N}_containment.png" 2>> "$TMPLOG" \
     | grep -aE "TREE|ROW|FRUIT|SAVED" | tee -a "$TMPLOG"
 fi
 
