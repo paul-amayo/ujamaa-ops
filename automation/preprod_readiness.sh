@@ -290,6 +290,33 @@ for S in "${SURVEYS[@]}"; do
         mark "R7-FIXED $S: empty $CFG slot pre-placed in prod + root shim (partition lands there)"
     fi
 
+    # ---- R5c verdict provenance consistency (Paul 2026-08-15: fold the
+    # diagnosis into the recipe). A stage2 run whose recorded embedder or
+    # hierarchy differs from the CANON pair scored the wrong vocabulary —
+    # the 0.00/0.23 class on 04 and the missing apr verdicts. Verdicts are
+    # cheap (~2 min), so drop the bad entries and let the slot re-verdict.
+    CANON_EMB="/home/paperspace/data/high/nerf/${S%_Jackal}_v1g/ckpts/model_best.pth"
+    CANON_HJ=$(ls -t "$R"/scene_graph*/marker_hierarchy*.json 2>/dev/null | head -1)
+    NBAD=0
+    while IFS= read -r PROV; do
+        PE=$(python3 -c "import json;print(json.load(open('$PROV')).get('embedder',''))" 2>/dev/null)
+        PH=$(python3 -c "import json;print(json.load(open('$PROV')).get('hierarchy',''))" 2>/dev/null)
+        { [ "$PE" = "$CANON_EMB" ] && [ "$PH" = "$CANON_HJ" ]; } && continue
+        NBAD=$((NBAD+1))
+    done < <(find "$R/blocks_ns/$CFG/" -maxdepth 3 -name stage2_provenance.json 2>/dev/null)
+    VJ=$R/blocks_ns/$CFG/verdicts_censusinit_fw2.json
+    if [ -f "$VJ" ] && [ ! -f "$R/blocks_ns/$CFG"/block_000/splat_runs_FEATFIX/stage2_provenance.json ]; then
+        # verdicts recorded BEFORE provenance existed: scored by the old
+        # hand-map, trustworthiness unknown -> re-verdict from scratch
+        mv "$VJ" "${VJ%.json}.pre_provenance_$(date +%s).json"
+        mark "R5c-REVERDICT $S verdicts predate provenance (scored by the retired hand-map) — archived, slots re-score"
+    elif [ "$NBAD" -gt 0 ]; then
+        mark "R5c-STALE-UNFIXED $S $NBAD stage2 runs record a non-canon embedder/hierarchy pair (see stage2_provenance.json)"
+        RED=$((RED+1))
+    else
+        mark "R5c-PASS $S stage2 provenance matches the canon embedder+hierarchy"
+    fi
+
     # ---- R6 embedder -------------------------------------------------------
     case "$S" in
         01_13B_Jackal) TAG=01_13B;; 02_13B_Jackal) TAG=02_13B;; 03_13B_Jackal) TAG=03_13B;;

@@ -64,14 +64,14 @@ root_of()  { case "$1" in
     *) echo "$CITRUS/$1";; esac; }
 cfg_of()   { echo lio_row100; }   # pipeline ALWAYS partitions to its own CONFIG name — 04 lio_row6F assumption parked a finished 3h run
 maxblk_of() { echo ""; }   # block counts derive from the partition ON DISK, never hardcoded — the 6F-era "11" would have silently stopped 04 at block_010 of 48
-emb_of() {  # newest canon-preference embedder ckpt for the verdict step
-    local tag
-    case "$1" in
-        01_13B_Jackal) tag=01_13B;; 02_13B_Jackal) tag=02_13B;; 03_13B_Jackal) tag=03_13B;;
-        04_13D_Jackal) echo /home/paperspace/data/high/nerf/04_13D_v3vocab1k/ckpts/model_best.pth; return;;
-        05_13D_Jackal) tag=05_13D;; apr_2026_zed|dec_2025_ten_rows) tag=klap;;
-    esac
-    ls -t /home/paperspace/data/high/nerf/${tag}*/ckpts/model_best.pth 2>/dev/null | head -1
+emb_of() {  # DERIVE exactly as the pipeline does (${SURVEY%_Jackal}_v1g),
+    # never a hand-kept map: the old map scored apr with klapmuts_v1 and 04
+    # with the retired v3vocab1k vocabulary -> containment 0.00. The verdict
+    # itself now prefers stage2_provenance.json; this is the fallback.
+    local exp="${1%_Jackal}_v1g"
+    local p="/home/paperspace/data/high/nerf/$exp/ckpts/model_best.pth"
+    [ -f "$p" ] && { echo "$p"; return; }
+    ls -t "/home/paperspace/data/high/nerf/${1%_Jackal}"*/ckpts/model_best.pth 2>/dev/null | head -1
 }
 hier_of() { ls -t "$(root_of "$1")"/scene_graph*/marker_hierarchy*.json 2>/dev/null | head -1; }
 

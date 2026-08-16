@@ -70,6 +70,12 @@ HIGH_EMBEDDER_CKPT=$EMB pixi run python $ARU/build_census_init.py \
 
 # 4. real stage2 (census-init, fw2)
 STAGE2_BD=$BD STAGE2_SUP=$SUP STAGE2_EMBEDDER=$EMB \
+mkdir -p $BD/splat_runs_FEATFIX
+printf '{"embedder": "%s", "hierarchy": "%s", "supervision": "%s"}\n' \
+  "$EMB" "$HJ" "$SUP" > $BD/splat_runs_FEATFIX/stage2_provenance.json
+# provenance: the verdict must score with the SAME embedder+hierarchy the
+# features were built from — a hand-kept map in the queue disagreed and
+# scored apr with klapmuts_v1 / 04 with the v3vocab1k vocabulary (0.00)
 STAGE2_NAME=stage2_censusinit_fw2 STAGE2_FRUIT_W=2.0 \
 STAGE2_INIT_DIR=$BD/stage2_init_census/nerfstudio_models \
   /home/paperspace/code/automation/stage2_fruitchild.sh
