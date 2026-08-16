@@ -329,23 +329,76 @@ for S in "${SURVEYS[@]}"; do
         # every downstream verdict (02: mean pairwise cos 1.0000, containment
         # recall 1.0 / precision 0.013). Quarantine it so the pipeline's [5b]
         # gate retrains in-slot, and rewind so blocks re-run stage2.
-        if (cd /home/paperspace/code/nerf_new && pixi run python \
-              "$SRC/embedder_roundtrip.py" --ckpt "$CANON_CK") \
-              > "$LOGS/preprod_${S}_embedder_health.log" 2>&1; then
-            mark "R6-PASS $S embedder healthy ($(grep -a separation "$LOGS/preprod_${S}_embedder_health.log" | tail -1))"
+        health() { (cd /home/paperspace/code/nerf_new && pixi run python \
+                     "$SRC/embedder_roundtrip.py" --ckpt "$CANON_CK") \
+                     > "$LOGS/preprod_${S}_embedder_health$1.log" 2>&1; }
+        hline() { grep -aE 'COLLAPSED|separation' "$LOGS/preprod_${S}_embedder_health$1.log" | tail -1; }
+        if health ""; then
+            mark "R6-PASS $S embedder healthy ($(hline ''))"
         else
-            QD=$R/experimental/collapsed_embedder_$(date +%Y%m%d)
-            mkdir -p "$QD"
-            mv "$(dirname "$(dirname "$CANON_CK")")" "$QD/" 2>/dev/null \
-              && mark "R6-QUARANTINED $S embedder FAILED health ($(grep -aE 'COLLAPSED|separation' "$LOGS/preprod_${S}_embedder_health.log" | tail -1)) -> retrains in-slot" \
-              || mark "R6-STALE-UNFIXED $S embedder unhealthy and quarantine failed (see preprod_${S}_embedder_health.log)"
-            echo 0 > "$STATE/$S.next"
+            # REPAIR, don't quarantine-and-hope (Paul 2026-08-16: "readiness
+            # is there to solve"): retraining on the same inputs reproduces
+            # the same collapse, so fix the INPUT first — rebuild the
+            # hierarchy with the trajectory-derived row direction (the PCA
+            # trap gives rows that cut across every aisle) — then retrain,
+            # then RE-VERIFY. Only a repair that fails twice is reported.
+            mark "R6-REPAIR $S embedder unhealthy ($(hline '')) — rebuilding hierarchy + retraining"
+            HJC=$R/scene_graph/marker_hierarchy.json
+            (cd /home/paperspace/code/nerf_new && pixi run --manifest-path "$NS_PIXI" \
+                python "$SRC/build_marker_hierarchy.py" \
+                --semantic-monolithic "$R/filtered_semantic_v2.monolithic" \
+                --marker-monolithic "$(ls "$R"/scene_graph*/markers_v2*.monolithic | head -1)" \
+                --data-dir "$R" --out "$HJC") \
+                > "$LOGS/preprod_${S}_hierarchy_repair.log" 2>&1 \
+                && mark "R6-REPAIR $S hierarchy rebuilt ($(grep -aoE 'row-normal.*' "$LOGS/preprod_${S}_hierarchy_repair.log" | tail -1))" \
+                || mark "R6-REPAIR $S hierarchy rebuild FAILED (see preprod_${S}_hierarchy_repair.log)"
+            mv "$(dirname "$(dirname "$CANON_CK")")" \
+               "$R/experimental/collapsed_embedder_$(date +%Y%m%d%H%M)" 2>/dev/null
+            (cd /home/paperspace/code/nerf_new && pixi run --manifest-path "$NS_PIXI" \
+                python "$SRC/../interfaces/rerun/HiGH/train_hyperembedder_graph.py" \
+                --hierarchy-json "$HJC" --experiment-name "${S%_Jackal}_v1g" \
+                --contrastive-weight 2.0 --cosine-reconstruction-weight 2.0 \
+                --reconstruction-weight 1.0 --temperature 0.2 --keep-super-row \
+                --epochs 1500 --no-level-norms) \
+                > "$LOGS/preprod_${S}_embedder_retrain.log" 2>&1
+            if health "_post"; then
+                mark "R6-FIXED $S embedder repaired and verified ($(hline '_post'))"
+                echo 0 > "$STATE/$S.next"   # blocks re-run stage2 on it
+            else
+                mark "R6-STALE-UNFIXED $S embedder STILL unhealthy after hierarchy rebuild + retrain ($(hline '_post')) — needs human root-cause; see preprod_${S}_embedder_retrain.log"
+                RED=$((RED+1))
+            fi
         fi
     elif ls -t /home/paperspace/data/high/nerf/${TAG}*/ckpts/model_best.pth >/dev/null 2>&1; then
         mark "R6-PASS $S embedder present (non-canon name)"
     else
         mark "R6-IN-SLOT $S embedder absent — [5c] trains it in the first slot"
         NOTES="$NOTES embedder-in-slot;"
+    fi
+
+    # ---- R10 verdict feedback (Paul 2026-08-16: "a score of 0 on the iou
+    # means we have failed somewhere and the survey wasnt ready for prod").
+    # Recorded near-zero containment is a READINESS failure, not a report:
+    # the blocks trained on something broken. Drop those verdict entries and
+    # rewind so the survey re-runs stage2 + re-scores on the repaired chain.
+    VJ2=$R/blocks_ns/$CFG/verdicts_censusinit_fw2.json
+    if [ -f "$VJ2" ]; then
+        NZERO=$(python3 - "$VJ2" << 'PY' 2>/dev/null
+import json, sys
+d = json.load(open(sys.argv[1]))
+bad = [b for b, r in d.get("blocks", {}).items()
+       if (r.get("tree_iou_min") or 0) < 0.10]
+for b in bad:
+    d["blocks"].pop(b, None)
+if bad:
+    json.dump(d, open(sys.argv[1], "w"), indent=1)
+print(len(bad))
+PY
+)
+        if [ "${NZERO:-0}" -gt 0 ]; then
+            mark "R10-REQUEUED $S $NZERO block(s) scored ~0 containment — entries dropped, survey rewound to re-train stage2 + re-score on the repaired chain"
+            echo 0 > "$STATE/$S.next"
+        fi
     fi
 
     if [ "$RED" -eq 0 ]; then
