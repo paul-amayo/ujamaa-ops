@@ -34,10 +34,33 @@ mark() { echo "[$(date +%m-%d\ %H:%M:%S)] $1"; }
 exec >> "$LOGS/week_prod_20260814.log" 2>&1
 mark "WEEK QUEUE START (budget to $(date -d @$END_TS '+%m-%d %H:%M'))"
 
-# refuse to double-book the GPU
+# refuse to double-book the GPU — and CLEAN UP ORPHANS from a previous run
+# of THIS queue. A restart kills the parent but ns-train ignores SIGTERM
+# mid-CUDA-op: orphans held 27G of 34G overnight, so every stage2 OOMed
+# (masked as an NVML INTERNAL ASSERT) while returning success. Never
+# pkill -f (matches this shell — the self-match trap): resolve PGIDs from
+# the device holders and kill those groups explicitly.
+ORPHAN_PGIDS=$(fuser /dev/nvidia0 2>/dev/null | tr ' ' '\n' | grep -E "^[0-9]+$" \
+    | xargs -r -I{} ps -o pgid= -p {} 2>/dev/null | tr -d ' ' | sort -u)
+for PG in $ORPHAN_PGIDS; do
+    [ "$PG" = "$$" ] && continue
+    ps -o args= -g "$PG" 2>/dev/null | grep -q "[n]s-train" || continue
+    ps -o args= -g "$PG" 2>/dev/null | grep -q "splat_viewer" && continue
+    mark "GPU-CLEAN killing orphaned trainer group $PG (held VRAM from a previous run)"
+    kill -KILL -"$PG" 2>/dev/null
+done
+sleep 5
 if ps -eo args | grep -qE "[n]s-train"; then
-    mark "ABORT: ns-train already running — GPU busy"; exit 1
+    mark "ABORT: ns-train still running after cleanup — GPU busy"; exit 1
 fi
+# hard VRAM floor: a slot needs ~10G; refuse to start blind
+FREE_G=$(cd /home/paperspace/code/nerf_new && pixi run python -c \
+    "import torch;print(int(torch.cuda.mem_get_info()[0]/1e9))" 2>/dev/null | tail -1)
+if [ -n "$FREE_G" ] && [ "$FREE_G" -lt 10 ]; then
+    mark "ABORT: only ${FREE_G}G VRAM free (need >=10G) — investigate holders: fuser -v /dev/nvidia0"
+    exit 1
+fi
+mark "GPU ready: ${FREE_G:-?}G free"
 
 # ---------------- pre-prod readiness phase ---------------------------------
 # Paul 2026-08-15: readiness MAKES surveys ready — it fixes/regenerates

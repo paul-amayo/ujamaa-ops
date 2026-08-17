@@ -68,17 +68,23 @@ HIGH_EMBEDDER_CKPT=$EMB pixi run python $ARU/build_census_init.py \
   --src-ckpt $BD/stage2_init/nerfstudio_models/$(basename $S1) \
   --dst-dir $BD/stage2_init_census/nerfstudio_models || { echo "REPL-FAIL: init build"; exit 1; }
 
-# 4. real stage2 (census-init, fw2)
-STAGE2_BD=$BD STAGE2_SUP=$SUP STAGE2_EMBEDDER=$EMB \
+# provenance: the verdict must score with the SAME embedder+hierarchy the
+# features were built from — a hand-kept map in the queue disagreed and
+# scored apr with klapmuts_v1 / 04 with the v3vocab1k vocabulary (0.00).
+# NB: written BEFORE the env block below — inserting it between those
+# backslash-continued lines silently detached STAGE2_BD/SUP/EMBEDDER from
+# the call (stage2 then trained nothing and exited 0; 8 night slots lost).
 mkdir -p $BD/splat_runs_FEATFIX
 printf '{"embedder": "%s", "hierarchy": "%s", "supervision": "%s"}\n' \
   "$EMB" "$HJ" "$SUP" > $BD/splat_runs_FEATFIX/stage2_provenance.json
-# provenance: the verdict must score with the SAME embedder+hierarchy the
-# features were built from — a hand-kept map in the queue disagreed and
-# scored apr with klapmuts_v1 / 04 with the v3vocab1k vocabulary (0.00)
+
+# 4. real stage2 (census-init, fw2)
+STAGE2_BD=$BD STAGE2_SUP=$SUP STAGE2_EMBEDDER=$EMB \
 STAGE2_NAME=stage2_censusinit_fw2 STAGE2_FRUIT_W=2.0 \
 STAGE2_INIT_DIR=$BD/stage2_init_census/nerfstudio_models \
   /home/paperspace/code/automation/stage2_fruitchild.sh
+ls $BD/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/nerfstudio_models*/*.ckpt \
+  >/dev/null 2>&1 || { echo "REPL-FAIL: stage2 produced no ckpt"; exit 1; }
 
 # 5. verdict on the top-fruit frame
 CFG=$(ls -t $BD/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/config.yml | head -1)

@@ -33,6 +33,9 @@ echo "n" | MAX_JOBS=4 HIGH_EMBEDDER_CKPT=$EMB CANARY_EVERY=1000 \
     --vis tensorboard nerfstudio-data \
     --eval-mode interval --eval-interval 10 \
     && echo "FRUITCHILD-DONE in $(( ($(date +%s)-T0)/60 )) min" \
-    || echo "FRUITCHILD-FAIL"
-# resume the night queue behind it (skip-checks continue at 05)
-exec /home/paperspace/code/automation/night_stage_queue.sh
+    || { echo "FRUITCHILD-FAIL"; exit 1; }
+# The legacy tail `exec night_stage_queue.sh` was REMOVED 2026-08-17: it
+# replaced this script's process with a held queue that exits 0, so EVERY
+# stage2 failure returned success. That converted an OOM into eight hollow
+# "done" slots overnight. A failing stage2 must fail loudly.
+exit 0
