@@ -24,7 +24,7 @@ OUT_JSON=$CFGDIR/verdicts_censusinit_fw2.json
 TMPLOG=$(mktemp /tmp/claude-1000/-home-paperspace-code/c47d8606-c5fe-4343-ae48-8faa25cdc994/scratchpad/verdict_${N}_XXXX.log 2>/dev/null || mktemp)
 cd /home/paperspace/code/nerf_new
 
-CFG=$(ls -t "$BD"/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/config.yml 2>/dev/null | head -1)
+CFG=$(ls -t "$BD"/splat_runs_FEATFIX/stage2_censusinit_*/high/*/config.yml 2>/dev/null | head -1)
 [ -n "$CFG" ] || { echo "VERDICT-SKIP $N: no stage2 config"; exit 0; }
 
 # top-coverage supervision frame — TREE MODE: most painted (non-void) px.

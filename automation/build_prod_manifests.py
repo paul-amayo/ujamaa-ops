@@ -53,7 +53,7 @@ EMB_ROOT = Path("/home/paperspace/data/high/nerf")
 TOPDOWN = Path("/home/paperspace/code/ujamaa/project/bateleur_orchard_topdown.json")
 OUT_MD = Path("/home/paperspace/code/PROD.md")
 
-STAGE2_NAME = "stage2_censusinit_fw2"
+STAGE2_NAME = "stage2_censusinit_*"   # fw2 refine OR seed-only run
 IOU_FLOOR = 0.80  # 04-canon containment floor
 AGENTS = ("monos", "tassili", "bateleur", "sankofa", "azalai")
 

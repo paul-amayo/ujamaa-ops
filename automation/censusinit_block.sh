@@ -78,16 +78,31 @@ mkdir -p $BD/splat_runs_FEATFIX
 printf '{"embedder": "%s", "hierarchy": "%s", "supervision": "%s"}\n' \
   "$EMB" "$HJ" "$SUP" > $BD/splat_runs_FEATFIX/stage2_provenance.json
 
-# 4. real stage2 (census-init, fw2)
-STAGE2_BD=$BD STAGE2_SUP=$SUP STAGE2_EMBEDDER=$EMB \
-STAGE2_NAME=stage2_censusinit_fw2 STAGE2_FRUIT_W=2.0 \
-STAGE2_INIT_DIR=$BD/stage2_init_census/nerfstudio_models \
-  /home/paperspace/code/automation/stage2_fruitchild.sh
-ls $BD/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/nerfstudio_models*/*.ckpt \
-  >/dev/null 2>&1 || { echo "REPL-FAIL: stage2 produced no ckpt"; exit 1; }
+# 4. stage2 — SEED-ONLY or the fw2 refine.
+# CENSUS_SEED_ONLY=1 stops at the census-init seed: measured 2026-08-17 on
+# 02 b000, 5000 iters of fw2 moved containment by <0.01 (0.964/0.777/0.706
+# vs seed 0.964/0.774/0.707) once the target cache was fresh, so the refine
+# costs ~45 GPU-min per block for nothing measurable. Seed-only doubles
+# block throughput; the refine stays available for the A/B.
+if [ "${CENSUS_SEED_ONLY:-0}" = "1" ]; then
+  BOOT=$(ls -t $BD/splat_runs_FEATFIX/stage2_bootstrap/high/*/config.yml | head -1)
+  TS=$(basename $(dirname $BOOT))
+  RUN=$BD/splat_runs_FEATFIX/stage2_censusinit_seed/high/$TS
+  mkdir -p $RUN/nerfstudio_models
+  cp $BD/stage2_init_census/nerfstudio_models/*.ckpt $RUN/nerfstudio_models/
+  sed 's|^experiment_name: .*$|experiment_name: stage2_censusinit_seed|' $BOOT > $RUN/config.yml
+  echo "REPL-SEEDONLY: staged census-init seed as stage2_censusinit_seed"
+else
+  STAGE2_BD=$BD STAGE2_SUP=$SUP STAGE2_EMBEDDER=$EMB \
+  STAGE2_NAME=stage2_censusinit_fw2 STAGE2_FRUIT_W=2.0 \
+  STAGE2_INIT_DIR=$BD/stage2_init_census/nerfstudio_models \
+    /home/paperspace/code/automation/stage2_fruitchild.sh
+  ls $BD/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/nerfstudio_models*/*.ckpt \
+    >/dev/null 2>&1 || { echo "REPL-FAIL: stage2 produced no ckpt"; exit 1; }
+fi
 
 # 5. verdict on the top-fruit frame
-CFG=$(ls -t $BD/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/config.yml | head -1)
+CFG=$(ls -t $BD/splat_runs_FEATFIX/stage2_censusinit_*/high/*/config.yml | head -1)
 FR=$(pixi run python - "$SUP" << 'PY'
 import sys
 import numpy as np
@@ -96,7 +111,8 @@ from pathlib import Path
 best = (0, None)
 for f in sorted(Path(sys.argv[1]).glob('kf_*.png')):
     a = np.array(Image.open(f), np.uint16)
-    n = int(((a >= 200) & (a != 65535)).sum())
+    n = int((a != 65535).sum())   # TREE-mode: ids>=200 is FRUIT-only and
+    # returns no frame on fruitless surveys (02/05/klap) — REPL-FRAME: None
     if n > best[0]:
         best = (n, f.name)
 print(best[1])

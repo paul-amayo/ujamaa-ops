@@ -72,6 +72,8 @@ mark "GPU ready: ${FREE_G:-?}G free"
 bash /home/paperspace/code/automation/preprod_readiness.sh
 mark "READINESS PHASE COMPLETE (stale report in readiness.json) — entering training rotation"
 
+export CENSUS_SEED_ONLY=${CENSUS_SEED_ONLY:-1}   # seed-only stage2 (2026-08-17: fw2 moved 02 b000 <0.01 over 5000 iters)
+
 # ---------------- rotation config ------------------------------------------
 # All splat-eligible surveys rotate — including 02 (Paul 2026-08-14: no
 # reason to exclude the control epoch; stage2 is contingent on its painted
@@ -249,7 +251,7 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
         esac
         ELAPSED=$(( $(date +%s) - T0 ))
         BD=$R/blocks_ns/$C/block_$BID
-        if ls "$BD"/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/nerfstudio_models*/*.ckpt >/dev/null 2>&1; then
+        if ls "$BD"/splat_runs_FEATFIX/stage2_censusinit_*/high/*/nerfstudio_models*/*.ckpt >/dev/null 2>&1; then
             SUP=$BD/supervision/trees_only
             [ -f "$SUP/manifest.json" ] || SUP=$BD/supervision/strict_tree_v2
             EMB=$(emb_of "$S"); HJ=$(hier_of "$S")
@@ -293,7 +295,7 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
             [ -d "$BD" ] || continue
             BN=$(basename "$BD"); BNUM=${BN#block_}
             echo "$BN" | grep -qE "^block_[0-9]+$" || continue
-            ls "$BD"/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/nerfstudio_models*/*.ckpt >/dev/null 2>&1 || continue
+            ls "$BD"/splat_runs_FEATFIX/stage2_censusinit_*/high/*/nerfstudio_models*/*.ckpt >/dev/null 2>&1 || continue
             HAS=$(python3 -c "import json,sys; d=json.load(open('$VJ')) if __import__('os').path.exists('$VJ') else {'blocks':{}}; print(int('$BNUM' in d.get('blocks',{})))" 2>/dev/null || echo 0)
             SUP=$BD/supervision/trees_only
             [ -f "$SUP/manifest.json" ] || SUP=$BD/supervision/strict_tree_v2

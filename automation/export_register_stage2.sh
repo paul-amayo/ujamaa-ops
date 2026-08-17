@@ -16,7 +16,7 @@ LOG=/home/paperspace/logs/export_$(basename "$CFGDIR")_${N}.log
 PLY=$BD/splats/splat_cropped_stage2_censusinit_fw2.ply
 cd /home/paperspace/code/nerf_new
 
-CFG=$(ls -t "$BD"/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/config.yml 2>/dev/null | head -1)
+CFG=$(ls -t "$BD"/splat_runs_FEATFIX/stage2_censusinit_*/high/*/config.yml 2>/dev/null | head -1)
 [ -n "$CFG" ] || { echo "EXPORT-SKIP $N: no stage2 config"; exit 0; }
 
 if [ ! -f "$PLY" ]; then
