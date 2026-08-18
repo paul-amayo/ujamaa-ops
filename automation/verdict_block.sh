@@ -61,7 +61,7 @@ ROOT_DIR=$SURVEY_DIR
 HIGH_EMBEDDER_CKPT=$EMB pixi run python "$ARU/containment_eval.py" \
   --config "$CFG" --hyper-ckpt "$EMB" --hierarchy-json "$HJ" \
   --supervision-dir "$SUP" --frame "$FR" \
-  --kf-images "$ROOT_DIR/kf_images" \
+  --kf-images "$ROOT_DIR/prod/scratch_sam3" \
   --out "$FIG/week_${SURVEY}_${N}_containment.png" 2>> "$TMPLOG" \
   | grep -aE "TREE|ROW|FRUIT|SAVED" | tee -a "$TMPLOG"
 
@@ -74,7 +74,7 @@ if ! grep -qaE "TREE" "$TMPLOG"; then
   HIGH_EMBEDDER_CKPT=$EMB pixi run python "$ARU/containment_eval.py" \
     --config "$CFG" --hyper-ckpt "$EMB" --hierarchy-json "$HJ" \
     --supervision-dir "$SUP" --frame "$FR" \
-    --kf-images "$ROOT_DIR/kf_images" \
+    --kf-images "$ROOT_DIR/prod/scratch_sam3" \
     --out "$FIG/week_${SURVEY}_${N}_containment.png" 2>> "$TMPLOG" \
     | grep -aE "TREE|ROW|FRUIT|SAVED" | tee -a "$TMPLOG"
 fi

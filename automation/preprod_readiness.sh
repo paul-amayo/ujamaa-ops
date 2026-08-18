@@ -93,18 +93,20 @@ for S in "${SURVEYS[@]}"; do
 
     # ---- R2 kdomain --------------------------------------------------------
     if [ -e "$MONOS/image_left_kf20cm.monolithic" ]; then
-        KFC=$(cd /home/paperspace/code/nerf_new && pixi run python "$SRC/kf_domain.py" \
-              --data-dir "$MONOS" 2>/dev/null | grep -oaE "K=[0-9]+" | head -1 | cut -d= -f2)
-        PNGC=$(ls "$TASSILI"/kf_images/kf_*.png 2>/dev/null | wc -l)
+        # kf_domain is DEAD (2026-08-18): K = kf mono entry count, read by
+        # the fixed C++ indexer; PNGs are regenerable renders in scratch_sam3
+        KFC=$(cd /home/paperspace/code/nerf_new && pixi run python "$SRC/survey_paths.py" \
+              --count "$R" 2>/dev/null | tail -1)
+        PNGC=$(ls "$R"/prod/scratch_sam3/kf_*.png 2>/dev/null | wc -l)
         if [ -n "$KFC" ] && [ "$PNGC" -eq "$KFC" ]; then
             mark "R2-PASS $S K=$KFC pngs=$PNGC"
         elif [ -n "$KFC" ] && [ "$PNGC" -lt "$KFC" ]; then
             mark "R2-FIX $S extracting ($PNGC/$KFC)"
             (cd /home/paperspace/code/nerf_new && pixi run python "$SRC/extract_kf_pngs.py" \
                 --data-dir "$R" --mono "$MONOS/image_left_kf20cm.monolithic" \
-                --out-dir "$TASSILI/kf_images") \
+                --out-dir "$R/prod/scratch_sam3") \
                 > "$LOGS/preprod_${S}_extract.log" 2>&1 \
-                && mark "R2-FIXED $S ($(ls "$TASSILI"/kf_images/kf_*.png 2>/dev/null | wc -l) PNGs)" \
+                && mark "R2-FIXED $S ($(ls "$R"/prod/scratch_sam3/kf_*.png 2>/dev/null | wc -l) PNGs)" \
                 || { mark "R2-RED $S extract failed"; RED=$((RED+1)); }
         else
             mark "R2-RED $S K probe failed (K='$KFC' pngs=$PNGC)"; RED=$((RED+1))

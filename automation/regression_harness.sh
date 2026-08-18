@@ -45,7 +45,7 @@ pixi run --manifest-path "$NS_PIXI" python - << 'EOF' || FAIL=1
 import sys
 from pathlib import Path
 sys.path.insert(0, '/home/paperspace/code/aru_sil_core/src/scripts')
-import kf_domain
+import survey_paths
 bad = []
 for root in sorted(Path('/home/paperspace/data/citrus_all').glob('*_Jackal')):
     kf_mono = root / 'image_left_kf20cm.monolithic'
@@ -53,7 +53,7 @@ for root in sorted(Path('/home/paperspace/data/citrus_all').glob('*_Jackal')):
     if not (kf_mono.exists() and kf_dir.is_dir()):
         continue
     try:
-        nk = len(kf_domain.load(root).names)
+        nk = len(survey_paths.kf_timestamps(root))
     except Exception as e:
         print(f"  {root.name}: kf_domain load FAILED ({e})")
         bad.append(root.name)
