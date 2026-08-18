@@ -54,8 +54,10 @@ if ps -eo args | grep -qE "[n]s-train"; then
     mark "ABORT: ns-train still running after cleanup — GPU busy"; exit 1
 fi
 # hard VRAM floor: a slot needs ~10G; refuse to start blind
-FREE_G=$(cd /home/paperspace/code/nerf_new && pixi run python -c \
-    "import torch;print(int(torch.cuda.mem_get_info()[0]/1e9))" 2>/dev/null | tail -1)
+# A FILE, not `python -c`: pixi's deno_task_shell eats the -c quoting and
+# returns nothing, which turned this hard floor into a no-op.
+FREE_G=$(cd /home/paperspace/code/nerf_new && pixi run python \
+    "$AUTO/free_vram_gb.py" 2>/dev/null | tail -1)
 if [ -n "$FREE_G" ] && [ "$FREE_G" -lt 10 ]; then
     mark "ABORT: only ${FREE_G}G VRAM free (need >=10G) — investigate holders: fuser -v /dev/nvidia0"
     exit 1
@@ -82,7 +84,14 @@ export CENSUS_SEED_ONLY=${CENSUS_SEED_ONLY:-1}   # seed-only stage2 (2026-08-17:
 # not camera-frame LIO; wiring transform_lio without verifying the frame
 # convention would train plausible-looking garbage, so that verification is
 # daylight work, and the gate lets it join mid-week without a restart).
-SURVEYS=(05_13D_Jackal 04_13D_Jackal apr_2026_zed 01_13B_Jackal 03_13B_Jackal 02_13B_Jackal dec_2025_ten_rows)
+# dec_2025_ten_rows is OUT of the rotation (2026-08-18, Paul: "klapmuts
+# ten rows needs to be looked at"). Open items: monos nest one level
+# deeper (prod/monos/monolithics) unlike every other survey; two orphaned
+# index files sit in prod/monos with no mono beside them; kf domain does
+# not match (1790 kf_images vs 1792 mono entries), which [0c] now treats
+# as a hard stop; and it has no markers_v2 or marker_hierarchy yet. Its
+# root_of entry stays so the survey can still be driven by hand.
+SURVEYS=(05_13D_Jackal 04_13D_Jackal apr_2026_zed 01_13B_Jackal 03_13B_Jackal 02_13B_Jackal)
 root_of()  { case "$1" in
     apr_2026_zed) echo "$KLAP/apr_2026_zed";;
     dec_2025_ten_rows) echo "$KLAP/dec_2025_ten_rows";;
@@ -100,7 +109,10 @@ emb_of() {  # DERIVE exactly as the pipeline does (${SURVEY%_Jackal}_v1g),
     [ -f "$p" ] && { echo "$p"; return; }
     ls -t "$(root_of "$1")/prod/bateleur/embedder/${1%_Jackal}"*/ckpts/model_best.pth 2>/dev/null | head -1
 }
-hier_of() { ls -t "$(root_of "$1")"/scene_graph*/marker_hierarchy*.json 2>/dev/null | head -1; }
+# The hierarchy lives in prod/bateleur/scene_graph (2026-08-18). The old
+# "$ROOT"/scene_graph* glob resolved through a shim and would now silently
+# return nothing, scoring every block against an empty hierarchy.
+hier_of() { echo "$(root_of "$1")/prod/bateleur/scene_graph/marker_hierarchy.json"; }
 
 # ---------------- phase A: cheap flips -------------------------------------
 if [ ! -f "$STATE/A.done" ]; then
@@ -179,7 +191,12 @@ apr_prep() {
 }
 
 # ---------------- CPU sidecar: klap ten-rows ingest ------------------------
-(
+# DISABLED 2026-08-18 with ten_rows out of the rotation. It also addressed
+# $KLAP/dec_2025_ten_rows/monolithics and /kf_images, which are prod paths now
+# (prod/monos/monolithics, prod/tassili/kf_images) — it would rebuild the kf
+# cut at the survey root and recreate the split-brain we just cleared.
+TENROWS_SIDECAR=${TENROWS_SIDECAR:-0}
+[ "$TENROWS_SIDECAR" = "1" ] && (
     exec >> "$LOGS/week_cpu_sidecar.log" 2>&1
     mark "CPU sidecar start (ten-rows ingest)"
     TR=$KLAP/dec_2025_ten_rows/monolithics

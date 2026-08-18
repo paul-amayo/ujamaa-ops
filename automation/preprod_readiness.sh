@@ -48,7 +48,14 @@ mkdir -p "$STATE"
 RJSON=$STATE/readiness.json
 mark() { echo "[$(date +%m-%d\ %H:%M:%S)] $1"; }
 
-SURVEYS=(05_13D_Jackal 04_13D_Jackal apr_2026_zed 01_13B_Jackal 03_13B_Jackal 02_13B_Jackal dec_2025_ten_rows)
+# dec_2025_ten_rows is OUT of the rotation (2026-08-18, Paul: "klapmuts
+# ten rows needs to be looked at"). Open items: monos nest one level
+# deeper (prod/monos/monolithics) unlike every other survey; two orphaned
+# index files sit in prod/monos with no mono beside them; kf domain does
+# not match (1790 kf_images vs 1792 mono entries), which [0c] now treats
+# as a hard stop; and it has no markers_v2 or marker_hierarchy yet. Its
+# root_of entry stays so the survey can still be driven by hand.
+SURVEYS=(05_13D_Jackal 04_13D_Jackal apr_2026_zed 01_13B_Jackal 03_13B_Jackal 02_13B_Jackal)
 [ $# -ge 1 ] && SURVEYS=("$1")
 root_of() { case "$1" in
     apr_2026_zed) echo "$KLAP/apr_2026_zed";;
