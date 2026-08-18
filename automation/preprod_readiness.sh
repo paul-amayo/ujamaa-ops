@@ -77,6 +77,25 @@ for S in "${SURVEYS[@]}"; do
         ln -sfn "monolithics/image_left_kf20cm.monolithic" "$R/image_left_kf20cm.monolithic"
         mark "R1-FIXED $S: kf mono root alias"
     fi
+    # R1b frame contract + self-contained monos + empty-index guard.
+    # dec_2025_ten_rows burned 7 queue slots on two faults this catches:
+    #   - laser.monolithic did not resolve from the dir the pipeline passes,
+    #     so IndexLogger built a 1-BYTE index for a missing file and every
+    #     project() silently returned empty ("0 world points");
+    #   - the alias above points transform_lio at ZED odom, which is
+    #     CAMERA-frame, while LaserProjector's c2w = L2C*Tf*L2C^-1 assumes
+    #     LIDAR-frame. The helper conjugates it (T_lidar = L2C^-1*T_cam*L2C)
+    #     so prod's c2w collapses to exactly Tf_cam. Surveys already in the
+    #     laser frame (apr_2026_zed, 01-05) are detected and left alone.
+    # Runs standalone on purpose: it imports pbTransform_pb2, whose
+    # descriptors are fatal alongside the C++ bindings in one process.
+    # A pose swap invalidates the kf_domain cache — R2 below rebuilds it,
+    # which MUST stay ordered after this.
+    while IFS= read -r LFLINE; do
+        [ -n "$LFLINE" ] && mark "$LFLINE"
+    done < <(cd /home/paperspace/code/nerf_new && pixi run python \
+             "$SRC/ensure_laser_frame_poses.py" --data-dir "$R" 2>/dev/null \
+             | grep -a "^LASERFRAME-")
     if [ -e "$R/transform_lio.monolithic" ] && [ -e "$R/image_left_kf20cm.monolithic" ]; then
         mark "R1-PASS $S pose+kf monos resolve"
     else
