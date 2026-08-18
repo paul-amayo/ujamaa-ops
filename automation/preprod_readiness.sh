@@ -322,53 +322,24 @@ for S in "${SURVEYS[@]}"; do
         01_13B_Jackal) TAG=01_13B;; 02_13B_Jackal) TAG=02_13B;; 03_13B_Jackal) TAG=03_13B;;
         04_13D_Jackal) TAG=04_13D;; 05_13D_Jackal) TAG=05_13D;; *) TAG=klap;;
     esac
+    # ---- R6 embedder PRESENCE only (health gate DEPRECATED 2026-08-17) ----
+    # The health gate never produced a true positive and produced three false
+    # ones in a day, each triggering a RETRAIN — the single most destructive
+    # action available to readiness, because a new embedder silently
+    # invalidates every already-seeded block (features built with embedder A
+    # scored with embedder B read ~0: 05 b009 measured 0.845 by hand at 19:30,
+    # then 0.00 after the 19:40 retrain, same features). Its two metrics were
+    # also wrong or unvalidated: separation was measured in a latent space no
+    # query uses, and no threshold ever linked round-trip fidelity to
+    # containment. The real health signal is the containment verdict itself
+    # (R10), which is outcome-linked and already runs per block.
     CANON_CK="/home/paperspace/data/high/nerf/${S%_Jackal}_v1g/ckpts/model_best.pth"
     if [ -f "$CANON_CK" ]; then
-        # R6b HEALTH: present is not enough — a COLLAPSED embedder (all words
-        # mapping to one point) passes every other gate and silently kills
-        # every downstream verdict (02: mean pairwise cos 1.0000, containment
-        # recall 1.0 / precision 0.013). Quarantine it so the pipeline's [5b]
-        # gate retrains in-slot, and rewind so blocks re-run stage2.
-        health() { (cd /home/paperspace/code/nerf_new && pixi run python \
-                     "$SRC/embedder_roundtrip.py" --ckpt "$CANON_CK") \
-                     > "$LOGS/preprod_${S}_embedder_health$1.log" 2>&1; }
-        hline() { grep -aE 'COLLAPSED|separation' "$LOGS/preprod_${S}_embedder_health$1.log" | tail -1; }
-        if health ""; then
-            mark "R6-PASS $S embedder healthy ($(hline ''))"
-        else
-            # REPAIR, don't quarantine-and-hope (Paul 2026-08-16: "readiness
-            # is there to solve"): retraining on the same inputs reproduces
-            # the same collapse, so fix the INPUT first — rebuild the
-            # hierarchy with the trajectory-derived row direction (the PCA
-            # trap gives rows that cut across every aisle) — then retrain,
-            # then RE-VERIFY. Only a repair that fails twice is reported.
-            mark "R6-REPAIR $S embedder unhealthy ($(hline '')) — rebuilding hierarchy + retraining"
-            HJC=$R/scene_graph/marker_hierarchy.json
-            (cd /home/paperspace/code/nerf_new && pixi run --manifest-path "$NS_PIXI" \
-                python "$SRC/build_marker_hierarchy.py" \
-                --semantic-monolithic "$R/filtered_semantic_v2.monolithic" \
-                --marker-monolithic "$(ls "$R"/scene_graph*/markers_v2*.monolithic | head -1)" \
-                --data-dir "$R" --out "$HJC") \
-                > "$LOGS/preprod_${S}_hierarchy_repair.log" 2>&1 \
-                && mark "R6-REPAIR $S hierarchy rebuilt ($(grep -aoE 'row-normal.*' "$LOGS/preprod_${S}_hierarchy_repair.log" | tail -1))" \
-                || mark "R6-REPAIR $S hierarchy rebuild FAILED (see preprod_${S}_hierarchy_repair.log)"
-            mv "$(dirname "$(dirname "$CANON_CK")")" \
-               "$R/experimental/collapsed_embedder_$(date +%Y%m%d%H%M)" 2>/dev/null
-            (cd /home/paperspace/code/nerf_new && pixi run --manifest-path "$NS_PIXI" \
-                python "$SRC/../interfaces/rerun/HiGH/train_hyperembedder_graph.py" \
-                --hierarchy-json "$HJC" --experiment-name "${S%_Jackal}_v1g" \
-                --contrastive-weight 2.0 --cosine-reconstruction-weight 2.0 \
-                --reconstruction-weight 1.0 --temperature 0.2 --keep-super-row \
-                --epochs 1500 --no-level-norms) \
-                > "$LOGS/preprod_${S}_embedder_retrain.log" 2>&1
-            if health "_post"; then
-                mark "R6-FIXED $S embedder repaired and verified ($(hline '_post'))"
-                echo 0 > "$STATE/$S.next"   # blocks re-run stage2 on it
-            else
-                mark "R6-STALE-UNFIXED $S embedder STILL unhealthy after hierarchy rebuild + retrain ($(hline '_post')) — needs human root-cause; see preprod_${S}_embedder_retrain.log"
-                RED=$((RED+1))
-            fi
-        fi
+        mark "R6-PASS $S embedder present ($(basename $(dirname $(dirname $CANON_CK))))"
+        (cd /home/paperspace/code/nerf_new && pixi run python \
+            "$SRC/embedder_roundtrip.py" --ckpt "$CANON_CK") \
+            > "$LOGS/preprod_${S}_embedder_health.log" 2>&1 || true
+        mark "R6-INFO $S $(grep -a separation "$LOGS/preprod_${S}_embedder_health.log" | tail -1) (advisory — never triggers a retrain)"
     elif ls -t /home/paperspace/data/high/nerf/${TAG}*/ckpts/model_best.pth >/dev/null 2>&1; then
         mark "R6-PASS $S embedder present (non-canon name)"
     else
