@@ -93,10 +93,12 @@ emb_of() {  # DERIVE exactly as the pipeline does (${SURVEY%_Jackal}_v1g),
     # never a hand-kept map: the old map scored apr with klapmuts_v1 and 04
     # with the retired v3vocab1k vocabulary -> containment 0.00. The verdict
     # itself now prefers stage2_provenance.json; this is the fallback.
+    # The embedder lives with its survey in prod/bateleur (2026-08-18) — one
+    # physical copy, never a second in a shared tree that can go stale.
     local exp="${1%_Jackal}_v1g"
-    local p="/home/paperspace/data/high/nerf/$exp/ckpts/model_best.pth"
+    local p="$(root_of "$1")/prod/bateleur/embedder/$exp/ckpts/model_best.pth"
     [ -f "$p" ] && { echo "$p"; return; }
-    ls -t "/home/paperspace/data/high/nerf/${1%_Jackal}"*/ckpts/model_best.pth 2>/dev/null | head -1
+    ls -t "$(root_of "$1")/prod/bateleur/embedder/${1%_Jackal}"*/ckpts/model_best.pth 2>/dev/null | head -1
 }
 hier_of() { ls -t "$(root_of "$1")"/scene_graph*/marker_hierarchy*.json 2>/dev/null | head -1; }
 

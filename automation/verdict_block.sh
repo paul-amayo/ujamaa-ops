@@ -16,7 +16,13 @@ if [ -f "$PROV" ]; then
     EMB=$(python3 -c "import json;print(json.load(open('$PROV'))['embedder'])" 2>/dev/null)
     HJ=$(python3 -c "import json;print(json.load(open('$PROV'))['hierarchy'])" 2>/dev/null)
 fi
-EMB=${EMB:-${CENSUS_EMBEDDER:-/home/paperspace/data/high/nerf/04_13D_v3vocab1k/ckpts/model_best.pth}}
+# Fallback = THIS survey's embedder in prod/bateleur (2026-08-18). It used to
+# default to a hardcoded 04 checkpoint on a retired vocabulary, which scored
+# other surveys against the wrong embedder and returned containment 0.00
+# without ever saying so. Provenance above still wins; this only fires when a
+# block has none, and a missing file now fails loudly instead of mis-scoring.
+SURVEY_ROOT_GUESS=${CFGDIR%%/prod/*}
+EMB=${EMB:-${CENSUS_EMBEDDER:-$(ls -t "$SURVEY_ROOT_GUESS"/prod/bateleur/embedder/*/ckpts/model_best.pth 2>/dev/null | head -1)}}
 HJ=${HJ:-${CENSUS_HIERARCHY:-/home/paperspace/data/citrus_all/04_13D_Jackal/scene_graph_v4/marker_hierarchy_fruit5.json}}
 ARU=/home/paperspace/code/aru_sil_core/src/scripts
 FIG=/home/paperspace/code/lab_notebook/figs

@@ -171,18 +171,27 @@ def stage2_state(cfg: Path):
     return blocks, done
 
 
-def find_embedder(sid: str):
-    for name in EMB_PREF.get(sid, []):
-        p = EMB_ROOT / name / "ckpts/model_best.pth"
-        if p.exists():
-            return p, name + " (canon)"
-    tag = EMB_TAG.get(sid)
-    if tag:
-        cands = sorted(EMB_ROOT.glob(f"{tag}*/ckpts/model_best.pth"),
+def find_embedder(sid: str, root: Path = None):
+    """The embedder lives with its survey in prod/bateleur (2026-08-18).
+
+    One physical copy per survey, beside the SAM3 masks and scene_graph it was
+    trained from. The old shared EMB_ROOT tree invited a second copy going
+    stale while blocks were seeded from the first — and features seeded under
+    embedder A read ~0 through embedder B, so a stray copy silently zeroes
+    every already-seeded block.
+    """
+    if root is not None:
+        emb_dir = Path(root) / "prod/bateleur/embedder"
+        for name in EMB_PREF.get(sid, []):
+            p = emb_dir / name / "ckpts/model_best.pth"
+            if p.exists():
+                return p, name + " (canon)"
+        cands = sorted(emb_dir.glob("*/ckpts/model_best.pth"),
                        key=lambda p: p.stat().st_mtime)
         if cands:
-            return cands[-1], cands[-1].parent.parent.name + " (newest, no canon tag)"
-    return None, "no embedder ckpt found"
+            return cands[-1], cands[-1].parents[1].name + " (newest in prod/bateleur)"
+        return None, "no embedder in prod/bateleur/embedder (trains in-slot)"
+    return None, "no survey root given"
 
 
 def ledger_obs():
@@ -311,14 +320,13 @@ def migrate(root: Path, execute: bool):
             else:
                 mv_shim(entry, exp / n, plan, execute, shim=False)
 
-    # blessed embedder: physical copy into prod/tassili (small ckpt)
-    emb, _ = find_embedder(root.name)
-    if emb and execute:
-        dst = prod / "tassili/embedder" / emb.parent.parent.name / "model_best.pth"
-        if not dst.exists() and emb.stat().st_size < 1 << 30:
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(emb, dst)
-            plan.append(f"  copy    embedder {emb.parent.parent.name} -> prod/tassili/embedder/")
+    # NO EMBEDDER COPY (removed 2026-08-18). This block used to copy the
+    # embedder into prod/tassili/embedder, and every copy it made went stale:
+    # measured on 2026-08-18, 05's copy was four days behind the live ckpt,
+    # 02's two days, 03's one. A stale embedder is the most destructive
+    # artifact in the pipeline — features seeded under one read ~0 through
+    # another — so the embedder now has exactly ONE home, written directly by
+    # the trainer: <survey>/prod/bateleur/embedder/<exp>/ckpts/model_best.pth.
     return plan
 
 
@@ -363,7 +371,7 @@ def survey_manifest(root: Path, obs: dict):
                        f"splats.json {'present' if (cfg / 'splats.json').exists() else 'MISSING — export + register for the viewer'}"))
     else:
         c.append(check("blocks", False, "no blocks_ns config with stage2 or splats.json"))
-    emb, emb_ev = find_embedder(sid)
+    emb, emb_ev = find_embedder(sid, root)
     c.append(check("embedder", emb is not None, emb_ev))
     c.append(check("hierarchy", hier is not None,
                    f"{n_obj} obj / {n_rows} rows ({hier.parent.name})" if hier else "no marker_hierarchy"))

@@ -60,61 +60,44 @@ echo "{" > "$RJSON.tmp"
 
 for S in "${SURVEYS[@]}"; do
     R=$(root_of "$S"); RED=0; NOTES=""
+    # PROD LAYOUT (2026-08-18): assets are addressed where they physically
+    # live. The root shims are gone, so a stale path fails loudly.
+    MONOS=$R/prod/monos
+    [ -f "$MONOS/image_left_kf20cm.monolithic" ] || \
+        { [ -d "$MONOS/monolithics" ] && MONOS=$MONOS/monolithics; }
+    BATELEUR=$R/prod/bateleur
+    TASSILI=$R/prod/tassili
     mark "=== $S readiness ==="
 
     # ---- R1 pose -----------------------------------------------------------
-    MD=$R; [ -d "$R/monolithics" ] && MD=$R/monolithics
-    if [ ! -e "$R/transform_lio.monolithic" ]; then
-        for CAND in zed_transform.monolithic transform_lio.monolithic; do
-            if [ -f "$MD/$CAND" ] && [ "$MD" != "$R" ]; then
-                ln -sfn "monolithics/$CAND" "$R/transform_lio.monolithic"
-                mark "R1-FIXED $S: transform_lio -> monolithics/$CAND (camera-frame odom for training; INS stays georef-side)"
-                break
-            fi
-        done
-    fi
-    if [ ! -e "$R/image_left_kf20cm.monolithic" ] && [ -f "$MD/image_left_kf20cm.monolithic" ]; then
-        ln -sfn "monolithics/image_left_kf20cm.monolithic" "$R/image_left_kf20cm.monolithic"
-        mark "R1-FIXED $S: kf mono root alias"
-    fi
-    # R1b frame contract + self-contained monos + empty-index guard.
-    # dec_2025_ten_rows burned 7 queue slots on two faults this catches:
-    #   - laser.monolithic did not resolve from the dir the pipeline passes,
-    #     so IndexLogger built a 1-BYTE index for a missing file and every
-    #     project() silently returned empty ("0 world points");
-    #   - the alias above points transform_lio at ZED odom, which is
-    #     CAMERA-frame, while LaserProjector's c2w = L2C*Tf*L2C^-1 assumes
-    #     LIDAR-frame. The helper conjugates it (T_lidar = L2C^-1*T_cam*L2C)
-    #     so prod's c2w collapses to exactly Tf_cam. Surveys already in the
-    #     laser frame (apr_2026_zed, 01-05) are detected and left alone.
-    # Runs standalone on purpose: it imports pbTransform_pb2, whose
-    # descriptors are fatal alongside the C++ bindings in one process.
-    # A pose swap invalidates the kf_domain cache — R2 below rebuilds it,
-    # which MUST stay ordered after this.
-    while IFS= read -r LFLINE; do
-        [ -n "$LFLINE" ] && mark "$LFLINE"
-    done < <(cd /home/paperspace/code/nerf_new && pixi run python \
-             "$SRC/ensure_laser_frame_poses.py" --data-dir "$R" 2>/dev/null \
-             | grep -a "^LASERFRAME-")
-    if [ -e "$R/transform_lio.monolithic" ] && [ -e "$R/image_left_kf20cm.monolithic" ]; then
-        mark "R1-PASS $S pose+kf monos resolve"
+    # NO ALIASING (2026-08-18). This gate used to create root symlinks
+    # (transform_lio -> monolithics/zed_transform, kf mono -> monolithics/...)
+    # so root-addressed scripts kept resolving. All 3,222 survey symlinks were
+    # removed because those shims let stale artifacts resolve silently; every
+    # consumer now addresses prod directly, and a missing asset must fail here
+    # rather than be papered over.
+    if [ -f "$MONOS/transform_lio.monolithic" ] && [ -f "$MONOS/image_left_kf20cm.monolithic" ]; then
+        mark "R1-PASS $S pose+kf monos in prod/monos"
     else
-        mark "R1-RED $S: no pose/kf mono (ingest incomplete)"; RED=$((RED+1))
+        [ -f "$MONOS/transform_lio.monolithic" ] || mark "R1-RED $S: no transform_lio.monolithic in $MONOS"
+        [ -f "$MONOS/image_left_kf20cm.monolithic" ] || mark "R1-RED $S: no image_left_kf20cm.monolithic in $MONOS"
+        RED=$((RED+1))
     fi
 
     # ---- R2 kdomain --------------------------------------------------------
-    if [ -e "$R/image_left_kf20cm.monolithic" ]; then
+    if [ -e "$MONOS/image_left_kf20cm.monolithic" ]; then
         KFC=$(cd /home/paperspace/code/nerf_new && pixi run python "$SRC/kf_domain.py" \
-              --data-dir "$R" 2>/dev/null | grep -oaE "K=[0-9]+" | head -1 | cut -d= -f2)
-        PNGC=$(ls "$R"/kf_images/kf_*.png 2>/dev/null | wc -l)
+              --data-dir "$MONOS" 2>/dev/null | grep -oaE "K=[0-9]+" | head -1 | cut -d= -f2)
+        PNGC=$(ls "$TASSILI"/kf_images/kf_*.png 2>/dev/null | wc -l)
         if [ -n "$KFC" ] && [ "$PNGC" -eq "$KFC" ]; then
             mark "R2-PASS $S K=$KFC pngs=$PNGC"
         elif [ -n "$KFC" ] && [ "$PNGC" -lt "$KFC" ]; then
             mark "R2-FIX $S extracting ($PNGC/$KFC)"
             (cd /home/paperspace/code/nerf_new && pixi run python "$SRC/extract_kf_pngs.py" \
-                --data-dir "$R" --mono "$R/image_left_kf20cm.monolithic") \
+                --data-dir "$R" --mono "$MONOS/image_left_kf20cm.monolithic" \
+                --out-dir "$TASSILI/kf_images") \
                 > "$LOGS/preprod_${S}_extract.log" 2>&1 \
-                && mark "R2-FIXED $S ($(ls "$R"/kf_images/kf_*.png 2>/dev/null | wc -l) PNGs)" \
+                && mark "R2-FIXED $S ($(ls "$TASSILI"/kf_images/kf_*.png 2>/dev/null | wc -l) PNGs)" \
                 || { mark "R2-RED $S extract failed"; RED=$((RED+1)); }
         else
             mark "R2-RED $S K probe failed (K='$KFC' pngs=$PNGC)"; RED=$((RED+1))
@@ -124,42 +107,42 @@ for S in "${SURVEYS[@]}"; do
     # ---- R3 masks ----------------------------------------------------------
     K=${KFC:-0}
     for D in sky_masks fg_masks; do
-        FIRST=$(ls "$R/$D/" 2>/dev/null | head -1)
-        CNT=$(ls "$R/$D/"kf_*.png 2>/dev/null | wc -l)
+        FIRST=$(ls "$TASSILI/$D/" 2>/dev/null | head -1)
+        CNT=$(ls "$TASSILI/$D/"kf_*.png 2>/dev/null | wc -l)
         if [ -n "$FIRST" ] && ! echo "$FIRST" | grep -qE "^kf_|^\."; then
             mkdir -p "$R/experimental/masks_streamnamed_pre_kf_rebuild"
-            T=$R/$D; [ -L "$R/$D" ] && T=$(readlink -f "$R/$D")
+            T=$TASSILI/$D; [ -L "$TASSILI/$D" ] && T=$(readlink -f "$TASSILI/$D")
             mv "$T" "$R/experimental/masks_streamnamed_pre_kf_rebuild/$D" 2>/dev/null
-            [ -L "$R/$D" ] && unlink "$R/$D"
+            [ -L "$TASSILI/$D" ] && unlink "$TASSILI/$D"
             mark "R3-QUARANTINED $S $D (stream-named relic '$FIRST' -> experimental; prod holds only realisable assets)"
             CNT=0
         fi
         if [ "$CNT" -lt "$K" ] || [ "$K" -eq 0 ]; then
             # stale .done over an under-count must not survive: the pipeline
             # [4b] gate trusts it (a false FIXED stamped one on 0 PNGs once)
-            [ -f "$R/$D/.done" ] && mv "$R/$D/.done" "$R/$D/.done.revoked_$(date +%s)"
+            [ -f "$TASSILI/$D/.done" ] && mv "$TASSILI/$D/.done" "$TASSILI/$D/.done.revoked_$(date +%s)"
             TOOL=build_sky_masks.py; [ "$D" = "fg_masks" ] && TOOL=build_fg_masks.py
             mark "R3-FIX $S rebuilding $D kf-named ($CNT/$K) — GPU"
             (cd /home/paperspace/code/nerf_new && pixi run --manifest-path "$SAM3_PIXI" \
                 python "$SRC/$TOOL" --data-dir "$R") \
                 > "$LOGS/preprod_${S}_${D}.log" 2>&1
-            NEWCNT=$(ls "$R/$D/"kf_*.png 2>/dev/null | wc -l)
+            NEWCNT=$(ls "$TASSILI/$D/"kf_*.png 2>/dev/null | wc -l)
             # FIXED means the FILES exist — an exit code is not evidence
             if [ "$NEWCNT" -ge "$K" ] && [ "$K" -gt 0 ]; then
-                touch "$R/$D/.done"
+                touch "$TASSILI/$D/.done"
                 mark "R3-FIXED $S $D ($NEWCNT PNGs)"
             else
                 mark "R3-RED $S $D rebuild produced $NEWCNT/$K (see preprod_${S}_${D}.log)"
                 RED=$((RED+1))
             fi
         else
-            [ -f "$R/$D/.done" ] || touch "$R/$D/.done"
+            [ -f "$TASSILI/$D/.done" ] || touch "$TASSILI/$D/.done"
             mark "R3-PASS $S $D kf-named x$CNT"
         fi
     done
 
     # ---- R4 registry -------------------------------------------------------
-    if [ -f "$R/sam3_v2/global_ids.json" ] && ls "$R"/scene_graph*/marker_hierarchy*.json >/dev/null 2>&1; then
+    if [ -f "$BATELEUR/sam3_v2/global_ids.json" ] && ls "$BATELEUR"/scene_graph/marker_hierarchy.json >/dev/null 2>&1; then
         mark "R4-PASS $S registry present"
         HAS_REG=1
     else
@@ -175,8 +158,8 @@ for S in "${SURVEYS[@]}"; do
     # hierarchy -> per-block supervision. stat -L ALWAYS (a shim's own
     # date is migration day and lies). Proven live: 03's mono was
     # 2026-05-09 vs registry 2026-07-10 -> only 3 ids resolved.
-    MONO=$R/filtered_semantic_v2.monolithic
-    GIDS=$R/sam3_v2/global_ids.json
+    MONO=$MONOS/filtered_semantic_v2.monolithic
+    GIDS=$BATELEUR/sam3_v2/global_ids.json
     if [ "$HAS_REG" = "1" ] && { [ ! -e "$MONO" ] || \
          [ "$(stat -Lc %Y "$MONO" 2>/dev/null || echo 0)" -lt "$(stat -Lc %Y "$GIDS")" ]; }; then
         mark "R5a-STALE $S semantic monolithics predate the registry — regenerating from sam3 assets"
@@ -187,10 +170,10 @@ for S in "${SURVEYS[@]}"; do
               > "$LOGS/preprod_${S}_markers_regen.log" 2>&1 \
            && (cd /home/paperspace/code/nerf_new && pixi run --manifest-path "$NS_PIXI" \
               python "$SRC/build_marker_hierarchy.py" \
-              --semantic-monolithic "$R/filtered_semantic_v2.monolithic" \
-              --marker-monolithic "$R/scene_graph/markers_v2.monolithic" \
+              --semantic-monolithic "$MONOS/filtered_semantic_v2.monolithic" \
+              --marker-monolithic "$BATELEUR/scene_graph/markers_v2.monolithic" \
               --dominant-direction-xz "1,0" \
-              --out "$R/scene_graph/marker_hierarchy.json") \
+              --out "$BATELEUR/scene_graph/marker_hierarchy.json") \
               > "$LOGS/preprod_${S}_hierarchy_regen.log" 2>&1; then
             # cascade: downstream markers older than the fresh mono are
             # stale too — mv them aside so supervision recompiles
@@ -198,7 +181,7 @@ for S in "${SURVEYS[@]}"; do
             while IFS= read -r MK; do
                 [ "$(stat -Lc %Y "$MK")" -lt "$(stat -Lc %Y "$MONO")" ] || continue
                 mv "$MK" "${MK}.stale_$(date +%s)" && NMV=$((NMV+1))
-            done < <(find "$R/blocks_ns/$CFG/" \
+            done < <(find "$TASSILI/blocks_ns/$CFG/" \
                        \( -name ".palette_v2" -o -name "manifest.json" \) 2>/dev/null)
             # trailing slash: blocks_ns/<cfg> is a shim into prod and bare
             # find does not follow a symlink argument (found 0 on 03)
@@ -223,7 +206,7 @@ for S in "${SURVEYS[@]}"; do
             QD=$R/experimental/stale_stage2_pre_regen_$(date +%Y%m%d)
             mkdir -p "$QD/$(basename "$(dirname "$S2")")"
             mv "$S2" "$QD/$(basename "$(dirname "$S2")")/" && NS2=$((NS2+1))
-        done < <(find "$R/blocks_ns/$CFG/" -maxdepth 3 -type d \
+        done < <(find "$TASSILI/blocks_ns/$CFG/" -maxdepth 3 -type d \
                    -name "stage2_censusinit_fw2" 2>/dev/null)
         if [ "$NS2" -gt 0 ]; then
             mark "R5b-REQUEUED $S $NS2 stage2 runs superseded by a fresher semantic mono -> experimental (slots retrain)"
@@ -232,8 +215,8 @@ for S in "${SURVEYS[@]}"; do
     fi
 
     # ---- R5 supervision viability (probe first + middle canonical block) --------
-    if [ "$HAS_REG" = "1" ] && [ -d "$R/blocks_ns/$CFG" ]; then
-        BLOCKS=($(ls -d "$R/blocks_ns/$CFG"/block_* 2>/dev/null | grep -E "block_[0-9]+$" | sort))
+    if [ "$HAS_REG" = "1" ] && [ -d "$TASSILI/blocks_ns/$CFG" ]; then
+        BLOCKS=($(ls -d "$TASSILI/blocks_ns/$CFG"/block_* 2>/dev/null | grep -E "block_[0-9]+$" | sort))
         NB=${#BLOCKS[@]}
         if [ "$NB" -gt 0 ]; then
             BEST_RATIO=-1; BEST_LINE=""
@@ -247,9 +230,9 @@ for S in "${SURVEYS[@]}"; do
                     (cd /home/paperspace/code/nerf_new && pixi run --manifest-path "$NS_PIXI" \
                         python "$SRC/save_filtered_semantic_pngs.py" \
                         --block-dir "$BD" \
-                        --semantic-monolithic "$R/filtered_semantic_v2.monolithic" \
-                        --marker-monolithic "$(ls "$R"/scene_graph*/markers_v2*.monolithic | head -1)" \
-                        --global-ids "$R/sam3_v2/global_ids.json") \
+                        --semantic-monolithic "$MONOS/filtered_semantic_v2.monolithic" \
+                        --marker-monolithic "$BATELEUR/scene_graph/markers_v2.monolithic" \
+                        --global-ids "$BATELEUR/sam3_v2/global_ids.json") \
                         > "$LOGS/preprod_${S}_supervision_$(basename "$BD").log" 2>&1 \
                         && touch "$BD/semantic_v2_B/.palette_v2"
                 fi
@@ -259,7 +242,7 @@ for S in "${SURVEYS[@]}"; do
                 READOUT=$(cd /home/paperspace/code/nerf_new && pixi run python \
                     "$SRC/audit_supervision_density.py" \
                     --supervision-dir "$BD/semantic_v2_B" \
-                    --global-ids "$R/sam3_v2/global_ids.json" \
+                    --global-ids "$BATELEUR/sam3_v2/global_ids.json" \
                     --transforms "$BD/transforms.json" \
                     2>> "$LOGS/preprod_${S}_probe_$(basename "$BD").log" | tail -1)
                 mark "R5-PROBE $S $(basename "$BD"): ${READOUT:-AUDIT-CRASHED (see probe log)}"
@@ -286,84 +269,18 @@ for S in "${SURVEYS[@]}"; do
         NOTES="$NOTES paint-in-slot;"
     fi
 
-    # ---- R7 blocks live IN PROD (Paul: "wouldnt the blocks be placed in
-    # prod" — the canonical cfg IS the realisable asset under construction;
-    # root keeps only a shim so training writes land in prod from block one)
-    PB=$R/prod/tassili/blocks_ns/$CFG
-    RB=$R/blocks_ns/$CFG
-    if [ -d "$RB" ] && [ ! -L "$RB" ]; then
-        mkdir -p "$R/prod/tassili/blocks_ns"
-        if [ -d "$PB" ]; then
-            mark "R7-RED $S: BOTH root and prod hold $CFG — manual merge needed"
-            RED=$((RED+1))
-        else
-            mv "$RB" "$PB" && ln -sfn "../prod/tassili/blocks_ns/$CFG" "$RB" \
-                && mark "R7-FIXED $S: $CFG moved into prod/tassili + root shim" \
-                || { mark "R7-RED $S: cfg move failed"; RED=$((RED+1)); }
-        fi
-    elif [ -L "$RB" ] && [ -d "$PB" ]; then
-        mark "R7-PASS $S $CFG already in prod (root shim)"
-    else
-        mkdir -p "$PB" "$R/blocks_ns"
-        [ -e "$RB" ] || ln -sfn "../prod/tassili/blocks_ns/$CFG" "$RB"
-        mark "R7-FIXED $S: empty $CFG slot pre-placed in prod + root shim (partition lands there)"
-    fi
-
-    # ---- R5c verdict provenance consistency (Paul 2026-08-15: fold the
-    # diagnosis into the recipe). A stage2 run whose recorded embedder or
-    # hierarchy differs from the CANON pair scored the wrong vocabulary —
-    # the 0.00/0.23 class on 04 and the missing apr verdicts. Verdicts are
-    # cheap (~2 min), so drop the bad entries and let the slot re-verdict.
-    CANON_EMB="/home/paperspace/data/high/nerf/${S%_Jackal}_v1g/ckpts/model_best.pth"
-    CANON_HJ=$(ls -t "$R"/scene_graph*/marker_hierarchy*.json 2>/dev/null | head -1)
-    NBAD=0
-    while IFS= read -r PROV; do
-        PE=$(python3 -c "import json;print(json.load(open('$PROV')).get('embedder',''))" 2>/dev/null)
-        PH=$(python3 -c "import json;print(json.load(open('$PROV')).get('hierarchy',''))" 2>/dev/null)
-        { [ "$PE" = "$CANON_EMB" ] && [ "$PH" = "$CANON_HJ" ]; } && continue
-        NBAD=$((NBAD+1))
-    done < <(find "$R/blocks_ns/$CFG/" -maxdepth 3 -name stage2_provenance.json 2>/dev/null)
-    VJ=$R/blocks_ns/$CFG/verdicts_censusinit_fw2.json
-    if [ -f "$VJ" ] && [ ! -f "$R/blocks_ns/$CFG"/block_000/splat_runs_FEATFIX/stage2_provenance.json ]; then
-        # verdicts recorded BEFORE provenance existed: scored by the old
-        # hand-map, trustworthiness unknown -> re-verdict from scratch
-        mv "$VJ" "${VJ%.json}.pre_provenance_$(date +%s).json"
-        mark "R5c-REVERDICT $S verdicts predate provenance (scored by the retired hand-map) — archived, slots re-score"
-    elif [ "$NBAD" -gt 0 ]; then
-        mark "R5c-STALE-UNFIXED $S $NBAD stage2 runs record a non-canon embedder/hierarchy pair (see stage2_provenance.json)"
+    # ---- R7 blocks live IN PROD -------------------------------------------
+    # The canonical cfg is the realisable asset under construction, so the
+    # slot is pre-placed and training writes land in prod from block one.
+    # The root shim this gate used to leave behind is gone (2026-08-18):
+    # blocks are addressed at prod/tassili/blocks_ns only.
+    PB=$TASSILI/blocks_ns/$CFG
+    if [ -d "$TASSILI/blocks_ns/$CFG" ] && [ ! -L "$TASSILI/blocks_ns/$CFG" ]; then
+        mark "R7-RED $S: $CFG still sits at the survey root — move it into $PB"
         RED=$((RED+1))
     else
-        mark "R5c-PASS $S stage2 provenance matches the canon embedder+hierarchy"
-    fi
-
-    # ---- R6 embedder -------------------------------------------------------
-    case "$S" in
-        01_13B_Jackal) TAG=01_13B;; 02_13B_Jackal) TAG=02_13B;; 03_13B_Jackal) TAG=03_13B;;
-        04_13D_Jackal) TAG=04_13D;; 05_13D_Jackal) TAG=05_13D;; *) TAG=klap;;
-    esac
-    # ---- R6 embedder PRESENCE only (health gate DEPRECATED 2026-08-17) ----
-    # The health gate never produced a true positive and produced three false
-    # ones in a day, each triggering a RETRAIN — the single most destructive
-    # action available to readiness, because a new embedder silently
-    # invalidates every already-seeded block (features built with embedder A
-    # scored with embedder B read ~0: 05 b009 measured 0.845 by hand at 19:30,
-    # then 0.00 after the 19:40 retrain, same features). Its two metrics were
-    # also wrong or unvalidated: separation was measured in a latent space no
-    # query uses, and no threshold ever linked round-trip fidelity to
-    # containment. The real health signal is the containment verdict itself
-    # (R10), which is outcome-linked and already runs per block.
-    CANON_CK="/home/paperspace/data/high/nerf/${S%_Jackal}_v1g/ckpts/model_best.pth"
-    if [ -f "$CANON_CK" ]; then
-        mark "R6-PASS $S embedder present ($(basename $(dirname $(dirname $CANON_CK))))"
-        (cd /home/paperspace/code/nerf_new && pixi run python \
-            "$SRC/embedder_roundtrip.py" --ckpt "$CANON_CK") \
-            > "$LOGS/preprod_${S}_embedder_health.log" 2>&1 || true
-        mark "R6-INFO $S $(grep -a separation "$LOGS/preprod_${S}_embedder_health.log" | tail -1) (advisory — never triggers a retrain)"
-    elif ls -t /home/paperspace/data/high/nerf/${TAG}*/ckpts/model_best.pth >/dev/null 2>&1; then
-        mark "R6-PASS $S embedder present (non-canon name)"
-    else
-        mark "R6-IN-SLOT $S embedder absent — [5c] trains it in the first slot"
-        NOTES="$NOTES embedder-in-slot;"
+        mkdir -p "$PB"
+        mark "R7-PASS $S $CFG in prod/tassili ($(ls -d "$PB"/block_* 2>/dev/null | wc -l) blocks)"
     fi
 
     # ---- R10 verdict feedback (Paul 2026-08-16: "a score of 0 on the iou
@@ -371,7 +288,7 @@ for S in "${SURVEYS[@]}"; do
     # Recorded near-zero containment is a READINESS failure, not a report:
     # the blocks trained on something broken. Drop those verdict entries and
     # rewind so the survey re-runs stage2 + re-scores on the repaired chain.
-    VJ2=$R/blocks_ns/$CFG/verdicts_censusinit_fw2.json
+    VJ2=$TASSILI/blocks_ns/$CFG/verdicts_censusinit_fw2.json
     if [ -f "$VJ2" ]; then
         NZERO=$(python3 - "$VJ2" << 'PY' 2>/dev/null
 import json, sys
