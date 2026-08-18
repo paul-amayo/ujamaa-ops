@@ -282,7 +282,10 @@ for S in "${SURVEYS[@]}"; do
     # The root shim this gate used to leave behind is gone (2026-08-18):
     # blocks are addressed at prod/tassili/blocks_ns only.
     PB=$TASSILI/blocks_ns/$CFG
-    if [ -d "$TASSILI/blocks_ns/$CFG" ] && [ ! -L "$TASSILI/blocks_ns/$CFG" ]; then
+    # The check is on the ROOT copy, not the prod one — a blanket repoint of
+    # $R/blocks_ns -> $TASSILI/blocks_ns rewrote this test too, so it fired RED
+    # on all six surveys for having their blocks exactly where they belong.
+    if [ -d "$R/blocks_ns/$CFG" ] && [ ! -L "$R/blocks_ns/$CFG" ]; then
         mark "R7-RED $S: $CFG still sits at the survey root — move it into $PB"
         RED=$((RED+1))
     else
