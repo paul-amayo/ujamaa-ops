@@ -235,8 +235,8 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
         # partition hasn't been built yet (R7 pre-places an EMPTY cfg in
         # prod) — that is UNKNOWN, not complete: the first slot creates the
         # blocks. count-1=-1 once silently skipped 01 and ten-rows forever.
-        if [ -z "$MAX" ] && [ -d "$R/blocks_ns/$C" ]; then
-            NBLK=$(ls -d "$R/blocks_ns/$C"/block_* 2>/dev/null \
+        if [ -z "$MAX" ] && [ -d "$R/prod/tassili/blocks_ns/$C" ]; then
+            NBLK=$(ls -d "$R/prod/tassili/blocks_ns/$C"/block_* 2>/dev/null \
                      | grep -cE "block_[0-9]+$")
             if [ "$NBLK" -gt 0 ]; then
                 MAX=$((NBLK - 1))
@@ -269,7 +269,7 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
                     > "$LOGS/week_${S}_b${BID}.log" 2>&1 ;;
         esac
         ELAPSED=$(( $(date +%s) - T0 ))
-        BD=$R/blocks_ns/$C/block_$BID
+        BD=$R/prod/tassili/blocks_ns/$C/block_$BID
         if ls "$BD"/splat_runs_FEATFIX/stage2_censusinit_*/high/*/nerfstudio_models*/*.ckpt >/dev/null 2>&1; then
             SUP=$BD/supervision/trees_only
             [ -f "$SUP/manifest.json" ] || SUP=$BD/supervision/strict_tree_v2
@@ -309,8 +309,8 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
     for S in "${SURVEYS[@]}"; do
         [ -f "$STATE/$S.parked" ] && continue
         R=$(root_of "$S"); C=$(cfg_of "$S")
-        VJ=$R/blocks_ns/$C/verdicts_censusinit_fw2.json
-        for BD in "$R/blocks_ns/$C"/block_*; do
+        VJ=$R/prod/tassili/blocks_ns/$C/verdicts_censusinit_fw2.json
+        for BD in "$R/prod/tassili/blocks_ns/$C"/block_*; do
             [ -d "$BD" ] || continue
             BN=$(basename "$BD"); BNUM=${BN#block_}
             echo "$BN" | grep -qE "^block_[0-9]+$" || continue
