@@ -283,15 +283,17 @@ def migrate(root: Path, execute: bool):
     # reconcile: a previously-blessed config that no longer meets the bar
     # (e.g. after the bar tightened to stage2-census-init) demotes to
     # experimental, and its root shim goes with it
+    # EVICTION DEFANGED (2026-08-19). This loop used to mv non-blessed
+    # configs out of prod/tassili/blocks_ns into experimental at EVERY
+    # ROUND-N-DONE. When the stage2 quarantine removed its blessing signal it
+    # relocated 04/05/apr's block trees — stage1 checkpoints included — into
+    # the safe-to-delete tree: prod assets in the deletable tree is the exact
+    # inversion the doctrine exists to prevent. PROD.md regen must NEVER move
+    # block trees as a side effect; it now only REPORTS what it would bless.
     for pc in sorted((prod / "tassili/blocks_ns").glob("*/")) if (prod / "tassili/blocks_ns").is_dir() else []:
-        if cfg and pc.resolve() == cfg.resolve():
+        if cfg is not None and pc.resolve() == cfg.resolve():
             continue
-        mv_shim(pc, exp / "blocks_ns" / pc.name, plan, execute, shim=False)
-        shim_at = root / "blocks_ns" / pc.name
-        if shim_at.is_symlink():
-            plan.append(f"  unlink  stale shim blocks_ns/{pc.name}")
-            if execute:
-                shim_at.unlink()
+        plan.append(f"  note    non-blessed cfg {pc.name} in prod/tassili/blocks_ns (left in place)")
 
     for entry in sorted(root.iterdir()):
         n = entry.name
