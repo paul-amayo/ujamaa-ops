@@ -1,6 +1,6 @@
 # Prod readiness — surveys × UJAMAA agents
 
-Generated 2026-08-17 05:26 UTC by `automation/build_prod_manifests.py` — do not edit by hand.
+Generated 2026-08-19 12:08 UTC by `automation/build_prod_manifests.py` — do not edit by hand.
 
 Layout per survey: `prod/{monos,tassili,bateleur,sankofa,azalai}` =
 PHYSICAL folders, **unsafe to delete** (source data + current-best
@@ -15,14 +15,14 @@ Hapi run on demo-synthetic data — no per-survey assets yet.
 
 | survey | prod | experimental (deletable) | tassili | bateleur | sankofa | azalai | note |
 |---|---|---|---|---|---|---|---|
-| 01_13B_Jackal | 92G | 1G | 5/7 ✗ stage2,verdicts | **READY** | **READY** | **READY** |  |
-| 02_13B_Jackal | 122G | 1G | 5/7 ✗ stage2,verdicts | **READY** | **READY** | **READY** | ledger control epoch — joined the splat rotation 2026-08-14 (stage2 contingent on painted semantics) |
-| 03_13B_Jackal | 92G | 2G | 5/7 ✗ stage2,verdicts | **READY** | **READY** | **READY** |  |
-| 04_13D_Jackal | 170G | 36G | 5/7 ✗ stage2,verdicts | **READY** | 2/3 ✗ multi_epoch | **READY** |  |
-| 05_13D_Jackal | 133G | 21G | 5/7 ✗ stage2,verdicts | **READY** | 1/3 ✗ in_ledger,multi_epoch | **READY** |  |
-| apr_2026_zed | 58G | 23G | 5/7 ✗ stage2,verdicts | **READY** | 1/3 ✗ in_ledger,multi_epoch | 2/3 ✗ georef |  |
-| dec_2025_a300 | 12G | 1G | 1/4 ✗ blocks,embedder,hierarchy | 1/4 ✗ hierarchy,registry,topdown | 1/3 ✗ in_ledger,multi_epoch | 1/3 ✗ rows,georef | pilot mcap — georef + SAM3 ledger seed |
-| dec_2025_ten_rows | 94G | 1G | 1/7 ✗ blocks,stage2,verdicts,registered,embedder,hierarchy | 1/4 ✗ hierarchy,registry,topdown | 1/3 ✗ in_ledger,multi_epoch | 2/3 ✗ rows | Dec ten-rows — in week rotation, gated on pose-domain verification (INS=ENU0 frame) |
+| 01_13B_Jackal | 97G | 38G | 3/7 ✗ stage2,verdicts,registered,hierarchy | 3/4 ✗ hierarchy | **READY** | 2/3 ✗ rows |  |
+| 02_13B_Jackal | 179G | 58G | 3/7 ✗ stage2,verdicts,registered,hierarchy | 3/4 ✗ hierarchy | **READY** | 2/3 ✗ rows | ledger control epoch — joined the splat rotation 2026-08-14 (stage2 contingent on painted semantics) |
+| 03_13B_Jackal | 97G | 37G | 3/7 ✗ stage2,verdicts,registered,hierarchy | 3/4 ✗ hierarchy | **READY** | 2/3 ✗ rows |  |
+| 04_13D_Jackal | 148G | 85G | 3/7 ✗ stage2,verdicts,registered,hierarchy | 3/4 ✗ hierarchy | 2/3 ✗ multi_epoch | 2/3 ✗ rows |  |
+| 05_13D_Jackal | 84G | 129G | 3/7 ✗ stage2,verdicts,registered,hierarchy | 3/4 ✗ hierarchy | 1/3 ✗ in_ledger,multi_epoch | 2/3 ✗ rows |  |
+| apr_2026_zed | 44G | 57G | 2/7 ✗ stage2,verdicts,registered,embedder,hierarchy | 2/4 ✗ hierarchy,registry | 1/3 ✗ in_ledger,multi_epoch | 1/3 ✗ rows,georef |  |
+| dec_2025_a300 | 12G | 1G | 1/4 ✗ blocks,embedder,hierarchy | 1/4 ✗ hierarchy,registry,topdown | 1/3 ✗ in_ledger,multi_epoch | 0/3 ✗ site_geometry,rows,georef | pilot mcap — georef + SAM3 ledger seed |
+| dec_2025_ten_rows | 92G | 3G | 1/7 ✗ blocks,stage2,verdicts,registered,embedder,hierarchy | 1/4 ✗ hierarchy,registry,topdown | 1/3 ✗ in_ledger,multi_epoch | 1/3 ✗ site_geometry,rows | Dec ten-rows — in week rotation, gated on pose-domain verification (INS=ENU0 frame) |
 
 ## Per-survey checklists
 
@@ -31,14 +31,14 @@ prod block config: `/home/paperspace/data/citrus_all/01_13B_Jackal/prod/tassili/
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 71 blocks
-  - [ ] stage2: 2/71 blocks have stage2_censusinit_fw2 ckpt (missing ['block_002', 'block_003', 'block_004', 'block_005'])
-  - [ ] verdicts: 1 recorded, 0 pass floor 0.8; unrecorded blocks ['000', '002', '003', '004', '005']; failing ['001']
-  - [x] registered: splats.json present
-  - [x] embedder: 01_13B_c20cos20 (canon)
-  - [x] hierarchy: 289 obj / 38 rows (scene_graph)
+  - [ ] stage2: 0/71 blocks have stage2_censusinit_* ckpt (missing ['block_000', 'block_001', 'block_002', 'block_003'])
+  - [ ] verdicts: no verdicts_*.json in lio_row100 — run containment verdicts
+  - [ ] registered: splats.json MISSING — export + register for the viewer
+  - [x] embedder: 01_13B_v1g (newest in prod/bateleur)
+  - [ ] hierarchy: no marker_hierarchy
 - **bateleur**
   - [x] trajectory: lio/odom mono present
-  - [x] hierarchy: 289 obj / 38 rows
+  - [ ] hierarchy: no marker_hierarchy
   - [x] registry: global_ids.json
   - [x] topdown: topdown export bateleur_orchard_topdown_01_13B_Jackal.json
 - **sankofa**
@@ -47,7 +47,7 @@ prod block config: `/home/paperspace/data/citrus_all/01_13B_Jackal/prod/tassili/
   - [x] multi_epoch: site 13B epochs in ledger: ['01_13B_Jackal', '02_13B_Jackal', '03_13B_Jackal']
 - **azalai**
   - [x] site_geometry: /home/paperspace/data/citrus_all/site.json
-  - [x] rows: 38 planting rows
+  - [ ] rows: no rows in hierarchy
   - [x] georef: gps.monolithic present
 
 ### 02_13B_Jackal — ledger control epoch — joined the splat rotation 2026-08-14 (stage2 contingent on painted semantics)
@@ -55,14 +55,14 @@ prod block config: `/home/paperspace/data/citrus_all/02_13B_Jackal/prod/tassili/
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 27 blocks
-  - [ ] stage2: 2/27 blocks have stage2_censusinit_fw2 ckpt (missing ['block_002', 'block_003', 'block_004', 'block_005'])
-  - [ ] verdicts: 2 recorded, 0 pass floor 0.8; unrecorded blocks ['002', '003', '004', '005', '006']; failing ['000', '001']
-  - [x] registered: splats.json present
+  - [ ] stage2: 0/27 blocks have stage2_censusinit_* ckpt (missing ['block_000', 'block_001', 'block_002', 'block_003'])
+  - [ ] verdicts: no verdicts_*.json in lio_row100 — run containment verdicts
+  - [ ] registered: splats.json MISSING — export + register for the viewer
   - [x] embedder: 02_13B_v1g (canon)
-  - [x] hierarchy: 177 obj / 1 rows (scene_graph)
+  - [ ] hierarchy: no marker_hierarchy
 - **bateleur**
   - [x] trajectory: lio/odom mono present
-  - [x] hierarchy: 177 obj / 1 rows
+  - [ ] hierarchy: no marker_hierarchy
   - [x] registry: global_ids.json
   - [x] topdown: topdown export bateleur_orchard_topdown_02_13B_Jackal.json
 - **sankofa**
@@ -71,7 +71,7 @@ prod block config: `/home/paperspace/data/citrus_all/02_13B_Jackal/prod/tassili/
   - [x] multi_epoch: site 13B epochs in ledger: ['01_13B_Jackal', '02_13B_Jackal', '03_13B_Jackal']
 - **azalai**
   - [x] site_geometry: /home/paperspace/data/citrus_all/site.json
-  - [x] rows: 1 planting rows
+  - [ ] rows: no rows in hierarchy
   - [x] georef: gps.monolithic present
 
 ### 03_13B_Jackal
@@ -79,14 +79,14 @@ prod block config: `/home/paperspace/data/citrus_all/03_13B_Jackal/prod/tassili/
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 105 blocks
-  - [ ] stage2: 2/105 blocks have stage2_censusinit_fw2 ckpt (missing ['block_002', 'block_003', 'block_004', 'block_005'])
-  - [ ] verdicts: 1 recorded, 0 pass floor 0.8; unrecorded blocks ['001', '002', '003', '004', '005']; failing ['000']
-  - [x] registered: splats.json present
-  - [x] embedder: 03_13B_v1g (newest, no canon tag)
-  - [x] hierarchy: 272 obj / 40 rows (scene_graph)
+  - [ ] stage2: 0/105 blocks have stage2_censusinit_* ckpt (missing ['block_000', 'block_001', 'block_002', 'block_003'])
+  - [ ] verdicts: no verdicts_*.json in lio_row100 — run containment verdicts
+  - [ ] registered: splats.json MISSING — export + register for the viewer
+  - [x] embedder: 03_13B_v1g (newest in prod/bateleur)
+  - [ ] hierarchy: no marker_hierarchy
 - **bateleur**
   - [x] trajectory: lio/odom mono present
-  - [x] hierarchy: 272 obj / 40 rows
+  - [ ] hierarchy: no marker_hierarchy
   - [x] registry: global_ids.json
   - [x] topdown: topdown export bateleur_orchard_topdown_03_13B_Jackal.json
 - **sankofa**
@@ -95,22 +95,22 @@ prod block config: `/home/paperspace/data/citrus_all/03_13B_Jackal/prod/tassili/
   - [x] multi_epoch: site 13B epochs in ledger: ['01_13B_Jackal', '02_13B_Jackal', '03_13B_Jackal']
 - **azalai**
   - [x] site_geometry: /home/paperspace/data/citrus_all/site.json
-  - [x] rows: 40 planting rows
+  - [ ] rows: no rows in hierarchy
   - [x] georef: gps.monolithic present
 
 ### 04_13D_Jackal
-prod block config: `/home/paperspace/data/citrus_all/04_13D_Jackal/prod/tassili/blocks_ns/lio_row100`
+prod block config: `/home/paperspace/data/citrus_all/04_13D_Jackal/prod/tassili/blocks_ns/lio_row6F`
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
-  - [x] blocks: lio_row100: 48 blocks
-  - [ ] stage2: 5/48 blocks have stage2_censusinit_fw2 ckpt (missing ['block_005', 'block_006', 'block_007', 'block_008'])
-  - [ ] verdicts: 2 recorded, 0 pass floor 0.8; unrecorded blocks ['000', '001', '004', '005', '006']; failing ['002', '003']
-  - [x] registered: splats.json present
-  - [x] embedder: 04_13D_v3vocab1k (canon)
-  - [x] hierarchy: 81 obj / 10 rows (scene_graph)
+  - [x] blocks: lio_row6F: 6 blocks
+  - [ ] stage2: 1/6 blocks have stage2_censusinit_* ckpt (missing ['block_000', 'block_001', 'block_002', 'block_004'])
+  - [ ] verdicts: no verdicts_*.json in lio_row6F — run containment verdicts
+  - [ ] registered: splats.json MISSING — export + register for the viewer
+  - [x] embedder: 04_13D_v1g (newest in prod/bateleur)
+  - [ ] hierarchy: no marker_hierarchy
 - **bateleur**
   - [x] trajectory: lio/odom mono present
-  - [x] hierarchy: 81 obj / 10 rows
+  - [ ] hierarchy: no marker_hierarchy
   - [x] registry: global_ids.json + Q4 reproduction verified
   - [x] topdown: topdown export bateleur_orchard_topdown_04_13D_Jackal.json
 - **sankofa**
@@ -119,7 +119,7 @@ prod block config: `/home/paperspace/data/citrus_all/04_13D_Jackal/prod/tassili/
   - [ ] multi_epoch: site 13D epochs in ledger: ['04_13D_Jackal']
 - **azalai**
   - [x] site_geometry: /home/paperspace/data/citrus_all/site.json
-  - [x] rows: 10 planting rows
+  - [ ] rows: no rows in hierarchy
   - [x] georef: gps.monolithic present
 
 ### 05_13D_Jackal
@@ -127,14 +127,14 @@ prod block config: `/home/paperspace/data/citrus_all/05_13D_Jackal/prod/tassili/
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 43 blocks
-  - [ ] stage2: 9/43 blocks have stage2_censusinit_fw2 ckpt (missing ['block_009', 'block_010', 'block_011', 'block_012'])
-  - [ ] verdicts: 2 recorded, 2 pass floor 0.8; unrecorded blocks ['000', '002', '004', '005', '006']
-  - [x] registered: splats.json present
+  - [ ] stage2: 0/43 blocks have stage2_censusinit_* ckpt (missing ['block_000', 'block_001', 'block_002', 'block_003'])
+  - [ ] verdicts: no verdicts_*.json in lio_row100 — run containment verdicts
+  - [ ] registered: splats.json MISSING — export + register for the viewer
   - [x] embedder: 05_13D_v1g (canon)
-  - [x] hierarchy: 81 obj / 10 rows (scene_graph)
+  - [ ] hierarchy: no marker_hierarchy
 - **bateleur**
   - [x] trajectory: lio/odom mono present
-  - [x] hierarchy: 81 obj / 10 rows
+  - [ ] hierarchy: no marker_hierarchy
   - [x] registry: global_ids.json + Q4 reproduction verified
   - [x] topdown: topdown export bateleur_orchard_topdown_05_13D_Jackal.json
 - **sankofa**
@@ -143,7 +143,7 @@ prod block config: `/home/paperspace/data/citrus_all/05_13D_Jackal/prod/tassili/
   - [ ] multi_epoch: site 13D epochs in ledger: ['04_13D_Jackal']
 - **azalai**
   - [x] site_geometry: /home/paperspace/data/citrus_all/site.json
-  - [x] rows: 10 planting rows
+  - [ ] rows: no rows in hierarchy
   - [x] georef: gps.monolithic present
 
 ### apr_2026_zed
@@ -151,15 +151,15 @@ prod block config: `/home/paperspace/data/klapmuts/apr_2026_zed/prod/tassili/blo
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 25 blocks
-  - [ ] stage2: 4/25 blocks have stage2_censusinit_fw2 ckpt (missing ['block_004', 'block_005', 'block_006', 'block_007'])
-  - [ ] verdicts: 1 recorded, 0 pass floor 0.8; unrecorded blocks ['000', '002', '003', '004', '005']; failing ['001']
-  - [x] registered: splats.json present
-  - [x] embedder: klapmuts_v2vocab1k (newest, no canon tag)
-  - [x] hierarchy: 749 obj / 16 rows (scene_graph)
+  - [ ] stage2: 0/25 blocks have stage2_censusinit_* ckpt (missing ['block_000', 'block_001', 'block_002', 'block_003'])
+  - [ ] verdicts: no verdicts_*.json in lio_row100 — run containment verdicts
+  - [ ] registered: splats.json MISSING — export + register for the viewer
+  - [ ] embedder: no embedder in prod/bateleur/embedder (trains in-slot)
+  - [ ] hierarchy: no marker_hierarchy
 - **bateleur**
   - [x] trajectory: lio/odom mono present
-  - [x] hierarchy: 749 obj / 16 rows
-  - [x] registry: global_ids.json
+  - [ ] hierarchy: no marker_hierarchy
+  - [ ] registry: no sam3_v2/global_ids.json
   - [x] topdown: topdown export bateleur_orchard_topdown_apr_2026_zed.json
 - **sankofa**
   - [ ] in_ledger: not in ledger_v2.json
@@ -167,14 +167,14 @@ prod block config: `/home/paperspace/data/klapmuts/apr_2026_zed/prod/tassili/blo
   - [ ] multi_epoch: site klapmuts epochs in ledger: []
 - **azalai**
   - [x] site_geometry: /home/paperspace/data/klapmuts/apr_2026_zed/prod/azalai/site.json
-  - [x] rows: 16 planting rows
+  - [ ] rows: no rows in hierarchy
   - [ ] georef: no GNSS on ZED rig — inherit georef via census association (planned)
 
 ### dec_2025_a300 — pilot mcap — georef + SAM3 ledger seed
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [ ] blocks: no blocks_ns config with stage2 or splats.json
-  - [ ] embedder: no embedder ckpt found
+  - [ ] embedder: no embedder in prod/bateleur/embedder (trains in-slot)
   - [ ] hierarchy: no marker_hierarchy
 - **bateleur**
   - [x] trajectory: lio/odom mono present
@@ -186,7 +186,7 @@ prod block config: `/home/paperspace/data/klapmuts/apr_2026_zed/prod/tassili/blo
   - [x] one_datum: ledger_v2.json (single 03-datum)
   - [ ] multi_epoch: site klapmuts epochs in ledger: []
 - **azalai**
-  - [x] site_geometry: /home/paperspace/data/klapmuts/site.json
+  - [ ] site_geometry: no site.json (planting geometry)
   - [ ] rows: no rows in hierarchy
   - [ ] georef: no absolute georef source
 
@@ -195,10 +195,10 @@ prod block config: `/home/paperspace/data/klapmuts/dec_2025_ten_rows/prod/tassil
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [ ] blocks: lio_row100: 0 blocks
-  - [ ] stage2: 0/0 blocks have stage2_censusinit_fw2 ckpt
+  - [ ] stage2: 0/0 blocks have stage2_censusinit_* ckpt
   - [ ] verdicts: no verdicts_*.json in lio_row100 — run containment verdicts
   - [ ] registered: splats.json MISSING — export + register for the viewer
-  - [ ] embedder: no embedder ckpt found
+  - [ ] embedder: no embedder in prod/bateleur/embedder (trains in-slot)
   - [ ] hierarchy: no marker_hierarchy
 - **bateleur**
   - [x] trajectory: lio/odom mono present
@@ -210,7 +210,7 @@ prod block config: `/home/paperspace/data/klapmuts/dec_2025_ten_rows/prod/tassil
   - [x] one_datum: ledger_v2.json (single 03-datum)
   - [ ] multi_epoch: site klapmuts epochs in ledger: []
 - **azalai**
-  - [x] site_geometry: /home/paperspace/data/klapmuts/site.json
+  - [ ] site_geometry: no site.json (planting geometry)
   - [ ] rows: no rows in hierarchy
   - [x] georef: gnsscorr_raw.npz present
 
