@@ -117,8 +117,15 @@ def canon_block(name: str):
 
 
 def find_hierarchy(root: Path):
-    cands = sorted(root.glob("scene_graph*/marker_hierarchy*.json"),
+    # scene_graph moved into prod/bateleur/ in the 08-18 migration; the
+    # root-level glob then reported "no marker_hierarchy" fleet-wide while
+    # the files existed (same missing-root-path class as the 08-20
+    # kf-image lidar-init regression). Probe canon first, root as legacy.
+    cands = sorted(root.glob("prod/bateleur/scene_graph*/marker_hierarchy*.json"),
                    key=lambda p: p.stat().st_mtime)
+    if not cands:
+        cands = sorted(root.glob("scene_graph*/marker_hierarchy*.json"),
+                       key=lambda p: p.stat().st_mtime)
     if not cands:
         return None, 0, 0
     try:
