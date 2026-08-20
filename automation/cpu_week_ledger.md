@@ -5,7 +5,10 @@ Worked by scheduled Claude sessions (daily cron) and live sessions alike:
 take the TOP unchecked task, work it to a committable state, tick it with a
 date + result line, stop. Conventions: nice -n 15 for heavy CPU (GLOMAP
 bursts in the GPU slots own the cores), commit-after-green, notebook entry
-per work session, ground truth from artifacts not logs.
+per work session, ground truth from artifacts not logs. Each morning tick
+ALSO: republish lab_notebook/dashboard.html to the canonical artifact
+(https://claude.ai/code/artifact/3a2156c8-d3b4-4a2b-9968-923c007dc45a) so
+Paul's view stays current without asking.
 
 - [x] P0 (pilot): hierarchy checklist cells lie — checker probes a
       pre-migration path ("no marker_hierarchy" fleet-wide while the files
