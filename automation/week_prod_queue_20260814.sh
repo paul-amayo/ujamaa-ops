@@ -147,10 +147,11 @@ if [ ! -f "$STATE/A.done" ]; then
             && mark "A3-DONE verdict $B" || mark "A3-FAIL verdict $B"
     done
 
-    # export smoke test on a finished block; gates rotation exports
-    bash "$AUTO/export_register_stage2.sh" "$CFG05/block_001" \
-        && { touch "$STATE/export.ok"; mark "A4-DONE export smoke (rotation exports ENABLED)"; } \
-        || mark "A4-FAIL export smoke (rotation continues TRAINING-ONLY; fix export in daylight)"
+    # splat exports RETIRED (Paul 2026-08-20): tassili renders directly from
+    # checkpoints now — no .ply export/registration in rotation. The
+    # export.ok flag is never created; both rotation-export call sites are
+    # gated on it and stay dormant.
+    mark "A4-SKIP splat exports retired (tassili renders from ckpts)"
 
     # 05 block_000: quarantine raw-LIO-stage1 runs -> refined-consistent retrain
     B0=$CFG05/block_000
@@ -228,6 +229,16 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
     ACTIVE=0
     for S in "${SURVEYS[@]}"; do
         [ "$(date +%s)" -ge "$END_TS" ] && break
+        # DISK FLOOR (2026-08-20): twice in one night ENOSPC killed this
+        # queue mid-write — fast-failing every slot (1 s each, pointers
+        # advancing past untried blocks) and truncating .next files to
+        # empty. A full disk must stop the rotation LOUDLY and CLEANLY,
+        # before any state write, not corrupt it.
+        AVAIL_G=$(df --output=avail -BG / 2>/dev/null | tail -1 | tr -dc 0-9)
+        if [ -n "$AVAIL_G" ] && [ "$AVAIL_G" -lt 15 ]; then
+            mark "ABORT-DISK: only ${AVAIL_G}G free on / (floor 15G) — stopping cleanly before state corruption; clear space and relaunch"
+            exit 1
+        fi
         R=$(root_of "$S"); C=$(cfg_of "$S")
         NEXT=$(cat "$STATE/$S.next" 2>/dev/null || echo 0)
         MAX=$(maxblk_of "$S")
