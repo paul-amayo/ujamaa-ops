@@ -295,30 +295,14 @@ for S in "${SURVEYS[@]}"; do
         mark "R7-PASS $S $CFG in prod/tassili ($(ls -d "$PB"/block_* 2>/dev/null | wc -l) blocks)"
     fi
 
-    # ---- R10 verdict feedback (Paul 2026-08-16: "a score of 0 on the iou
-    # means we have failed somewhere and the survey wasnt ready for prod").
-    # Recorded near-zero containment is a READINESS failure, not a report:
-    # the blocks trained on something broken. Drop those verdict entries and
-    # rewind so the survey re-runs stage2 + re-scores on the repaired chain.
-    VJ2=$TASSILI/blocks_ns/$CFG/verdicts_censusinit_fw2.json
-    if [ -f "$VJ2" ]; then
-        NZERO=$(python3 - "$VJ2" << 'PY' 2>/dev/null
-import json, sys
-d = json.load(open(sys.argv[1]))
-bad = [b for b, r in d.get("blocks", {}).items()
-       if (r.get("tree_iou_min") or 0) < 0.10]
-for b in bad:
-    d["blocks"].pop(b, None)
-if bad:
-    json.dump(d, open(sys.argv[1], "w"), indent=1)
-print(len(bad))
-PY
-)
-        if [ "${NZERO:-0}" -gt 0 ]; then
-            mark "R10-REQUEUED $S $NZERO block(s) scored ~0 containment — entries dropped, survey rewound to re-train stage2 + re-score on the repaired chain"
-            echo 0 > "$STATE/$S.next"
-        fi
-    fi
+    # R10 (auto-requeue on tree_iou_min < 0.10) DROPPED (Paul 2026-08-20).
+    # It assumed near-zero containment was transient chain breakage that a
+    # retrain repairs; apr proved it can be STRUCTURAL (broken row
+    # hierarchy) — the rule then loops forever: drop entries, rewind to 0,
+    # cache-hit resweep reproduces the same scores, repeat every launch
+    # (and it silently overrode operator-set pointers twice on 08-20).
+    # Near-zero verdicts now stay RECORDED for triage; requeue is a human
+    # decision.
 
     if [ "$RED" -eq 0 ]; then
         mark ">>> $S READY${NOTES:+ (in-slot: $NOTES)}"
