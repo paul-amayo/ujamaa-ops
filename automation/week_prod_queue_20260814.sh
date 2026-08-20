@@ -306,6 +306,7 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
                 mark "SLOT $S block_$BID clip-cache evict: $(( ${EG:-0} / 1048576 ))G freed (kept newest generation)"
             fi
             mark "SLOT $S block_$BID OK"
+            echo 0 > "$STATE/consec_fails"   # any success resets the breaker
             echo $((NEXT + 1)) > "$STATE/$S.next"   # advance ONLY on OK
         elif AUD=$( (cd /home/paperspace/code/nerf_new && pixi run python \
                 "$SRC/audit_supervision_density.py" --supervision-dir "$BD/semantic_v2_B") 2>/dev/null | tail -1) \
@@ -325,6 +326,18 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
             mark "SLOT $S block_$BID FAILED after ${ELAPSED}s — recorded"\
 " ($STATE/$S.block_$BID.FAILED; see week_${S}_b${BID}.log) — advancing"
             echo $((NEXT + 1)) > "$STATE/$S.next"
+            # CIRCUIT BREAKER (2026-08-20): fail-and-advance is right for
+            # idiosyncratic bad blocks but catastrophic under a SYSTEMIC bug
+            # — the kf-image regression fake-failed ~25 slots across all six
+            # surveys over 7 h while pointers marched on. Four consecutive
+            # failures with no OK in between is no longer block-specific:
+            # stop loudly and leave state intact for triage.
+            CF=$(( $(cat "$STATE/consec_fails" 2>/dev/null || echo 0) + 1 ))
+            echo "$CF" > "$STATE/consec_fails"
+            if [ "$CF" -ge 4 ]; then
+                mark "CIRCUIT-BREAKER: $CF consecutive slot failures across surveys — systemic bug likely (cf. 2026-08-20 kf-image regression). PAUSING; run automation/audit_pointers.sh, fix the cause, rewind pointers, relaunch."
+                exit 1
+            fi
         fi
     done
     # round-end backfill: any block with a stage2 ckpt but a missing verdict
