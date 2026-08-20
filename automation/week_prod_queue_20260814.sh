@@ -292,6 +292,19 @@ while [ "$(date +%s)" -lt "$END_TS" ]; do
             fi
             [ -f "$STATE/export.ok" ] && { bash "$AUTO/export_register_stage2.sh" "$BD" \
                 || mark "SLOT $S block_$BID export FAIL"; }
+            # clip-cache eviction (Paul 2026-08-20): target tables cost 2.3G
+            # per EMBEDDER GENERATION per block and were never cleaned —
+            # audit found 103 dirs / 245.7G, ~85% keyed to retired
+            # embedders. Keep the newest-built generation (the one this
+            # successful run built or reused), evict older siblings. Pure
+            # derived data: an over-eviction rebuilds itself in minutes at
+            # the next train, so keep-newest is safe by construction.
+            EVICT=$(ls -dt "$BD"/clip_cache_* 2>/dev/null | tail -n +2)
+            if [ -n "$EVICT" ]; then
+                EG=$(du -xsck $EVICT 2>/dev/null | tail -1 | cut -f1)
+                rm -rf $EVICT
+                mark "SLOT $S block_$BID clip-cache evict: $(( ${EG:-0} / 1048576 ))G freed (kept newest generation)"
+            fi
             mark "SLOT $S block_$BID OK"
             echo $((NEXT + 1)) > "$STATE/$S.next"   # advance ONLY on OK
         elif AUD=$( (cd /home/paperspace/code/nerf_new && pixi run python \
