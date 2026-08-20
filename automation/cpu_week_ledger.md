@@ -12,7 +12,7 @@ per work session, ground truth from artifacts not logs.
       exist under prod/bateleur/scene_graph/). Fix in
       automation/build_prod_manifests.py, regen PROD.md, verify cells flip.
       DONE 2026-08-20: checker probed <root>/scene_graph; now falls back to
-      prod/bateleur/scene_graph. 6 surveys flipped to hierarchy=[x]. 35e7d00
+      prod/bateleur/scene_graph. 6 surveys flipped to hierarchy=[x]. d1e5ef6
 - [ ] P1: gen2 M0 — centroid row stage into build_marker_hierarchy.py per
       plans/gen2_hierarchy_swap.md M0: census centroids in (all, from
       global_ids stats), HighInterface.ransac_init (Aug-18 binding path),
