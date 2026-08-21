@@ -12,6 +12,7 @@ import json
 import os
 import re
 import shutil
+import socket
 import subprocess
 from pathlib import Path
 
@@ -111,6 +112,62 @@ def parse_tassili_ledger():
             if len(c) >= 7 and not set(c[0]) <= {"-", " "}:
                 rows.append(c)
     return rows
+
+
+# ---------- GPU boxes ----------
+# Two Paperspace VMs, one card each. The dashboard builds on psevpcdyeahz
+# (V100) and reaches the other over ssh; a box that is not reachable says so
+# rather than reading as idle. NOTE: the 3.45/3.25 pairing is the measured
+# one — the cards sit opposite to what the IPs suggest.
+GPU_HOSTS = [
+    dict(name="A100", hostname="pszol0k59pw9", ssh="paperspace@184.105.3.25"),
+    dict(name="V100", hostname="psevpcdyeahz", ssh="paperspace@184.105.3.45"),
+]
+GPU_PROBE = (
+    "nvidia-smi --query-gpu=name,memory.used,memory.total,utilization.gpu "
+    "--format=csv,noheader,nounits; echo ---; "
+    "ps -eo etimes,args --sort=-etimes | grep \"[n]s-train\" | head -1")
+
+
+def _elapsed(secs):
+    h, m = secs // 3600, secs % 3600 // 60
+    return f"{h} h {m:02d} m" if h else f"{m} min"
+
+
+def gpu_boxes():
+    out = []
+    for h in GPU_HOSTS:
+        local = socket.gethostname() == h["hostname"]
+        cmd = GPU_PROBE if local else (
+            "ssh -o BatchMode=yes -o ConnectTimeout=6 "
+            f"-o StrictHostKeyChecking=accept-new {h['ssh']} '{GPU_PROBE}'")
+        raw = sh(cmd)
+        rec = dict(h, local=local, ok=False, job=None, card="", util=0,
+                   used=0, total=0, err="")
+        head, _, proc = raw.partition("---")
+        line = head.strip().splitlines()
+        try:
+            f = [x.strip() for x in line[0].split(",")]
+            rec.update(ok=True, card=f[0].replace("NVIDIA ", ""),
+                       used=int(f[1]), total=int(f[2]), util=int(f[3]))
+        except (IndexError, ValueError):
+            rec["err"] = (line[0][:90] if line else
+                          ("no answer over ssh" if not local else "no answer"))
+        m = re.match(r"\s*(\d+)\s+(.*)", proc.strip())
+        if m:
+            args = m.group(2)
+            exp = re.search(r"--experiment-name (\S+)", args)
+            blk = re.search(r"(block_\d+)", args)
+            sur = re.search(r"--data \S*?/([^/ ]+)/prod/", args)
+            rec["job"] = dict(
+                secs=int(m.group(1)),
+                exp=exp.group(1) if exp else "?",
+                block=blk.group(1) if blk else "?",
+                survey=sur.group(1) if sur else "?")
+        rec["st"] = ("serious" if not rec["ok"] else
+                     "good" if rec["job"] else "warning")
+        out.append(rec)
+    return out
 
 
 # ---------- queue / log state ----------
@@ -405,7 +462,7 @@ SCOREBOARD = [
 
 
 # ---------- live risk probes ----------
-def risks():
+def risks(boxes=()):
     out = []
     du = shutil.disk_usage("/")
     free_gb = du.free / 1e9
@@ -429,8 +486,15 @@ def risks():
                     "good" if n == 0 else "warning" if n < 8 else "serious"))
     reg = ("UNVERIFIED under K-indexed poses — gates 4D/Sankofa trust")
     out.append(("Citrus registries", reg, "serious"))
-    out.append(("Single GPU", "all training serialised through one card",
-                "warning"))
+    live = [b for b in boxes if b["ok"]]
+    if live:
+        out.append(("GPU capacity",
+                    " + ".join(f'{b["name"]} {b["total"] / 1024:.0f}G'
+                               for b in live),
+                    "good" if len(live) > 1 else "warning"))
+    else:
+        out.append(("GPU capacity", "no card reachable from this build",
+                    "unknown"))
     out.append(("Fruit level (demo differentiator)",
                 "gates not yet passed — S2 12% vs target", "serious"))
     out.append(("A200 staged-delete + src/config",
@@ -818,6 +882,27 @@ tr.why td { border-top:none; padding-top:0; }
 .st-unknown{color:var(--unknown)}
 .absent td { opacity:.55; }
 
+/* ---------- gpu boxes ---------- */
+.gpus { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+@media (max-width:760px){ .gpus { grid-template-columns:1fr; } }
+.gpu { border:1px solid var(--line); background:var(--surface);
+  border-top:3px solid var(--c,var(--muted)); padding:.85rem 1rem 1rem; }
+.gpu .hd { display:flex; align-items:baseline; gap:.5rem; }
+.gpu .nm { font:700 1.05rem/1 var(--f-mono); letter-spacing:-.01em; }
+.gpu .card { font-size:.78rem; color:var(--muted); }
+.gpu .chip { margin-left:auto; font:700 .68rem/1 var(--f-mono);
+  letter-spacing:.07em; }
+.meter { margin-top:.7rem; }
+.meter .lb { display:flex; justify-content:space-between;
+  font:.72rem/1 var(--f-mono); color:var(--muted); margin-bottom:.28rem; }
+.meter .lb b { color:var(--ink); font-weight:700; }
+.gpu .job { margin-top:.85rem; padding-top:.7rem;
+  border-top:1px solid var(--hair); font-size:.84rem; }
+.gpu .job .k { font:600 .68rem/1 var(--f-mono); letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); display:block;
+  margin-bottom:.25rem; }
+.gpu .job code { font:.8rem/1.5 var(--f-mono); }
+
 /* ---------- queue ---------- */
 .qline { font:12px/1.7 var(--f-mono); background:var(--surface);
   border:1px solid var(--line); border-left:3px solid var(--accent);
@@ -883,7 +968,7 @@ def worst(sts):
     return o
 
 
-def attention(pillars, rk, ch, fresh, wq):
+def attention(pillars, rk, ch, fresh, wq, boxes=()):
     """Everything the page already knows is not-green, in one triage list.
 
     The statuses were always computed per-section; nothing collected them, so
@@ -915,6 +1000,15 @@ def attention(pillars, rk, ch, fresh, wq):
                             claim="rotation is dead",
                             ev="watchdog relaunches at :13/:43 unless a deliberate "
                                "stop is logged"))
+    for b in boxes:
+        if not b["ok"]:
+            out.append(dict(st="serious", where="GPU box", href="#gpus",
+                            claim=f'{b["name"]} unreachable',
+                            ev=f'{b["ssh"]} — {b["err"]}'))
+        elif not b["job"]:
+            out.append(dict(st="warning", where="GPU box", href="#gpus",
+                            claim=f'{b["name"]} idle',
+                            ev=f'{b["util"]}% util, no ns-train process'))
     out.sort(key=lambda d: -RANK.get(d["st"], 0))
     return out
 
@@ -926,17 +1020,57 @@ def item_html(d):
             f'<div class="ev">{md(d["ev"])}</div></div></div>')
 
 
+def gpu_html(boxes):
+    cards = ""
+    for b in boxes:
+        chip = (f'<span class="chip st-{b["st"]}">{ICON[b["st"]]} '
+                f'{"running" if b["job"] else "idle" if b["ok"] else "unreachable"}'
+                "</span>")
+        if not b["ok"]:
+            body = (f'<div class="job"><span class="k">not reachable</span>'
+                    f'{esc(b["ssh"])} &mdash; {esc(b["err"])}</div>')
+        else:
+            gb = f'{b["used"] / 1024:.1f} / {b["total"] / 1024:.0f} GB'
+            vpct = int(100 * b["used"] / b["total"]) if b["total"] else 0
+            body = (
+                f'<div class="meter"><div class="lb"><span>utilisation</span>'
+                f'<b>{b["util"]}%</b></div>'
+                f'<div class="bar"><i class="fill" style="width:{b["util"]}%">'
+                f'</i></div></div>'
+                f'<div class="meter"><div class="lb"><span>VRAM</span>'
+                f'<b>{gb}</b></div>'
+                f'<div class="bar"><i class="fill" style="width:{vpct}%"></i>'
+                f'</div></div>')
+            if b["job"]:
+                j = b["job"]
+                body += (f'<div class="job"><span class="k">running</span>'
+                         f'<code>{esc(j["exp"])}</code> &middot; {esc(j["survey"])}'
+                         f' &middot; {esc(j["block"])}'
+                         f'<div class="muted small">{esc(_elapsed(j["secs"]))}'
+                         f' elapsed</div></div>')
+            else:
+                body += ('<div class="job"><span class="k">running</span>'
+                         '<span class="muted">no ns-train process</span></div>')
+        cards += (f'<div class="gpu s-{b["st"]}"><div class="hd">'
+                  f'<span class="nm">{esc(b["name"])}</span>'
+                  f'<span class="card">{esc(b["card"] or "?")}</span>{chip}</div>'
+                  f'{body}</div>')
+    return f'<div class="gpus">{cards}</div>'
+
+
 def build():
     today = datetime.date.today()
     days = (LAUNCH - today).days
     phases = parse_roadmap()
     notes = parse_notebook()
     qs = queue_state()
-    rk = risks()
+    boxes = gpu_boxes()
+    rk = risks(boxes)
     ch = code_health()
     fresh = narrative_freshness()
     wq = week_queue()
-    att = attention(PILLARS, rk, ch, fresh, wq)
+    gpu_panel = gpu_html(boxes)
+    att = attention(PILLARS, rk, ch, fresh, wq, boxes)
 
     # ---- programme clock ----
     span = (LAUNCH - PROGRAMME_START).days
@@ -1096,6 +1230,8 @@ def build():
     n_bigrisk = len([r for r in rk if RANK.get(r[2], 0) >= 2])
     nav = [("attention", "Needs attention", worst([d["st"] for d in att]),
             len(hot) or ""),
+           ("gpus", "GPU boxes", worst([b["st"] for b in boxes]),
+            f'{sum(1 for b in boxes if b["job"])}/{len(boxes)}'),
            ("schedule", "Schedule", "good", f"{done_items}/{all_items}"),
            ("risks", "Big risks", worst([r[2] for r in rk]), n_bigrisk or "")]
     nav += pillar_nav
@@ -1150,6 +1286,15 @@ def build():
         <span class="muted small">every non-green claim on this sheet, worst first</span></div>
       {triage}
     </div>
+  </section>
+
+  <section class="sec" id="gpus">
+    <div class="eyebrow">Right now</div>
+    <h2>GPU boxes</h2>
+    <div class="tagline">Live probe of both Paperspace VMs: nvidia-smi for the
+      card, the running ns-train process for the job. A box that cannot be
+      reached says so rather than reading as idle.</div>
+    {gpu_panel}
   </section>
 
   <section class="sec" id="schedule">
