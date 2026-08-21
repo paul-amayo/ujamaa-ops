@@ -131,6 +131,214 @@ def queue_state():
 
 
 
+# ---------- the week GPU rotation (week_prod_queue_20260814.sh) ----------
+# Ground truth from artifacts: stage2 ckpts + verdict json on disk, the
+# pointer files, the queue log's SLOT marks. Replaces the tail of two retired
+# queue logs that sat here until 2026-08-21 (it showed "PILOT-DONE" for days).
+WEEK_LOG = LOGS / "week_prod_20260814.log"
+WEEK_STATE = LOGS / "week_prod_20260814_state"
+ROTATION = [("05_13D_Jackal", "/home/paperspace/data/citrus_all"),
+            ("04_13D_Jackal", "/home/paperspace/data/citrus_all"),
+            ("apr_2026_zed", "/home/paperspace/data/klapmuts"),
+            ("01_13B_Jackal", "/home/paperspace/data/citrus_all"),
+            ("03_13B_Jackal", "/home/paperspace/data/citrus_all"),
+            ("02_13B_Jackal", "/home/paperspace/data/citrus_all")]
+PASS_FLOOR = 0.80   # distill_containment_verdicts pass_rule: tree_iou_min >= 0.80
+
+
+def _mark_ts(s):
+    """'08-21 09:45:36' -> datetime (the log carries no year)."""
+    try:
+        return datetime.datetime.strptime(
+            f"{datetime.date.today().year}-{s}", "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return None
+
+
+def week_queue():
+    if not WEEK_LOG.exists():
+        return None
+    lines = WEEK_LOG.read_text(errors="replace").splitlines()
+    slots, open_slot = [], None
+    for ln in lines:
+        m = re.match(r"\[(\d\d-\d\d \d\d:\d\d:\d\d)\] SLOT (\S+) (block_\d+) "
+                     r"(OK|FAILED|\(round (\d+)\))", ln)
+        if not m:
+            continue
+        ts, survey, block, kind, rnd = m.groups()
+        t = _mark_ts(ts)
+        if kind.startswith("(round"):
+            open_slot = {"survey": survey, "block": block, "start": t,
+                         "round": int(rnd)}
+        elif open_slot and open_slot["survey"] == survey \
+                and open_slot["block"] == block:
+            open_slot.update(end=t, outcome=kind)
+            slots.append(open_slot)
+            open_slot = None
+    tail40 = "\n".join(lines[-40:])
+    stop = next((k for k in ("CIRCUIT-BREAKER", "ABORT-DISK", "WEEK-DONE",
+                             "ABORT:") if k in tail40), None)
+    alive = sh("ps -eo args | grep -c '[w]eek_prod_queue_20260814.sh'") \
+        not in ("", "0")
+    rnd_f = WEEK_STATE / "round"
+    rnd = rnd_f.read_text().strip() if rnd_f.exists() else "?"
+    wd = LOGS / "queue_watchdog.log"
+    wd_lines = wd.read_text().strip().splitlines() if wd.exists() else []
+    watchdog = wd_lines[-1] if wd_lines else "no action yet (queue never found dead)"
+    cur = None
+    if open_slot:
+        s, b = open_slot["survey"], open_slot["block"]
+        slog = LOGS / f"week_{s}_b{b[-3:]}.log"
+        stage = ""
+        if slog.exists():
+            for ln in reversed(slog.read_text(errors="replace").splitlines()):
+                if ln.startswith(f"[{b[-3:]}]"):
+                    stage = re.sub(r"treelod=\S+", "treelod=on", ln)[:90]
+                    break
+        canary = (Path(dict(ROTATION)[s]) / s / "prod/tassili/blocks_ns/lio_row100"
+                  / b / "canary/canary.jsonl")
+        step = ""
+        if canary.exists():
+            last = canary.read_text().strip().splitlines()
+            if last:
+                try:
+                    j = json.loads(last[-1])
+                    step = f"step {j.get('step')} · train FG {j.get('train_fg')} dB"
+                except Exception:
+                    pass
+        mins = (int((datetime.datetime.now() - open_slot["start"]).total_seconds() // 60)
+                if open_slot["start"] else None)
+        cur = dict(open_slot, stage=stage, step=step, mins=mins)
+    rows = []
+    for s, base in ROTATION:
+        cfg = Path(base) / s / "prod/tassili/blocks_ns/lio_row100"
+        blocks = sorted(d for d in cfg.glob("block_*") if re.search(r"block_\d+$", d.name))
+        built = sum(1 for d in blocks if list(d.glob(
+            "splat_runs_FEATFIX/stage2_censusinit_*/high/*/nerfstudio_models*/*.ckpt")))
+        nxt_f = WEEK_STATE / f"{s}.next"
+        nxt = None
+        if nxt_f.exists() and nxt_f.read_text().strip().isdigit():
+            nxt = int(nxt_f.read_text().strip())
+        vj = cfg / "verdicts_censusinit_fw2.json"
+        rec = npass = 0
+        if vj.exists():
+            try:
+                vb = json.loads(vj.read_text()).get("blocks", {})
+                rec = len(vb)
+                npass = sum(1 for r in vb.values()
+                            if (r.get("tree_iou_min") or 0) >= PASS_FLOOR)
+            except Exception:
+                pass
+        # a FAILED marker is REAL only if the block still has no stage2 ckpt
+        # and sits below the pointer; markers above a rewound pointer or on a
+        # block that later trained OK are stale (the 08-20 march left 28)
+        failed = sorted(int(p.name.split("block_")[1].split(".")[0])
+                        for p in WEEK_STATE.glob(f"{s}.block_*.FAILED"))
+        has_ck = {int(d.name[6:]) for d in blocks if list(d.glob(
+            "splat_runs_FEATFIX/stage2_censusinit_*/high/*/nerfstudio_models*/*.ckpt"))}
+        tried = [f for f in failed
+                 if nxt is not None and f < nxt and f not in has_ck]
+        oks = [x for x in slots if x["survey"] == s and x["outcome"] == "OK"]
+        last_ok = max((x["end"] for x in oks if x["end"]), default=None)
+        rows.append(dict(survey=s, n_blocks=len(blocks), built=built, next=nxt,
+                         rec=rec, npass=npass, failed=tried,
+                         stale_failed=len(failed) - len(tried), last_ok=last_ok,
+                         oks=len(oks)))
+    now = datetime.datetime.now()
+
+    def window(hours):
+        w = [x for x in slots if x["end"]
+             and (now - x["end"]).total_seconds() < hours * 3600]
+        ok = [x for x in w if x["outcome"] == "OK"]
+        durs = sorted(int((x["end"] - x["start"]).total_seconds() // 60)
+                      for x in ok if x["start"] and x["end"])
+        return len(ok), len(w) - len(ok), (durs[len(durs) // 2] if durs else None)
+    ok_day, fail_day, med = window(24)
+    ok_12, fail_12, med_12 = window(12)
+    return dict(alive=alive, stop=stop, round=rnd, watchdog=watchdog, cur=cur,
+                rows=rows, recent=slots[-10:], ok_day=ok_day,
+                fail_day=fail_day, med=med, ok_12=ok_12, fail_12=fail_12,
+                med_12=med_12,
+                gpu=sh("nvidia-smi --query-gpu=memory.used,utilization.gpu --format=csv,noheader"),
+                disk=sh("df -h / | awk 'NR==2{print $4}'"))
+
+
+def week_queue_html(q, esc):
+    if q["stop"]:
+        st, label = "serious", (f"STOPPED DELIBERATELY ({q['stop']}) — needs "
+                                "diagnosis; the watchdog will not restart it")
+    elif q["alive"]:
+        st, label = "good", "running"
+    else:
+        st, label = "critical", ("DEAD — watchdog relaunches at :13/:43 unless "
+                                 "a deliberate stop is logged")
+    cur = q["cur"]
+    if cur:
+        cur_txt = (f"{esc(cur['survey'])} {esc(cur['block'])} (round {cur['round']})"
+                   f" · {cur['mins']} min · {esc(cur['stage'])}"
+                   + (f" · {esc(cur['step'])}" if cur["step"] else ""))
+    else:
+        cur_txt = "between slots"
+    tp = f"12 h: {q['ok_12']} OK / {q['fail_12']} failed"
+    if q["med_12"]:
+        tp += f" (median OK slot {q['med_12']} min)"
+    tp += f" · 24 h: {q['ok_day']} OK / {q['fail_day']} failed"
+    head = (
+        "<div class='wrap'><table>"
+        f"<tr><td>rotation</td><td class='val'><span class='st st-{st}'>{ICON[st]} "
+        f"{esc(label)}</span></td><td class='muted'>round {esc(q['round'])} · {tp}</td></tr>"
+        f"<tr><td>current slot</td><td class='val' colspan='2'>{cur_txt}</td></tr>"
+        f"<tr><td>GPU · disk</td><td class='val'>{esc(q['gpu'])}</td>"
+        f"<td class='muted'>{esc(q['disk'])} free (ABORT-DISK floor 15G)</td></tr>"
+        f"<tr><td>watchdog</td><td class='muted' colspan='2'>{esc(q['watchdog'])}</td></tr>"
+        "</table></div>")
+    trs = []
+    for r in q["rows"]:
+        pct = int(100 * r["built"] / r["n_blocks"]) if r["n_blocks"] else 0
+        if r["next"] is None:
+            nxt = "?"
+        elif r["next"] >= r["n_blocks"]:
+            nxt = "done"
+        else:
+            nxt = f"b{r['next']:03d}"
+        failed = ", ".join(f"b{f:03d}" for f in r["failed"]) or "—"
+        if r["stale_failed"]:
+            failed += (f" <span class='muted small'>(+{r['stale_failed']} stale "
+                       "markers: trained OK later or above the pointer)</span>")
+        if r["rec"] and r["npass"] / r["rec"] >= 0.7:
+            vst = "good"
+        elif r["rec"] and r["npass"]:
+            vst = "warning"
+        elif r["rec"]:
+            vst = "serious"
+        else:
+            vst = "warning"
+        last_ok = r["last_ok"].strftime("%m-%d %H:%M") if r["last_ok"] else "—"
+        trs.append(
+            f"<tr><td>{esc(r['survey'])}</td><td class='val'>{r['built']}/{r['n_blocks']}</td>"
+            f"<td style='min-width:120px'><div class='bar'><div class='fill' "
+            f"style='width:{pct}%'></div></div></td>"
+            f"<td class='val'>{esc(nxt)}</td><td class='val'>{r['oks']}</td>"
+            f"<td class='muted'>{last_ok}</td>"
+            f"<td><span class='st st-{vst}'>{ICON[vst]} {r['npass']}/{r['rec']}</span></td>"
+            f"<td class='small'>{failed}</td></tr>")
+    table = ("<div class='wrap'><table><tr class='muted'><td>survey</td>"
+             "<td>stage2 built</td><td></td><td>next</td><td>OK slots</td>"
+             "<td>last OK</td><td>verdict pass (tree IoU min &ge; 0.80)</td>"
+             "<td>failed (tried, no ckpt)</td></tr>" + "".join(trs) + "</table></div>")
+    hist = []
+    for x in reversed(q["recent"]):
+        d = (int((x["end"] - x["start"]).total_seconds() // 60)
+             if x["start"] and x["end"] else "?")
+        s = "good" if x["outcome"] == "OK" else "serious"
+        when = x["end"].strftime("%m-%d %H:%M") if x["end"] else "?"
+        hist.append(f"<div class='qline'><span class='st st-{s}'>{ICON[s]}</span> {when} "
+                    f"{esc(x['survey'])} {esc(x['block'])} {esc(x['outcome'])} · "
+                    f"{d} min · round {x['round']}</div>")
+    return (head + table
+            + "<div class='small muted' style='margin:.4rem 0 .2rem'>recent slots</div>"
+            + "".join(hist))
+
 # ---------- the science: parsed from lab_notebook/PILLARS.md ----------
 # It used to be a Python literal in this file, which meant updating the
 # science story was a CODE edit — so it drifted 25 notebook entries behind
@@ -471,8 +679,12 @@ def build():
         f'{"in sync" if nb_behind == 0 else str(nb_behind) + " entries ahead"}'
         f'</span></td></tr>')
 
-    q_html = ("".join(f"<div class='qline'>{esc(q)}</div>" for q in qs)
-              or "<div class='qline muted'>no active queue lines</div>")
+    wq = week_queue()
+    if wq:
+        q_html = week_queue_html(wq, esc)
+    else:
+        q_html = ("".join(f"<div class='qline'>{esc(q)}</div>" for q in qs)
+                  or "<div class='qline muted'>no active queue lines</div>")
 
     auto = parse_autonomy()
     if auto:
@@ -576,7 +788,7 @@ tr.why td {{ border-top:none; padding-top:0; }}
 {auto_html}
 <h2>New dataset &rarr; tassili <span class="muted tagline">— {len(open_rows)} open (ledger: TESTING.md §6)</span></h2>
 {led_html}
-<h2>Live queue</h2>{q_html}
+<h2>Live queue <span class="muted tagline">— the week GPU rotation (automation/week_prod_queue_20260814.sh): pointers, stage2 ckpts and verdict json read from disk</span></h2>{q_html}
 <h2>Experiment trail (lab notebook)</h2><div class="wrap"><table>{notes_html}</table></div>
 """
     OUT.write_text(page)
