@@ -16,6 +16,9 @@ Paul's view stays current without asking.
       automation/build_prod_manifests.py, regen PROD.md, verify cells flip.
       DONE 2026-08-20: checker probed <root>/scene_graph; now falls back to
       prod/bateleur/scene_graph. 6 surveys flipped to hierarchy=[x]. d1e5ef6
+2026-08-21: the 08:23 tick was MISSED — the session died with the VM reboot
+(09:23); re-armed 09:40 in the recovery session, P1 still top.
+
 - [ ] P1: gen2 M0 — centroid row stage into build_marker_hierarchy.py per
       plans/gen2_hierarchy_swap.md M0: census centroids in (all, from
       global_ids stats), HighInterface.ransac_init (Aug-18 binding path),
@@ -44,3 +47,26 @@ Paul's view stays current without asking.
 
 Out of scope for this queue (GPU): SAM3 fruit passes, DINOv2 pre-flight,
 any training — they ride gen2 / post-rotation windows per the plan.
+
+## Session-death recovery (added 2026-08-21 after the VM reboot)
+Durable — survive session death AND reboot: the GPU queue itself (setsid),
+automation/queue_watchdog.sh (USER crontab `:13/:43` — `crontab -l`, not
+/etc/crontab), daily_dashboard.sh (06:15 HTML rebuild), pointers/markers in
+~/logs/week_prod_20260814_state/, this ledger.
+Session-bound — die with the Claude session; re-arm in ANY new session with one
+line ("revive the autonomous week"):
+  1. persistent Monitor: `tail -n0 -F ~/logs/week_prod_20260814.log
+     ~/logs/queue_watchdog.log | grep -E --line-buffered
+     "CIRCUIT-BREAKER|ABORT|FAILED|SUP-SPARSE|ROUND-[0-9]+-DONE|WEEK-DONE|WEEK QUEUE START|GPU ready|SLOT .* OK|relaunching|NOT restarting"`
+  2. CronCreate `23 8 * * *` (7-day expiry): queue-health glance (tail log,
+     watchdog log, audit_pointers.sh, df floor 15G, queue alive) → republish
+     lab_notebook/dashboard.html with Artifact url=
+     https://claude.ai/code/artifact/3a2156c8-d3b4-4a2b-9968-923c007dc45a →
+     top unchecked task here (~3 h, niced, commit-after-green, notebook) →
+     status note to Paul.
+Lessons: cron PATH has no ~/.pixi/bin — every cron-launched script exports
+PATH itself (watchdog + queue fixed 08-21). Never run ollama (cpu-only Gemma,
+~8 G RAM) or the adinkra :8003 server beside the rotation: a gsplat_cuda JIT
+rebuild (8× nvcc ≈ 2–2.5 G each) OOM-killed on the 29 G box and cost 04 b008
+(08-21 06:47–07:16). A transiently-failed block's requeue is Paul's call:
+`audit_pointers.sh`, rewind the .next, archive the FAILED marker.

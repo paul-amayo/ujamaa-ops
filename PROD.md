@@ -1,6 +1,6 @@
 # Prod readiness — surveys × UJAMAA agents
 
-Generated 2026-08-20 20:01 UTC by `automation/build_prod_manifests.py` — do not edit by hand.
+Generated 2026-08-21 03:42 UTC by `automation/build_prod_manifests.py` — do not edit by hand.
 
 Layout per survey: `prod/{monos,tassili,bateleur,sankofa,azalai}` =
 PHYSICAL folders, **unsafe to delete** (source data + current-best
@@ -15,12 +15,12 @@ Hapi run on demo-synthetic data — no per-survey assets yet.
 
 | survey | prod | experimental (deletable) | tassili | bateleur | sankofa | azalai | note |
 |---|---|---|---|---|---|---|---|
-| 01_13B_Jackal | 110G | 1G | 5/7 ✗ stage2,verdicts | **READY** | **READY** | **READY** |  |
-| 02_13B_Jackal | 197G | 1G | 5/7 ✗ stage2,verdicts | **READY** | **READY** | **READY** | ledger control epoch — joined the splat rotation 2026-08-14 (stage2 contingent on painted semantics) |
-| 03_13B_Jackal | 110G | 1G | 5/7 ✗ stage2,verdicts | **READY** | **READY** | **READY** |  |
-| 04_13D_Jackal | 157G | 1G | 5/7 ✗ stage2,verdicts | **READY** | 2/3 ✗ multi_epoch | **READY** |  |
-| 05_13D_Jackal | 115G | 1G | 5/7 ✗ stage2,verdicts | **READY** | 1/3 ✗ in_ledger,multi_epoch | **READY** |  |
-| apr_2026_zed | 60G | 54G | 5/7 ✗ stage2,verdicts | **READY** | 1/3 ✗ in_ledger,multi_epoch | 2/3 ✗ georef |  |
+| 01_13B_Jackal | 117G | 1G | 5/7 ✗ stage2,verdicts | **READY** | **READY** | **READY** |  |
+| 02_13B_Jackal | 204G | 1G | 5/7 ✗ stage2,verdicts | **READY** | **READY** | **READY** | ledger control epoch — joined the splat rotation 2026-08-14 (stage2 contingent on painted semantics) |
+| 03_13B_Jackal | 117G | 1G | 5/7 ✗ stage2,verdicts | **READY** | **READY** | **READY** |  |
+| 04_13D_Jackal | 164G | 1G | 5/7 ✗ stage2,verdicts | **READY** | 2/3 ✗ multi_epoch | **READY** |  |
+| 05_13D_Jackal | 122G | 1G | 5/7 ✗ stage2,verdicts | **READY** | 1/3 ✗ in_ledger,multi_epoch | **READY** |  |
+| apr_2026_zed | 66G | 54G | 5/7 ✗ stage2,verdicts | **READY** | 1/3 ✗ in_ledger,multi_epoch | 2/3 ✗ georef |  |
 | dec_2025_a300 | 12G | 1G | 1/4 ✗ blocks,embedder,hierarchy | 1/4 ✗ hierarchy,registry,topdown | 1/3 ✗ in_ledger,multi_epoch | 0/3 ✗ site_geometry,rows,georef | pilot mcap — georef + SAM3 ledger seed |
 | dec_2025_ten_rows | 92G | 3G | 1/7 ✗ blocks,stage2,verdicts,registered,embedder,hierarchy | 1/4 ✗ hierarchy,registry,topdown | 1/3 ✗ in_ledger,multi_epoch | 1/3 ✗ site_geometry,rows | Dec ten-rows — in week rotation, gated on pose-domain verification (INS=ENU0 frame) |
 
@@ -31,8 +31,8 @@ prod block config: `/home/paperspace/data/citrus_all/01_13B_Jackal/prod/tassili/
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 71 blocks
-  - [ ] stage2: 5/71 blocks have stage2_censusinit_* ckpt (missing ['block_005', 'block_006', 'block_007', 'block_008'])
-  - [ ] verdicts: 4 recorded, 2 pass floor 0.8; unrecorded blocks ['002', '005', '006', '007', '008']; failing ['000', '003']
+  - [ ] stage2: 6/71 blocks have stage2_censusinit_* ckpt (missing ['block_006', 'block_007', 'block_008', 'block_009'])
+  - [ ] verdicts: 5 recorded, 2 pass floor 0.8; unrecorded blocks ['002', '006', '007', '008', '009']; failing ['000', '003', '005']
   - [x] registered: splats.json present
   - [x] embedder: 01_13B_v1g (newest in prod/bateleur)
   - [x] hierarchy: 288 obj / 41 rows (scene_graph)
@@ -55,8 +55,8 @@ prod block config: `/home/paperspace/data/citrus_all/02_13B_Jackal/prod/tassili/
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 27 blocks
-  - [ ] stage2: 5/27 blocks have stage2_censusinit_* ckpt (missing ['block_005', 'block_006', 'block_007', 'block_008'])
-  - [ ] verdicts: 5 recorded, 1 pass floor 0.8; unrecorded blocks ['005', '006', '007', '008', '009']; failing ['000', '001', '002', '004']
+  - [ ] stage2: 6/27 blocks have stage2_censusinit_* ckpt (missing ['block_006', 'block_007', 'block_008', 'block_009'])
+  - [ ] verdicts: 6 recorded, 1 pass floor 0.8; unrecorded blocks ['006', '007', '008', '009', '010']; failing ['000', '001', '002', '004', '005']
   - [x] registered: splats.json present
   - [x] embedder: 02_13B_v1g (canon)
   - [x] hierarchy: 180 obj / 33 rows (scene_graph)
@@ -79,8 +79,8 @@ prod block config: `/home/paperspace/data/citrus_all/03_13B_Jackal/prod/tassili/
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 105 blocks
-  - [ ] stage2: 5/105 blocks have stage2_censusinit_* ckpt (missing ['block_005', 'block_006', 'block_007', 'block_008'])
-  - [ ] verdicts: 5 recorded, 4 pass floor 0.8; unrecorded blocks ['005', '006', '007', '008', '009']; failing ['002']
+  - [ ] stage2: 6/105 blocks have stage2_censusinit_* ckpt (missing ['block_006', 'block_007', 'block_008', 'block_009'])
+  - [ ] verdicts: 6 recorded, 5 pass floor 0.8; unrecorded blocks ['006', '007', '008', '009', '010']; failing ['002']
   - [x] registered: splats.json present
   - [x] embedder: 03_13B_v1g (newest in prod/bateleur)
   - [x] hierarchy: 311 obj / 39 rows (scene_graph)
@@ -103,8 +103,8 @@ prod block config: `/home/paperspace/data/citrus_all/04_13D_Jackal/prod/tassili/
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 48 blocks
-  - [ ] stage2: 7/48 blocks have stage2_censusinit_* ckpt (missing ['block_007', 'block_008', 'block_009', 'block_010'])
-  - [ ] verdicts: 7 recorded, 5 pass floor 0.8; unrecorded blocks ['007', '008', '009', '010', '011']; failing ['004', '005']
+  - [ ] stage2: 8/48 blocks have stage2_censusinit_* ckpt (missing ['block_008', 'block_009', 'block_010', 'block_011'])
+  - [ ] verdicts: 8 recorded, 6 pass floor 0.8; unrecorded blocks ['008', '009', '010', '011', '012']; failing ['004', '005']
   - [x] registered: splats.json present
   - [x] embedder: 04_13D_v1g (newest in prod/bateleur)
   - [x] hierarchy: 107 obj / 11 rows (scene_graph)
@@ -127,8 +127,8 @@ prod block config: `/home/paperspace/data/citrus_all/05_13D_Jackal/prod/tassili/
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 43 blocks
-  - [ ] stage2: 10/43 blocks have stage2_censusinit_* ckpt (missing ['block_010', 'block_011', 'block_012', 'block_013'])
-  - [ ] verdicts: 10 recorded, 5 pass floor 0.8; unrecorded blocks ['010', '011', '012', '013', '014']; failing ['001', '002', '003', '005', '008']
+  - [ ] stage2: 11/43 blocks have stage2_censusinit_* ckpt (missing ['block_010', 'block_011', 'block_012', 'block_014'])
+  - [ ] verdicts: 11 recorded, 6 pass floor 0.8; unrecorded blocks ['010', '011', '012', '014', '015']; failing ['001', '002', '003', '005', '008']
   - [x] registered: splats.json present
   - [x] embedder: 05_13D_v1g (canon)
   - [x] hierarchy: 100 obj / 9 rows (scene_graph)
@@ -151,8 +151,8 @@ prod block config: `/home/paperspace/data/klapmuts/apr_2026_zed/prod/tassili/blo
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 25 blocks
-  - [ ] stage2: 5/25 blocks have stage2_censusinit_* ckpt (missing ['block_005', 'block_006', 'block_007', 'block_008'])
-  - [ ] verdicts: 3 recorded, 0 pass floor 0.8; unrecorded blocks ['002', '003', '005', '006', '007']; failing ['000', '001', '004']
+  - [ ] stage2: 6/25 blocks have stage2_censusinit_* ckpt (missing ['block_006', 'block_007', 'block_008', 'block_009'])
+  - [ ] verdicts: 6 recorded, 0 pass floor 0.8; unrecorded blocks ['006', '007', '008', '009', '010']; failing ['000', '001', '002', '003', '004', '005']
   - [x] registered: splats.json present
   - [x] embedder: apr_2026_zed_v1g (newest in prod/bateleur)
   - [x] hierarchy: 481 obj / 14 rows (scene_graph)

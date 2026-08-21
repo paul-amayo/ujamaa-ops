@@ -21,6 +21,9 @@
 # Kill: ps -eo pid,pgid,args | grep "[w]eek_prod_queue" -> kill -TERM -<PGID>
 # No rm, no git push, nothing destructive (quarantines are mv).
 set -u
+# Self-sufficient PATH: the watchdog launches this from cron (PATH=/usr/bin:/bin)
+# and pixi lives in ~/.pixi/bin (2026-08-21 reboot lesson).
+export PATH=/home/paperspace/.local/bin:/home/paperspace/.pixi/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 LOGS=/home/paperspace/logs
 SRC=/home/paperspace/code/aru_sil_core/src/scripts
 AUTO=/home/paperspace/code/automation
