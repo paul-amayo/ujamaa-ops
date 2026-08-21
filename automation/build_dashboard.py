@@ -9,13 +9,20 @@ Output:          lab_notebook/dashboard.html
 import datetime
 import html
 import json
+import os
 import re
 import shutil
 import subprocess
 from pathlib import Path
 
-CODE = Path("/home/paperspace/code")
-LOGS = Path("/home/paperspace/logs")
+# Roots resolve to the workstation when it is present, otherwise to whatever
+# checkout this script lives in (e.g. the ujamaa-ops mirror on a laptop), so
+# the same builder runs off-box. UJAMAA_CODE / UJAMAA_LOGS override both.
+_WORKSTATION = Path("/home/paperspace/code")
+CODE = Path(os.environ.get("UJAMAA_CODE") or
+            (_WORKSTATION if _WORKSTATION.exists()
+             else Path(__file__).resolve().parent.parent))
+LOGS = Path(os.environ.get("UJAMAA_LOGS") or (CODE.parent / "logs"))
 OUT = CODE / "lab_notebook" / "dashboard.html"
 LAUNCH = datetime.date(2026, 12, 15)
 
@@ -404,6 +411,12 @@ def risks():
                 "serious" if free_gb > 60 else "critical"))
     for name, d in [("high/", CODE / "high"),
                     ("aru_sil_core/src", CODE / "aru_sil_core" / "src")]:
+        if not d.exists():
+            # off-box build (ujamaa-ops mirror): no sub-repo to probe. Say so
+            # rather than reporting a git count that was never taken.
+            out.append((f"Uncommitted — {name}", "not in this checkout",
+                        "unknown"))
+            continue
         n = sh("git status --porcelain | wc -l", cwd=d)
         try:
             n = int(n)
@@ -552,6 +565,12 @@ def _score(u, s):
 def code_health():
     rows = []
     for u in HEALTH_UNITS:
+        if not u["root"].exists():
+            rows.append((u, dict(loc=0, files=0, breakage=None, hygiene=None,
+                                 tmp_refs=0, big=0, dirty=0, age=0, tests=None,
+                                 absent=True), None,
+                         "not in this checkout — unmeasured", "unknown"))
+            continue
         s = _unit_stats(u)
         score, why = _score(u, s)
         st = ("good" if score >= 85 else
@@ -574,9 +593,9 @@ HEALTH_FLAGS = [
 
 
 ICON = {"good": "&#9679;", "warning": "&#9650;", "serious": "&#9632;",
-        "critical": "&#10006;"}
+        "critical": "&#10006;", "unknown": "&#9675;"}
 SNAME = {"good": "OK", "warning": "WATCH", "serious": "RISK",
-         "critical": "CRITICAL"}
+         "critical": "CRITICAL", "unknown": "n/a"}
 
 
 def narrative_freshness():
@@ -657,20 +676,21 @@ def build():
     ch = code_health()
     health_html = "".join(
         f'''<tr><td>{esc(u["name"])}<div class="muted small">{esc(u["note"])}</div></td>
-        <td class="val">{s["loc"] / 1000:.1f}k</td>
+        <td class="val">{"—" if s.get("absent") else f'{s["loc"] / 1000:.1f}k'}</td>
         <td class="val">{esc(s["tests"] or "—")}</td>
-        <td class="val">{s["breakage"] if s["breakage"] is not None else "?"}</td>
-        <td class="val">{(s["hygiene"] or 0) / max(s["loc"] / 1000, .001):.0f}</td>
-        <td class="val">{s["dirty"]}</td>
-        <td><span class="st st-{st}">{ICON[st]} {score}</span></td></tr>
+        <td class="val">{"—" if s.get("absent") else (s["breakage"] if s["breakage"] is not None else "?")}</td>
+        <td class="val">{"—" if s.get("absent") else f'{(s["hygiene"] or 0) / max(s["loc"] / 1000, .001):.0f}'}</td>
+        <td class="val">{"—" if s.get("absent") else s["dirty"]}</td>
+        <td><span class="st st-{st}">{ICON[st]} {SNAME[st] if score is None else score}</span></td></tr>
         <tr class="why"><td colspan="7" class="muted small">{esc(why)}</td></tr>'''
         for u, s, score, why, st in ch)
     flags_html = "".join(
         f'''<tr><td>{esc(k)}</td><td class="muted">{esc(v)}</td>
         <td><span class="st st-{s}">{ICON[s]} {SNAME[s]}</span></td></tr>'''
         for k, v, s in HEALTH_FLAGS)
-    scored = [score for u, s, score, why, st in ch if not u.get("legacy")]
-    health_min = min(scored) if scored else 0
+    scored = [score for u, s, score, why, st in ch
+              if not u.get("legacy") and score is not None]
+    health_min = min(scored) if scored else "—"
     pill_day, nb_newest, nb_behind, nb_st = narrative_freshness()
     fresh_html = (
         f'<tr><td>Science narrative (PILLARS) vs lab notebook</td>'
@@ -753,6 +773,7 @@ td.val {{ font-weight:600; white-space:nowrap; }}
 .st {{ font-weight:700; font-size:.78rem; white-space:nowrap; }}
 .st-good {{ color:var(--good); }} .st-warning {{ color:var(--warning); }}
 .st-serious {{ color:var(--serious); }} .st-critical {{ color:var(--critical); }}
+.st-unknown {{ color:var(--muted); }}
 .qline {{ font:12px/1.6 ui-monospace,monospace; background:var(--card);
   border-left:3px solid var(--accent); padding:.15rem .6rem; margin:.15rem 0;
   overflow-x:auto; white-space:nowrap; }}
