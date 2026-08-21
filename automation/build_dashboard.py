@@ -69,6 +69,9 @@ def parse_notebook():
                 entries.append((m.group(1), m.group(2)))
         if len(entries) >= 8:
             break
+    # newest first: entries sit in file order, which is neither chronological
+    # nor newest-first, so the trail used to show a month's OLDEST eight.
+    entries.sort(key=lambda e: e[0][:10], reverse=True)
     return entries[:8]
 
 
@@ -623,6 +626,306 @@ def narrative_freshness():
     return pill_day or "?", newest, behind, st
 
 
+def esc(s):
+    return html.escape(str(s))
+
+
+def md(s):
+    """Escape, then honour the **bold** the PILLARS.md source already uses."""
+    return re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", esc(s))
+
+
+RANK = {"good": 0, "unknown": 0, "warning": 1, "serious": 2, "critical": 3}
+# Phase 0 of the roadmap opens the week of Jul 13 — the programme clock starts there.
+PROGRAMME_START = datetime.date(2026, 7, 13)
+
+CSS = """
+*,*::before,*::after { box-sizing:border-box; }
+:root {
+  --bg:#eceeec; --surface:#f7f9f8; --surface2:#e2e7e4; --ink:#12171a;
+  --muted:#5b6660; --line:#d2d9d5; --hair:#dfe4e1;
+  --accent:#1f4b6b; --accent-soft:#cddbe5;
+  --good:#1c6b3f; --warning:#8a5a00; --serious:#b3261e; --critical:#7f1610;
+  --unknown:#8b948f;
+  --f-display:ui-serif,"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --f-ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+  --f-mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#101413; --surface:#171c1a; --surface2:#212826; --ink:#e6ebe8;
+    --muted:#94a29b; --line:#2c3432; --hair:#242b29;
+    --accent:#79aed4; --accent-soft:#24384a;
+    --good:#4cc97a; --warning:#e0a72e; --serious:#ff6b5e; --critical:#ff9a90;
+    --unknown:#7d8a84;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#101413; --surface:#171c1a; --surface2:#212826; --ink:#e6ebe8;
+  --muted:#94a29b; --line:#2c3432; --hair:#242b29;
+  --accent:#79aed4; --accent-soft:#24384a;
+  --good:#4cc97a; --warning:#e0a72e; --serious:#ff6b5e; --critical:#ff9a90;
+  --unknown:#7d8a84;
+}
+html { -webkit-text-size-adjust:100%; }
+body { margin:0; background:var(--bg); color:var(--ink);
+  font:15px/1.55 var(--f-ui); font-variant-numeric:tabular-nums; }
+a { color:inherit; }
+:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+
+/* ---------- sheet ---------- */
+.sheet { display:grid; grid-template-columns:232px minmax(0,1fr); gap:2.75rem;
+  max-width:1260px; margin:0 auto; padding:2.25rem 1.5rem 5rem; }
+@media (max-width:900px) {
+  .sheet { grid-template-columns:1fr; gap:1.25rem; padding-top:1.25rem; }
+  .rail { position:static !important; }
+}
+
+/* ---------- left rail ---------- */
+.rail { position:sticky; top:1.5rem; align-self:start; display:flex;
+  flex-direction:column; gap:1.15rem; }
+.brand { font:700 1.35rem/1 var(--f-display); letter-spacing:.01em; }
+.brand span { display:block; font:500 .7rem/1.4 var(--f-mono);
+  letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+  margin-top:.4rem; }
+.clock { border-top:2px solid var(--ink); padding-top:.6rem; }
+.clock .n { font:700 2.1rem/1 var(--f-mono); letter-spacing:-.02em; }
+.clock .l { font-size:.78rem; color:var(--muted); margin-top:.15rem; }
+.track { height:5px; background:var(--surface2); margin-top:.7rem;
+  position:relative; }
+.track i { position:absolute; inset:0 auto 0 0; background:var(--accent);
+  display:block; }
+.track b { position:absolute; top:-3px; width:2px; height:11px;
+  background:var(--ink); }
+.tickrow { display:flex; justify-content:space-between;
+  font:.66rem/1 var(--f-mono); color:var(--muted); margin-top:.35rem; }
+nav { display:flex; flex-direction:column; border-top:1px solid var(--line); }
+nav a { display:flex; align-items:center; gap:.55rem; padding:.34rem 0;
+  font-size:.83rem; text-decoration:none; color:var(--muted);
+  border-bottom:1px solid var(--hair); }
+nav a:hover { color:var(--ink); }
+nav a.on { color:var(--ink); font-weight:600; }
+nav a .dot { width:7px; height:7px; flex:0 0 7px; border-radius:50%;
+  background:var(--c,var(--good)); }
+nav a .n { margin-left:auto; font:.7rem/1 var(--f-mono); color:var(--muted); }
+.d-good{--c:var(--good)} .d-warning{--c:var(--warning)}
+.d-serious{--c:var(--serious)} .d-critical{--c:var(--critical)}
+.d-unknown{--c:var(--unknown)}
+
+/* ---------- headings ---------- */
+.eyebrow { font:600 .68rem/1 var(--f-mono); letter-spacing:.15em;
+  text-transform:uppercase; color:var(--muted); }
+.sec { margin:0 0 2.9rem; scroll-margin-top:1.25rem; }
+.sec > h2 { font:600 1.3rem/1.25 var(--f-display); margin:.45rem 0 .3rem;
+  text-wrap:balance; letter-spacing:.005em; }
+.sec > .tagline { color:var(--muted); font-size:.85rem; max-width:74ch;
+  margin-bottom:.9rem; }
+h1 { font:600 1.15rem/1.3 var(--f-display); margin:0 0 .15rem; }
+
+/* ---------- readout strip ---------- */
+.readout { display:grid; grid-template-columns:repeat(4,minmax(0,1fr));
+  border:1px solid var(--line); background:var(--surface); margin-bottom:2.4rem; }
+@media (max-width:640px){ .readout { grid-template-columns:repeat(2,1fr); } }
+.readout > div { padding:.85rem 1rem; border-left:1px solid var(--line); }
+.readout > div:first-child { border-left:none; }
+.readout .n { font:700 1.75rem/1.05 var(--f-mono); letter-spacing:-.02em; }
+.readout .l { font-size:.75rem; color:var(--muted); margin-top:.3rem; }
+.readout .n.warning { color:var(--warning); }
+.readout .n.serious { color:var(--serious); }
+
+/* ---------- triage ---------- */
+.triage { border:1px solid var(--line); background:var(--surface); }
+.triage .hd { display:flex; align-items:baseline; gap:.6rem; padding:.7rem 1rem;
+  border-bottom:1px solid var(--line); background:var(--surface2); }
+.triage .hd h2 { font:600 1rem/1 var(--f-display); margin:0; }
+.item { display:grid; grid-template-columns:auto minmax(0,1fr);
+  gap:.7rem; padding:.6rem 1rem .6rem .85rem; border-top:1px solid var(--hair);
+  border-left:3px solid var(--c,var(--muted)); }
+.item:first-of-type { border-top:none; }
+.item .where { font:600 .68rem/1.5 var(--f-mono); letter-spacing:.06em;
+  text-transform:uppercase; color:var(--muted); white-space:nowrap; }
+.item .claim { font-weight:600; }
+.item .ev { color:var(--muted); font-size:.85rem; max-width:80ch; }
+.item a { text-decoration:none; border-bottom:1px solid var(--accent-soft); }
+details.more > summary { cursor:pointer; padding:.55rem 1rem;
+  font:600 .78rem/1 var(--f-mono); color:var(--muted);
+  border-top:1px solid var(--line); }
+details.more > summary:hover { color:var(--ink); }
+details.more[open] > summary { color:var(--ink); }
+
+/* ---------- phases ---------- */
+.phase { display:grid; grid-template-columns:2.1rem minmax(0,1fr) auto;
+  gap:.75rem; align-items:center; padding:.42rem 0;
+  border-top:1px solid var(--hair); }
+.phase .ix { font:600 .78rem/1 var(--f-mono); color:var(--muted); }
+.phase .nm { font-size:.9rem; }
+.phase .ct { font:600 .8rem/1 var(--f-mono); color:var(--muted); }
+.phase.now .nm { font-weight:600; }
+.phase.now .ix { color:var(--accent); }
+.bar { height:6px; background:var(--surface2); }
+.fill { height:6px; background:var(--accent); display:block; }
+.phase .bar { margin-top:.3rem; }
+
+/* ---------- pillar ledger ---------- */
+.pillar { border:1px solid var(--line); background:var(--surface);
+  padding:1.05rem 1.15rem 1.15rem; margin-bottom:1.15rem;
+  scroll-margin-top:1.25rem; }
+.pillar h2 { font:600 1.2rem/1.2 var(--f-display); margin:.2rem 0 .1rem; }
+.pillar .tag { color:var(--muted); font-size:.85rem; }
+.q { font-family:var(--f-display); font-style:italic; color:var(--muted);
+  border-left:2px solid var(--accent); padding-left:.7rem; margin:.6rem 0 .9rem;
+  max-width:76ch; }
+.tally { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.2rem; }
+.tally span { font:600 .68rem/1 var(--f-mono); letter-spacing:.06em;
+  text-transform:uppercase; padding:.25rem .45rem; border:1px solid currentColor; }
+.claimrow { border-left:3px solid var(--c,var(--muted)); padding:.5rem .8rem;
+  border-top:1px solid var(--hair); }
+.claimrow:first-of-type { border-top:none; }
+.claimrow .t { font-weight:600; font-size:.92rem; }
+.claimrow .e { color:var(--muted); font-size:.85rem; max-width:82ch;
+  margin-top:.15rem; }
+.next { margin-top:.9rem; padding-top:.7rem; border-top:1px solid var(--line);
+  font-size:.87rem; max-width:82ch; }
+.next b { font:600 .68rem/1 var(--f-mono); letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); display:block;
+  margin-bottom:.25rem; }
+.s-good{--c:var(--good)} .s-warning{--c:var(--warning)}
+.s-serious{--c:var(--serious)} .s-critical{--c:var(--critical)}
+.s-unknown{--c:var(--unknown)}
+body.openonly .claimrow.s-good { display:none; }
+.toggle { font:600 .72rem/1 var(--f-mono); letter-spacing:.06em;
+  text-transform:uppercase; color:var(--muted); background:none;
+  border:1px solid var(--line); padding:.4rem .6rem; cursor:pointer; }
+.toggle:hover { color:var(--ink); }
+body.openonly .toggle { color:var(--ink); border-color:var(--accent); }
+
+/* ---------- tables ---------- */
+.wrap { overflow-x:auto; border:1px solid var(--line); background:var(--surface); }
+table { border-collapse:collapse; width:100%; font-size:.86rem; }
+td { padding:.44rem .7rem; border-top:1px solid var(--hair);
+  vertical-align:top; }
+tr:first-child td { border-top:none; }
+td.val { font-family:var(--f-mono); font-weight:600; white-space:nowrap; }
+tr.head td { font:600 .68rem/1 var(--f-mono); letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); background:var(--surface2);
+  border-top:none; padding-top:.55rem; padding-bottom:.55rem; }
+tr.why td { border-top:none; padding-top:0; }
+.muted { color:var(--muted); }
+.small { font-size:.78rem; }
+.st { font:700 .68rem/1 var(--f-mono); letter-spacing:.07em; white-space:nowrap; }
+.st-good{color:var(--good)} .st-warning{color:var(--warning)}
+.st-serious{color:var(--serious)} .st-critical{color:var(--critical)}
+.st-unknown{color:var(--unknown)}
+.absent td { opacity:.55; }
+
+/* ---------- queue ---------- */
+.qline { font:12px/1.7 var(--f-mono); background:var(--surface);
+  border:1px solid var(--line); border-left:3px solid var(--accent);
+  padding:.2rem .7rem; margin:.2rem 0; overflow-x:auto; white-space:nowrap; }
+
+/* ---------- autonomy ---------- */
+.auto { display:grid; grid-template-columns:auto minmax(90px,1fr) auto auto;
+  gap:.6rem .8rem; align-items:center; border:1px solid var(--line);
+  background:var(--surface); padding:.8rem 1rem; }
+.auto .d { font:.78rem/1 var(--f-mono); color:var(--muted); }
+.auto .p { font:600 .78rem/1 var(--f-mono); white-space:nowrap; }
+.auto .x { font:.75rem/1 var(--f-mono); color:var(--muted); white-space:nowrap; }
+
+/* ---------- trail ---------- */
+.trail { border-left:2px solid var(--line); padding-left:1rem; }
+.tr { position:relative; padding:.42rem 0; border-top:1px solid var(--hair); }
+.tr:first-child { border-top:none; }
+.tr::before { content:""; position:absolute; left:-1.32rem; top:.85rem;
+  width:7px; height:7px; background:var(--accent); border-radius:50%; }
+.tr .d { font:.72rem/1 var(--f-mono); color:var(--muted); }
+.tr .t { font-size:.9rem; max-width:84ch; }
+footer { color:var(--muted); font-size:.78rem; border-top:1px solid var(--line);
+  padding-top:.8rem; margin-top:2rem; }
+@media print {
+  .rail nav, .toggle { display:none; }
+  .sheet { grid-template-columns:1fr; }
+  body { background:#fff; }
+}
+@media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto !important; } }
+"""
+
+JS = """
+(function () {
+  var links = [].slice.call(document.querySelectorAll('nav a'));
+  var secs = links.map(function (a) {
+    return document.getElementById(a.getAttribute('href').slice(1));
+  });
+  function spy() {
+    var best = 0, top = 120;
+    secs.forEach(function (s, i) {
+      if (s && s.getBoundingClientRect().top <= top) best = i;
+    });
+    links.forEach(function (a, i) { a.classList.toggle('on', i === best); });
+  }
+  addEventListener('scroll', spy, { passive: true });
+  spy();
+  var t = document.getElementById('openonly');
+  if (t) t.addEventListener('click', function () {
+    var on = document.body.classList.toggle('openonly');
+    t.textContent = on ? 'Show settled claims' : 'Open items only';
+    t.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+})();
+"""
+
+
+def worst(sts):
+    """Worst severity in a list of status strings (for the nav dots)."""
+    o = "good"
+    for s in sts:
+        if RANK.get(s, 0) > RANK.get(o, 0):
+            o = s
+    return o
+
+
+def attention(pillars, rk, ch, fresh, wq):
+    """Everything the page already knows is not-green, in one triage list.
+
+    The statuses were always computed per-section; nothing collected them, so
+    'what needs me today' meant scrolling the whole sheet."""
+    out = []
+    for i, pl in enumerate(pillars):
+        for claim, ev, st in pl["open"]:
+            out.append(dict(st=st, where=pl["name"], href=f"#p{i}",
+                            claim=claim, ev=ev))
+    for k, v, st in rk:
+        if RANK.get(st, 0) > 0:
+            out.append(dict(st=st, where="Risk", href="#risks", claim=k, ev=v))
+    for u, s, score, why, st in ch:
+        if score is not None and RANK.get(st, 0) > 0:
+            out.append(dict(st=st, where="Code health", href="#health",
+                            claim=f'{u["name"]} scores {score}', ev=why))
+    pill_day, nb_newest, nb_behind, nb_st = fresh
+    if nb_behind:
+        out.append(dict(st=nb_st, where="Narrative", href="#health",
+                        claim=f"PILLARS is {nb_behind} notebook entries behind",
+                        ev=f"curated {pill_day} · newest entry {nb_newest}"))
+    if wq:
+        if wq["stop"]:
+            out.append(dict(st="serious", where="Queue", href="#queue",
+                            claim=f"rotation stopped ({wq['stop']})",
+                            ev="needs diagnosis; the watchdog will not restart it"))
+        elif not wq["alive"]:
+            out.append(dict(st="critical", where="Queue", href="#queue",
+                            claim="rotation is dead",
+                            ev="watchdog relaunches at :13/:43 unless a deliberate "
+                               "stop is logged"))
+    out.sort(key=lambda d: -RANK.get(d["st"], 0))
+    return out
+
+
+def item_html(d):
+    return (f'<div class="item s-{d["st"]}">'
+            f'<div class="where">{esc(d["where"])}</div>'
+            f'<div><div class="claim"><a href="{d["href"]}">{md(d["claim"])}</a></div>'
+            f'<div class="ev">{md(d["ev"])}</div></div></div>')
+
+
 def build():
     today = datetime.date.today()
     days = (LAUNCH - today).days
@@ -630,68 +933,99 @@ def build():
     notes = parse_notebook()
     qs = queue_state()
     rk = risks()
+    ch = code_health()
+    fresh = narrative_freshness()
+    wq = week_queue()
+    att = attention(PILLARS, rk, ch, fresh, wq)
 
-    def esc(s):
-        return html.escape(str(s))
+    # ---- programme clock ----
+    span = (LAUNCH - PROGRAMME_START).days
+    elapsed = max(0, min(span, (today - PROGRAMME_START).days))
+    pct_time = int(100 * elapsed / span) if span else 0
+    done_items = sum(p["done"] for p in phases)
+    all_items = sum(p["done"] + p["open"] for p in phases)
+    pct_work = int(100 * done_items / all_items) if all_items else 0
 
+    # ---- phases ----
+    now_ix = next((i for i, p in enumerate(phases) if p["open"]), len(phases) - 1)
     phase_html = ""
-    for p in phases:
+    for i, p in enumerate(phases):
         tot = p["done"] + p["open"]
         pct = int(100 * p["done"] / tot) if tot else 0
-        phase_html += f'''
-        <div class="phase">
-          <div class="phead"><span>{esc(p["name"])}</span>
-            <span class="muted">{p["done"]}/{tot}</span></div>
-          <div class="bar"><div class="fill" style="width:{pct}%"></div></div>
-        </div>'''
+        m = re.match(r"^Phase (\S+) — (.+)$", p["name"])
+        ix, nm = (f"P{m.group(1)}", m.group(2)) if m else ("\u00b7", p["name"])
+        phase_html += (
+            f'<div class="phase{" now" if i == now_ix else ""}">'
+            f'<div class="ix">{esc(ix)}</div>'
+            f'<div><div class="nm">{esc(nm)}</div>'
+            f'<div class="bar"><i class="fill" style="width:{pct}%"></i></div></div>'
+            f'<div class="ct">{p["done"]}/{tot}</div></div>')
 
-    def prow(items):
-        return "".join(
-            f"<tr><td>{esc(k)}</td><td class='val'>{esc(v)}</td>"
-            f"<td><span class='st st-{st}'>{ICON[st]} {SNAME[st]}</span></td></tr>"
-            for k, v, st in items)
+    # ---- pillars ----
     pillar_html = ""
-    for pl in PILLARS:
-        rows = prow([(k, v, st) for k, v, st in pl["solved"]])
-        rows += prow([(k, v, st) for k, v, st in pl["open"]])
-        pillar_html += f"""
-        <div class='pillar'>
-          <h2>{esc(pl['name'])} <span class='muted tagline'>— {esc(pl['tag'])}</span></h2>
-          <div class='q'>{esc(pl['question'])}</div>
-          <div class='wrap'><table>{rows}</table></div>
-          <div class='next'><b>Next:</b> {esc(pl['next'])}</div>
-        </div>"""
+    pillar_nav = []
+    for i, pl in enumerate(PILLARS):
+        rows = ""
+        for claim, ev, st in pl["open"] + pl["solved"]:
+            rows += (f'<div class="claimrow s-{st}"><div class="t">{md(claim)}</div>'
+                     + (f'<div class="e">{md(ev)}</div>' if ev else "")
+                     + "</div>")
+        sts = [st for _, _, st in pl["open"]]
+        nopen = len(sts)
+        w = worst(sts)
+        tally = f'<span class="st-good">{len(pl["solved"])} settled</span>'
+        for label, key in (("watch", "warning"), ("risk", "serious"),
+                           ("critical", "critical")):
+            n = sum(1 for s in sts if s == key)
+            if n:
+                tally += f'<span class="st-{key}">{n} {label}</span>'
+        pillar_html += (
+            f'<section class="pillar" id="p{i}">'
+            f'<div class="eyebrow">{esc(pl["tag"])}</div>'
+            f'<h2>{esc(pl["name"])}</h2>'
+            f'<div class="q">{esc(pl["question"])}</div>'
+            f'<div class="tally">{tally}</div>{rows}'
+            + (f'<div class="next"><b>Next</b>{esc(pl["next"])}</div>'
+               if pl["next"] else "")
+            + "</section>")
+        pillar_nav.append((f"p{i}", pl["name"].split(" ")[0], w, nopen or ""))
 
-    score_html = "".join(
-        f'''<tr><td>{esc(k)}</td><td class="val">{esc(v)}</td>
-        <td><span class="st st-{s}">{ICON[s]} {SNAME[s]}</span></td>
-        <td class="muted">{esc(note)}</td></tr>'''
-        for k, v, s, note in SCOREBOARD)
-
+    # ---- risks / health ----
     risk_html = "".join(
-        f'''<tr><td>{esc(k)}</td><td class="val">{esc(v)}</td>
-        <td><span class="st st-{s}">{ICON[s]} {SNAME[s]}</span></td></tr>'''
+        f'<tr><td>{esc(k)}</td><td class="val">{esc(v)}</td>'
+        f'<td><span class="st st-{s}">{ICON[s]} {SNAME[s]}</span></td></tr>'
         for k, v, s in rk)
-
-    ch = code_health()
-    health_html = "".join(
-        f'''<tr><td>{esc(u["name"])}<div class="muted small">{esc(u["note"])}</div></td>
-        <td class="val">{"—" if s.get("absent") else f'{s["loc"] / 1000:.1f}k'}</td>
-        <td class="val">{esc(s["tests"] or "—")}</td>
-        <td class="val">{"—" if s.get("absent") else (s["breakage"] if s["breakage"] is not None else "?")}</td>
-        <td class="val">{"—" if s.get("absent") else f'{(s["hygiene"] or 0) / max(s["loc"] / 1000, .001):.0f}'}</td>
-        <td class="val">{"—" if s.get("absent") else s["dirty"]}</td>
-        <td><span class="st st-{st}">{ICON[st]} {SNAME[st] if score is None else score}</span></td></tr>
-        <tr class="why"><td colspan="7" class="muted small">{esc(why)}</td></tr>'''
-        for u, s, score, why, st in ch)
+    DASH = "\u2014"
+    hrows = []
+    for u, s, score, why, st in ch:
+        absent = s.get("absent")
+        loc = DASH if absent else f"{s['loc'] / 1000:.1f}k"
+        brk = DASH if absent else (
+            s["breakage"] if s["breakage"] is not None else "?")
+        hyg = DASH if absent else (
+            f"{(s['hygiene'] or 0) / max(s['loc'] / 1000, .001):.0f}")
+        drt = DASH if absent else s["dirty"]
+        badge = SNAME[st] if score is None else score
+        cls = ' class="absent"' if absent else ""
+        hrows.append(
+            f'<tr{cls}><td>{esc(u["name"])}'
+            f'<div class="muted small">{esc(u["note"])}</div></td>'
+            f'<td class="val">{loc}</td>'
+            f'<td class="val">{esc(s["tests"] or DASH)}</td>'
+            f'<td class="val">{brk}</td><td class="val">{hyg}</td>'
+            f'<td class="val">{drt}</td>'
+            f'<td><span class="st st-{st}">{ICON[st]} {badge}</span></td></tr>'
+            f'<tr class="why"><td colspan="7" class="muted small">'
+            f'{esc(why)}</td></tr>')
+    health_html = "".join(hrows)
     flags_html = "".join(
-        f'''<tr><td>{esc(k)}</td><td class="muted">{esc(v)}</td>
-        <td><span class="st st-{s}">{ICON[s]} {SNAME[s]}</span></td></tr>'''
+        f'<tr><td>{esc(k)}</td><td class="muted">{esc(v)}</td>'
+        f'<td><span class="st st-{s}">{ICON[s]} {SNAME[s]}</span></td></tr>'
         for k, v, s in HEALTH_FLAGS)
     scored = [score for u, s, score, why, st in ch
               if not u.get("legacy") and score is not None]
     health_min = min(scored) if scored else "—"
-    pill_day, nb_newest, nb_behind, nb_st = narrative_freshness()
+    pill_day, nb_newest, nb_behind, nb_st = fresh
     fresh_html = (
         f'<tr><td>Science narrative (PILLARS) vs lab notebook</td>'
         f'<td class="val">curated {esc(pill_day)} · newest entry {esc(nb_newest)}</td>'
@@ -699,118 +1033,195 @@ def build():
         f'{"in sync" if nb_behind == 0 else str(nb_behind) + " entries ahead"}'
         f'</span></td></tr>')
 
-    wq = week_queue()
+    # ---- queue ----
     if wq:
         q_html = week_queue_html(wq, esc)
+        q_st = "serious" if wq["stop"] else "good" if wq["alive"] else "critical"
     else:
-        q_html = ("".join(f"<div class='qline'>{esc(q)}</div>" for q in qs)
-                  or "<div class='qline muted'>no active queue lines</div>")
+        q_html = ("".join(f'<div class="qline">{esc(q)}</div>' for q in qs)
+                  or '<div class="qline muted">no active queue lines — '
+                     '~/logs is not readable from this checkout</div>')
+        q_st = "unknown"
 
+    # ---- autonomy ----
     auto = parse_autonomy()
     if auto:
-        arows = []
+        cells = ""
         for day, kv in reversed(auto):
             r, c = kv.get("runs", 0), kv.get("clean", 0)
             iv, dbg = kv.get("interventions", 0), kv.get("debugged", 0)
             pct = 100 * c / r if r else 0
             ast = ("good" if iv == 0 and dbg == 0 else
                    "warning" if iv + dbg <= 3 else "serious")
-            arows.append(
-                f'<tr><td class="muted">{esc(day)}</td>'
-                f'<td class="val">{c}/{r} clean ({pct:.0f}%)</td>'
-                f'<td class="val">{iv}</td><td class="val">{dbg}</td>'
-                f'<td><span class="st st-{ast}">{ICON[ast]}</span></td></tr>')
-        auto_html = ('<div class="wrap"><table><tr class="muted">'
-                     '<td>day</td><td>runs clean</td><td>interventions</td>'
-                     '<td>debugged</td><td></td></tr>'
-                     + "".join(arows) + "</table></div>")
+            cells += (
+                f'<div class="d">{esc(day)}</div>'
+                f'<div class="bar"><i class="fill" style="width:{pct:.0f}%;'
+                f'background:var(--{ast})"></i></div>'
+                f'<div class="p">{c}/{r} clean</div>'
+                f'<div class="x">{iv} interventions · {dbg} debugged</div>')
+        auto_html = f'<div class="auto">{cells}</div>'
     else:
         auto_html = ('<div class="muted small">no AUTONOMY: lines in the '
                      'notebook yet — format in lab_notebook/TESTING.md §5</div>')
 
+    # ---- dataset ledger ----
     ledger = parse_tassili_ledger()
     open_rows = [r for r in ledger if "open" in r[4] or "pending" in r[4]]
-    led_html = ("".join(
-        f'<tr><td>{esc(r[0])}</td><td class="muted">{esc(r[1])}</td>'
-        f'<td class="val">{esc(r[4])}</td><td class="muted">{esc(r[6])}</td></tr>'
-        for r in ledger) or "")
-    led_html = (f'<div class="wrap"><table><tr class="muted"><td>dataset</td>'
-                f'<td>landed</td><td>days to tassili</td><td>notes</td></tr>'
-                f'{led_html}</table></div>') if ledger else ""
+    led_html = ""
+    if ledger:
+        body = "".join(
+            f'<tr><td>{esc(r[0])}</td><td class="muted">{esc(r[1])}</td>'
+            f'<td class="val">{esc(r[4])}</td><td class="muted">{esc(r[6])}</td></tr>'
+            for r in ledger)
+        led_html = ('<div class="wrap"><table><tr class="head"><td>dataset</td>'
+                    '<td>landed</td><td>days to tassili</td><td>notes</td></tr>'
+                    f"{body}</table></div>")
 
-    notes_html = "".join(
-        f"<tr><td class='muted'>{esc(d)}</td><td>{esc(t)}</td></tr>"
-        for d, t in notes)
+    trail_html = "".join(
+        f'<div class="tr"><div class="d">{esc(d)}</div>'
+        f'<div class="t">{esc(t)}</div></div>' for d, t in notes)
+
+    # ---- triage band ----
+    hot = [d for d in att if RANK.get(d["st"], 0) >= 2]
+    warm = [d for d in att if RANK.get(d["st"], 0) == 1]
+    triage = "".join(item_html(d) for d in hot)
+    if warm:
+        triage += ('<details class="more"><summary>'
+                   f'+ {len(warm)} watch items</summary>'
+                   + "".join(item_html(d) for d in warm) + "</details>")
+    if not att:
+        triage = '<div class="item s-good"><div class="where">clear</div>' \
+                 '<div><div class="claim">nothing above watch level</div></div></div>'
+
+    n_bigrisk = len([r for r in rk if RANK.get(r[2], 0) >= 2])
+    nav = [("attention", "Needs attention", worst([d["st"] for d in att]),
+            len(hot) or ""),
+           ("schedule", "Schedule", "good", f"{done_items}/{all_items}"),
+           ("risks", "Big risks", worst([r[2] for r in rk]), n_bigrisk or "")]
+    nav += pillar_nav
+    nav += [("queue", "Live queue", q_st, ""),
+            ("health", "Code health", worst([st for _, _, _, _, st in ch]),
+             health_min),
+            ("autonomy", "Autonomy", "good", ""),
+            ("datasets", "Datasets", "warning" if open_rows else "good",
+             len(open_rows) or ""),
+            ("trail", "Trail", "good", "")]
+    nav_html = "".join(
+        f'<a href="#{i}"><span class="dot d-{s}"></span>{esc(t)}'
+        f'<span class="n">{esc(n)}</span></a>' for i, t, s, n in nav)
 
     page = f"""<meta charset="utf-8">
-<title>UJAMAA — roadmap dashboard</title>
-<style>
-:root {{ --ink:#1a1a19; --muted:#6f6e66; --line:#e4e2da; --card:#faf9f5;
-  --good:#1a7f37; --warning:#9a6700; --serious:#cf222e; --critical:#82071e;
-  --accent:#4969ed; }}
-@media (prefers-color-scheme: dark) {{
-  :root {{ --ink:#e8e6df; --muted:#a09e94; --line:#3a3934; --card:#232320;
-    --good:#3fb950; --warning:#d29922; --serious:#f85149; --critical:#ff7b72; }}
-  body {{ background:#191917; }} }}
-body {{ font:15px/1.5 -apple-system,'Segoe UI',sans-serif; color:var(--ink);
-  max-width:1080px; margin:2rem auto; padding:0 1.2rem; }}
-h1 {{ font-size:1.5rem; margin-bottom:.2rem; }}
-h2 {{ font-size:1.05rem; margin:1.6rem 0 .6rem; }}
-.muted {{ color:var(--muted); }}
-.hero {{ display:flex; gap:1rem; flex-wrap:wrap; margin:1rem 0; }}
-.tile {{ background:var(--card); border:1px solid var(--line);
-  border-radius:10px; padding:.8rem 1.1rem; min-width:150px; }}
-.tile .n {{ font-size:1.6rem; font-weight:700; }}
-.tile .l {{ font-size:.8rem; color:var(--muted); }}
-.phase {{ margin:.45rem 0; }}
-.phead {{ display:flex; justify-content:space-between; font-size:.9rem; }}
-.bar {{ height:8px; background:var(--line); border-radius:4px; }}
-.fill {{ height:8px; background:var(--accent); border-radius:4px; }}
-table {{ border-collapse:collapse; width:100%; font-size:.88rem; }}
-td {{ padding:.35rem .5rem; border-top:1px solid var(--line);
-  vertical-align:top; }}
-td.val {{ font-weight:600; white-space:nowrap; }}
-.st {{ font-weight:700; font-size:.78rem; white-space:nowrap; }}
-.st-good {{ color:var(--good); }} .st-warning {{ color:var(--warning); }}
-.st-serious {{ color:var(--serious); }} .st-critical {{ color:var(--critical); }}
-.st-unknown {{ color:var(--muted); }}
-.qline {{ font:12px/1.6 ui-monospace,monospace; background:var(--card);
-  border-left:3px solid var(--accent); padding:.15rem .6rem; margin:.15rem 0;
-  overflow-x:auto; white-space:nowrap; }}
-.wrap {{ overflow-x:auto; }}
-.pillar {{ background:var(--card); border:1px solid var(--line);
-  border-radius:12px; padding: .2rem 1rem .8rem; margin:1rem 0; }}
-.pillar h2 {{ margin:.8rem 0 .3rem; }}
-.tagline {{ font-weight:400; font-size:.85rem; }}
-.q {{ font-style:italic; color:var(--muted); margin:.2rem 0 .6rem;
-  border-left:3px solid var(--accent); padding-left:.6rem; }}
-.next {{ font-size:.85rem; margin-top:.6rem; }}
-.small {{ font-size:.78rem; }}
-tr.why td {{ border-top:none; padding-top:0; }}
-</style>
-<h1>UJAMAA — roadmap dashboard</h1>
-<div class="muted">generated {esc(datetime.datetime.now().strftime('%Y-%m-%d %H:%M'))}
- · sources: UJAMAA_ROADMAP.md · lab_notebook · ~/logs · live git/disk</div>
-<div class="hero">
-  <div class="tile"><div class="n">{days}</div><div class="l">days to launch (Dec 15)</div></div>
-  <div class="tile"><div class="n">{sum(p['done'] for p in phases)}/{sum(p['done']+p['open'] for p in phases)}</div><div class="l">roadmap items done</div></div>
-  <div class="tile"><div class="n">{len([r for r in rk if r[2] in ('serious','critical')])}</div><div class="l">open big risks</div></div>
-  <div class="tile"><div class="n">{health_min}</div><div class="l">code health (weakest scored unit)</div></div>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>UJAMAA Programme Sheet</title>
+<style>{CSS}</style>
+<div class="sheet">
+<aside class="rail">
+  <div class="brand">UJAMAA<span>programme sheet</span></div>
+  <div class="clock">
+    <div class="n">{days}</div>
+    <div class="l">days to launch · {LAUNCH:%d %b %Y}</div>
+    <div class="track"><i style="width:{pct_work}%"></i>
+      <b style="left:{pct_time}%"></b></div>
+    <div class="tickrow"><span>{pct_work}% of items</span>
+      <span>{pct_time}% of calendar</span></div>
+  </div>
+  <nav>{nav_html}</nav>
+</aside>
+
+<main>
+  <h1>Digital-twin orchard programme</h1>
+  <div class="muted small">generated {esc(today.strftime('%Y-%m-%d'))} {esc(datetime.datetime.now().strftime('%H:%M'))}
+   · roadmap · lab notebook · ~/logs · live git &amp; disk</div>
+
+  <div class="readout">
+    <div><div class="n">{done_items}<span class="muted">/{all_items}</span></div>
+      <div class="l">roadmap items done</div></div>
+    <div><div class="n {"serious" if len(hot) else ""}">{len(hot)}</div>
+      <div class="l">items at risk or worse</div></div>
+    <div><div class="n {"warning" if warm else ""}">{len(warm)}</div>
+      <div class="l">on watch</div></div>
+    <div><div class="n">{health_min}</div>
+      <div class="l">code health, weakest unit</div></div>
+  </div>
+
+  <section class="sec" id="attention">
+    <div class="triage">
+      <div class="hd"><h2>Needs attention</h2>
+        <span class="muted small">every non-green claim on this sheet, worst first</span></div>
+      {triage}
+    </div>
+  </section>
+
+  <section class="sec" id="schedule">
+    <div class="eyebrow">Roadmap</div>
+    <h2>Schedule</h2>
+    <div class="tagline">Phases run in order; the marked phase is the first with
+      open items. The rail's tick compares work done against calendar spent.</div>
+    {phase_html}
+  </section>
+
+  <section class="sec" id="risks">
+    <div class="eyebrow">Programme</div>
+    <h2>Big risks</h2>
+    <div class="tagline">Live probes (disk, working trees) alongside the
+      standing structural risks.</div>
+    <div class="wrap"><table>{risk_html}</table></div>
+  </section>
+
+  <div style="display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:.7rem">
+    <div><div class="eyebrow">Research pillars</div>
+      <h2 style="font:600 1.3rem/1.25 var(--f-display);margin:.45rem 0 0">Claim ledger</h2></div>
+    <button class="toggle" id="openonly" aria-pressed="false">Open items only</button>
+  </div>
+  {pillar_html}
+
+  <section class="sec" id="queue">
+    <div class="eyebrow">Automation</div>
+    <h2>Live queue</h2>
+    <div class="tagline">The week GPU rotation (automation/week_prod_queue_20260814.sh):
+      pointers, stage2 checkpoints and verdict json read from disk.</div>
+    {q_html}
+  </section>
+
+  <section class="sec" id="health">
+    <div class="eyebrow">Engineering</div>
+    <h2>Code health</h2>
+    <div class="tagline">Computed at build time: ruff breakage (E9 syntax + F821
+      undefined name), hygiene (unused imports and variables per KLOC), pytest
+      suites, git state.</div>
+    <div class="wrap"><table>
+    <tr class="head"><td>unit</td><td>LOC</td><td>test suite</td><td>breakage</td>
+      <td>hyg/KLOC</td><td>dirty</td><td>score</td></tr>
+    {health_html}</table></div>
+    <div class="wrap" style="margin-top:.8rem"><table>{fresh_html}{flags_html}</table></div>
+  </section>
+
+  <section class="sec" id="autonomy">
+    <div class="eyebrow">Pipeline</div>
+    <h2>Autonomy</h2>
+    <div class="tagline">From AUTONOMY: lines in daily notebook entries; bar length
+      is the share of runs that finished clean (definitions: lab_notebook/TESTING.md §5).</div>
+    {auto_html}
+  </section>
+
+  <section class="sec" id="datasets">
+    <div class="eyebrow">Ingest</div>
+    <h2>New dataset &rarr; tassili</h2>
+    <div class="tagline">{len(open_rows)} open (ledger: TESTING.md §6).</div>
+    {led_html}
+  </section>
+
+  <section class="sec" id="trail">
+    <div class="eyebrow">Lab notebook</div>
+    <h2>Experiment trail</h2>
+    <div class="trail">{trail_html}</div>
+  </section>
+
+  <footer>Rebuild: <code>python3 automation/build_dashboard.py</code> ·
+    roots follow UJAMAA_CODE / UJAMAA_LOGS, defaulting to the workstation.</footer>
+</main>
 </div>
-<h2>Milestone progress</h2>{phase_html}
-{pillar_html}
-<h2>Big risks</h2><div class="wrap"><table>{risk_html}</table></div>
-<h2>Code health <span class="muted tagline">— computed at build time: ruff (breakage = E9 syntax + F821 undefined-name; hygiene = unused imports/vars per KLOC), pytest suites, git state</span></h2>
-<div class="wrap"><table>
-<tr class="muted"><td>unit</td><td>LOC</td><td>test suite</td><td>breakage</td><td>hyg/KLOC</td><td>dirty</td><td>score</td></tr>
-{health_html}</table></div>
-<div class="wrap"><table>{fresh_html}{flags_html}</table></div>
-<h2>Pipeline autonomy <span class="muted tagline">— from AUTONOMY: lines in daily notebook entries (defs: lab_notebook/TESTING.md §5)</span></h2>
-{auto_html}
-<h2>New dataset &rarr; tassili <span class="muted tagline">— {len(open_rows)} open (ledger: TESTING.md §6)</span></h2>
-{led_html}
-<h2>Live queue <span class="muted tagline">— the week GPU rotation (automation/week_prod_queue_20260814.sh): pointers, stage2 ckpts and verdict json read from disk</span></h2>{q_html}
-<h2>Experiment trail (lab notebook)</h2><div class="wrap"><table>{notes_html}</table></div>
+<script>{JS}</script>
 """
     OUT.write_text(page)
     print(f"-> {OUT}")
