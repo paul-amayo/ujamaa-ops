@@ -43,6 +43,20 @@ Replace the row stage in `build_marker_hierarchy.py`:
 - Reference implementation: `automation/july_centroid_solve.py` (committed
   2026-08-20; run it for the standalone plot anytime).
 
+**M0 LANDED 2026-08-21** (aru_sil_core `f2773f6a`, pilot `automation/gen2_m0_pilot.sh`
++ `gen2_m0_diff.py`, notebook "gen2 M0 LANDED"). Pilot on all six surveys to
+`experimental/gen2_m0/`: citrus keeps every real row (05 8, 04 8, 01 37, 03 39 —
+the lost prod rows were 1-/2-tree residue and cross-row thieves), apr catch-all
+229 → 72 (mv10: 53). Added `row_min_members` (default 3). Inputs for the swaps:
+- apr: band 0.6 is clean on the mv10 census (0 wide rows, 5 row-less) but not on
+  the 573 one — M1 runs mv10 with `coral_outlier_threshold_m` 0.6 (or a gap-split);
+  the site `row_merge_below_m` must stay ≤ band.
+- 13B: `dominant_direction_threshold` 0.985 removes every thief row (01/02/03 wide 0)
+  at the cost of row-end fragments that min-members buckets (02 ~20 row-less) — M3
+  decision; 03 also needs `row_num_models` ≥ 60 (it exhausted 40).
+- Census-only trees (no marker → no hierarchy node) stay out of the object set by
+  design; promoting every census tree to an object is an M1 question.
+
 ## M1 — apr swap (first: smallest, all pieces proven)
 
 1. Promote census: site.json `cluster_min_voxels: 20 -> 10`; re-run the

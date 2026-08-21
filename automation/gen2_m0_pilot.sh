@@ -39,6 +39,7 @@ for spec in "05:05_13D_Jackal:$CITRUS:v2:v2" "04:04_13D_Jackal:$CITRUS:v2:v2" \
             "02:02_13B_Jackal:$CITRUS:v2:v2" \
             "apr:apr_2026_zed:$KLAP:v2:v2" "apr_mv10:apr_2026_zed:$KLAP:mv10:mv10" \
             "02_dir985:02_13B_Jackal:$CITRUS:v2:v2:--dominant-direction-threshold 0.985" \
+            "02_dir95:02_13B_Jackal:$CITRUS:v2:v2:--dominant-direction-threshold 0.95" \
             "01_dir985:01_13B_Jackal:$CITRUS:v2:v2:--dominant-direction-threshold 0.985" \
             "03_dir985:03_13B_Jackal:$CITRUS:v2:v2:--dominant-direction-threshold 0.985" \
             "apr_band06:apr_2026_zed:$KLAP:v2:v2:--row-band-m 0.6" \

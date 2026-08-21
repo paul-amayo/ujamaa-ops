@@ -38,6 +38,7 @@ SPECS = {
     "apr_mv10": (KLAP / "apr_2026_zed", 1.6),
     # experiment variants (same prod baseline)
     "02_dir985": (CITRUS / "02_13B_Jackal", 4.0),
+    "02_dir95": (CITRUS / "02_13B_Jackal", 4.0),
     "01_dir985": (CITRUS / "01_13B_Jackal", 4.0),
     "03_dir985": (CITRUS / "03_13B_Jackal", 4.0),
     "apr_band06": (KLAP / "apr_2026_zed", 1.6),

@@ -19,12 +19,19 @@ Paul's view stays current without asking.
 2026-08-21: the 08:23 tick was MISSED — the session died with the VM reboot
 (09:23); re-armed 09:40 in the recovery session, P1 still top.
 
-- [ ] P1: gen2 M0 — centroid row stage into build_marker_hierarchy.py per
+- [x] P1: gen2 M0 — centroid row stage into build_marker_hierarchy.py per
       plans/gen2_hierarchy_swap.md M0: census centroids in (all, from
       global_ids stats), HighInterface.ransac_init (Aug-18 binding path),
       outlier bucket => row_id -1 (never a row), site keys (row_num_models
       NEW, default 40), pilot apr+05 to experimental/ + citrus regression
       diff. Reference: automation/july_centroid_solve.py.
+      DONE 2026-08-21: census RANSAC row stage + row_min_members (default 3)
+      in build_marker_hierarchy (aru_sil_core f2773f6a); pilot on ALL six
+      surveys to experimental/gen2_m0 (code 4962286): citrus keeps every real
+      row (05 8, 04 8, 01 37, 03 39), apr catch-all 229 -> 72 (mv10: 53).
+      M1/M3 inputs: apr band 0.6 is clean on mv10 (0 wide) but not on 573;
+      13B dir gate 0.985 = 0 thieves (row-end fragments bucketed); 03 needs
+      row_num_models >= 60. Notebook 2026-08-21 "gen2 M0 LANDED".
 - [ ] P2: Sankofa structural metrics per tree per epoch — canopy extent /
       height / volume proxies from banked LiDAR cluster members in each
       registry (no splat needed); output per-tree per-epoch table keyed by
