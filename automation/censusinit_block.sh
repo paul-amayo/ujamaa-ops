@@ -144,7 +144,14 @@ if [ "${CENSUS_KEEP_INTERMEDIATES:-0}" != "1" ]; then
   RECLAIM=$(du -xsck "$BD/stage2_init" "$BD/stage2_init_census" \
       "$BD"/splat_runs_FEATFIX/stage2_bootstrap/high/*/nerfstudio_models 2>/dev/null | tail -1 | cut -f1)
   rm -rf "$BD/stage2_init" "$BD/stage2_init_census"
-  rm -rf "$BD"/splat_runs_FEATFIX/stage2_bootstrap/high/*/nerfstudio_models
+  # Remove the WHOLE bootstrap run dir, not just its checkpoint. Step 1 gates on
+  # stage2_bootstrap/high/*/config.yml existing, so deleting only
+  # nerfstudio_models left the gate satisfied while the checkpoint it hands to
+  # --load-dir was gone: the block succeeded once and then failed on EVERY
+  # re-run with "No checkpoint directory found" (03 block_005, 2026-08-22).
+  # Dropping the directory makes the gate fail, so a retry rebuilds it — and
+  # step 0 already rebuilds stage2_init from the stage1 ckpt the same way.
+  rm -rf "$BD"/splat_runs_FEATFIX/stage2_bootstrap
   echo "REPL-RECLAIM: dropped derivable intermediates ($(( ${RECLAIM:-0} / 1024 ))M) — CENSUS_KEEP_INTERMEDIATES=1 to keep"
 fi
 
