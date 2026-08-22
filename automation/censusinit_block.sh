@@ -131,4 +131,21 @@ HIGH_EMBEDDER_CKPT=$EMB pixi run python $ARU/containment_eval.py \
   --config $CFG --hyper-ckpt $EMB --hierarchy-json $HJ --supervision-dir $SUP \
   --frame $FR --kf-images $(dirname $(dirname $(dirname $BD)))/kf_images \
   --out $FIG/repl_${N}_containment.png 2>/dev/null | grep -aE "TREE|FRUIT|ROW|SAVED"
+# ---- reclaim derivable intermediates -------------------------------------
+# stage2_init      = stage1 ckpt + zero high_features   (rebuilt by step 0)
+# stage2_init_census = that + the interaction census W  (rebuilt by steps 2-3)
+# stage2_bootstrap ckpt = a 1-iteration run whose ONLY product is a config.yml
+# All three are derivable from stage1 + interaction_W.npz in minutes, yet they
+# cost ~2.9 G per block and were kept forever: measured 2026-08-22 on 05
+# block_000 (967M x3 of a 6.2 G block). automation/hpc_block_chain.sh already
+# drops the first two for scratch discipline; do it here so the fleet benefits.
+# Escape hatch: CENSUS_KEEP_INTERMEDIATES=1 keeps them for debugging.
+if [ "${CENSUS_KEEP_INTERMEDIATES:-0}" != "1" ]; then
+  RECLAIM=$(du -xsck "$BD/stage2_init" "$BD/stage2_init_census" \
+      "$BD"/splat_runs_FEATFIX/stage2_bootstrap/high/*/nerfstudio_models 2>/dev/null | tail -1 | cut -f1)
+  rm -rf "$BD/stage2_init" "$BD/stage2_init_census"
+  rm -rf "$BD"/splat_runs_FEATFIX/stage2_bootstrap/high/*/nerfstudio_models
+  echo "REPL-RECLAIM: dropped derivable intermediates ($(( ${RECLAIM:-0} / 1024 ))M) — CENSUS_KEEP_INTERMEDIATES=1 to keep"
+fi
+
 echo "REPL-DONE $N"
