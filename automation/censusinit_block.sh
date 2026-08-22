@@ -91,6 +91,16 @@ if [ "${CENSUS_SEED_ONLY:-0}" = "1" ]; then
   mkdir -p $RUN/nerfstudio_models
   cp $BD/stage2_init_census/nerfstudio_models/*.ckpt $RUN/nerfstudio_models/
   sed 's|^experiment_name: .*$|experiment_name: stage2_censusinit_seed|' $BOOT > $RUN/config.yml
+  # dataparser_transforms.json too: the seed is a staged CHECKPOINT COPY, not an
+  # ns-train invocation, so nerfstudio never writes one here. Anything that maps
+  # world coords into the run's dataparser frame then dies on a missing file —
+  # the streamed render service (render_service.py) refuses every seed-only
+  # block with FileNotFoundError (2026-08-22). Prefer the bootstrap's copy (same
+  # stage, same --data $BD); fall back to stage1, which parses the same block.
+  DPT=$(dirname $BOOT)/dataparser_transforms.json
+  [ -f "$DPT" ] || DPT=$(ls -t $BD/splat_runs_STAGE1/*/high/*/dataparser_transforms.json 2>/dev/null | head -1)
+  if [ -n "$DPT" ] && [ -f "$DPT" ]; then cp "$DPT" $RUN/dataparser_transforms.json
+  else echo "REPL-WARN: no dataparser_transforms.json to stage — streamed render will refuse this block"; fi
   echo "REPL-SEEDONLY: staged census-init seed as stage2_censusinit_seed"
 else
   STAGE2_BD=$BD STAGE2_SUP=$SUP STAGE2_EMBEDDER=$EMB \
