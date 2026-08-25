@@ -12,7 +12,7 @@ retrain is the unit of cost and features must ride together, never alone.
 |---|---|---|
 | Row fix: July-style centroid RANSAC rows | apr | SOLVED in experimental (2026-08-20): `ransac_init` on census centroids, dir 0.985, thr 0.8, outlier bucket EXCLUDED — ~22 clean bed strands, bucket 3-4 pts. Fig `topdown_apr_july_centroid_solve.png` |
 | Census upgrade: mv10 (783 sacks) | apr | BUILT + audited (beats 573 prod on every axis; mv5=1357 over-fragments). `bateleur/sam3_mv10` + `markers_mv10.monolithic` |
-| Fruit level (ids ≥ 200) | 04, 05 | Recipe validated Jul 31 on 01 (strict filter); NOT yet run on 04/05 |
+| Fruit level (ids ≥ FRUIT_ID_BASE) | 04, 05 | Recipe validated Jul 31 on 01 (strict filter); NOT yet run on 04/05 |
 | Supervision hygiene extension | 01, 02, 03 | OPTIONAL / undecided — 13B trio still pre-hygiene; fold in here or defer to gen3 |
 
 ## Gates (all must hold before any survey's swap)
@@ -79,13 +79,20 @@ the lost prod rows were 1-/2-tree residue and cross-row thieves), apr catch-all
    filter = roundness only in-tree (doctrine).
 2. Fruit inventory: detection-driven (never preseeded — Jul 31: hand
    inventory dropped 46 true oranges); assign fruit->parent tree by
-   mask-in-tree + depth; fruit nodes ids ≥ 200, parented to trees.
+   mask-in-tree + depth; fruit node id = FRUIT_ID_BASE + node id, parented
+   to trees. NOTE (2026-08-24): FRUIT_ID_BASE moved 200 -> 10000 in
+   aru_sil_core `61babcb8`. The old base assumed a survey had fewer than 200
+   trees; 03 (309 objects), 01 (290) and apr (481) collided with it and had
+   36/31/60 % of their trees silently STRIPPED from supervision. 04 (107) and
+   05 (100) were under the ceiling, which is why they were the clean surveys —
+   but M3's 13B trio would have hit it, so run M2 against the new base.
    Tree/row ids UNCHANGED (census untouched) — 04's true-WGS84 ledger
    entries stay valid.
 3. Supervision v3 compile (trees + fruit), embedder retrain per survey
    (fruit = innermost hyperbolic radius), re-seed sweep (04: 48 blocks,
    05: 43 — ~8 h GPU each cache-warm).
-4. Fruit-level verdicts activate automatically (the ids ≥ 200 criterion in
+4. Fruit-level verdicts activate automatically (the ids ≥ FRUIT_ID_BASE
+   criterion in
    the battery stops returning EMPTY).
 
 ## M3 (optional) — 13B trio hygiene
