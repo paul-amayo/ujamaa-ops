@@ -5,7 +5,7 @@
 # klapmuts grounding -> klap (pass A, B x3, C) -> restore citrus server.
 set -u
 DIR=/home/paperspace/code/automation/adinkra_www
-OUT=/home/paperspace/data/experimental_adinkra_www_20260827
+OUT=${ADINKRA_OUT:-/home/paperspace/data/experimental_adinkra_www_20260827}
 LOG=$OUT/driver.log
 MODEL="hf.co/unsloth/gemma-4-12b-it-GGUF:Q4_K_M"
 ADK=/home/paperspace/code/ujamaa/adinkra
