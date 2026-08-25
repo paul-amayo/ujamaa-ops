@@ -11,7 +11,7 @@ failure is logged as a defect row and the pass moves on (never stalls).
 """
 import argparse, json, time, sys, urllib.request, datetime
 
-LANGS = ["en", "af", "xh", "zu", "sw"]
+LANGS = ["en", "af", "xh", "zu", "sw", "ha", "ar", "am"]
 URL = "http://localhost:8003/query"
 TIMEOUT = 300
 
