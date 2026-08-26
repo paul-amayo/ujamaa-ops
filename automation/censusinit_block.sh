@@ -104,7 +104,7 @@ if [ "${CENSUS_SEED_ONLY:-0}" = "1" ]; then
   echo "REPL-SEEDONLY: staged census-init seed as stage2_censusinit_seed"
 else
   STAGE2_BD=$BD STAGE2_SUP=$SUP STAGE2_EMBEDDER=$EMB \
-  STAGE2_NAME=stage2_censusinit_fw2 STAGE2_FRUIT_W=2.0 \
+  STAGE2_NAME=stage2_censusinit_fw2 STAGE2_FRUIT_W="${STAGE2_FRUIT_W:-2.0}" \
   STAGE2_INIT_DIR=$BD/stage2_init_census/nerfstudio_models \
     /home/paperspace/code/automation/stage2_fruitchild.sh
   ls $BD/splat_runs_FEATFIX/stage2_censusinit_fw2/high/*/nerfstudio_models*/*.ckpt \
