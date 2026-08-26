@@ -88,6 +88,12 @@ Published siblings: `McGill-NLP/AfriqueLlama-8B`, `McGill-NLP/AfriqueQwen-14B`
 (HF collection). Reported: AfriqueQwen-8B beats Gemma 3 12B in aggregate at half
 the parameters; largest gains on seen languages.
 
+**2026-08-26 update — cards read, several caveats resolved: see
+`plans/multilingual_model_track.md` (the dedicated track). Headlines:
+`McGill-NLP/AfriqueGemma-12B` exists, CC BY 4.0, 20 African languages
+covering 6 of our 8, ollama-ready quants, +4.0 over Gemma 3-12B baseline.
+Still base-only (no instruct), still Gemma 3.**
+
 **Caveats to check before counting on it:**
 - CPT, **not instruction tuning** — no chat/instruct variant is documented. Our
   panels need structured JSON command output, so a CPT-only checkpoint may need
