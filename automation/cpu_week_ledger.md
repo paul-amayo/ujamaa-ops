@@ -1,4 +1,4 @@
-# CPU week ledger — 2026-08-20 → 08-27
+# CPU week ledger — 2026-08-20 → 08-31 (weekend catch-up armed 08-28)
 
 Standing queue of CPU-only work to advance alongside the GPU rotation.
 Worked by scheduled Claude sessions (daily cron) and live sessions alike:
@@ -36,11 +36,35 @@ Paul's view stays current without asking.
       height / volume proxies from banked LiDAR cluster members in each
       registry (no splat needed); output per-tree per-epoch table keyed by
       ledger_v2 canonical ids; wire into compare.py replacing the proxy.
+      2026-08-28 A100 attempt (automation/tree_struct_metrics.py, census
+      argmax over stage1 gaussians): NOT measurement-grade — ownership
+      smears along ray corridors (t72/b013 owned cloud spans 10x23 m, 0
+      gaussians within 3 m of the hierarchy anchor; anchor-trim keeps 7%
+      and reads 0.6 m "heights" = ground band). Same blend-attribution
+      smear the fruit round-trip exposed. Next: per-block visibility
+      weighting or W-mass weighting, cross-check vs init_lidar.ply — OR
+      the banked-registry path once registries are rsynced from the VM
+      (not on this box; no ssh config A100->VM yet). Diagnosis session
+      work, not unattended-queue work.
 - [ ] P3: per-tree NDVI series via the citrus-tree-ndvi skill (Sentinel-2,
       all 4 ledger epochs + dec if georef allows); join onto P2's table.
+      08-28 note: blocked on this box — needs per-tree WGS84 from the
+      registries (VM) or a gps_anchor_lio-derived anchor for census xyz.
 - [ ] P4: Bateleur timeline scrubber real — drive it from ledger_v2 epochs;
       refresh ALL stale topdown exports (apr shows 81 trees vs 783 census;
       regenerate export_bateleur_topdown for every survey post-gen2 too).
+      08-28: export refresh HALF queued (weekend queue topdown_01..05, all
+      5 on-box surveys); scrubber half still open.
+
+## Weekend catch-up queue (2026-08-28, Paul: "queue non GPU roadmap items")
+Durable (setsid) sequential queue: automation/weekend_cpu_queue.sh, logs in
+~/logs/weekend_cpu_20260828/ (STATUS file). Items: DATASETS.md regen [DONE,
+6 surveys], regression Tier A [PASS], topdown exports x5, 10 fps 3D fruit
+dedup fleet on every fruit-bearing tree of 04+05 (fruit3d_{prep,detect,
+cluster}.py — validated same day on 05 t72), cross-epoch v3 join on
+corroborated 3D counts (fruit_cross_epoch_04_05_v3.json). CronCreate ticks
+were DENIED by the permission classifier this session — re-arm judgment
+ticks in any new session with one line ("weekend tick per cpu_week_ledger").
 - [ ] P5: dec_2025_a300 CPU half — kf20cm cut from odom (~220 kf) → blocks
       → census snap → berry-in-plant supervision compile (~15 px plant-mask
       dilation). GPU stage1 waits for a post-rotation window.

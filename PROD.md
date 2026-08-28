@@ -1,6 +1,6 @@
 # Prod readiness — surveys × UJAMAA agents
 
-Generated 2026-08-24 17:00 UTC by `automation/build_prod_manifests.py` — do not edit by hand.
+Generated 2026-08-25 15:13 UTC by `automation/build_prod_manifests.py` — do not edit by hand.
 
 Layout per survey: `prod/{monos,tassili,bateleur,sankofa,azalai}` =
 PHYSICAL folders, **unsafe to delete** (source data + current-best
@@ -15,9 +15,9 @@ Hapi run on demo-synthetic data — no per-survey assets yet.
 
 | survey | prod | experimental (deletable) | tassili | bateleur | sankofa | azalai | note |
 |---|---|---|---|---|---|---|---|
-| 01_13B_Jackal | 97G | 1G | 4/7 ✗ stage2,verdicts,registered | **READY** | **READY** | **READY** |  |
+| 01_13B_Jackal | 155G | 1G | 5/7 ✗ verdicts,registered | **READY** | **READY** | **READY** |  |
 | 02_13B_Jackal | 130G | 1G | 5/7 ✗ verdicts,registered | **READY** | **READY** | **READY** | ledger control epoch — joined the splat rotation 2026-08-14 (stage2 contingent on painted semantics) |
-| 03_13B_Jackal | 95G | 1G | 4/7 ✗ stage2,verdicts,registered | **READY** | **READY** | **READY** |  |
+| 03_13B_Jackal | 172G | 1G | 5/7 ✗ verdicts,registered | **READY** | **READY** | **READY** |  |
 | 04_13D_Jackal | 95G | 1G | 5/7 ✗ verdicts,registered | **READY** | 2/3 ✗ multi_epoch | **READY** |  |
 | 05_13D_Jackal | 97G | 9G | 5/7 ✗ verdicts,registered | **READY** | 1/3 ✗ in_ledger,multi_epoch | **READY** |  |
 | apr_2026_zed | 44G | 1G | 4/7 ✗ stage2,verdicts,registered | **READY** | 1/3 ✗ in_ledger,multi_epoch | 2/3 ✗ georef |  |
@@ -29,8 +29,8 @@ prod block config: `/home/paperspace/data/citrus_all/01_13B_Jackal/prod/tassili/
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 71 blocks
-  - [ ] stage2: 22/71 blocks have stage2_censusinit_* ckpt (missing ['block_022', 'block_023', 'block_024', 'block_025'])
-  - [ ] verdicts: 22 recorded, 6 pass floor 0.8; unrecorded blocks ['022', '023', '024', '025', '026']; failing ['001', '003', '006', '007', '008', '009', '010', '012', '013', '014', '015', '016', '017', '018', '019', '021']
+  - [x] stage2: 71/71 blocks have stage2_censusinit_* ckpt
+  - [ ] verdicts: 71 recorded, 12 pass floor 0.8; failing ['001', '003', '006', '007', '008', '009', '010', '012', '013', '014', '015', '016', '017', '018', '019', '021', '022', '024', '026', '027', '028', '029', '030', '031', '032', '033', '034', '035', '036', '037', '038', '039', '040', '041', '042', '043', '044', '045', '046', '047', '048', '049', '050', '051', '052', '053', '054', '055', '056', '057', '058', '059', '060', '061', '063', '066', '067', '069', '070']
   - [ ] registered: splats.json MISSING — export + register for the viewer
   - [x] embedder: 01_13B_v1g (newest in prod/bateleur)
   - [x] hierarchy: 290 obj / 40 rows (scene_graph)
@@ -77,8 +77,8 @@ prod block config: `/home/paperspace/data/citrus_all/03_13B_Jackal/prod/tassili/
 - **tassili**
   - [x] kdomain: kf20cm=y lio_mono=y
   - [x] blocks: lio_row100: 105 blocks
-  - [ ] stage2: 23/105 blocks have stage2_censusinit_* ckpt (missing ['block_023', 'block_024', 'block_025', 'block_026'])
-  - [ ] verdicts: 23 recorded, 4 pass floor 0.8; unrecorded blocks ['023', '024', '025', '026', '027']; failing ['000', '002', '003', '004', '006', '007', '008', '009', '010', '012', '013', '014', '015', '016', '017', '018', '019', '021', '022']
+  - [x] stage2: 105/105 blocks have stage2_censusinit_* ckpt
+  - [ ] verdicts: 105 recorded, 19 pass floor 0.8; failing ['000', '002', '003', '004', '006', '007', '008', '009', '010', '012', '013', '014', '015', '016', '017', '018', '019', '021', '022', '024', '025', '026', '028', '029', '030', '031', '032', '033', '034', '035', '036', '037', '038', '039', '040', '041', '042', '043', '044', '045', '046', '047', '048', '050', '051', '052', '053', '054', '055', '056', '057', '058', '059', '060', '062', '063', '064', '065', '066', '069', '070', '074', '076', '077', '078', '079', '080', '082', '083', '084', '086', '087', '088', '089', '090', '092', '093', '094', '095', '096', '097', '098', '099', '101', '103', '104']
   - [ ] registered: splats.json MISSING — export + register for the viewer
   - [x] embedder: 03_13B_v1g (newest in prod/bateleur)
   - [x] hierarchy: 309 obj / 40 rows (scene_graph)
