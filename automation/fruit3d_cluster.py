@@ -34,8 +34,9 @@ if len(all_d) < 3:
     (work / "dedup3d.json").write_text(json.dumps(
         {"tree": tree, "n_events_10fps": 0, "n_events_kf": 0,
          "note": "too few depth-valid detections"}))
-    sys.exit(f"[cluster] tree {tree}: only {len(all_d)} depth-valid "
-             "detections — wrote empty dedup3d.json")
+    print(f"[cluster] tree {tree}: only {len(all_d)} depth-valid "
+          "detections — wrote empty dedup3d.json (expected, not a failure)")
+    sys.exit(0)
 scale = 0.001 if np.median(all_d) > 100 else 1.0
 print(f"[cluster] {len(all_d)} depth-valid detections, median raw depth "
       f"{np.median(all_d):.0f} -> unit scale {scale}")
@@ -74,6 +75,13 @@ print(f"[cluster] convention {best.upper()}: median dist to census centroid "
 keep = d_cent < 6.0  # sanity: fruit lives on the tree, not across the row
 W, tags = W[keep], [t for t, k in zip(tags, keep) if k]
 print(f"[cluster] {keep.sum()}/{len(keep)} points within 6 m of tree centroid")
+if len(W) < 2:
+    (work / "dedup3d.json").write_text(json.dumps(
+        {"tree": tree, "n_events_10fps": int(len(W)), "n_events_kf": 0,
+         "note": "no unprojectable points survived the gates"}))
+    print(f"[cluster] tree {tree}: {len(W)} usable points — wrote empty "
+          "dedup3d.json (expected, not a failure)")
+    sys.exit(0)
 
 def cluster(P, eps):
     n = len(P)
@@ -94,9 +102,13 @@ def cluster(P, eps):
 
 def report(mask, label):
     P = W[mask]
-    tg = [t for t, m in zip(tags, mask) if m]
     print(f"\n--- {label}: {len(P)} detection-events ---")
     rows = {}
+    if len(P) == 0:
+        for eps in eps_list:
+            rows[eps] = {"clusters": 0, "multi": 0, "singletons": 0,
+                         "max_sightings": 0}
+        return rows
     for eps in eps_list:
         lab = cluster(P, eps)
         uniq, counts = np.unique(lab, return_counts=True)
