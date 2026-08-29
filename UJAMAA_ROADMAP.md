@@ -90,6 +90,14 @@ time allows. Cutting scope here is the plan, not a failure.
 - [ ] Forecast faculty (§C) is stretch — demo can ship with Record + Comparison.
 
 **RESEARCH LEAD — semantic pose-graph refinement (opened 2026-07-23):**
+- [x] PROTOTYPE LANDED 2026-08-29 (automation/pose_graph_13b.py): survey
+      SE(2) nodes + tree landmarks recover the recorded datum shifts blind
+      (01 to 0.037 m, 02 to 0.07 m, theta<=0.06 deg), reproduce the best
+      hand association (272 @ 0.544 m), and 02 inherits geometry (0.386 m
+      from 9 legs). Per-leg nodes add <=0.1 m — the open question is
+      SETTLED: the 1.4 m is an RTK day-datum difference, not pose error.
+      Remaining rungs (not yet done): trajectory-true leg nodes, iterated
+      re-association, extend to 13D + fruit view-opportunity. Original spec:
 - [ ] **Cross-survey tree correspondences as semantic loop-closure constraints.**
       Found while debugging association: 01 and 03 differ by a *common-mode* ~1.4 m
       North offset — measured two semi-independent ways (tree correspondences 1.44 m;

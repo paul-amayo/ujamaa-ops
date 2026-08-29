@@ -71,10 +71,20 @@ ticks in any new session with one line ("weekend tick per cpu_week_ledger").
 - [ ] P6: hygiene sweep — fix the 1 RED test in aru_sil_core suite; retire
       /tmp path refs in the 11 flagged active scripts (volatile-dependency
       class); teach_repeat legacy quarantine decision note for Paul.
-- [ ] P7 (slack only): semantic pose-graph prototype — tree correspondences
-      as loop-closure constraints (ceres/g2o over banked ledger pairs);
-      success = the 1.4 m common-mode shift absorbed by the graph, 02
-      inherits geometry. Research; timebox one day.
+- [x] P7: semantic pose-graph prototype. DONE 2026-08-29
+      (automation/pose_graph_13b.py, scipy soft_l1; ledger_v2 datum_correction
+      as blind ground truth): rigid SE(2) node per survey + 346 free tree
+      landmarks recovers 01's shift to 0.037 m and 02's to 0.07 m with
+      theta<=0.06 deg; residual 1.019->0.312 m; graph re-association
+      reproduces the hand-tuned best (272 pairs @ 0.544 vs 0.56 m); 02
+      inherits geometry at 0.386 m median from 9 legs. Level-2 per-(survey,
+      row) legs: only 0.312->0.275 m, corrections median 0.073 m —
+      **the 1.4 m offset is PURE RTK datum; intra-survey pose error <=0.1 m;
+      remaining residual is tree-centroid scatter.** July research question
+      settled. Outputs: sankofa_substrate/pose_graph_13b_v1.json (incl.
+      graph-refined landmark map for ledger_v3). Next rungs if pursued:
+      trajectory-true legs (kf poses), joint re-association iterations, 13D
+      view-opportunity accounting for fruit comparability.
 
 Out of scope for this queue (GPU): SAM3 fruit passes, DINOv2 pre-flight,
 any training — they ride gen2 / post-rotation windows per the plan.
