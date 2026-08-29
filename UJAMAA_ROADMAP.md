@@ -109,7 +109,16 @@ time allows. Cutting scope here is the plan, not a failure.
       an RTK datum/base-station difference between survey days, or a real pose error?
 
 **GPU-QUEUED (run when the E-track batch clears the GPU):**
-- [ ] **Recursive fruit hierarchy (04 first, then general).** We already have per-tree SAM3
+- [x] **Recursive fruit hierarchy** — DONE 2026-08-26/28, beyond spec: fruit
+      nodes live in every hierarchy (SAM3 in-tree ledger, gen2 fleet 60/60
+      fruit blocks, median fruit IoU 0.48 via densify+share-seed), and fruit
+      COUNTS are now 3D-deduplicated at the native 10 fps rate
+      (automation/fruit3d_*.py: 05 = 154 corroborated fruit / 20 trees,
+      04 = 108 / 17; cross-epoch presence agreement 57%→72.6%,
+      fruit_cross_epoch_04_05_v3.json). Open remainder: hierarchy/Bateleur
+      still display sighting-inflated n_detections — swap to corroborated
+      counts. Original spec follows:
+      **Recursive fruit hierarchy (04 first, then general).** We already have per-tree SAM3
       masks + metric depth. Strategy: pick each tree's closest/largest-mask frames (rank by
       depth), crop+dilate+upscale to the tree-mask bbox, re-prompt SAM3 with fruit prompts
       ("orange"/"citrus fruit"), reject detections outside the parent mask, multi-view dedup
