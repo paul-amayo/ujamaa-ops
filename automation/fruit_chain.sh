@@ -1,8 +1,13 @@
 #!/bin/bash
 # M2 fruit chain, prod-path port of chain_04_fruitfix.sh (2026-08-25).
 #
-#   usage: fruit_chain.sh <survey> [--steps 1|all] [--blocks N,M,..] [--floor GB]
+#   usage: fruit_chain.sh <survey> [--steps 1|all|blocks] [--blocks N,M,..] [--floor GB]
 #   e.g.   fruit_chain.sh 05_13D_Jackal --steps 1
+#
+#   --steps blocks: per-block loop ONLY, against the CURRENT embedder — the
+#   recovery mode for an interrupted loop. Re-running --steps all instead would
+#   retrain the embedder and orphan every block already seeded against it
+#   (decode pairing breaks: fruit IoU 0.787 -> 0.001, seen 2026-08-28/30).
 #
 # WHY A PORT: chain_04_fruitfix.sh encodes the canonical order (trees first,
 # fruit WITHIN trees, 2x crop context + parent rejection) and is the recipe
@@ -77,6 +82,16 @@ mark "  ledger out: $FRUITDIR/clip_<NNN>/frame_entries.json"
 # after step 1 for every block; with --steps all on a fresh survey, run --steps 1
 # first. Tree/row ids are untouched, so 04's WGS84 ledger entries stay valid.
 if [ "$STEPS" = "all" ]; then
+    # GUARD (2026-08-30): --steps all retrains the survey EMBEDDER, which
+    # orphans every block not in this run (decode pairing breaks; the 08-28
+    # 3-block requeue did exactly this to 40/43 of survey 05: fruit IoU
+    # 0.787 -> 0.001). A partial --blocks list must use --steps blocks.
+    if [ -n "$ONLY" ]; then
+        mark "REFUSED: --steps all with --blocks would retrain the embedder"
+        mark "  against a PARTIAL block list and orphan the rest of the fleet."
+        mark "  Use --steps blocks (per-block loop vs the current embedder)."
+        exit 2
+    fi
     disk_ok || exit 1
     python3 "$SCR/fruit_nodes_from_ledger.py" \
         --hierarchy "$HIER" \
@@ -145,7 +160,7 @@ except Exception as e:
     print(f'unreadable ({type(e).__name__})')" 2>/dev/null)
     mark "b$N ledger ok — $NF"
 
-    [ "$STEPS" = "all" ] || continue
+    case "$STEPS" in all|blocks) ;; *) continue;; esac
 
     # ---- 3. supervision v3 (trees + fruit) ---------------------------------
     # Writes to trees_fruit_v3, NOT back over trees_only: trees_only is the
