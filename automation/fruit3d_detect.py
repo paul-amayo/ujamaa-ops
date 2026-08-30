@@ -9,6 +9,7 @@ Runs in the sam3 pixi env. Usage: fruit3d_detect.py <workdir> [workdir ...]
 (one model load for the whole fleet). Output: <workdir>/detections.json
 """
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -26,6 +27,12 @@ processor = Sam3Processor(model)
 print(f"[det] SAM3 ready; {len(sys.argv)-1} workdirs", flush=True)
 
 
+DEPTH_DIR = os.environ.get("FRUIT3D_DEPTH_DIR", "depth")
+# Tagged outputs keep depth-source A/Bs side by side (e.g. TAG=_splat ->
+# detections_splat.json) instead of clobbering the fleet's ZED results.
+TAG = os.environ.get("FRUIT3D_TAG", "")
+
+
 def run_workdir(work):
     meta = json.loads((work / "meta.json").read_text())
     out = []
@@ -33,7 +40,7 @@ def run_workdir(work):
         name = rec["name"]
         rgb = Image.open(work / "frames" / f"{name}.png").convert("RGB")
         tmask = np.array(Image.open(work / "masks" / f"{name}.png")) > 127
-        depth = np.array(Image.open(work / "depth" / f"{name}.png"))
+        depth = np.array(Image.open(work / DEPTH_DIR / f"{name}.png"))
         if depth.ndim == 3:
             depth = depth[..., 0]
         H, W = tmask.shape
@@ -91,7 +98,7 @@ def run_workdir(work):
         out.append({"name": name, "ts_ms": rec["ts_ms"],
                     "is_kf": rec["is_kf"], "donor_kf": rec["donor_kf"],
                     "detections": dets})
-    (work / "detections.json").write_text(json.dumps(out, indent=1))
+    (work / f"detections{TAG}.json").write_text(json.dumps(out, indent=1))
     tot = sum(len(r["detections"]) for r in out)
     kf_tot = sum(len(r["detections"]) for r in out if r["is_kf"])
     print(f"[det] {work.name}: {tot} detection-events on {len(out)} frames "

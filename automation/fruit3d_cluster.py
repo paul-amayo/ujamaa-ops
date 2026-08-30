@@ -6,16 +6,18 @@ tree's census centroid. Cluster = single-linkage union-find at eps metres.
 Reports: physical fruit count at 10 fps vs keyframes-only, sightings/fruit.
 """
 import json
+import os
 import sys
 from pathlib import Path
 
 import numpy as np
 
+TAG = os.environ.get("FRUIT3D_TAG", "")
 work = Path(sys.argv[1])
 eps_list = [float(x) for x in (sys.argv[2].split(",") if len(sys.argv) > 2
                                else ["0.05", "0.08", "0.12"])]
 meta = json.loads((work / "meta.json").read_text())
-dets = json.loads((work / "detections.json").read_text())
+dets = json.loads((work / f"detections{TAG}.json").read_text())
 root, tree = Path(meta["root"]), meta["tree"]
 pose_of = {r["name"]: np.array(r["pose"]) for r in meta["frames"]}
 
@@ -31,7 +33,7 @@ Kinv = np.linalg.inv(K)
 # depth units: ZED PNGs are uint16 mm if median >> 100
 all_d = [d["depth_med"] for r in dets for d in r["detections"] if d["depth_med"]]
 if len(all_d) < 3:
-    (work / "dedup3d.json").write_text(json.dumps(
+    (work / f"dedup3d{TAG}.json").write_text(json.dumps(
         {"tree": tree, "n_events_10fps": 0, "n_events_kf": 0,
          "note": "too few depth-valid detections"}))
     print(f"[cluster] tree {tree}: only {len(all_d)} depth-valid "
@@ -76,7 +78,7 @@ keep = d_cent < 6.0  # sanity: fruit lives on the tree, not across the row
 W, tags = W[keep], [t for t, k in zip(tags, keep) if k]
 print(f"[cluster] {keep.sum()}/{len(keep)} points within 6 m of tree centroid")
 if len(W) < 2:
-    (work / "dedup3d.json").write_text(json.dumps(
+    (work / f"dedup3d{TAG}.json").write_text(json.dumps(
         {"tree": tree, "n_events_10fps": int(len(W)), "n_events_kf": 0,
          "note": "no unprojectable points survived the gates"}))
     print(f"[cluster] tree {tree}: {len(W)} usable points — wrote empty "
@@ -135,8 +137,8 @@ out = {"tree": tree, "convention": best, "depth_scale": scale,
        "per_eps_10fps_fruitpx": {str(k): v for k, v in res_clean.items()},
        "per_eps_kf_fruitpx": {str(k): v for k, v in res_clean_kf.items()},
        "points": [{"xyz": W[i].tolist(), **tags[i]} for i in range(len(tags))]}
-(work / "dedup3d.json").write_text(json.dumps(out, indent=1))
-print(f"\n[cluster] wrote {work/'dedup3d.json'}")
+(work / f"dedup3d{TAG}.json").write_text(json.dumps(out, indent=1))
+print(f"\n[cluster] wrote {work}/dedup3d{TAG}.json")
 
 import matplotlib
 matplotlib.use("Agg")
@@ -160,5 +162,5 @@ for ax, (title, mask) in zip(axes, [("10 fps (fruit-px depth)", fr_mask),
     ax.set_xlabel("X (m)"); ax.set_ylabel("Z (m)")
 fig.suptitle(f"3D fruit dedup, tree {tree} — top-down of unprojected detections")
 fig.tight_layout()
-fig.savefig(work / "dedup3d.png", dpi=130)
-print(f"[cluster] fig -> {work/'dedup3d.png'}")
+fig.savefig(work / f"dedup3d{TAG}.png", dpi=130)
+print(f"[cluster] fig -> {work}/dedup3d{TAG}.png")

@@ -46,10 +46,14 @@ Paul's view stays current without asking.
       the banked-registry path once registries are rsynced from the VM
       (not on this box; no ssh config A100->VM yet). Diagnosis session
       work, not unattended-queue work.
-- [ ] P3: per-tree NDVI series via the citrus-tree-ndvi skill (Sentinel-2,
-      all 4 ledger epochs + dec if georef allows); join onto P2's table.
-      08-28 note: blocked on this box — needs per-tree WGS84 from the
-      registries (VM) or a gps_anchor_lio-derived anchor for census xyz.
+- [x] P3: per-tree NDVI series. DONE 2026-08-30 on this box:
+      tree_wgs84_from_census.py anchors every survey's census trees to
+      WGS84 (kf<->gps Sim2, scale 0.9995-1.0022, rmse 0.39-0.41 m — metric
+      confirmed); tree_ndvi_sentinel2.py samples S2 L2A per tree. Survey-
+      date scenes: 13B 0.154-0.157 median across 01/02/03 (same-scene
+      agreement 0.003 validates the anchors), 13D 0.273/0.275. Monthly
+      2023 series banked: 22 scenes across both farms (2 cloud gaps),
+      prod/sankofa/tree_ndvi_s2_*.json per survey.
 - [ ] P4: Bateleur timeline scrubber real — drive it from ledger_v2 epochs;
       refresh ALL stale topdown exports (apr shows 81 trees vs 783 census;
       regenerate export_bateleur_topdown for every survey post-gen2 too).
@@ -68,9 +72,17 @@ ticks in any new session with one line ("weekend tick per cpu_week_ledger").
 - [ ] P5: dec_2025_a300 CPU half — kf20cm cut from odom (~220 kf) → blocks
       → census snap → berry-in-plant supervision compile (~15 px plant-mask
       dilation). GPU stage1 waits for a post-rotation window.
-- [ ] P6: hygiene sweep — fix the 1 RED test in aru_sil_core suite; retire
-      /tmp path refs in the 11 flagged active scripts (volatile-dependency
-      class); teach_repeat legacy quarantine decision note for Paul.
+- [x] P6: hygiene sweep. DONE 2026-08-30: suite 50/50 GREEN on the A100
+      (was uncollectable: libjpeg clash needs LD_PRELOAD of the pixi
+      libjpeg under pytest — binding built against system libs; test_gemma
+      + test_crash deleted as script-debris, embeddings prober renamed,
+      stale 'persimmon' vocab literal now resolves the LIVE table;
+      scene_manifest was the 13th unmigrated consumer — derive/load moved
+      to survey_paths, manifest home prod/tassili/scene.json, 04's
+      supervision_dir re-declared onto gen2). /tmp refs retired to
+      ~/logs/eval across 14 scripts + 3 queue heredocs; dashboard lock
+      marked deliberately volatile. teach_repeat quarantine note still
+      Paul's call.
 - [x] P7: semantic pose-graph prototype. DONE 2026-08-29
       (automation/pose_graph_13b.py, scipy soft_l1; ledger_v2 datum_correction
       as blind ground truth): rigid SE(2) node per survey + 346 free tree
