@@ -44,7 +44,7 @@ echo; echo "--- [5] CEILING CONTROL (must stay 100/100/0) ---"
 HIGH_EMBEDDER_CKPT=$H pixi run python \
   /home/paperspace/code/aru_sil_core/src/scripts/fruit_pointing_map.py \
   --config $CFG --hyper-ckpt $H --hierarchy-json $HJ --supervision-dir $SUP \
-  --frame kf_000542.png --gt-features --out /tmp/signoff_ceiling.png \
+  --frame kf_000542.png --gt-features --out /home/paperspace/logs/eval/signoff_ceiling.png \
   2>/dev/null | grep -aE "CROSS-LEVEL"
 
 echo; echo "--- [6] FULL RELEVANCY EVAL (multi-frame, negatives-free) ---"
@@ -52,7 +52,7 @@ HIGH_EMBEDDER_CKPT=$H pixi run python \
   /home/paperspace/code/aru_sil_core/src/scripts/eval_r6_relevancy.py \
   --config $CFG --hyper-ckpt $H --hierarchy-json $HJ --block-dir $B/block_001 \
   --markers 1,16,24,60,73 --n-frames 12 --no-negatives \
-  --out-dir /tmp/signoff_r6 2>/dev/null \
+  --out-dir /home/paperspace/logs/eval/signoff_r6 2>/dev/null \
   | grep -aE "POINTING|FRUIT-PIXEL|MEAN IoU|fruit@"
 
 echo; echo "--- [7] ALIGNED GATES (own supervision; embedder = \$H) ---"

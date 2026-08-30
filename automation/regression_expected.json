@@ -1,10 +1,9 @@
 {
- "block": "/home/paperspace/data/citrus_all/04_13D_Jackal/blocks_ns/lio_row6F/block_001_L095_sky",
+ "block": "/home/paperspace/data/citrus_all/04_13D_Jackal/prod/tassili/blocks_ns/lio_row100/block_001",
  "iters": 2000,
  "metric": "Train Metrics Dict/psnr_fg",
- "train_psnr_fg": 12.78,
- "gauss": 476200.0,
- "tol_psnr_db": 1.5,
- "tol_gauss_frac": 0.1,
- "note": "2026-08-14: null measured on 3 frozen-code probes (12.23/13.07/12.73) + 4 prior = 7 samples, mean 12.78, sigma ~0.47 \u2014 single-probe tol = 3 sigma; the 12.28->13.70 drift was sampling noise, not code. For release gates use median-of-3 probes."
+ "train_psnr_fg": 15.07,
+ "gauss": 464252.0,
+ "tol_psnr_db": 0.5,
+ "tol_gauss_frac": 0.1
 }

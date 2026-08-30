@@ -3,6 +3,7 @@
 # from the live sources (roadmap, lab notebook, ~/logs, git, disk, ruff+pytest
 # code health) and appends one line per run to ~/logs/daily_dashboard.log.
 # flock: never overlap with a manual rebuild or a previous slow run.
+# lockfile is DELIBERATELY volatile (stale locks must die with the boot)
 exec 9>/tmp/ujamaa_dashboard.lock
 flock -n 9 || { echo "$(date -Is) SKIP (locked)" >> /home/paperspace/logs/daily_dashboard.log; exit 0; }
 cd /home/paperspace/code

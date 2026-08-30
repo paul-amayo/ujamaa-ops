@@ -38,8 +38,8 @@ for N in 001 000 002 003 004 005; do
       --fruit-ledger-glob "$D/sam3_fruit_tree_b$N/clip_*/frame_entries.json" \
       --filter strict_fruit_tree_v1 \
       --out-dir $BD/supervision/strict_tree_v2 \
-      | tee /tmp/fruitfix_compile_$N.txt
-    KEPT=$(grep -oE "kept [0-9]+" /tmp/fruitfix_compile_$N.txt | grep -oE "[0-9]+" | head -1)
+      | tee /home/paperspace/logs/eval/fruitfix_compile_$N.txt
+    KEPT=$(grep -oE "kept [0-9]+" /home/paperspace/logs/eval/fruitfix_compile_$N.txt | grep -oE "[0-9]+" | head -1)
     echo "KEEPS block_$N: ${KEPT:-0}"
     if [ "${KEPT:-0}" -le "$FLOOR" ]; then
       echo "SKIP-TRAIN block_$N: keeps ${KEPT:-0} <= floor $FLOOR (fruit level not viable)"

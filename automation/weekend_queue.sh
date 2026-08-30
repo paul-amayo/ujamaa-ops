@@ -100,12 +100,12 @@ from pathlib import Path
 B = Path(sys.argv[1])
 names = [Path(f["file_path"]).name
          for f in json.loads((B/"transforms.json").read_text())["frames"]]
-Path("/tmp/fleet_frames.json").write_text(json.dumps(sorted(names)))
+Path("/home/paperspace/logs/eval/fleet_frames.json").write_text(json.dumps(sorted(names)))
 PY
     cd $ARU
     pixi run --manifest-path $SAM3_PIXI python $SCR/build_sky_masks.py \
-      --data-dir $KROOT --keep-frames /tmp/fleet_frames.json
-    python3 $SCR/build_fg_masks.py --data-dir $KROOT --keep-frames /tmp/fleet_frames.json
+      --data-dir $KROOT --keep-frames /home/paperspace/logs/eval/fleet_frames.json
+    python3 $SCR/build_fg_masks.py --data-dir $KROOT --keep-frames /home/paperspace/logs/eval/fleet_frames.json
     [ -f "$BD/semantic_v2_B/palette.json" ] || \
       python3 $SCR/save_semantic_pngs_fast.py --block-dir $BD --root $KROOT \
         --semantic-monolithic $KROOT/filtered_semantic_v2.monolithic

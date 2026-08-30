@@ -39,12 +39,12 @@ from pathlib import Path
 B = Path(sys.argv[1])
 tj = "transforms.json.orig" if (B/"transforms.json.orig").exists() else "transforms.json"
 names = [Path(f["file_path"]).name for f in json.loads((B/tj).read_text())["frames"]]
-Path("/tmp/chain04_frames.json").write_text(json.dumps(sorted(names)))
+Path("$D/chain04_frames.json").write_text(json.dumps(sorted(names)))
 print(f"{len(names)} frames")
 PY
     pixi run --manifest-path $SAM3_PIXI python $SCR/build_sky_masks.py \
-      --data-dir $D --keep-frames /tmp/chain04_frames.json
-    python3 $SCR/build_fg_masks.py --data-dir $D --keep-frames /tmp/chain04_frames.json
+      --data-dir $D --keep-frames $D/chain04_frames.json
+    python3 $SCR/build_fg_masks.py --data-dir $D --keep-frames $D/chain04_frames.json
     echo "--- T: tree id maps (hierarchy projection) ---"
     [ -f "$BD/supervision_trees_r6/meta.json" ] || \
       pixi run --manifest-path $NS_PIXI python $SCR/r6_project_idmaps.py \

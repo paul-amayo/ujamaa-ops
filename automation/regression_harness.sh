@@ -24,7 +24,10 @@ set -u
 CODE=/home/paperspace/code
 EXPECTED=$CODE/automation/regression_expected.json
 NS_PIXI=$CODE/nerf_new/pixi.toml
-BLOCK=/home/paperspace/data/citrus_all/04_13D_Jackal/blocks_ns/lio_row6F/block_001_L095_sky
+# gen2 (2026-08-30): the legacy lio_row6F probe block was purged in the
+# fleet rebuild; the probe now runs on the gen2 partition. Expected values
+# recalibrated the same day (substrate legitimately changed).
+BLOCK=/home/paperspace/data/citrus_all/04_13D_Jackal/prod/tassili/blocks_ns/lio_row100/block_001
 LOG=/home/paperspace/logs/regression_harness.log
 CPU_ONLY=0; CALIBRATE=0
 for a in "$@"; do case "$a" in
@@ -131,12 +134,16 @@ EXP=probe_$(date +%Y%m%d_%H%M)
 ROOT=/home/paperspace/data/citrus_all/04_13D_Jackal
 eval "$(python3 - "$ROOT" << 'EOF'
 import json, shlex, sys
-sc = json.load(open(f"{sys.argv[1]}/scene.json"))
+import os
+mp = f"{sys.argv[1]}/prod/tassili/scene.json"
+if not os.path.exists(mp):
+    mp = f"{sys.argv[1]}/scene.json"
+sc = json.load(open(mp))
 b = sc["baseline"]
 for k, v in b.get("env", {}).items():
     print(f'export {k}={shlex.quote(str(v))}')
 if sc.get("supervision_dir"):
-    print(f'export TREE_WEIGHT_DIR={shlex.quote(sys.argv[1] + "/" + sc["supervision_dir"])}')
+    print(f'export TREE_WEIGHT_DIR={shlex.quote(os.path.dirname(mp) + "/" + sc["supervision_dir"])}')
 flags = {k: v for k, v in b["flags"].items() if k != "max-num-iterations"}
 print('FLAGS=' + shlex.quote(" ".join(f"--{k} {v}" for k, v in flags.items())))
 EOF

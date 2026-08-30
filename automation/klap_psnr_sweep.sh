@@ -30,20 +30,20 @@ while ps -eo cmd | grep -E "^.*ns-train" | grep -v grep > /dev/null; do sleep 60
 echo "=== SWEEP START $(date) ==="
 
 echo "=== STAGE M: sky -> fg masks for block_004 frames ==="
-$PYNS - "$BD" <<'PY'
+$PYNS - "$BD" "$ROOT/klap_sweep_frames.json" <<'PY'
 import json, sys
 from pathlib import Path
 B = Path(sys.argv[1])
 names = [Path(f["file_path"]).name
          for f in json.loads((B/"transforms.json").read_text())["frames"]]
-Path("/tmp/klap_sweep_frames.json").write_text(json.dumps(sorted(names)))
+Path(sys.argv[2]).write_text(json.dumps(sorted(names)))
 print(f"{len(names)} frames for masking")
 PY
 cd $ARU
 pixi run --manifest-path $SAM3_PIXI python $SCR/build_sky_masks.py \
-  --data-dir $ROOT --keep-frames /tmp/klap_sweep_frames.json || exit 1
+  --data-dir $ROOT --keep-frames $ROOT/klap_sweep_frames.json || exit 1
 python3 $SCR/build_fg_masks.py --data-dir $ROOT \
-  --keep-frames /tmp/klap_sweep_frames.json || exit 1
+  --keep-frames $ROOT/klap_sweep_frames.json || exit 1
 
 echo "=== STAGE V: block-length variants ==="
 python3 $SCR/make_block_variants.py --block-dir $BD --lengths 97 49 || exit 1
