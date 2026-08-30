@@ -86,6 +86,10 @@ time allows. Cutting scope here is the plan, not a failure.
       flags (currently a structure-PROXY; doubles as association QA).
 - [ ] Structural + spectral metrics per tree per epoch (canopy from splat/LiDAR, NDVI series)
       — replaces the v0 proxy; unblocks the *biological* Comparison.
+      2026-08-30: SPECTRAL HALF DONE — per-tree WGS84 anchors (Sim2 rmse 0.4 m) +
+      Sentinel-2 NDVI at survey dates (13B 0.157 / 13D 0.274 medians, cross-epoch
+      same-scene agreement 0.003) + monthly-2023 series (22 scenes, prod/sankofa/).
+      Structural half open: inputs banked on-box (instance_labels_v2 + wgs84).
 - [ ] Make Bateleur's timeline scrubber real — driven by the ledger.
 - [ ] Forecast faculty (§C) is stretch — demo can ship with Record + Comparison.
 
@@ -142,16 +146,21 @@ time allows. Cutting scope here is the plan, not a failure.
 ### Day-long experiment trails (added 2026-07-30 — course-correction)
 Interactive one-offs drifted us from this file; standing rule: the GPU always has a
 QUEUE, planned against this roadmap, results auto-logged to the notebook. Queues:
-- [ ] **Q1 fruit ladder (roadmap "recursive fruit hierarchy"):** S2 (protected class)
-      gates auto-evaluated on completion; if fail → S3a (tally survives densification)
-      → S3b (anchor-weight sweep) as a scripted chain, one night.
-- [ ] **Q2 klapmuts splat fleet:** partition → ~32 blocks × 25 min ≈ 13 GPU-h overnight
-      → served splats on farm #2 (generalisation story for the demo).
-- [ ] **Q3 citrus checkpoint-hygiene audit:** all 76 trained blocks, feature-loss vs
-      logged value (opacity-reset corruption screen) — CPU/GPU-light, interleaves.
-- [ ] **Q4 registry re-verification under K-indexed poses:** 04 then 01/03 recluster
-      from caches; gates the Sankofa ledger (Phase 2) and 4D association.
-- [ ] **Q5 (Phase 1 debt): 02 association + dataset registry file + regression harness.**
+- [x] **Q1 fruit ladder** — SUPERSEDED-DONE by the gen2 fruit finals (2026-08-27/28):
+      densify+share-seed recipe, 60/60 fruit blocks, median fruit IoU 0.48; the S-ladder
+      escalation was never needed.
+- [x] **Q2 klapmuts splat fleet** — DONE via the gen2 fleet: apr_2026_zed 24/24 blocks
+      trained + verdicted (b017 closed 2026-08-29 with the empty-lidar random-init fix).
+- [x] **Q3 checkpoint-hygiene audit** — SUBSUMED: the fleet was rebuilt fresh (gen2) and
+      re-certified by per-block verdicts + the recalibrated Tier B baseline
+      (FG 15.07@2k, 2026-08-30); the opacity-reset corruption class it screened for
+      cannot survive a from-scratch rebuild.
+- [x] **Q4 registry re-verification under K-indexed poses** — VERIFIED-DONE 2026-08-30:
+      the gen2 fleet's unified-pipeline runs rebuilt every survey's registry stack
+      (markers_v2 + instance_labels + hierarchy, 08-22 mtimes, K-indexed by
+      construction); per-tree WGS84 re-anchored the same day (rmse 0.39-0.41 m).
+- [x] **Q5 (Phase 1 debt)** — DONE 2026-08-12 (see Phase 1: 02 association, DATASETS.md
+      registry, regression harness).
 
 ### Phase 3 — Demo software (late Sep → early Nov)
 - [ ] Convert the design bundle (`ujamaa/project/`) into the real web app for the four
