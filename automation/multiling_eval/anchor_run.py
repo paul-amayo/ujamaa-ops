@@ -22,6 +22,24 @@ NAMES = {"en": "English", "af": "Afrikaans", "xh": "isiXhosa",
 LETTERS = "ABCD"
 
 
+def gen_chat(model, prompt, n_predict):
+    """Deployed-plane probe: the model's own chat template via /api/chat.
+    Reasoning models think before answering, so no stop sequences and a
+    generous budget; the answer is message.content (thinking arrives
+    separately and is ignored)."""
+    body = json.dumps({
+        "model": model, "stream": False, "keep_alive": "30m",
+        "messages": [{"role": "user", "content": prompt}],
+        "options": {"num_predict": n_predict, "temperature": 0},
+    }).encode()
+    req = urllib.request.Request("http://localhost:11434/api/chat", body,
+                                 {"Content-Type": "application/json"})
+    t0 = time.time()
+    r = json.load(urllib.request.urlopen(req, timeout=600))
+    msg = r.get("message", {})
+    return (msg.get("content") or "").strip(), round(time.time() - t0, 2)
+
+
 def gen(model, prompt, n_predict, stop):
     body = json.dumps({
         "model": model, "prompt": prompt, "raw": True, "stream": False,
@@ -80,6 +98,8 @@ def main():
     ap.add_argument("--task", required=True, choices=["belebele", "flores"])
     ap.add_argument("--out", required=True)
     ap.add_argument("--langs", default="")
+    ap.add_argument("--chat", action="store_true",
+                    help="deployed plane: model chat template, instruction-led prompts")
     a = ap.parse_args()
     langs = a.langs.split(",") if a.langs else LANGS
     done = done_keys(a.out)
@@ -95,9 +115,16 @@ def main():
             for idx in range(100):
                 if ("belebele", lang, idx) in done:
                     continue
-                resp, secs = gen(a.model, mcq_prompt(items, idx), 4, ["\n"])
+                if a.chat:
+                    prompt = ("Answer the multiple-choice question with the "
+                              "letter only (A, B, C or D).\n\n"
+                              + mcq_prompt(items, idx))
+                    resp, secs = gen_chat(a.model, prompt, 2000)
+                else:
+                    resp, secs = gen(a.model, mcq_prompt(items, idx), 4, ["\n"])
                 pred = parse_letter(resp)
                 emit(dict(task="belebele", lang=lang, idx=idx, model=a.model,
+                          mode="chat" if a.chat else "raw",
                           pred=pred, gold=items[idx]["gold"],
                           ok=pred == items[idx]["gold"], secs=secs,
                           raw=resp.strip()[:40]))
@@ -119,8 +146,15 @@ def main():
                     if ("flores", lang, idx) in done:
                         continue
                     p = mt_prompt(sd, td, sname, tname, src[i])
-                    resp, secs = gen(a.model, p, 130, ["\n"])
+                    if a.chat:
+                        p = (f"Translate from {sname} to {tname}. Output ONLY "
+                             "the translation, nothing else.\n\n" + p)
+                        resp, secs = gen_chat(a.model, p, 2000)
+                        resp = resp.splitlines()[0] if resp else ""
+                    else:
+                        resp, secs = gen(a.model, p, 130, ["\n"])
                     emit(dict(task="flores", lang=lang, idx=idx, model=a.model,
+                              mode="chat" if a.chat else "raw",
                               hyp=resp.strip(), ref=ref[i], secs=secs))
             print(f"[{a.model.split('/')[-1]}] flores {lang} done", flush=True)
 

@@ -90,8 +90,9 @@ def main():
               lambda a, lg, d=d: (sum(chrfs[(a, lg, d)]) / len(chrfs[(a, lg, d)])
                                   if chrfs[(a, lg, d)] else None),
               [l for l in LANGS if l != "en"])
-    print("\nadapt = afrique - g3 (what African CPT bought)")
-    print("gener = g4 - g3 (what a generation bought; g4 is IT — confound noted)")
+    print("\nadapt = afrique - g3 (both base models, identical raw few-shot protocol)")
+    print("gener = g4 - g3 — CROSS-PLANE: g4 is instruct, probed via its own chat")
+    print("template (deployed plane); indicative only, not a controlled comparison.")
 
 
 if __name__ == "__main__":
