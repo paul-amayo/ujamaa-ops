@@ -19,9 +19,9 @@
 #              seed).
 #   5. QA GATE judge_recipe.py bars: med>=21 P5>=17 int-min>=16 wvm<=4.
 #              On failure: RE-ROLL stage1 once (roll variance drops 0-5 frames
-#              2-9 dB at random — measured across 6 rolls on 4 blocks; culls
+#              2-9 dB at random — measured across 8 rolls on 4 blocks; culls
 #              were tested and rejected: geometric cull -2.6 dB collateral,
-#              view-exclusivity cull no effect). Keep the better roll.
+#              view-exclusivity cull no effect). Last roll stays staged.
 #
 # The gate REFUSES to leave a failing field as the block's newest run: after a
 # failed second roll the block is flagged (exit 3) with the LAST roll left
