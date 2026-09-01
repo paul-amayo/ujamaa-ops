@@ -37,13 +37,35 @@ def rows(dataset, config, split, offset, length):
             time.sleep(5)
 
 
+FLORES_URL = "https://dl.fbaipublicfiles.com/flores101/dataset/flores200_dataset.tar.gz"
+
+
+def fetch_flores_tarball():
+    """Download+extract the official FLORES-200 tarball once; reuse after."""
+    import tarfile
+    root = DATA_DIR / "flores200_dataset"
+    if (root / "devtest").exists():
+        return root
+    DATA_DIR.mkdir(exist_ok=True)
+    tgz = DATA_DIR / "flores200_dataset.tar.gz"
+    if not tgz.exists():
+        print("downloading FLORES-200 tarball (~25 MB)...")
+        urllib.request.urlretrieve(FLORES_URL, tgz)
+    with tarfile.open(tgz) as t:
+        t.extractall(DATA_DIR)
+    return root
+
+
 def main():
     DATA_DIR.mkdir(exist_ok=True)
     problems = []
+    flores_root = fetch_flores_tarball()
     for code, fl in LANGS.items():
-        # Belebele: passage/question/4 answers/correct index
+        # Belebele: passage/question/4 answers/correct index.
+        # The rows API caps length at 100, so paginate.
         try:
-            rs = rows("facebook/belebele", fl, "test", 0, N_MCQ + N_MCQ_SHOTS)
+            rs = (rows("facebook/belebele", fl, "test", 0, 100)
+                  + rows("facebook/belebele", fl, "test", 100, N_MCQ + N_MCQ_SHOTS - 100))
             items = [dict(passage=r["flores_passage"], q=r["question"],
                           opts=[r["mc_answer1"], r["mc_answer2"],
                                 r["mc_answer3"], r["mc_answer4"]],
@@ -55,12 +77,12 @@ def main():
             print(f"belebele {code}: {len(items)}")
         except Exception as e:
             problems.append(f"belebele {code}: {e}")
-        # FLORES: parallel by row index across languages
+        # FLORES-200 from the original Meta tarball: plain per-language text
+        # files, parallel by line index — no HF gating, no API caps.
         try:
-            dev = rows("Muennighoff/flores200", fl, "dev", 0, N_MT_SHOTS)
-            devtest = rows("Muennighoff/flores200", fl, "devtest", 0, N_MT)
-            sents = dict(dev=[r["sentence"] for r in dev],
-                         devtest=[r["sentence"] for r in devtest])
+            dev = (flores_root / "dev" / f"{fl}.dev").read_text().splitlines()
+            devtest = (flores_root / "devtest" / f"{fl}.devtest").read_text().splitlines()
+            sents = dict(dev=dev[:N_MT_SHOTS], devtest=devtest[:N_MT])
             if len(sents["devtest"]) < N_MT:
                 raise RuntimeError(f"short: {len(sents['devtest'])}")
             (DATA_DIR / f"flores_{code}.json").write_text(
