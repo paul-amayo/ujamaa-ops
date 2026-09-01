@@ -37,29 +37,22 @@ def rows(dataset, config, split, offset, length):
             time.sleep(5)
 
 
-FLORES_URL = "https://dl.fbaipublicfiles.com/flores101/dataset/flores200_dataset.tar.gz"
-
-
-def fetch_flores_tarball():
-    """Download+extract the official FLORES-200 tarball once; reuse after."""
-    import tarfile
-    root = DATA_DIR / "flores200_dataset"
-    if (root / "devtest").exists():
-        return root
-    DATA_DIR.mkdir(exist_ok=True)
-    tgz = DATA_DIR / "flores200_dataset.tar.gz"
-    if not tgz.exists():
-        print("downloading FLORES-200 tarball (~25 MB)...")
-        urllib.request.urlretrieve(FLORES_URL, tgz)
-    with tarfile.open(tgz) as t:
-        t.extractall(DATA_DIR)
-    return root
+def fetch_flores():
+    """FLORES via mteb/flores: one wide table, every language a column,
+    parallel by row index. (Meta's tarball 403s and OLDI moved to gated HF;
+    this mirror is ungated and datasets-server-enabled.)"""
+    out = {}
+    for split, n in (("dev", N_MT_SHOTS), ("devtest", N_MT)):
+        rs = rows("mteb/flores", "default", split, 0, n)
+        for code, fl in LANGS.items():
+            out.setdefault(code, {})[split] = [r[fl] for r in rs]
+    return out
 
 
 def main():
     DATA_DIR.mkdir(exist_ok=True)
     problems = []
-    flores_root = fetch_flores_tarball()
+    flores_all = fetch_flores()
     for code, fl in LANGS.items():
         # Belebele: passage/question/4 answers/correct index.
         # The rows API caps length at 100, so paginate.
@@ -77,12 +70,9 @@ def main():
             print(f"belebele {code}: {len(items)}")
         except Exception as e:
             problems.append(f"belebele {code}: {e}")
-        # FLORES-200 from the original Meta tarball: plain per-language text
-        # files, parallel by line index — no HF gating, no API caps.
+        # FLORES (mteb/flores wide table), parallel by row index
         try:
-            dev = (flores_root / "dev" / f"{fl}.dev").read_text().splitlines()
-            devtest = (flores_root / "devtest" / f"{fl}.devtest").read_text().splitlines()
-            sents = dict(dev=dev[:N_MT_SHOTS], devtest=devtest[:N_MT])
+            sents = flores_all[code]
             if len(sents["devtest"]) < N_MT:
                 raise RuntimeError(f"short: {len(sents['devtest'])}")
             (DATA_DIR / f"flores_{code}.json").write_text(
