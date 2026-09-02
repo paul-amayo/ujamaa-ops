@@ -61,8 +61,10 @@ def gen_retry(fn, *args):
             return fn(*args)
         except Exception as e:
             if attempt == 2:
-                print(f"query failed twice: {e}", flush=True)
-                return "", -1.0
+                # Die LOUDLY: a dead server would otherwise poison the run
+                # with empty rows that resume then skips as done (learned
+                # 2026-09-02: 409 such rows against a stopped ollama).
+                raise RuntimeError(f"query failed twice ({e}) — server down?")
             time.sleep(15)
 
 
