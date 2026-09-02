@@ -13,7 +13,7 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 ARMS = {"gemma-3-12b-pt": "g3", "AfriqueGemma-12B": "afrique",
-        "gemma-4-12b-it": "g4"}
+        "gemma-4-12b#bf16": "g4pt", "gemma-4-12b-it": "g4"}
 LANGS = ["en", "af", "xh", "zu", "sw", "ha", "ar", "am"]
 
 
@@ -64,22 +64,23 @@ def main():
                 direction = str(d["idx"]).split(":")[0]
                 chrfs[(arm, d["lang"], direction)].append(chrf(d["hyp"], d["ref"]))
 
+    ARMLIST = ["g3", "afrique", "g4pt", "g4"]
+
     def table(title, get, langs):
         print(f"\n=== {title} ===")
-        print("lang   " + "".join(f"{a:>9}" for a in ["g3", "afrique", "g4"])
-              + "     adapt     gener")
+        print("lang   " + "".join(f"{a:>9}" for a in ARMLIST)
+              + "     adapt    gen_pt     gener")
         for lg in langs:
-            v = {a: get(a, lg) for a in ["g3", "afrique", "g4"]}
+            v = {a: get(a, lg) for a in ARMLIST}
             if all(x is None for x in v.values()):
                 continue
             row = f"{lg:5}"
-            for a in ["g3", "afrique", "g4"]:
+            for a in ARMLIST:
                 row += f"{v[a]:9.1f}" if v[a] is not None else f"{'—':>9}"
             if v["g3"] is not None:
-                if v["afrique"] is not None:
-                    row += f"  {v['afrique'] - v['g3']:+8.1f}"
-                if v["g4"] is not None:
-                    row += f"  {v['g4'] - v['g3']:+8.1f}"
+                for other in ("afrique", "g4pt", "g4"):
+                    row += (f"  {v[other] - v['g3']:+8.1f}"
+                            if v[other] is not None else f"  {'—':>8}")
             print(row)
 
     table("Belebele accuracy (%)",
@@ -90,9 +91,11 @@ def main():
               lambda a, lg, d=d: (sum(chrfs[(a, lg, d)]) / len(chrfs[(a, lg, d)])
                                   if chrfs[(a, lg, d)] else None),
               [l for l in LANGS if l != "en"])
-    print("\nadapt = afrique - g3 (both base models, identical raw few-shot protocol)")
-    print("gener = g4 - g3 — CROSS-PLANE: g4 is instruct, probed via its own chat")
-    print("template (deployed plane); indicative only, not a controlled comparison.")
+    print("\nadapt  = afrique - g3 (base vs base, identical raw few-shot, both Q4)")
+    print("gen_pt = g4pt - g3 (base vs base, identical protocol; g4pt is bf16 vs")
+    print("         g3 Q4 — precision favours g4pt slightly)")
+    print("gener  = g4-it - g3 — CROSS-PLANE (chat template, deployed plane);")
+    print("         indicative only.")
 
 
 if __name__ == "__main__":
