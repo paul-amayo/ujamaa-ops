@@ -19,7 +19,21 @@ KLAP_S=/home/paperspace/data/klapmuts/apr_2026_zed/prod/tassili/blocks_ns/lio_ro
 mkdir -p "$OUT"
 log() { echo "$(date -Is) $*" >> "$LOG"; }
 
+ensure_ollama() {
+  curl -sf -m 4 http://localhost:11434/api/version >/dev/null && return 0
+  log "ollama down — starting it (evening fleet policy stops it; drivers restart it)"
+  sudo -n systemctl start ollama 2>/dev/null || systemctl start ollama 2>/dev/null
+  for i in $(seq 1 15); do
+    curl -sf -m 4 http://localhost:11434/api/version >/dev/null \
+      && { log "ollama up"; return 0; }
+    sleep 2
+  done
+  log "FATAL ollama would not start"
+  return 1
+}
+
 start_server() { # $1 hierarchy $2 scores $3 label
+  ensure_ollama || exit 1
   pkill -f "uvicorn server:app.*8003" 2>/dev/null; sleep 2
   cd "$ADK"
   setsid nohup env HIGH_LLM_URL=http://localhost:11434 \
