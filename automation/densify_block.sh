@@ -67,7 +67,8 @@ echo "n" | MAX_JOBS=4 HIGH_EMBEDDER_CKPT=$EMB HIGH_LOSS_WARMUP_STEP=1000000000 \
     --pipeline.model.fruit-protect-tau 3.0 \
     --pipeline.model.fruit-anchor-weight 0.0 \
     --pipeline.model.fruit-densify True \
-    --pipeline.model.stop-split-at $MAXIT \
+    --pipeline.model.fruit-densify-tail ${FD_TAIL:-2000} \
+    --pipeline.model.stop-split-at ${STOP_SPLIT:-$MAXIT} \
     --pipeline.model.sky-loss-lambda 1.0 \
     --pipeline.datamanager.semantic-dir "$SUP" \
     --max-num-iterations $MAXIT --steps-per-save $((MAXIT - 1)) \
