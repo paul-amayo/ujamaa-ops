@@ -53,6 +53,19 @@ def gen(model, prompt, n_predict, stop):
     return r.get("response", ""), round(time.time() - t0, 2)
 
 
+def gen_retry(fn, *args):
+    """One retry on transport errors (ollama restarts under co-tenancy);
+    a second failure returns an empty response instead of killing the pass."""
+    for attempt in (1, 2):
+        try:
+            return fn(*args)
+        except Exception as e:
+            if attempt == 2:
+                print(f"query failed twice: {e}", flush=True)
+                return "", -1.0
+            time.sleep(15)
+
+
 def mcq_prompt(items, idx):
     """2-shot in-language MCQ; shots are the items past the eval slice."""
     shots = items[100:102]
@@ -119,9 +132,9 @@ def main():
                     prompt = ("Answer the multiple-choice question with the "
                               "letter only (A, B, C or D).\n\n"
                               + mcq_prompt(items, idx))
-                    resp, secs = gen_chat(a.model, prompt, 2000)
+                    resp, secs = gen_retry(gen_chat, a.model, prompt, 4000)
                 else:
-                    resp, secs = gen(a.model, mcq_prompt(items, idx), 4, ["\n"])
+                    resp, secs = gen_retry(gen, a.model, mcq_prompt(items, idx), 4, ["\n"])
                 pred = parse_letter(resp)
                 emit(dict(task="belebele", lang=lang, idx=idx, model=a.model,
                           mode="chat" if a.chat else "raw",
@@ -149,10 +162,10 @@ def main():
                     if a.chat:
                         p = (f"Translate from {sname} to {tname}. Output ONLY "
                              "the translation, nothing else.\n\n" + p)
-                        resp, secs = gen_chat(a.model, p, 2000)
+                        resp, secs = gen_retry(gen_chat, a.model, p, 8000)
                         resp = resp.splitlines()[0] if resp else ""
                     else:
-                        resp, secs = gen(a.model, p, 130, ["\n"])
+                        resp, secs = gen_retry(gen, a.model, p, 130, ["\n"])
                     emit(dict(task="flores", lang=lang, idx=idx, model=a.model,
                               mode="chat" if a.chat else "raw",
                               hyp=resp.strip(), ref=ref[i], secs=secs))
