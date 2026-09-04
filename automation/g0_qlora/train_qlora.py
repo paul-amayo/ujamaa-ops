@@ -45,8 +45,8 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--max-steps", type=int, default=0)
     ap.add_argument("--resume", action="store_true")
-    ap.add_argument("--micro-bs", type=int, default=4)
-    ap.add_argument("--accum", type=int, default=32)
+    ap.add_argument("--micro-bs", type=int, default=1)
+    ap.add_argument("--accum", type=int, default=128)
     a = ap.parse_args()
 
     free, _ = torch.cuda.mem_get_info()
