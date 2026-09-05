@@ -32,7 +32,7 @@ if [ "$PHASE" = "train" ] || [ "$PHASE" = "all" ]; then
     RESUME=""
     ls "$RUN"/checkpoint-* >/dev/null 2>&1 && RESUME="--resume"
     log "TRAIN attempt $TRIES $RESUME"
-    $PY "$D/train_qlora.py" --data "$TOK" --out "$RUN" $RESUME >> "$LOG" 2>&1
+    $PY "$D/train_qlora.py" --data "$TOK" --out "$RUN" --micro-bs 2 --accum 64 $RESUME >> "$LOG" 2>&1
     [ -f "$RUN/TRAIN_DONE" ] || { log "train exited; wait 10m then retry"; sleep 600; }
   done
   log "G0 TRAIN COMPLETE"
