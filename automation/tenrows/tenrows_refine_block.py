@@ -4,7 +4,7 @@ Keeps our metric scale/world (LiDAR init stays valid), replaces per-frame poses 
 import sys, json, shutil, numpy as np
 from pathlib import Path
 blk = sys.argv[1]; T = Path("/home/paperspace/data/klapmuts/dec_2025_ten_rows/prod/tassili"); B = T/"blocks_ns/lio_row100"
-W = T/("colmap_b013" if blk == "block_013" else f"colmap_{blk}"); FLIP = np.diag([1., -1., -1., 1.])
+W = T/f"colmap_{blk}"; FLIP = np.diag([1., -1., -1., 1.])   # colmap_<blk>: GLOMAP-mapped models (2026-09-06 retry) where the incremental mapper failed
 cm = json.loads((W/"transforms.json").read_text()); ours = json.loads((B/blk/"transforms.json").read_text())
 cmap = {Path(f["file_path"]).name: np.array(f["transform_matrix"]) for f in cm["frames"]}            # GL c2w, COLMAP world
 omap = {Path(f["file_path"]).name: np.array(f["transform_matrix"]) for f in ours["frames"]}          # GL c2w, our world
