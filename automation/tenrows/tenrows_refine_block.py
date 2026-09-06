@@ -22,6 +22,9 @@ for f in ours["frames"]:
 out["frames"] = frames
 for k in ("train_filenames", "val_filenames", "test_filenames"):
     if k in ours: out[k] = [x for x in ours[k] if Path(x).name in cmap]
+cov = len(frames) / len(ours["frames"]); p50 = float(np.percentile(res, 50))
+if cov < 0.9 or p50 > 0.5:
+    print(f"[ref] {blk}: REFUSED — COLMAP coverage {cov:.0%}, alignment p50 {p50:.2f} m (need >=90% and <=0.5 m); no _ref block written"); sys.exit(1)
 bd = B/f"{blk}_ref"; bd.mkdir(exist_ok=True); (bd/"transforms.json").write_text(json.dumps(out, indent=2))
 if (B/blk/"init_lidar.ply").exists(): shutil.copy(B/blk/"init_lidar.ply", bd/"init_lidar.ply")
 print(f"[ref] {blk}: {len(frames)}/{len(ours['frames'])} frames refined; Sim(3) scale {s:.3f}, position p50 {np.percentile(res,50):.3f} m p90 {np.percentile(res,90):.3f} m; init = block's LiDAR init")
