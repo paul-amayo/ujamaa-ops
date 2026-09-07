@@ -7,7 +7,7 @@ set -u
 # gemma vocab (262k) makes the CE logits the VRAM hog: micro_bs=1 +
 # expandable segments, or the loss alone allocates 8 GiB (smoke, 2026-09-04).
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-PY=~/envs/hfeval/bin/python
+PY=${G0_PY:-~/envs/hfeval/bin/python}   # override with G0_PY=... (2026-09-07: hfeval_ft carries torch>=2.6 for checkpoint resume)
 D=/home/paperspace/code/automation/g0_qlora
 TOK=/home/paperspace/data/g0_tokens
 RUN=/home/paperspace/data/g0_run
