@@ -63,6 +63,31 @@ def run_arm(tok, model, langs, n):
     return res
 
 
+def ppl(tok, model, texts):
+    """Mean per-token NLL over held-out sentences — far more sensitive to
+    early language acquisition than end-task chrF (which needs the whole
+    generation pipeline to improve before it moves)."""
+    import math
+    tot_nll, tot_tok = 0.0, 0
+    for t in texts:
+        ids = tok(t, return_tensors="pt").to(model.device)
+        with torch.no_grad():
+            out = model(**ids, labels=ids["input_ids"])
+        n = ids["input_ids"].shape[1]
+        tot_nll += out.loss.item() * n
+        tot_tok += n
+    return round(math.exp(tot_nll / tot_tok), 3)
+
+
+def run_ppl(tok, model, langs, n):
+    res = {}
+    for lang in langs:
+        xx = json.loads((ar.DATA / f"flores_{lang}.json").read_text())
+        res[lang] = ppl(tok, model, xx["devtest"][:n])
+        print(f"  ppl {lang}: {res[lang]}", flush=True)
+    return res
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ckpt", required=True)
@@ -76,15 +101,19 @@ def main():
     tok, model = load_base()
     print("BASE arm:", flush=True)
     base_res = run_arm(tok, model, langs, a.n)
+    base_ppl = run_ppl(tok, model, langs, a.n)
 
     from peft import PeftModel
     model = PeftModel.from_pretrained(model, a.ckpt)
     model.eval()
     print("CKPT arm:", flush=True)
     ckpt_res = run_arm(tok, model, langs, a.n)
+    ckpt_ppl = run_ppl(tok, model, langs, a.n)
 
     out = dict(ckpt=a.ckpt, n=a.n, base=base_res, ckpt_scores=ckpt_res,
                delta={l: round(ckpt_res[l] - base_res[l], 2) for l in langs},
+               base_ppl=base_ppl, ckpt_ppl=ckpt_ppl,
+               ppl_ratio={l: round(ckpt_ppl[l] / base_ppl[l], 3) for l in langs},
                secs=round(time.time() - t0))
     Path(a.out).write_text(json.dumps(out, indent=1))
     print(json.dumps(out["delta"]), flush=True)
