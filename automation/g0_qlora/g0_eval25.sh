@@ -23,7 +23,8 @@ log "running paired eval on checkpoint-1200"
   || log "EVAL FAILED — resuming training regardless"
 
 log "resuming training"
-setsid nohup bash /home/paperspace/code/automation/g0_qlora/run_g0.sh train > /dev/null 2>&1 &
+setsid nohup env G0_PY=/home/paperspace/envs/hfeval_ft/bin/python \
+  bash /home/paperspace/code/automation/g0_qlora/run_g0.sh train > /dev/null 2>&1 &
 sleep 15
 pgrep -f "train_qlora.py" >/dev/null && log "G0_EVAL25_DONE — training resumed" \
   || log "G0_EVAL25_DONE — WARNING trainer not yet up (driver will retry)"
