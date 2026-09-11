@@ -7,7 +7,10 @@ set -u
 # gemma vocab (262k) makes the CE logits the VRAM hog: micro_bs=1 +
 # expandable segments, or the loss alone allocates 8 GiB (smoke, 2026-09-04).
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-PY=${G0_PY:-~/envs/hfeval/bin/python}   # override with G0_PY=... (2026-09-07: hfeval_ft carries torch>=2.6 for checkpoint resume)
+PY=${G0_PY:-~/envs/hfeval_ft/bin/python}   # hfeval_ft: torch>=2.6, required for checkpoint resume
+# (transformers' CVE-2025-32434 torch.load guard). Plain hfeval (torch 2.5.1) as the
+# default cost 139 failed retries / 23.6 h on 2026-09-09 when an eval pause relaunched
+# without G0_PY. Override with G0_PY=... only for a non-resume cold start.
 D=/home/paperspace/code/automation/g0_qlora
 TOK=/home/paperspace/data/g0_tokens
 RUN=/home/paperspace/data/g0_run
