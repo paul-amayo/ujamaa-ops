@@ -21,9 +21,10 @@ for SV in $SURVEYS; do
     if ls $BD/splat_runs_STAGE1/stage1_bg00_glref/high/*/nerfstudio_models/*.ckpt >/dev/null 2>&1 || ls $BD/splat_runs_STAGE1/stage1_bg00_glref/high/*/config.yml >/dev/null 2>&1; then
       say "$SV/$B stage-1 glref exists — skip"; continue
     fi
-    SUPARG=""; [ -d $BD/supervision ] && SUPARG="$BD/supervision" || say "$SV/$B: no supervision dir (training without TREE_WEIGHT)"
+    ENVS=(MAX_JOBS=4 CANARY_EVERY=2000 TREE_WEIGHT_BG=0.0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True)
+    if [ -d $BD/supervision ]; then ENVS+=(TREE_WEIGHT_DIR=$BD/supervision); else say "$SV/$B: no supervision dir (training without TREE_WEIGHT)"; fi
     t0=$(date +%s)
-    ( cd $NS && echo "n" | MAX_JOBS=4 CANARY_EVERY=2000 ${SUPARG:+TREE_WEIGHT_DIR=$SUPARG} TREE_WEIGHT_BG=0.0 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+    ( cd $NS && echo "n" | env "${ENVS[@]}" \
       pixi run ns-train high --data "$BD" --output-dir "$BD/splat_runs_STAGE1" --experiment-name stage1_bg00_glref \
       --pipeline.model.enable-high-features False --pipeline.model.high-loss-weight 0.0 \
       --pipeline.datamanager.semantic-dir /home/paperspace/logs/empty_semantic \

@@ -8,7 +8,7 @@ from pathlib import Path
 
 bd = Path(sys.argv[1]); p = bd / "transforms.json"
 t = json.loads(p.read_text())
-if t.get("pose_convention") == "opengl_c2w":
+if str(t.get("pose_convention", "")).startswith("opengl_c2w"):
     print(f"[flip] {bd.name}: already opengl_c2w — no-op"); sys.exit(0)
 T = np.array([f["transform_matrix"] for f in t["frames"]])
 tr = T[:, :3, 3]; d = np.diff(tr, axis=0); d /= np.linalg.norm(d, axis=1, keepdims=True) + 1e-9
