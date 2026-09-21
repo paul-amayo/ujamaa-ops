@@ -3,7 +3,7 @@
 # canonical block, then (b) stage-1 retrain (prod flags, experiment stage1_bg00_glref).
 # Resumable: flip/refine are tag-guarded no-ops when done; stage-1 skipped if the glref run exists.
 # Old runs untouched (prod doctrine: never delete). Stage-2/verdicts are phase 2.
-SURVEYS="01_13B_Jackal 02_13B_Jackal 03_13B_Jackal 04_13D_Jackal 05_13D_Jackal"
+SURVEYS="05_13D_Jackal 01_13B_Jackal 02_13B_Jackal 03_13B_Jackal 04_13D_Jackal"   # 05 first: it is the survey the demo render service serves (reordered 09-21)
 NS=/home/paperspace/code/nerf_new
 LOG=/home/paperspace/logs/citrus_fleet_glref.log; TSV=/home/paperspace/logs/citrus_fleet_glref.tsv
 say(){ echo "[$(date '+%m-%d %H:%M:%S')] $*" | tee -a $LOG; }
