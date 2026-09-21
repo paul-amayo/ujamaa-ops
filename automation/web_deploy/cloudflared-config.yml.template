@@ -1,0 +1,14 @@
+# /etc/cloudflared/config.yml — P0 tunnel (roadmap plans/web_deployment.md).
+# After: cloudflared tunnel create ujamaa && cloudflared tunnel route dns ujamaa <hostname> (per host)
+tunnel: <TUNNEL-UUID>
+credentials-file: /etc/cloudflared/<TUNNEL-UUID>.json
+ingress:
+  - hostname: demo.ujamaa.ai
+    service: http://127.0.0.1:8001
+  - hostname: query.ujamaa.ai
+    service: http://127.0.0.1:8002
+  - hostname: adinkra.ujamaa.ai
+    service: http://127.0.0.1:8003
+  - hostname: render.ujamaa.ai
+    service: http://127.0.0.1:8004
+  - service: http_status:404

@@ -1,0 +1,12 @@
+# Adinkra/query server instance — port 8003
+[Unit]
+Description=UJAMAA Adinkra panel server (8003)
+After=network-online.target
+[Service]
+User=paperspace
+WorkingDirectory=/home/paperspace/code/ujamaa/adinkra
+ExecStart=/usr/bin/python3 -m uvicorn server:app --host 127.0.0.1 --port 8003
+Restart=always
+RestartSec=5
+[Install]
+WantedBy=multi-user.target

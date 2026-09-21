@@ -1,0 +1,14 @@
+# UJAMAA pillar server (Tassili static + scene manifests + Bateleur/Research pages) — port 8001
+[Unit]
+Description=UJAMAA splat_viewer server (8001)
+After=network-online.target
+[Service]
+User=paperspace
+WorkingDirectory=/home/paperspace/code/aru_sil_core
+# 127.0.0.1: reached via cloudflared / SSH tunnel only. If the V100 VM calls this
+# box over the LAN, keep 0.0.0.0 until that call moves into the tunnel.
+ExecStart=/usr/bin/python3 -m uvicorn src.interfaces.splat_viewer.server:app --host 127.0.0.1 --port 8001
+Restart=always
+RestartSec=5
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,13 @@
+# GPU render service (server-side splat rendering + relevancy) — port 8004
+[Unit]
+Description=UJAMAA render service (8004, GPU)
+After=network-online.target
+[Service]
+User=paperspace
+WorkingDirectory=/home/paperspace/code/aru_sil_core
+EnvironmentFile=-/home/paperspace/demo_assets/demo.env
+ExecStart=/home/paperspace/.pixi/bin/pixi run --manifest-path /home/paperspace/code/nerf_new/pixi.toml python -m uvicorn src.interfaces.splat_viewer.render_service:app --host 127.0.0.1 --port 8004
+Restart=always
+RestartSec=10
+[Install]
+WantedBy=multi-user.target
