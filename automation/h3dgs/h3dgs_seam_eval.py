@@ -19,6 +19,8 @@ parser = ArgumentParser()
 lp = ModelParams(parser); op = OptimizationParams(parser); pp = PipelineParams(parser)
 parser.add_argument("--tau", type=float, default=0.0)
 parser.add_argument("--out", default="/home/paperspace/logs/h3dgs_seam")
+parser.add_argument("--seams", default="21->22,35->36,7->8", help="comma-separated old hand-offs A->B")
+parser.add_argument("--strip_seam", default=None, help="which seam gets the GT|render strip (default: first)")
 args = parser.parse_args(sys.argv[1:])
 os.makedirs(args.out, exist_ok=True)
 dataset, pipe = lp.extract(args), pp.extract(args)
@@ -31,7 +33,8 @@ print(f"[hier] {gaussians._xyz.size(0)} nodes; {len(cams)} cameras loaded", flus
 traj = json.load(urllib.request.urlopen("http://127.0.0.1:8001/scene/trajectory?stride=1"))["frames"]
 own = [(f["image_name"], f["block"]) for f in traj if f.get("block") is not None]
 bounds = {f"{own[i-1][1]}->{own[i][1]}": i for i in range(1, len(own)) if own[i][1] != own[i-1][1]}
-SEAMS, SPAN = ["21->22", "35->36", "7->8"], 20
+SEAMS, SPAN = args.seams.split(","), 20
+STRIP_SEAM = args.strip_seam or SEAMS[0]
 N = gaussians._xyz.size(0)
 ri, pi, nri = (torch.zeros(N).int().cuda() for _ in range(3)); iw = torch.zeros(N).float().cuda(); ns = torch.zeros(N).int().cuda()
 
@@ -60,18 +63,20 @@ for sname in SEAMS:
         if vp is None: continue
         im, n = render(vp); gt = torch.clamp(vp.original_image.cuda(), 0, 1)
         p = psnr(im, gt)
-        rows.append({"seam": sname, "off": off, "name": name, "owner": owner, "psnr": round(p, 2), "n_render": int(n), "test": name in set(x.image_name for x in scene.getTestCameras())})
-        print(f"[hseam] {sname:>7} off {off:+3d} {name} owner {owner}: PSNR {p:.2f} ({n} gaussians)", flush=True)
-        if sname == "21->22" and off in (-4, -1, 0, 2, 5, 10):
+        small = lambda t: torch.nn.functional.interpolate(t[None], size=(360, 640), mode="area")[0]
+        p640 = psnr(small(im), small(gt))   # same resolution as the per-block service profile
+        rows.append({"seam": sname, "off": off, "name": name, "owner": owner, "psnr": round(p, 2), "psnr_640": round(p640, 2), "n_render": int(n), "test": name in set(x.image_name for x in scene.getTestCameras())})
+        print(f"[hseam] {sname:>7} off {off:+3d} {name} owner {owner}: PSNR {p:.2f} (640x360: {p640:.2f}) ({n} gaussians)", flush=True)
+        if sname == STRIP_SEAM and off in (-4, -1, 0, 2, 5, 10):
             strip[off] = (Image.fromarray((gt.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)),
                           Image.fromarray((im.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)), rows[-1])
 json.dump(rows, open(os.path.join(args.out, "h3dgs_seam.json"), "w"))
 for sname in SEAMS:
     rs = [r for r in rows if r["seam"] == sname]
-    print(f"[hseam] {sname}: " + " ".join(f"{r['off']:+d}:{r['psnr']:.1f}" for r in rs), flush=True)
+    print(f"[hseam] {sname} (640x360 PSNR): " + " ".join(f"{r['off']:+d}:{r['psnr_640']:.1f}" for r in rs), flush=True)
 allr = [r for r in rows]
-near = [r["psnr"] for r in allr if abs(r["off"]) <= 2]; far = [r["psnr"] for r in allr if abs(r["off"]) >= 10]
-print(f"[hseam] SUMMARY tau={args.tau}: at the former hand-off (|off|<=2) mean {np.mean(near):.2f} dB vs >=2 m away {np.mean(far):.2f} dB; hand-off frames (off 0): {[r['psnr'] for r in allr if r['off']==0]}", flush=True)
+near = [r["psnr_640"] for r in allr if abs(r["off"]) <= 2]; far = [r["psnr_640"] for r in allr if abs(r["off"]) >= 10]
+print(f"[hseam] SUMMARY tau={args.tau} (640x360): at the former hand-off (|off|<=2) mean {np.mean(near):.2f} dB vs >=2 m away {np.mean(far):.2f} dB; hand-off frames (off 0): {[r['psnr_640'] for r in allr if r['off']==0]}; full-res mean over all {np.mean([r['psnr'] for r in allr]):.2f} dB", flush=True)
 offs = sorted(strip); pad, th, sw, sh = 4, 22, 640, 360
 canvas = Image.new("RGB", (2 * (sw + pad) + pad, len(offs) * (sh + th + pad) + pad + th), (20, 20, 20)); d = ImageDraw.Draw(canvas)
 for c, lab in enumerate(["ground-truth photo", f"merged hierarchy (tau {args.tau})"]): d.text((pad + c * (sw + pad), 4), lab, fill=(255, 255, 255))
