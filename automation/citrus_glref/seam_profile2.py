@@ -11,6 +11,15 @@ BL = Path("/home/paperspace/data/citrus_all/05_13D_Jackal/prod/tassili/blocks_ns
 t21 = json.load(open(BL/"block_021/transforms.json")); FOVY = 2*math.atan(t21["h"]/2/t21["fl_y"])
 traj = json.load(urllib.request.urlopen("http://127.0.0.1:8001/scene/trajectory?stride=1"))["frames"]
 own = [(f["image_name"], f["block"], f["matrix"]) for f in traj if f.get("block") is not None]
+# POSE_SRC=transforms: render at the poses the blocks were TRAINED on (block transforms.json, OpenGL -> OpenCV wire)
+import os
+if os.environ.get("POSE_SRC", "trajectory") == "transforms":
+    tp = {}
+    for tj in BL.glob("block_*/transforms.json"):
+        for f in json.load(open(tj))["frames"]:
+            tp[Path(f["file_path"]).name] = (np.array(f["transform_matrix"]) @ np.diag([1., -1, -1, 1])).flatten().tolist()
+    own = [(n, b, tp.get(n, m)) for n, b, m in own]
+    print("[seam2] poses: block transforms (trained poses)", flush=True)
 bounds = {f"{own[i-1][1]}->{own[i][1]}": i for i in range(1, len(own)) if own[i][1] != own[i-1][1]}
 import sys
 SEAMS = sys.argv[1].split(",") if len(sys.argv) > 1 else ["21->22", "35->36", "7->8"]; SPAN = 20; W, H = 640, 360
