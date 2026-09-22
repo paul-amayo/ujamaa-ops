@@ -6,7 +6,7 @@ import os, sys, numpy as np, torch
 from pathlib import Path
 from PIL import Image
 from transformers import AutoImageProcessor, AutoModelForDepthEstimation
-PROJ = Path("/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/h3dgs/camera_calibration/rectified")
+PROJ = Path(os.environ.get("H3DGS_PROJ", "/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/h3dgs")) / "camera_calibration/rectified"
 SRC, DST = PROJ / "images", PROJ / "depths"
 DST.mkdir(parents=True, exist_ok=True)
 name = "depth-anything/Depth-Anything-V2-Metric-Outdoor-Large-hf"
