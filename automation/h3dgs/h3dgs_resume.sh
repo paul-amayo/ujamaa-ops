@@ -42,8 +42,9 @@ submodules/gaussianhierarchy/build/GaussianHierarchyMerger $OUT/trained_chunks 0
 say "merge rc=$? wall=$(( $(date +%s)-t0 ))s $(ls -la $OUT/merged.hier 2>/dev/null | awk '{print $5" bytes"}')"
 [ -f $OUT/merged.hier ] || { say "NO MERGED HIERARCHY"; exit 1; }
 t0=$(date +%s)
-python render_hierarchy.py -s $PROJ/camera_calibration/aligned -i ../rectified/images --model_path $OUT --hierarchy $OUT/merged.hier \
-  --out_dir $OUT/renders --eval --scaffold_file $SC --taus 0 3 6 > /home/paperspace/logs/h3dgs_render_eval.log 2>&1
-grep -aE "tau|PSNR" /home/paperspace/logs/h3dgs_render_eval.log | tee -a $L
-say "held-out render in $(( $(date +%s)-t0 ))s"
+# held-out evaluation with the VRAM-bounded compact renderer at each test camera's OWN chunk pose
+# (render_hierarchy.py --eval needs ~30 GB for 4 chunks and scores at the pre-chunk-BA poses)
+python /home/paperspace/logs/h3dgs_eval_compact.py $PROJ --taus 0 3 6 --aligned > /home/paperspace/logs/h3dgs_eval_compact.log 2>&1
+grep -aE "^\[eval\]" /home/paperspace/logs/h3dgs_eval_compact.log | tee -a $L
+say "held-out eval (compact) in $(( $(date +%s)-t0 ))s"
 say "H3DGS TRAIN CHAIN DONE"

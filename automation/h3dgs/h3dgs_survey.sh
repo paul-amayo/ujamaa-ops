@@ -151,7 +151,7 @@ if [ ! -e $OUT/merged.hier ] || [ "$(cat $OUT/merged.chunks 2>/dev/null)" != "$D
   say "merge rc=$? in $(( $(date +%s)-t0 ))s ($(du -h $OUT/merged.hier 2>/dev/null | cut -f1))"; echo "$DONE" > $OUT/merged.chunks
   [ -f $OUT/merged.hier ] || { say "NO MERGED HIERARCHY"; exit 1; }
   t0=$(date +%s)
-  python render_hierarchy.py -s $CC/aligned -i ../rectified/images --model_path $OUT --hierarchy $OUT/merged.hier --out_dir $OUT/renders --eval --scaffold_file $SC --taus 0 3 6 > /home/paperspace/logs/h3dgs_${SV}_render_eval.log 2>&1
-  say "held-out render in $(( $(date +%s)-t0 ))s: $(grep -aE "tau:" /home/paperspace/logs/h3dgs_${SV}_render_eval.log | tr '\n' ' ')"
+  python /home/paperspace/logs/h3dgs_eval_compact.py $PROJ --taus 0 3 6 > /home/paperspace/logs/h3dgs_${SV}_eval_compact.log 2>&1
+  say "held-out eval (compact) in $(( $(date +%s)-t0 ))s: $(grep -aE "^\[eval\] tau" /home/paperspace/logs/h3dgs_${SV}_eval_compact.log | tr '\n' ' ')"
 fi
 say "=== $SV DONE in $(( ($(date +%s)-T_ALL)/60 )) min"

@@ -3,7 +3,7 @@
 PROJ=/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/h3dgs
 HIER=${1:-$PROJ/output/merged_partial.hier}; shift
 MERGED="${*:-0_0 0_2}"
-for p in $(pgrep -f "hier_render_service.py"); do kill -9 $p; done
+for p in $(pgrep -f "^[^ ]*python [^ ]*hier_render_service\.py"); do kill -9 $p; done
 for i in $(seq 1 30); do ss -ltn 2>/dev/null | grep -q ":8006 " || break; sleep 1; done   # wait for the port to free
 ss -ltn 2>/dev/null | grep -q ":8006 " && { echo "[hier] port 8006 still held: $(ss -ltnp | grep ':8006 ' | grep -oE 'pid=[0-9]+' | sort -u | tr '\n' ' ')"; exit 1; }
 export HIER SCAFFOLD=$PROJ/output/scaffold/point_cloud/iteration_30000 META=$PROJ/export_meta.json CHUNKS_DIR=$PROJ/camera_calibration/chunks MERGED_CHUNKS="$MERGED" TAU=${TAU:-3} PORT=8006

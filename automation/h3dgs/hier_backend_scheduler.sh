@@ -8,10 +8,10 @@ L=/home/paperspace/logs/hier_backend_scheduler.log; say(){ echo "[$(date '+%m-%d
 say "scheduler up"
 unresp=0
 while true; do
-  busy=$(pgrep -fc "train_post.py|GaussianHierarchyMerger|render_hierarchy.py|h3dgs_chunk_eval|h3dgs_seam_eval")
+  busy=$(pgrep -fc "^[^ ]*python( -u)? (render_hierarchy\.py|[^ ]*h3dgs_eval_compact\.py)|^[^ ]*/GaussianHierarchyMerger ")   # compact backend (~6 GB) coexists with training/post-opt; only the merger and the reference renderer are exclusive
   # "up" = a backend PROCESS exists. A healthz timeout alone never triggers a restart (it would race a
   # second instance onto the port); only a process that stays unresponsive for >90 s is force-restarted.
-  up=0; pgrep -f "hier_render_service.py" > /dev/null && up=1
+  up=0; pgrep -f "^[^ ]*python [^ ]*hier_render_service\.py" > /dev/null && up=1
   if [ "$up" = 1 ]; then
     if curl -sf -m10 http://127.0.0.1:8006/healthz > /dev/null 2>&1; then unresp=0; else unresp=$((unresp+1)); fi
     if [ "$unresp" -ge 5 ]; then say "backend unresponsive for >90 s — force restart"; /home/paperspace/logs/stop_hier_service.sh >> $L 2>&1; up=0; unresp=0; fi
@@ -29,7 +29,7 @@ while true; do
   fi
   if [ "$up" = 0 ] && [ -e $OUT/merged_partial.hier ]; then
     free=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1)
-    if [ "$free" -ge 16000 ]; then
+    if [ "$free" -ge 8000 ]; then
       say "starting backend (free ${free} MiB) with chunks: $(cat $OUT/merged_partial.chunks)"
       /home/paperspace/logs/start_hier_service.sh $OUT/merged_partial.hier $(cat $OUT/merged_partial.chunks) >> $L 2>&1
     fi
