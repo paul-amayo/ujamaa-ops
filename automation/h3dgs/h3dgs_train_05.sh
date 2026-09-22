@@ -12,7 +12,7 @@ until grep -q "PREP DONE" /home/paperspace/logs/h3dgs_prep.log 2>/dev/null; do s
 say "prep done ($(grep -c FAILED /home/paperspace/logs/h3dgs_prep.log) FAILED lines); chunks: $(ls $PROJ/camera_calibration/chunks | tr '\n' ' ')"
 say "GPU before: $(nvidia-smi --query-gpu=memory.used --format=csv,noheader)"
 t0=$(date +%s)
-python scripts/full_train.py --project_dir $PROJ --extra_training_args "--exposure_lr_init 0.0 --eval" > /home/paperspace/logs/h3dgs_full_train.log 2>&1
+python scripts/full_train.py --skip_if_exists --project_dir $PROJ --extra_training_args "--exposure_lr_init 0.0 --eval" > /home/paperspace/logs/h3dgs_full_train.log 2>&1
 rc=$?
 say "full_train rc=$rc wall=$(( $(date +%s)-t0 ))s"
 ls -la $PROJ/output/merged.hier 2>&1 | tee -a $L

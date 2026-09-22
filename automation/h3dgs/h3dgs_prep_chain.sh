@@ -16,6 +16,7 @@ export PATH=/home/paperspace/miniconda3/envs/h3dgs/bin:/home/paperspace/logs/h3d
 PY=/home/paperspace/miniconda3/envs/h3dgs/bin/python
 cd $REPO
 
+if [ "${START_AT:-1}" -le 2 ]; then
 say "1. blue rates on the warm service (hero stretch s=50%)"
 kill 1773915 2>/dev/null; sleep 1; kill 1776757 2>/dev/null
 for P in drive walk; do S0=0.5 PACE=$P timeout 150 /home/paperspace/envs/hfeval_ft/bin/python /home/paperspace/logs/blue_rate.py 2>&1 | grep -aE "\[blue" | tee -a $L; done
@@ -23,11 +24,15 @@ for P in drive walk; do S0=0.5 PACE=$P timeout 150 /home/paperspace/envs/hfeval_
 say "2. shrink demo render service to budget 8 GiB / preload 8"
 RENDER_VRAM_BUDGET=8 RENDER_PRELOAD=8 bash /home/paperspace/logs/restart_render_glref.sh > /home/paperspace/logs/restart_small.log 2>&1
 say "   $(tail -1 /home/paperspace/logs/restart_small.log | cut -c1-160)"
+fi
 
+if [ "${START_AT:-1}" -le 3 ]; then
 say "3. depth maps"
 /home/paperspace/envs/hfeval_ft/bin/python /home/paperspace/logs/h3dgs_depth_05.py > /home/paperspace/logs/h3dgs_depth.log 2>&1 || { say "DEPTH FAILED"; exit 1; }
 say "   $(tail -1 /home/paperspace/logs/h3dgs_depth.log)"
+fi
 
+if [ "${START_AT:-1}" -le 4 ]; then
 say "4. global SfM (fixed poses)"
 DB=$CC/rectified/database.db; rm -f $DB
 PARAMS=$($PY -c "import json;c=json.load(open('$PROJ/export_meta.json'))['camera'];print(f\"{c['fx']},{c['fy']},{c['cx']},{c['cy']}\")")
@@ -84,6 +89,7 @@ a = CC/"aligned/sparse/0"; a.mkdir(parents=True, exist_ok=True)
 for f in ("cameras.bin", "images.bin", "points3D.bin"): shutil.copy(CC/"rectified/sparse/0"/f, a/f)
 shutil.copy(CC/"prior/sparse/0/test.txt", a/"test.txt")
 EOF
+fi
 
 say "5. chunks (30 m cells)"
 rm -rf $CC/raw_chunks $CC/chunks
@@ -100,4 +106,4 @@ say "6. depth scales + test.txt per chunk"
 $PY preprocess/make_chunks_depth_scale.py --chunks_dir $CC/chunks --depths_dir $CC/rectified/depths >> $L 2>&1 || say "DEPTH SCALE FAILED"
 $PY preprocess/copy_file_to_chunks.py --file_path $CC/aligned/sparse/0/test.txt --chunks_path $CC/chunks >> $L 2>&1
 for c in $(ls $CC/chunks); do say "   $c: $(ls $CC/chunks/$c/sparse/0 | tr '\n' ' ') center=$(cat $CC/chunks/$c/center.txt) extent=$(cat $CC/chunks/$c/extent.txt)"; done
-say "PREP DONE"
+if [ "$(ls -d $CC/chunks/*/sparse/0 2>/dev/null | wc -l)" -gt 0 ]; then say "PREP DONE"; else say "PREP FAILED (no chunks)"; fi
