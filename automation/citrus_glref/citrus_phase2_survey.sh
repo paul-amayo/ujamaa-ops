@@ -10,6 +10,14 @@ say(){ echo "[$(date '+%m-%d %H:%M:%S')] $*" | tee -a $LOG; }
 echo -e "block\twall_s\tstatus" > $TSV
 say "pausing the stage-1 fleet (resumable; skip-guards on relaunch)"
 pkill -f "citrus_fleet_glref[.]sh"; sleep 2; pkill -f "ns-train hig[h]"; sleep 5
+# The pause kills the block in flight; its run dir already has a config.yml, which the fleet's skip-guard would
+# take as "trained" on relaunch. Quarantine every young glref stage-1 run without a final checkpoint (09-22:
+# five 02 blocks were silently skipped this way).
+for d in /home/paperspace/data/citrus_all/*/prod/tassili/blocks_ns/lio_row100/block_[0-9][0-9][0-9]/splat_runs_STAGE1/stage1_bg00_glref/high/*/; do
+  [ -e "$d/config.yml" ] || continue; ls "$d"/nerfstudio_models/*.ckpt >/dev/null 2>&1 && continue
+  [ $(( $(date +%s) - $(stat -c %Y "$d") )) -lt 7200 ] || continue
+  K=$(dirname $(dirname "$d"))_killed; mkdir -p "$K"; mv "$d" "$K"/ && say "quarantined killed partial run $d -> $K/"
+done
 NB=$(ls -d $B/block_[0-9][0-9][0-9] | wc -l); say "PHASE-2 START ($SV): $NB blocks, census seed on stage1_bg00_glref; embedder $(basename $(dirname $(dirname $EMB)))"
 ok=0; bad=0
 for BD in $B/block_[0-9][0-9][0-9]; do
