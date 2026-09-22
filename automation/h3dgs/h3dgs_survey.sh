@@ -50,6 +50,42 @@ EOF
     --Mapper.ba_global_function_tolerance 0.000001 --Mapper.ba_global_max_num_iterations 30 --Mapper.ba_global_max_refinements 3 \
     --Mapper.ba_refine_focal_length 0 --Mapper.ba_refine_principal_point 0 --Mapper.ba_refine_extra_params 0 --Mapper.fix_existing_frames 1 >> /home/paperspace/logs/h3dgs_${SV}_sfm.log 2>&1 || { say "TRIANGULATION FAILED"; exit 1; }
   mkdir -p $CC/aligned/sparse/0 && cp $CC/rectified/sparse/0/*.bin $CC/aligned/sparse/0/ && cp $CC/prior/sparse/0/test.txt $CC/aligned/sparse/0/
+fi
+# 3b. ONE global bundle adjustment (poses free, intrinsics fixed), Sim(3)-snapped onto the prior frame, then
+#     re-triangulated with poses FIXED -> aligned/sparse/0. Per-chunk BAs disagreed by 6-24 cm on shared cameras
+#     (measured on 05 2026-09-22); a single survey-wide solution is consistent by construction.
+if [ "$(cat $CC/aligned/RECIPE 2>/dev/null)" != "globalba" ]; then
+  DB=$CC/rectified/database.db; t0=$(date +%s); rm -rf $CC/globalba; mkdir -p $CC/globalba/sparse/raw $CC/globalba/sparse/snap
+  colmap bundle_adjuster --input_path $CC/rectified/sparse/0 --output_path $CC/globalba/sparse/raw \
+    --BundleAdjustment.refine_focal_length 0 --BundleAdjustment.refine_principal_point 0 --BundleAdjustment.refine_extra_params 0 \
+    --BundleAdjustment.function_tolerance 0.000001 --BundleAdjustment.max_num_iterations 100 --BundleAdjustment.max_linear_solver_iterations 200 \
+    > /home/paperspace/logs/h3dgs_${SV}_globalba.log 2>&1 || { say "GLOBAL BA FAILED"; exit 1; }
+  SNAP=$($PY - $CC << 'PYEOF'
+import sys, numpy as np
+sys.path.insert(0, "/home/paperspace/code/hierarchical-3d-gaussians/preprocess")
+from read_write_model import read_model, write_model, qvec2rotmat, rotmat2qvec, Image
+CC = sys.argv[1]
+_, ims0, _ = read_model(f"{CC}/rectified/sparse/0", ".bin"); cams1, ims1, _ = read_model(f"{CC}/globalba/sparse/raw", ".bin")
+cen = lambda ims: {k: -qvec2rotmat(v.qvec).T @ v.tvec for k, v in ims.items()}
+c0, c1 = cen(ims0), cen(ims1); keys = sorted(set(c0) & set(c1))
+X0 = np.array([c0[k] for k in keys]); X1 = np.array([c1[k] for k in keys]); m0, m1 = X0.mean(0), X1.mean(0)
+U, S, Vt = np.linalg.svd((X1 - m1).T @ (X0 - m0)); D = np.eye(3); D[2, 2] = np.sign(np.linalg.det(Vt.T @ U.T))
+R = Vt.T @ D @ U.T; s = np.trace(np.diag(S) @ D) / ((X1 - m1) ** 2).sum(); t = m0 - s * R @ m1
+d = np.linalg.norm((s * (R @ X1.T)).T + t - X0, axis=1)
+out = {}
+for k, im in ims1.items():
+    w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec; c2w = np.linalg.inv(w2c)
+    c2w[:3, :3] = R @ c2w[:3, :3]; c2w[:3, 3] = s * (R @ c2w[:3, 3]) + t; w2c = np.linalg.inv(c2w)
+    out[k] = Image(id=im.id, qvec=rotmat2qvec(w2c[:3, :3]), tvec=w2c[:3, 3], camera_id=im.camera_id, name=im.name, xys=np.zeros((0, 2)), point3D_ids=np.zeros((0,), int))
+write_model(cams1, out, {}, f"{CC}/globalba/sparse/snap", ".bin")
+print(f"scale {s:.5f}, camera shift median {np.median(d)*100:.1f} cm p90 {np.percentile(d,90)*100:.1f} cm max {d.max()*100:.1f} cm")
+PYEOF
+)
+  colmap point_triangulator --database_path $DB --image_path $IMGS --input_path $CC/globalba/sparse/snap --output_path $CC/aligned/sparse/0 \
+    --Mapper.ba_global_function_tolerance 0.000001 --Mapper.ba_global_max_num_iterations 30 --Mapper.ba_global_max_refinements 3 \
+    --Mapper.ba_refine_focal_length 0 --Mapper.ba_refine_principal_point 0 --Mapper.ba_refine_extra_params 0 --Mapper.fix_existing_frames 1 >> /home/paperspace/logs/h3dgs_${SV}_globalba.log 2>&1 || { say "RE-TRIANGULATION FAILED"; exit 1; }
+  cp $CC/prior/sparse/0/test.txt $CC/aligned/sparse/0/; echo globalba > $CC/aligned/RECIPE
+  say "global BA in $(( $(date +%s)-t0 ))s: $(grep -a 'Final cost' /home/paperspace/logs/h3dgs_${SV}_globalba.log | head -1 | tr -s ' ') | snap: $SNAP"
   STATS=$($PY - $CC << 'EOF'
 import sys, numpy as np
 sys.path.insert(0, "/home/paperspace/code/hierarchical-3d-gaussians/preprocess")
@@ -62,16 +98,17 @@ EOF
   say "SfM in $(( $(date +%s)-t0 ))s: $STATS"
 fi
 # 4. chunks + per-chunk BA + depth scales + test split
-if [ "$(ls $CH/*/sparse/0/depth_params.json 2>/dev/null | wc -l)" -eq 0 ]; then
+if [ "$(ls $CH/*/sparse/0/depth_params.json 2>/dev/null | wc -l)" -eq 0 ] || [ "$(cat $CH/RECIPE 2>/dev/null)" != "globalba" ]; then
   t0=$(date +%s); rm -rf $CC/raw_chunks $CH
   $PY preprocess/make_chunk.py --base_dir $CC/aligned/sparse/0 --images_dir $IMGS --chunk_size 30 --lapla_thresh 0 --min_n_cams 50 --max_n_cams 1500 --output_path $CC/raw_chunks >> $L 2>&1
   for RC in $(ls $CC/raw_chunks); do
     t1=$(date +%s)
-    $PY preprocess/prepare_chunk.py --raw_chunk $CC/raw_chunks/$RC --out_chunk $CH/$RC --images_dir $IMGS > /home/paperspace/logs/h3dgs_${SV}_chunk_$RC.log 2>&1 \
-      && say "chunk $RC refined in $(( $(date +%s)-t1 ))s" || say "chunk $RC BA FAILED"
+    $PY preprocess/prepare_chunk.py --raw_chunk $CC/raw_chunks/$RC --out_chunk $CH/$RC --images_dir $IMGS --skip_bundle_adjustment > /home/paperspace/logs/h3dgs_${SV}_chunk_$RC.log 2>&1 \
+      && say "chunk $RC triangulated (poses fixed) in $(( $(date +%s)-t1 ))s" || say "chunk $RC TRIANGULATION FAILED"
   done
   $PY preprocess/make_chunks_depth_scale.py --chunks_dir $CH --depths_dir $CC/rectified/depths >> $L 2>&1 || { say "DEPTH SCALE FAILED"; exit 1; }
   $PY preprocess/copy_file_to_chunks.py --file_path $CC/aligned/sparse/0/test.txt --chunks_path $CH >> $L 2>&1
+  echo globalba > $CH/RECIPE
   say "chunks in $(( $(date +%s)-t0 ))s: $(for c in $(ls $CH); do echo -n "$c=$($PY -c "import sys;sys.path.insert(0,'preprocess');from read_write_model import read_images_binary as r;print(len(r('$CH/$c/sparse/0/images.bin')))") "; done)"
 fi
 # 5. scaffold
