@@ -44,7 +44,7 @@ say "merge rc=$? wall=$(( $(date +%s)-t0 ))s $(ls -la $OUT/merged.hier 2>/dev/nu
 t0=$(date +%s)
 # held-out evaluation with the VRAM-bounded compact renderer at each test camera's OWN chunk pose
 # (render_hierarchy.py --eval needs ~30 GB for 4 chunks and scores at the pre-chunk-BA poses)
-python /home/paperspace/logs/h3dgs_eval_compact.py $PROJ --taus 0 3 6 --aligned > /home/paperspace/logs/h3dgs_eval_compact.log 2>&1
+/home/paperspace/logs/stop_hier_service.sh >/dev/null 2>&1; PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python /home/paperspace/logs/h3dgs_eval_compact.py $PROJ --taus 0 3 6 --aligned > /home/paperspace/logs/h3dgs_eval_compact.log 2>&1
 grep -aE "^\[eval\]" /home/paperspace/logs/h3dgs_eval_compact.log | tee -a $L
 say "held-out eval (compact) in $(( $(date +%s)-t0 ))s"
 say "H3DGS TRAIN CHAIN DONE"

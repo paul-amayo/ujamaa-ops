@@ -151,7 +151,7 @@ if [ ! -e $OUT/merged.hier ] || [ "$(cat $OUT/merged.chunks 2>/dev/null)" != "$D
   say "merge rc=$? in $(( $(date +%s)-t0 ))s ($(du -h $OUT/merged.hier 2>/dev/null | cut -f1))"; echo "$DONE" > $OUT/merged.chunks
   [ -f $OUT/merged.hier ] || { say "NO MERGED HIERARCHY"; exit 1; }
   t0=$(date +%s)
-  python /home/paperspace/logs/h3dgs_eval_compact.py $PROJ --taus 0 3 6 > /home/paperspace/logs/h3dgs_${SV}_eval_compact.log 2>&1
+  /home/paperspace/logs/stop_hier_service.sh >/dev/null 2>&1; PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python /home/paperspace/logs/h3dgs_eval_compact.py $PROJ --taus 0 3 6 > /home/paperspace/logs/h3dgs_${SV}_eval_compact.log 2>&1
   say "held-out eval (compact) in $(( $(date +%s)-t0 ))s: $(grep -aE "^\[eval\] tau" /home/paperspace/logs/h3dgs_${SV}_eval_compact.log | tr '\n' ' ')"
 fi
 say "=== $SV DONE in $(( ($(date +%s)-T_ALL)/60 )) min"

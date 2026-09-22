@@ -21,17 +21,22 @@ while true; do
     sleep 20; continue
   fi
   done_chunks=$(for c in $(ls $CH 2>/dev/null); do [ -e $OUT/trained_chunks/$c/hierarchy.hier_opt ] && echo -n "$c "; done | sed 's/ $//')
+  # all chunks done and the runner's full merge exists -> serve it directly (no duplicate multi-GB partial merge)
+  HIER_FILE=$OUT/merged_partial.hier
+  if [ -e $OUT/merged.hier ] && [ "$(echo $done_chunks | wc -w)" -eq "$(ls -d $CH/*_* 2>/dev/null | wc -l)" ]; then
+    HIER_FILE=$OUT/merged.hier; echo "$done_chunks" > $OUT/merged_partial.chunks
+  fi
   if [ -n "$done_chunks" ] && [ "$(cat $OUT/merged_partial.chunks 2>/dev/null)" != "$done_chunks" ]; then
     [ "$up" = 1 ] && { /home/paperspace/logs/stop_hier_service.sh >> $L 2>&1; up=0; }
     say "merging finished chunks: $done_chunks"
     (cd $REPO && submodules/gaussianhierarchy/build/GaussianHierarchyMerger $OUT/trained_chunks 0 $CH $OUT/merged_partial.hier $done_chunks >> $L 2>&1) \
       && echo "$done_chunks" > $OUT/merged_partial.chunks && say "merged ($(du -h $OUT/merged_partial.hier | cut -f1))" || say "MERGE FAILED"
   fi
-  if [ "$up" = 0 ] && [ -e $OUT/merged_partial.hier ]; then
+  if [ "$up" = 0 ] && [ -e $HIER_FILE ]; then
     free=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1)
     if [ "$free" -ge 8000 ]; then
       say "starting backend (free ${free} MiB) with chunks: $(cat $OUT/merged_partial.chunks)"
-      /home/paperspace/logs/start_hier_service.sh $OUT/merged_partial.hier $(cat $OUT/merged_partial.chunks) >> $L 2>&1
+      /home/paperspace/logs/start_hier_service.sh $HIER_FILE $(cat $OUT/merged_partial.chunks) >> $L 2>&1
     fi
   fi
   sleep 20

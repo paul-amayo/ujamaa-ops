@@ -14,8 +14,9 @@ from hier_compact import CompactHierarchy
 ap = argparse.ArgumentParser(); ap.add_argument("proj"); ap.add_argument("--taus", nargs="+", type=float, default=[0.0, 3.0, 6.0])
 ap.add_argument("--hier", default="output/merged.hier"); ap.add_argument("--out", default="output/eval_compact"); ap.add_argument("--aligned", action="store_true")
 ap.add_argument("--save", type=int, default=12, help="save this many renders per tau (first N test views)")
+ap.add_argument("--fg", default="", help="foreground-mask dir override (export_meta fg_masks otherwise)")
 a = ap.parse_args(); PROJ = Path(a.proj); CC = PROJ / "camera_calibration"; OUT = PROJ / a.out; OUT.mkdir(parents=True, exist_ok=True)
-meta = json.load(open(PROJ / "export_meta.json")); fg_dir = meta.get("fg_masks"); FG = Path(fg_dir) if fg_dir and Path(fg_dir).exists() else None
+meta = json.load(open(PROJ / "export_meta.json")); fg_dir = a.fg or meta.get("fg_masks"); FG = Path(fg_dir) if fg_dir and Path(fg_dir).exists() else None
 cam = read_cameras_binary(str(CC / "aligned/sparse/0/cameras.bin"))[1]; fx, fy, cx, cy = cam.params[:4]; W, H = cam.width, cam.height
 test = [l.strip() for l in open(CC / "aligned/sparse/0/test.txt") if l.strip()]
 aligned = {im.name: im for im in read_images_binary(str(CC / "aligned/sparse/0/images.bin")).values()}
@@ -58,7 +59,11 @@ for tau in a.taus:
         gt = torch.from_numpy(np.asarray(Image.open(CC / "rectified/images" / name).convert("RGB"), np.float32) / 255).permute(2, 0, 1).cuda()
         mask = None
         if FG and (FG / name).exists(): mask = torch.from_numpy(np.asarray(Image.open(FG / name).convert("L")) > 0).cuda()
-        im, n = ch.render(make_cam(m), tau)
+        if not rows: print(f"[eval] before first render: free {torch.cuda.mem_get_info()[0]/2**30:.2f} GiB, torch reserved {torch.cuda.memory_reserved()/2**30:.2f} GiB", flush=True)
+        try:
+            im, n = ch.render(make_cam(m), tau)
+        except Exception as ex:
+            print(f"[eval] render failed on {name} ({cname}): {type(ex).__name__}: {str(ex)[:120]} | free {torch.cuda.mem_get_info()[0]/2**30:.2f} GiB reserved {torch.cuda.memory_reserved()/2**30:.2f} GiB", flush=True); raise
         r = {"name": name, "tau": tau, "chunk": cname, "psnr": psnr(im, gt), "psnr_fg": psnr(im, gt, mask) if mask is not None else None, "nodes": n}
         if a.aligned and name in aligned:
             im2, _ = ch.render(make_cam(c2w_of(aligned[name])), tau); r["psnr_aligned_pose"] = psnr(im2, gt)
