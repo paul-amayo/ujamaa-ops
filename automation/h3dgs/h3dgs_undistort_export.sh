@@ -26,7 +26,28 @@ if [ ! -e $U/sparse/cameras.bin ]; then
 fi
 NEWCAM=$($PY -c "
 import sys; sys.path.insert(0,'/home/paperspace/code/hierarchical-3d-gaussians/preprocess'); from read_write_model import read_cameras_binary as r
-c=r('$U/sparse/cameras.bin')[1]; print(','.join(str(float(x)) for x in c.params)); import sys as s; s.stderr.write(f'{c.model} {c.width}x{c.height} {[round(float(x),2) for x in c.params]}\n')")
-say "undistorted PINHOLE camera: $NEWCAM"
-H3DGS_IMAGES_DIR=$U/images H3DGS_INTRINSICS=$NEWCAM $PY /home/paperspace/logs/h3dgs_export.py $S $P 2>&1 | tail -2 | tee -a $L
+c=r('$U/sparse/cameras.bin')[1]; print(','.join(str(float(x)) for x in c.params) + f',{c.width},{c.height}')")
+say "undistorted PINHOLE camera (fx,fy,cx,cy,w,h): $NEWCAM"
+# the sky / foreground masks live on the original pixel grid: warp them with the same undistortion (nearest)
+$PY - $S $U "$CAM" "$NEWCAM" << 'EOF' 2>&1 | tail -2 | tee -a $L
+import sys, cv2, numpy as np
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
+S, U = Path(sys.argv[1]), Path(sys.argv[2]); cam = [float(x) for x in sys.argv[3].split(",")]; new = [float(x) for x in sys.argv[4].split(",")]
+K = np.array([[cam[0], 0, cam[2]], [0, cam[1], cam[3]], [0, 0, 1]]); D = np.array(cam[4:8]); Kn = np.array([[new[0], 0, new[2]], [0, new[1], new[3]], [0, 0, 1]]); W, H = int(new[4]), int(new[5])
+m1, m2 = cv2.initUndistortRectifyMap(K, D, None, Kn, (W, H), cv2.CV_32FC1)
+names = set(p.name for p in (U / "images").glob("*.png"))
+for kind in ("sky_masks", "fg_masks"):
+    src = S / "prod/tassili" / kind
+    if not src.exists(): print(f"[undistort] no {kind}"); continue
+    dst = U / kind; dst.mkdir(exist_ok=True)
+    def one(f):
+        if (dst / f.name).exists(): return 0
+        m = cv2.imread(str(f), cv2.IMREAD_GRAYSCALE); cv2.imwrite(str(dst / f.name), cv2.remap(m, m1, m2, cv2.INTER_NEAREST, borderMode=cv2.BORDER_CONSTANT, borderValue=0)); return 1
+    fs = [f for f in src.glob("*.png") if f.name in names]
+    with ThreadPoolExecutor(16) as ex: n = sum(ex.map(one, fs))
+    print(f"[undistort] {kind}: {n} masks warped to {W}x{H} ({len(fs)} keyframes)")
+EOF
+SKY=""; FG=""; [ -d $U/sky_masks ] && SKY=$U/sky_masks; [ -d $U/fg_masks ] && FG=$U/fg_masks
+H3DGS_IMAGES_DIR=$U/images H3DGS_INTRINSICS=$NEWCAM H3DGS_SKY_MASKS=$SKY H3DGS_FG_MASKS=$FG $PY /home/paperspace/logs/h3dgs_export.py $S $P 2>&1 | tail -2 | tee -a $L
 echo "$CAM" > $P/undistort/opencv_camera.txt; say "UNDISTORT EXPORT DONE -> $P"

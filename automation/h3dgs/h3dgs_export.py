@@ -23,7 +23,9 @@ POSES, IMGS = PROJ / "camera_calibration/poses/sparse/0", PROJ / "camera_calibra
 GL2CV = np.diag([1.0, -1.0, -1.0, 1.0])
 
 TJ = os.environ.get("H3DGS_TRANSFORMS_NAME", "transforms.json")   # e.g. transforms_odo_glfix.json = the odometry poses backed up by the per-block refine
-blocks = sorted(x for x in BLOCKS.glob(f"block_[0-9][0-9][0-9]/{TJ}") if x.parent.name[6:].isdigit())   # canonical blocks only; suffixed dirs are experiments (prod doctrine)
+_blk = sorted(x.parent for x in BLOCKS.glob("block_[0-9][0-9][0-9]/transforms.json") if x.parent.name[6:].isdigit())   # canonical blocks only; suffixed dirs are experiments (prod doctrine)
+blocks = [(b / TJ) if (b / TJ).exists() else (b / "transforms.json") for b in _blk]   # a block without the named file keeps transforms.json (e.g. a refine-refused block still holds its odometry)
+if TJ != "transforms.json": print(f"[export] poses from {TJ}: {sum((b / TJ).exists() for b in _blk)}/{len(_blk)} blocks have it; the rest fall back to transforms.json")
 assert blocks, f"no blocks under {BLOCKS}"
 # H3DGS_BLOCK_VARIANT=_ref: take each block's poses from its `block_NNN_ref` sibling when one exists (ten_rows keeps its
 # refined-pose fleet in `_ref` variants while the canonical dirs still hold the odometry poses, 2026-09-23).
@@ -60,7 +62,9 @@ intr = np.array(intr); spread = (intr.max(0) - intr.min(0)) / intr.mean(0)
 if spread[:4].max() > 5e-3: print(f"WARNING: per-block intrinsics differ by up to {spread[:4].max()*100:.2f}% — using the median")
 fx, fy, cx, cy, w, h = np.median(intr, 0); w, h = int(round(w)), int(round(h))
 if INTR:
-    fx, fy, cx, cy = [float(x) for x in INTR.split(",")]; print(f"[export] intrinsics OVERRIDDEN (H3DGS_INTRINSICS): fx {fx:.2f} fy {fy:.2f} cx {cx:.2f} cy {cy:.2f}")
+    vals = [float(x) for x in INTR.split(",")]; fx, fy, cx, cy = vals[:4]
+    if len(vals) >= 6: w, h = int(round(vals[4])), int(round(vals[5]))   # re-rectified images may be cropped
+    print(f"[export] intrinsics OVERRIDDEN (H3DGS_INTRINSICS): fx {fx:.2f} fy {fy:.2f} cx {cx:.2f} cy {cy:.2f} {w}x{h}")
 names = [f[0] for f in frames]; assert len(set(names)) == len(names), "duplicate image names across blocks"
 print(f"{len(blocks)} blocks, {len(frames)} keyframes, convention: {conv_counts}, camera fx {fx:.1f} fy {fy:.1f} cx {cx:.1f} cy {cy:.1f} {w}x{h}")
 
@@ -90,8 +94,8 @@ for name, src, *_ in frames:
         ncopy += 1
 meta = {"survey_root": str(SURVEY), "blocks_cfg": str(BLOCKS), "n_images": len(images), "n_test": len(test_names), "convention": conv_counts,
         "world_rotation_to_zup": R_W.tolist(), "world_up_in_lio": n.tolist(), "camera": {"fx": fx, "fy": fy, "cx": cx, "cy": cy, "w": w, "h": h},
-        "fg_masks": str(SURVEY / "prod/tassili/fg_masks") if (SURVEY / "prod/tassili/fg_masks").exists() else None,
-        "sky_masks": str(SURVEY / "prod/tassili/sky_masks") if (SURVEY / "prod/tassili/sky_masks").exists() else None,
+        "fg_masks": os.environ.get("H3DGS_FG_MASKS") or (str(SURVEY / "prod/tassili/fg_masks") if (SURVEY / "prod/tassili/fg_masks").exists() else None),
+        "sky_masks": os.environ.get("H3DGS_SKY_MASKS") or (str(SURVEY / "prod/tassili/sky_masks") if (SURVEY / "prod/tassili/sky_masks").exists() else None),
         "pose_convention": "COLMAP w2c (OpenCV) in the z-up frame; c2w_cv = R_W @ c2w_gl @ diag(1,-1,-1,1)"}
 json.dump(meta, open(PROJ / "export_meta.json", "w"), indent=2)
 print(f"wrote {len(images)} poses, {len(test_names)} test names, copied {ncopy} images -> {PROJ}\nEXPORT DONE")

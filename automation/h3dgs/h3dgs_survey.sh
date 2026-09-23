@@ -103,12 +103,17 @@ EOF
   say "SfM in $(( $(date +%s)-t0 ))s: $STATS"
 fi
 # 4. chunks + per-chunk BA + depth scales + test split
-if [ "$(ls $CH/*/sparse/0/depth_params.json 2>/dev/null | wc -l)" -eq 0 ] || [ "$(cat $CH/RECIPE 2>/dev/null)" != "$(cat $CC/aligned/RECIPE)" ]; then
-  t0=$(date +%s); rm -rf $CC/raw_chunks $CH
-  $PY preprocess/make_chunk.py --base_dir $CC/aligned/sparse/0 --images_dir $IMGS --chunk_size 30 --lapla_thresh 0 --min_n_cams 50 --max_n_cams 1500 --output_path $CC/raw_chunks >> $L 2>&1
+# per-chunk idempotent: a chunk is prepared once (sparse/0/depth_params.json); a recipe change wipes everything
+if [ "$(cat $CH/RECIPE 2>/dev/null)" != "$(cat $CC/aligned/RECIPE)" ] && [ -e $CH/RECIPE ]; then say "chunk recipe changed ($(cat $CH/RECIPE) -> $(cat $CC/aligned/RECIPE)): rebuilding chunks"; rm -rf $CC/raw_chunks $CH; fi
+NEED=0; [ -e $CC/raw_chunks ] || NEED=1
+for RC in $(ls $CC/raw_chunks 2>/dev/null); do if [ -n "${H3DGS_ONLY_CHUNKS:-}" ] && ! [[ " $H3DGS_ONLY_CHUNKS " == *" $RC "* ]]; then continue; fi; [ -e $CH/$RC/sparse/0/depth_params.json ] || NEED=1; done
+if [ "$NEED" = 1 ]; then
+  t0=$(date +%s)
+  [ -e $CC/raw_chunks ] || $PY preprocess/make_chunk.py --base_dir $CC/aligned/sparse/0 --images_dir $IMGS --chunk_size 30 --lapla_thresh 0 --min_n_cams 50 --max_n_cams 1500 --output_path $CC/raw_chunks >> $L 2>&1
   SKIPBA="--skip_bundle_adjustment"; [ "${H3DGS_CHUNK_BA:-0}" = 1 ] && SKIPBA=""   # H3DGS_CHUNK_BA=1: the original per-chunk BA on top of the aligned poses
   for RC in $(ls $CC/raw_chunks); do
     if [ -n "${H3DGS_ONLY_CHUNKS:-}" ] && ! [[ " $H3DGS_ONLY_CHUNKS " == *" $RC "* ]]; then continue; fi   # chunk tests: prepare only the chunks under test
+    [ -e $CH/$RC/sparse/0/depth_params.json ] && continue   # already prepared
     t1=$(date +%s)
     $PY preprocess/prepare_chunk.py --raw_chunk $CC/raw_chunks/$RC --out_chunk $CH/$RC --images_dir $IMGS $SKIPBA > /home/paperspace/logs/h3dgs_${SV}_chunk_$RC.log 2>&1 \
       && say "chunk $RC $( [ -z "$SKIPBA" ] && echo "bundle-adjusted" || echo "triangulated (poses fixed)") in $(( $(date +%s)-t1 ))s" || say "chunk $RC TRIANGULATION FAILED"
