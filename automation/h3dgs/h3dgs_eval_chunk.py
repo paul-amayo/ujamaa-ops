@@ -20,6 +20,7 @@ ap.add_argument("--train_sample", type=int, default=0, help="score N evenly spac
 ap.add_argument("--exposure_json", default="", help="apply per-image trained exposure (chunk's exposure.json) before scoring")
 ap.add_argument("--right_half", action="store_true", help="score only the right half of each image (H3DGS train_test_exp protocol)")
 ap.add_argument("--sky", default="", help="sky-mask dir (255 = sky); adds a sky-masked PSNR over the non-sky pixels (default: the survey's prod/tassili/sky_masks)")
+ap.add_argument("--fill", action="store_true", help="single-chunk evals: render the scaffold's gaussians outside the chunk cell too (what the chunk saw during training / what neighbouring chunks provide after the merge)")
 a = ap.parse_args(); PROJ = Path(a.proj); CC = PROJ / "camera_calibration"; OUT = PROJ / a.out; OUT.mkdir(parents=True, exist_ok=True)
 meta = json.load(open(PROJ / "export_meta.json")); fg_dir = a.fg or meta.get("fg_masks"); FG = Path(fg_dir) if fg_dir and Path(fg_dir).exists() else None
 sky_dir = a.sky or meta.get("sky_masks") or str(PROJ.parent.parent / "prod/tassili/sky_masks"); SKY = Path(sky_dir) if Path(sky_dir).exists() else None
@@ -66,7 +67,8 @@ def psnr(a, b, m=None):
     d = (a - b) ** 2
     if m is not None: d = d[:, m]
     return 10 * math.log10(1.0 / max(d.mean().item(), 1e-12))
-t0 = time.time(); ch = CompactHierarchy(str(PROJ / a.hier), str(PROJ / "output/scaffold/point_cloud/iteration_30000"))
+fill = [(chunks[a.only_chunk][0], chunks[a.only_chunk][1])] if (a.fill and a.only_chunk) else None
+t0 = time.time(); ch = CompactHierarchy(str(PROJ / a.hier), str(PROJ / "output/scaffold/point_cloud/iteration_30000"), fill)
 print(f"[eval] {a.hier}: {ch.N} nodes loaded in {time.time()-t0:.0f}s, resident {ch.gpu_gib():.2f} GiB; {len(test)} test views; fg masks: {bool(FG)}", flush=True)
 rows = []
 for tau in a.taus:

@@ -26,6 +26,7 @@ blocks = sorted(x for x in BLOCKS.glob("block_[0-9][0-9][0-9]/transforms.json") 
 assert blocks, f"no blocks under {BLOCKS}"
 # H3DGS_BLOCK_VARIANT=_ref: take each block's poses from its `block_NNN_ref` sibling when one exists (ten_rows keeps its
 # refined-pose fleet in `_ref` variants while the canonical dirs still hold the odometry poses, 2026-09-23).
+INTR = os.environ.get("H3DGS_INTRINSICS", "")   # "fx,fy,cx,cy": override the blocks' nominal PINHOLE intrinsics (2026-09-23 probe: ZED focal ~2-3 % off)
 VARIANT = os.environ.get("H3DGS_BLOCK_VARIANT", "")
 if VARIANT:
     swapped = [x.parent.parent / (x.parent.name + VARIANT) / "transforms.json" for x in blocks]
