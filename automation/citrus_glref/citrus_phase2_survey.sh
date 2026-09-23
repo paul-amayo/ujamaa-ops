@@ -27,6 +27,9 @@ for BD in $B/block_[0-9][0-9][0-9]; do
   CENSUS_EMBEDDER=$EMB CENSUS_HIERARCHY=$HJ bash /home/paperspace/logs/censusinit_block_glref.sh $BD > /home/paperspace/logs/cp2_${SV}_$N.log 2>&1
   rc=$?; w=$(( $(date +%s)-t0 ))
   if [ $rc -eq 0 ]; then ok=$((ok+1)); echo -e "$N\t$w\tok" >> $TSV; say "$N seeded in ${w}s ($(grep -c REPL-INIT0 /home/paperspace/logs/cp2_${SV}_$N.log) init)"
+    # Paul 09-23: the census intermediates (~2 GB/block) are deleted once the seed checkpoint exists (regenerable in 161 s)
+    if ls $BD/splat_runs_FEATFIX/stage2_censusinit_glref/high/*/nerfstudio_models/*.ckpt >/dev/null 2>&1; then
+      rm -rf $BD/stage2_init_glref $BD/stage2_init_census_glref $BD/splat_runs_FEATFIX/stage2_bootstrap_glref; fi
   else bad=$((bad+1)); echo -e "$N\t$w\tFAIL" >> $TSV; say "$N FAILED rc=$rc: $(grep -aE 'REPL-FAIL|Error' /home/paperspace/logs/cp2_${SV}_$N.log | tail -1 | cut -c1-120)"; fi
 done
 say "PHASE-2 SEEDS DONE: ok=$ok fail=$bad"
