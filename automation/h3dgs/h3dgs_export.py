@@ -22,14 +22,15 @@ BLOCKS = SURVEY / "prod/tassili/blocks_ns" / a.cfg
 POSES, IMGS = PROJ / "camera_calibration/poses/sparse/0", PROJ / "camera_calibration/rectified/images"
 GL2CV = np.diag([1.0, -1.0, -1.0, 1.0])
 
-blocks = sorted(x for x in BLOCKS.glob("block_[0-9][0-9][0-9]/transforms.json") if x.parent.name[6:].isdigit())   # canonical blocks only; suffixed dirs are experiments (prod doctrine)
+TJ = os.environ.get("H3DGS_TRANSFORMS_NAME", "transforms.json")   # e.g. transforms_odo_glfix.json = the odometry poses backed up by the per-block refine
+blocks = sorted(x for x in BLOCKS.glob(f"block_[0-9][0-9][0-9]/{TJ}") if x.parent.name[6:].isdigit())   # canonical blocks only; suffixed dirs are experiments (prod doctrine)
 assert blocks, f"no blocks under {BLOCKS}"
 # H3DGS_BLOCK_VARIANT=_ref: take each block's poses from its `block_NNN_ref` sibling when one exists (ten_rows keeps its
 # refined-pose fleet in `_ref` variants while the canonical dirs still hold the odometry poses, 2026-09-23).
 INTR = os.environ.get("H3DGS_INTRINSICS", "")   # "fx,fy,cx,cy": override the blocks' nominal PINHOLE intrinsics (2026-09-23 probe: ZED focal ~2-3 % off)
 VARIANT = os.environ.get("H3DGS_BLOCK_VARIANT", "")
 if VARIANT:
-    swapped = [x.parent.parent / (x.parent.name + VARIANT) / "transforms.json" for x in blocks]
+    swapped = [x.parent.parent / (x.parent.name + VARIANT) / TJ for x in blocks]
     blocks = [s if s.exists() else x for s, x in zip(swapped, blocks)]
     print(f"[export] block variant {VARIANT!r}: {sum(s.exists() for s in swapped)}/{len(blocks)} blocks taken from their variant dirs")
 frames, intr, conv_counts = [], [], {"tagged_opengl": 0, "measured_opengl": 0, "measured_opencv_flipped": 0}
@@ -53,10 +54,13 @@ for tj_path in blocks:
             raise SystemExit(f"{tj_path}: pose convention undecidable from motion (mean col2.v = {s:+.2f})")
     for i, (f, m) in enumerate(zip(tj["frames"], M)):
         p = Path(f["file_path"]); p = p if p.is_absolute() else (tj_path.parent / p)
+        if os.environ.get("H3DGS_IMAGES_DIR"): p = Path(os.environ["H3DGS_IMAGES_DIR"]) / p.name   # e.g. re-rectified keyframes (same names)
         frames.append((p.name, p, m, bid, i))
 intr = np.array(intr); spread = (intr.max(0) - intr.min(0)) / intr.mean(0)
 if spread[:4].max() > 5e-3: print(f"WARNING: per-block intrinsics differ by up to {spread[:4].max()*100:.2f}% — using the median")
 fx, fy, cx, cy, w, h = np.median(intr, 0); w, h = int(round(w)), int(round(h))
+if INTR:
+    fx, fy, cx, cy = [float(x) for x in INTR.split(",")]; print(f"[export] intrinsics OVERRIDDEN (H3DGS_INTRINSICS): fx {fx:.2f} fy {fy:.2f} cx {cx:.2f} cy {cy:.2f}")
 names = [f[0] for f in frames]; assert len(set(names)) == len(names), "duplicate image names across blocks"
 print(f"{len(blocks)} blocks, {len(frames)} keyframes, convention: {conv_counts}, camera fx {fx:.1f} fy {fy:.1f} cx {cx:.1f} cy {cy:.1f} {w}x{h}")
 
