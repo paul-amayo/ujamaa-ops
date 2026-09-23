@@ -16,8 +16,9 @@ DEPTH="-d ../../rectified/depths"; case " $EXTRA " in *" --no-depth "*) DEPTH=""
 python -u train_single.py --port $((6100 + RANDOM % 900)) --save_iterations -1 -i ../../rectified/images $DEPTH --scaffold_file $SC --skybox_locked --eval \
   -s $CH/$C --model_path $T --bounds_file $CH/$C $EXTRA > $T/train.log 2>&1
 say "train rc=$? in $(( $(date +%s)-t0 ))s"
-[ -e $T/point_cloud/iteration_30000/point_cloud.ply ] || { say "$TAG: no point cloud ($(grep -aE 'Error|error' $T/train.log | tail -1 | cut -c1-120))"; exit 1; }
-submodules/gaussianhierarchy/build/GaussianHierarchyCreator $T/point_cloud/iteration_30000/point_cloud.ply $CH/$C $T $SC >> $T/train.log 2>&1
+PLY=$(ls -d $T/point_cloud/iteration_* 2>/dev/null | sort -t_ -k2 -n | tail -1)/point_cloud.ply   # last saved iteration (variants may train longer than 30k)
+[ -e "$PLY" ] || { say "$TAG: no point cloud ($(grep -aE 'Error|error' $T/train.log | tail -1 | cut -c1-120))"; exit 1; }
+submodules/gaussianhierarchy/build/GaussianHierarchyCreator $PLY $CH/$C $T $SC >> $T/train.log 2>&1
 [ -e $T/hierarchy.hier ] || { say "$TAG: no hierarchy"; exit 1; }
 EX=""; case "$EXTRA" in *train_test_exp*) EX="--exposure_json $T/exposure.json --right_half";; esac
 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True python /home/paperspace/logs/h3dgs_eval_chunk.py $PROJ --hier output/ablation/$TAG/$C/hierarchy.hier --taus 0 --only_chunk $C --out output/ablation/$TAG/eval_$C --save 12 $EX > $T/eval.log 2>&1

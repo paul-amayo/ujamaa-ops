@@ -106,15 +106,17 @@ fi
 if [ "$(ls $CH/*/sparse/0/depth_params.json 2>/dev/null | wc -l)" -eq 0 ] || [ "$(cat $CH/RECIPE 2>/dev/null)" != "$(cat $CC/aligned/RECIPE)" ]; then
   t0=$(date +%s); rm -rf $CC/raw_chunks $CH
   $PY preprocess/make_chunk.py --base_dir $CC/aligned/sparse/0 --images_dir $IMGS --chunk_size 30 --lapla_thresh 0 --min_n_cams 50 --max_n_cams 1500 --output_path $CC/raw_chunks >> $L 2>&1
+  SKIPBA="--skip_bundle_adjustment"; [ "${H3DGS_CHUNK_BA:-0}" = 1 ] && SKIPBA=""   # H3DGS_CHUNK_BA=1: the original per-chunk BA on top of the aligned poses
   for RC in $(ls $CC/raw_chunks); do
+    if [ -n "${H3DGS_ONLY_CHUNKS:-}" ] && ! [[ " $H3DGS_ONLY_CHUNKS " == *" $RC "* ]]; then continue; fi   # chunk tests: prepare only the chunks under test
     t1=$(date +%s)
-    $PY preprocess/prepare_chunk.py --raw_chunk $CC/raw_chunks/$RC --out_chunk $CH/$RC --images_dir $IMGS --skip_bundle_adjustment > /home/paperspace/logs/h3dgs_${SV}_chunk_$RC.log 2>&1 \
-      && say "chunk $RC triangulated (poses fixed) in $(( $(date +%s)-t1 ))s" || say "chunk $RC TRIANGULATION FAILED"
+    $PY preprocess/prepare_chunk.py --raw_chunk $CC/raw_chunks/$RC --out_chunk $CH/$RC --images_dir $IMGS $SKIPBA > /home/paperspace/logs/h3dgs_${SV}_chunk_$RC.log 2>&1 \
+      && say "chunk $RC $( [ -z "$SKIPBA" ] && echo "bundle-adjusted" || echo "triangulated (poses fixed)") in $(( $(date +%s)-t1 ))s" || say "chunk $RC TRIANGULATION FAILED"
     rm -rf $CC/raw_chunks/$RC/bundle_adjustment/images $CC/raw_chunks/$RC/bundle_adjustment/stereo $CC/raw_chunks/$RC/bundle_adjustment/database.db*   # transient copies (training reads rectified/images)
   done
   $PY preprocess/make_chunks_depth_scale.py --chunks_dir $CH --depths_dir $CC/rectified/depths >> $L 2>&1 || { say "DEPTH SCALE FAILED"; exit 1; }
   $PY preprocess/copy_file_to_chunks.py --file_path $CC/aligned/sparse/0/test.txt --chunks_path $CH >> $L 2>&1
-  cp $CC/aligned/RECIPE $CH/RECIPE
+  cp $CC/aligned/RECIPE $CH/RECIPE; [ -z "$SKIPBA" ] && echo 1 > $CH/CHUNK_BA
   say "chunks in $(( $(date +%s)-t0 ))s: $(for c in $(cd $CH && ls -d */ | tr -d /); do echo -n "$c=$($PY -c "import sys;sys.path.insert(0,'preprocess');from read_write_model import read_images_binary as r;print(len(r('$CH/$c/sparse/0/images.bin')))") "; done)"
 fi
 gpu_wait(){ until [ "$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1)" -ge "$1" ]; do sleep 30; done; }   # concurrent survey instances: never start a trainer into a full GPU
