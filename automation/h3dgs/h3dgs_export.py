@@ -86,6 +86,7 @@ for name, src, *_ in frames:
 meta = {"survey_root": str(SURVEY), "blocks_cfg": str(BLOCKS), "n_images": len(images), "n_test": len(test_names), "convention": conv_counts,
         "world_rotation_to_zup": R_W.tolist(), "world_up_in_lio": n.tolist(), "camera": {"fx": fx, "fy": fy, "cx": cx, "cy": cy, "w": w, "h": h},
         "fg_masks": str(SURVEY / "prod/tassili/fg_masks") if (SURVEY / "prod/tassili/fg_masks").exists() else None,
+        "sky_masks": str(SURVEY / "prod/tassili/sky_masks") if (SURVEY / "prod/tassili/sky_masks").exists() else None,
         "pose_convention": "COLMAP w2c (OpenCV) in the z-up frame; c2w_cv = R_W @ c2w_gl @ diag(1,-1,-1,1)"}
 json.dump(meta, open(PROJ / "export_meta.json", "w"), indent=2)
 print(f"wrote {len(images)} poses, {len(test_names)} test names, copied {ncopy} images -> {PROJ}\nEXPORT DONE")

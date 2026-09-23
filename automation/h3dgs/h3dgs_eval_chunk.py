@@ -19,8 +19,10 @@ ap.add_argument("--only_chunk", default="", help="score only the test views owne
 ap.add_argument("--train_sample", type=int, default=0, help="score N evenly spaced TRAINING views instead of the held-out set (fit diagnostic)")
 ap.add_argument("--exposure_json", default="", help="apply per-image trained exposure (chunk's exposure.json) before scoring")
 ap.add_argument("--right_half", action="store_true", help="score only the right half of each image (H3DGS train_test_exp protocol)")
+ap.add_argument("--sky", default="", help="sky-mask dir (255 = sky); adds a sky-masked PSNR over the non-sky pixels (default: the survey's prod/tassili/sky_masks)")
 a = ap.parse_args(); PROJ = Path(a.proj); CC = PROJ / "camera_calibration"; OUT = PROJ / a.out; OUT.mkdir(parents=True, exist_ok=True)
 meta = json.load(open(PROJ / "export_meta.json")); fg_dir = a.fg or meta.get("fg_masks"); FG = Path(fg_dir) if fg_dir and Path(fg_dir).exists() else None
+sky_dir = a.sky or meta.get("sky_masks") or str(PROJ.parent.parent / "prod/tassili/sky_masks"); SKY = Path(sky_dir) if Path(sky_dir).exists() else None
 cam = read_cameras_binary(str(CC / "aligned/sparse/0/cameras.bin"))[1]; fx, fy, cx, cy = cam.params[:4]; W, H = cam.width, cam.height
 test = [l.strip() for l in open(CC / "aligned/sparse/0/test.txt") if l.strip()]
 if a.train_sample:
@@ -85,7 +87,10 @@ for tau in a.taus:
         if EXPO: im = apply_expo(im, name)
         if saved < a.save: Image.fromarray((im.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)).save(tdir / name); saved += 1
         ims, gts = crop_right(im), crop_right(gt); masks = crop_right(mask) if mask is not None else None   # train_test_exp protocol: score the right half only
-        r = {"name": name, "tau": tau, "chunk": cname, "psnr": psnr(ims, gts), "psnr_fg": psnr(ims, gts, masks) if masks is not None else None, "nodes": n}
+        nosky = None
+        if SKY and (SKY / name).exists(): nosky = crop_right(torch.from_numpy(np.asarray(Image.open(SKY / name).convert("L")) == 0).cuda())
+        r = {"name": name, "tau": tau, "chunk": cname, "psnr": psnr(ims, gts), "psnr_fg": psnr(ims, gts, masks) if masks is not None else None,
+             "psnr_nosky": psnr(ims, gts, nosky) if nosky is not None else None, "nodes": n}
         if a.aligned and name in aligned:
             im2, _ = ch.render(make_cam(c2w_of(aligned[name])), tau); r["psnr_aligned_pose"] = psnr(crop_right(apply_expo(im2, name) if EXPO else im2), gts)
         rows.append(r)
@@ -93,6 +98,8 @@ for tau in a.taus:
     fg = [r["psnr_fg"] for r in rs if r["psnr_fg"] is not None]
     msg = f"[eval] tau {tau:g}: {len(rs)} views in {time.time()-t1:.0f}s — full-frame PSNR mean {np.mean([r['psnr'] for r in rs]):.2f} median {np.median([r['psnr'] for r in rs]):.2f} dB"
     if fg: msg += f"; FG-masked mean {np.mean(fg):.2f} median {np.median(fg):.2f} dB"
+    ns = [r["psnr_nosky"] for r in rs if r["psnr_nosky"] is not None]
+    if ns: msg += f"; SKY-MASKED mean {np.mean(ns):.2f} median {np.median(ns):.2f} dB"
     if a.aligned: msg += f"; at the aligned (pre-chunk-BA) pose: {np.mean([r['psnr_aligned_pose'] for r in rs]):.2f} dB"
     print(msg, flush=True)
 json.dump(rows, open(OUT / "scores.json", "w"), indent=1); print("[eval] DONE", flush=True)

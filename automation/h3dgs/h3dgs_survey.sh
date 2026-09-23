@@ -117,11 +117,12 @@ if [ "$(ls $CH/*/sparse/0/depth_params.json 2>/dev/null | wc -l)" -eq 0 ] || [ "
   cp $CC/aligned/RECIPE $CH/RECIPE
   say "chunks in $(( $(date +%s)-t0 ))s: $(for c in $(cd $CH && ls -d */ | tr -d /); do echo -n "$c=$($PY -c "import sys;sys.path.insert(0,'preprocess');from read_write_model import read_images_binary as r;print(len(r('$CH/$c/sparse/0/images.bin')))") "; done)"
 fi
+gpu_wait(){ until [ "$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1)" -ge "$1" ]; do sleep 30; done; }   # concurrent survey instances: never start a trainer into a full GPU
 # 5. scaffold
 mkdir -p $OUT/trained_chunks
 if [ ! -e $SC/point_cloud.ply ]; then
   t0=$(date +%s)
-  python train_coarse.py --port $((6100 + RANDOM % 900)) -s $CC/aligned --save_iterations -1 -i ../rectified/images --skybox_num 100000 --model_path $OUT/scaffold --exposure_lr_init 0.0 --eval >> $FT 2>&1
+  gpu_wait 8000; python train_coarse.py --port $((6100 + RANDOM % 900)) -s $CC/aligned --save_iterations -1 -i ../rectified/images --skybox_num 100000 --model_path $OUT/scaffold --exposure_lr_init 0.0 --eval >> $FT 2>&1
   say "scaffold rc=$? in $(( $(date +%s)-t0 ))s $( [ -e $SC/point_cloud.ply ] && echo OK || echo MISSING)"
   [ -e $SC/point_cloud.ply ] || { say "SCAFFOLD FAILED"; exit 1; }
 fi
@@ -135,7 +136,7 @@ for c in $ORDER; do
   if [ -e $T/hierarchy.hier_opt ]; then rm -rf $T/point_cloud $T/hierarchy.hier; continue; fi
   if [ ! -e $T/point_cloud/iteration_30000/point_cloud.ply ]; then
     t0=$(date +%s)
-    python -u train_single.py --port $((6100 + RANDOM % 900)) --save_iterations -1 -i ../../rectified/images -d ../../rectified/depths --scaffold_file $SC --skybox_locked \
+    gpu_wait 12000; python -u train_single.py --port $((6100 + RANDOM % 900)) --save_iterations -1 -i ../../rectified/images -d ../../rectified/depths --scaffold_file $SC --skybox_locked \
       --exposure_lr_init 0.0 --eval -s $CH/$c --model_path $T --bounds_file $CH/$c >> $FT 2>&1
     say "train chunk $c rc=$? wall=$(( $(date +%s)-t0 ))s"
     [ -e $T/point_cloud/iteration_30000/point_cloud.ply ] || { say "chunk $c: no point cloud — skipped"; continue; }
@@ -146,7 +147,7 @@ for c in $ORDER; do
   fi
   if [ ! -e $T/hierarchy.hier_opt ]; then
     t0=$(date +%s)
-    python -u train_post.py --port $((6100 + RANDOM % 900)) --iterations 15000 --feature_lr 0.0005 --opacity_lr 0.01 --scaling_lr 0.001 --save_iterations -1 \
+    gpu_wait 22000; python -u train_post.py --port $((6100 + RANDOM % 900)) --iterations 15000 --feature_lr 0.0005 --opacity_lr 0.01 --scaling_lr 0.001 --save_iterations -1 \
       -i ../../rectified/images --scaffold_file $SC --exposure_lr_init 0.0 --eval -s $CH/$c --model_path $T --hierarchy $T/hierarchy.hier >> $FT 2>&1
     say "post-opt chunk $c rc=$? wall=$(( $(date +%s)-t0 ))s $( [ -e $T/hierarchy.hier_opt ] && echo OK || echo 'NO hier_opt (OOM?)')"
   fi
