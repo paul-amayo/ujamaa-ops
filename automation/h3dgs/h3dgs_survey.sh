@@ -120,6 +120,7 @@ if [ "$(ls $CH/*/sparse/0/depth_params.json 2>/dev/null | wc -l)" -eq 0 ] || [ "
   say "chunks in $(( $(date +%s)-t0 ))s: $(for c in $(cd $CH && ls -d */ | tr -d /); do echo -n "$c=$($PY -c "import sys;sys.path.insert(0,'preprocess');from read_write_model import read_images_binary as r;print(len(r('$CH/$c/sparse/0/images.bin')))") "; done)"
 fi
 gpu_wait(){ until [ "$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1)" -ge "$1" ]; do sleep 30; done; }   # concurrent survey instances: never start a trainer into a full GPU
+[ "${H3DGS_STOP_AFTER_CHUNKS:-0}" = 1 ] && { say "stopped after the chunk stage (H3DGS_STOP_AFTER_CHUNKS)"; exit 0; }
 # 5. scaffold
 mkdir -p $OUT/trained_chunks
 if [ ! -e $SC/point_cloud.ply ]; then
@@ -136,21 +137,22 @@ for c in $ORDER; do
   T=$OUT/trained_chunks/$c; mkdir -p $T
   # a finished chunk is one with an optimised hierarchy (its ply / raw hierarchy are cleaned up after post-opt)
   if [ -e $T/hierarchy.hier_opt ]; then rm -rf $T/point_cloud $T/hierarchy.hier; continue; fi
-  if [ ! -e $T/point_cloud/iteration_30000/point_cloud.ply ]; then
+  if [ -z "$(ls -d $T/point_cloud/iteration_*/point_cloud.ply 2>/dev/null)" ]; then
     t0=$(date +%s)
     gpu_wait 12000; python -u train_single.py --port $((6100 + RANDOM % 900)) --save_iterations -1 -i ../../rectified/images -d ../../rectified/depths --scaffold_file $SC --skybox_locked \
-      --exposure_lr_init 0.0 --eval -s $CH/$c --model_path $T --bounds_file $CH/$c >> $FT 2>&1
+      --exposure_lr_init 0.0 --eval -s $CH/$c --model_path $T --bounds_file $CH/$c ${H3DGS_TRAIN_EXTRA:-} >> $FT 2>&1   # H3DGS_TRAIN_EXTRA: recipe overrides (densify threshold, iterations, alpha masks ...)
     say "train chunk $c rc=$? wall=$(( $(date +%s)-t0 ))s"
-    [ -e $T/point_cloud/iteration_30000/point_cloud.ply ] || { say "chunk $c: no point cloud — skipped"; continue; }
+    [ -n "$(ls -d $T/point_cloud/iteration_*/point_cloud.ply 2>/dev/null)" ] || { say "chunk $c: no point cloud — skipped"; continue; }
   fi
   if [ ! -e $T/hierarchy.hier ]; then
-    submodules/gaussianhierarchy/build/GaussianHierarchyCreator $T/point_cloud/iteration_30000/point_cloud.ply $CH/$c $T $SC >> $FT 2>&1
+    PLY=$(ls -d $T/point_cloud/iteration_* 2>/dev/null | sort -t_ -k2 -n | tail -1)/point_cloud.ply   # last saved iteration (H3DGS_TRAIN_EXTRA may lengthen training)
+    submodules/gaussianhierarchy/build/GaussianHierarchyCreator $PLY $CH/$c $T $SC >> $FT 2>&1
     [ -e $T/hierarchy.hier ] || { say "chunk $c: no hierarchy — skipped"; continue; }
   fi
   if [ ! -e $T/hierarchy.hier_opt ]; then
     t0=$(date +%s)
     gpu_wait 22000; python -u train_post.py --port $((6100 + RANDOM % 900)) --iterations 15000 --feature_lr 0.0005 --opacity_lr 0.01 --scaling_lr 0.001 --save_iterations -1 \
-      -i ../../rectified/images --scaffold_file $SC --exposure_lr_init 0.0 --eval -s $CH/$c --model_path $T --hierarchy $T/hierarchy.hier >> $FT 2>&1
+      -i ../../rectified/images --scaffold_file $SC --exposure_lr_init 0.0 --eval -s $CH/$c --model_path $T --hierarchy $T/hierarchy.hier ${H3DGS_POST_EXTRA:-} >> $FT 2>&1
     say "post-opt chunk $c rc=$? wall=$(( $(date +%s)-t0 ))s $( [ -e $T/hierarchy.hier_opt ] && echo OK || echo 'NO hier_opt (OOM?)')"
   fi
   # keep only what the merge needs: the optimised hierarchy (the ply and the un-optimised hierarchy are its inputs)
