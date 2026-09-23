@@ -110,6 +110,9 @@ def _render(msg: dict) -> bytes:
                          interpolation_weights=iw, num_node_kids=ns, use_trained_exp=False)["render"]
     torch.cuda.synchronize(); render_ms = (time.time() - t1) * 1000
     frame = (torch.clamp(im, 0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy()
+    global _FRAMES
+    _FRAMES = globals().get('_FRAMES', 0) + 1
+    if _FRAMES % 50 == 0: torch.cuda.empty_cache()   # per-frame temporaries vary in size; without this the caching allocator grew to 16 GB beyond the 4 GB model
     ok, buf = cv2.imencode(".jpg", frame[:, :, ::-1], [cv2.IMWRITE_JPEG_QUALITY, quality])
     header = struct.pack("<IHHHHff", int(msg.get("seq", 0)) & 0xFFFFFFFF, W, H, 1, 0, render_ms, (time.time() - t0) * 1000)
     return header + buf.tobytes()

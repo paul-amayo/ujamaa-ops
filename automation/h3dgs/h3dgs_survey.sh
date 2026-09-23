@@ -122,9 +122,13 @@ if [ ! -e $SC/point_cloud.ply ]; then
   [ -e $SC/point_cloud.ply ] || { say "SCAFFOLD FAILED"; exit 1; }
 fi
 # 6. chunks, smallest first
+# H3DGS_ONLY_CHUNKS="1_1 0_0" trains only those chunks (pose/recipe tests); merge+eval then run on whatever is complete
 ORDER=$(for c in $(ls $CH); do echo "$($PY -c "import sys;sys.path.insert(0,'preprocess');from read_write_model import read_images_binary as r;print(len(r('$CH/$c/sparse/0/images.bin')))") $c"; done | sort -n | awk '{print $2}')
 for c in $ORDER; do
+  if [ -n "${H3DGS_ONLY_CHUNKS:-}" ] && ! [[ " $H3DGS_ONLY_CHUNKS " == *" $c "* ]]; then continue; fi
   T=$OUT/trained_chunks/$c; mkdir -p $T
+  # a finished chunk is one with an optimised hierarchy (its ply / raw hierarchy are cleaned up after post-opt)
+  if [ -e $T/hierarchy.hier_opt ]; then rm -rf $T/point_cloud $T/hierarchy.hier; continue; fi
   if [ ! -e $T/point_cloud/iteration_30000/point_cloud.ply ]; then
     t0=$(date +%s)
     python -u train_single.py --save_iterations -1 -i ../../rectified/images -d ../../rectified/depths --scaffold_file $SC --skybox_locked \
