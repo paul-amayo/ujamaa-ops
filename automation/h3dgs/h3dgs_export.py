@@ -24,6 +24,13 @@ GL2CV = np.diag([1.0, -1.0, -1.0, 1.0])
 
 blocks = sorted(x for x in BLOCKS.glob("block_[0-9][0-9][0-9]/transforms.json") if x.parent.name[6:].isdigit())   # canonical blocks only; suffixed dirs are experiments (prod doctrine)
 assert blocks, f"no blocks under {BLOCKS}"
+# H3DGS_BLOCK_VARIANT=_ref: take each block's poses from its `block_NNN_ref` sibling when one exists (ten_rows keeps its
+# refined-pose fleet in `_ref` variants while the canonical dirs still hold the odometry poses, 2026-09-23).
+VARIANT = os.environ.get("H3DGS_BLOCK_VARIANT", "")
+if VARIANT:
+    swapped = [x.parent.parent / (x.parent.name + VARIANT) / "transforms.json" for x in blocks]
+    blocks = [s if s.exists() else x for s, x in zip(swapped, blocks)]
+    print(f"[export] block variant {VARIANT!r}: {sum(s.exists() for s in swapped)}/{len(blocks)} blocks taken from their variant dirs")
 frames, intr, conv_counts = [], [], {"tagged_opengl": 0, "measured_opengl": 0, "measured_opencv_flipped": 0}
 for tj_path in blocks:
     tj = json.load(open(tj_path)); bid = int(tj_path.parent.name.split("_")[1])
