@@ -85,6 +85,7 @@ PYEOF
     --Mapper.ba_global_function_tolerance 0.000001 --Mapper.ba_global_max_num_iterations 30 --Mapper.ba_global_max_refinements 3 \
     --Mapper.ba_refine_focal_length 0 --Mapper.ba_refine_principal_point 0 --Mapper.ba_refine_extra_params 0 --Mapper.fix_existing_frames 1 >> /home/paperspace/logs/h3dgs_${SV}_globalba.log 2>&1 || { say "RE-TRIANGULATION FAILED"; exit 1; }
   cp $CC/prior/sparse/0/test.txt $CC/aligned/sparse/0/; echo globalba > $CC/aligned/RECIPE
+  rm -f $CC/rectified/database.db*   # features+matches are dead once the model is triangulated
   say "global BA in $(( $(date +%s)-t0 ))s: $(grep -a 'Final cost' /home/paperspace/logs/h3dgs_${SV}_globalba.log | head -1 | tr -s ' ') | snap: $SNAP"
   STATS=$($PY - $CC << 'EOF'
 import sys, numpy as np
@@ -105,6 +106,7 @@ if [ "$(ls $CH/*/sparse/0/depth_params.json 2>/dev/null | wc -l)" -eq 0 ] || [ "
     t1=$(date +%s)
     $PY preprocess/prepare_chunk.py --raw_chunk $CC/raw_chunks/$RC --out_chunk $CH/$RC --images_dir $IMGS --skip_bundle_adjustment > /home/paperspace/logs/h3dgs_${SV}_chunk_$RC.log 2>&1 \
       && say "chunk $RC triangulated (poses fixed) in $(( $(date +%s)-t1 ))s" || say "chunk $RC TRIANGULATION FAILED"
+    rm -rf $CC/raw_chunks/$RC/bundle_adjustment/images $CC/raw_chunks/$RC/bundle_adjustment/stereo $CC/raw_chunks/$RC/bundle_adjustment/database.db*   # transient copies (training reads rectified/images)
   done
   $PY preprocess/make_chunks_depth_scale.py --chunks_dir $CH --depths_dir $CC/rectified/depths >> $L 2>&1 || { say "DEPTH SCALE FAILED"; exit 1; }
   $PY preprocess/copy_file_to_chunks.py --file_path $CC/aligned/sparse/0/test.txt --chunks_path $CH >> $L 2>&1
@@ -140,6 +142,8 @@ for c in $ORDER; do
       -i ../../rectified/images --scaffold_file $SC --exposure_lr_init 0.0 --eval -s $CH/$c --model_path $T --hierarchy $T/hierarchy.hier >> $FT 2>&1
     say "post-opt chunk $c rc=$? wall=$(( $(date +%s)-t0 ))s $( [ -e $T/hierarchy.hier_opt ] && echo OK || echo 'NO hier_opt (OOM?)')"
   fi
+  # keep only what the merge needs: the optimised hierarchy (the ply and the un-optimised hierarchy are its inputs)
+  [ -e $T/hierarchy.hier_opt ] && rm -rf $T/point_cloud $T/hierarchy.hier
 done
 DONE=$(for c in $ORDER; do [ -e $OUT/trained_chunks/$c/hierarchy.hier_opt ] && echo -n "$c "; done)
 say "chunks complete: $DONE (of $(echo $ORDER | wc -w))"

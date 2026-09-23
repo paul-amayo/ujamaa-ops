@@ -8,7 +8,7 @@ correlates with the velocity, so mean(col2 . v) > 0 means OpenCV-in-OpenGL-contr
 bug) and the matrix is converted with T @ diag(1,-1,-1,1). World up is measured too: the plane normal of the
 camera centres, signed by the cameras' up vectors; the world is rotated so that up = +z (chunks cut in x/y).
 """
-import argparse, json, shutil, sys, numpy as np
+import argparse, json, os, shutil, sys, numpy as np
 from pathlib import Path
 sys.path.insert(0, "/home/paperspace/code/hierarchical-3d-gaussians/preprocess")
 from read_write_model import Camera, Image, write_model, rotmat2qvec
@@ -72,7 +72,10 @@ POSES.mkdir(parents=True, exist_ok=True); write_model(cams, images, {}, str(POSE
 (POSES / "test.txt").write_text("\n".join(test_names) + "\n")
 IMGS.mkdir(parents=True, exist_ok=True); ncopy = 0
 for name, src, *_ in frames:
-    if not (IMGS / name).exists(): shutil.copy2(src, IMGS / name); ncopy += 1
+    if not (IMGS / name).exists():
+        try: os.link(src, IMGS / name)          # hardlink: same bytes, no extra space (never a symlink)
+        except OSError: shutil.copy2(src, IMGS / name)
+        ncopy += 1
 meta = {"survey_root": str(SURVEY), "blocks_cfg": str(BLOCKS), "n_images": len(images), "n_test": len(test_names), "convention": conv_counts,
         "world_rotation_to_zup": R_W.tolist(), "world_up_in_lio": n.tolist(), "camera": {"fx": fx, "fy": fy, "cx": cx, "cy": cy, "w": w, "h": h},
         "fg_masks": str(SURVEY / "prod/tassili/fg_masks") if (SURVEY / "prod/tassili/fg_masks").exists() else None,
