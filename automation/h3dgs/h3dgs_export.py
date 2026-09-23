@@ -22,7 +22,7 @@ BLOCKS = SURVEY / "prod/tassili/blocks_ns" / a.cfg
 POSES, IMGS = PROJ / "camera_calibration/poses/sparse/0", PROJ / "camera_calibration/rectified/images"
 GL2CV = np.diag([1.0, -1.0, -1.0, 1.0])
 
-blocks = sorted(BLOCKS.glob("block_*/transforms.json"))
+blocks = sorted(x for x in BLOCKS.glob("block_[0-9][0-9][0-9]/transforms.json") if x.parent.name[6:].isdigit())   # canonical blocks only; suffixed dirs are experiments (prod doctrine)
 assert blocks, f"no blocks under {BLOCKS}"
 frames, intr, conv_counts = [], [], {"tagged_opengl": 0, "measured_opengl": 0, "measured_opencv_flipped": 0}
 for tj_path in blocks:

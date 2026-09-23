@@ -2,7 +2,7 @@
 # Keep the H3DGS hierarchy backend (:8006) up for Tassili whenever the GPU can take it: down during any
 # post-optimisation / merge / held-out render of the 05 runner (those OOM next to it), up during training
 # phases and idle time. Re-merges the finished chunks into merged_partial.hier when a new one completes.
-PROJ=/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/h3dgs
+PROJ=${H3DGS_PROJ:-/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/h3dgs}
 OUT=$PROJ/output; CH=$PROJ/camera_calibration/chunks; REPO=/home/paperspace/code/hierarchical-3d-gaussians
 L=/home/paperspace/logs/hier_backend_scheduler.log; say(){ echo "[$(date '+%m-%d %H:%M:%S')] $*" | tee -a $L; }
 say "scheduler up"

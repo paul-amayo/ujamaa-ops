@@ -1,6 +1,6 @@
 #!/bin/bash
 # Start the H3DGS hierarchy render backend for 05_13D on :8006 (loopback). Usage: start_hier_service.sh [hier file] [merged chunk names...]
-PROJ=/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/h3dgs
+PROJ=${H3DGS_PROJ:-/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/h3dgs}
 HIER=${1:-$PROJ/output/merged_partial.hier}; shift
 MERGED="${*:-0_0 0_2}"
 for p in $(pgrep -f "^[^ ]*python [^ ]*hier_render_service\.py"); do kill -9 $p; done
