@@ -115,7 +115,7 @@ if [ "$(ls $CH/*/sparse/0/depth_params.json 2>/dev/null | wc -l)" -eq 0 ] || [ "
   $PY preprocess/make_chunks_depth_scale.py --chunks_dir $CH --depths_dir $CC/rectified/depths >> $L 2>&1 || { say "DEPTH SCALE FAILED"; exit 1; }
   $PY preprocess/copy_file_to_chunks.py --file_path $CC/aligned/sparse/0/test.txt --chunks_path $CH >> $L 2>&1
   cp $CC/aligned/RECIPE $CH/RECIPE
-  say "chunks in $(( $(date +%s)-t0 ))s: $(for c in $(ls $CH); do echo -n "$c=$($PY -c "import sys;sys.path.insert(0,'preprocess');from read_write_model import read_images_binary as r;print(len(r('$CH/$c/sparse/0/images.bin')))") "; done)"
+  say "chunks in $(( $(date +%s)-t0 ))s: $(for c in $(cd $CH && ls -d */ | tr -d /); do echo -n "$c=$($PY -c "import sys;sys.path.insert(0,'preprocess');from read_write_model import read_images_binary as r;print(len(r('$CH/$c/sparse/0/images.bin')))") "; done)"
 fi
 # 5. scaffold
 mkdir -p $OUT/trained_chunks
@@ -127,7 +127,7 @@ if [ ! -e $SC/point_cloud.ply ]; then
 fi
 # 6. chunks, smallest first
 # H3DGS_ONLY_CHUNKS="1_1 0_0" trains only those chunks (pose/recipe tests); merge+eval then run on whatever is complete
-ORDER=$(for c in $(ls $CH); do echo "$($PY -c "import sys;sys.path.insert(0,'preprocess');from read_write_model import read_images_binary as r;print(len(r('$CH/$c/sparse/0/images.bin')))") $c"; done | sort -n | awk '{print $2}')
+ORDER=$(for c in $(cd $CH && ls -d */ | tr -d /); do echo "$($PY -c "import sys;sys.path.insert(0,'preprocess');from read_write_model import read_images_binary as r;print(len(r('$CH/$c/sparse/0/images.bin')))") $c"; done | sort -n | awk '{print $2}')
 for c in $ORDER; do
   if [ -n "${H3DGS_ONLY_CHUNKS:-}" ] && ! [[ " $H3DGS_ONLY_CHUNKS " == *" $c "* ]]; then continue; fi
   T=$OUT/trained_chunks/$c; mkdir -p $T
