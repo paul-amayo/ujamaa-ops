@@ -26,7 +26,16 @@ test = [l.strip() for l in open(CC / "aligned/sparse/0/test.txt") if l.strip()]
 if a.train_sample:
     tset = set(test); allnames = sorted(im.name for im in read_images_binary(str(CC / "aligned/sparse/0/images.bin")).values() if im.name not in tset)
     test = allnames[::max(1, len(allnames) // a.train_sample)][:a.train_sample]
-EXPO = json.load(open(a.exposure_json)) if a.exposure_json else {}
+EXPO = json.load(open(a.exposure_json)) if a.exposure_json else {}; N_EXPO = 0
+def apply_expo(im, name):
+    """H3DGS/3DGS trained exposure: 3x4 affine on RGB (gaussian_renderer.render with use_trained_exp)."""
+    global N_EXPO
+    e = EXPO.get(name, EXPO.get(Path(name).stem))
+    if e is None: return im
+    e = torch.tensor(e, dtype=torch.float32, device=im.device); N_EXPO += 1
+    return (torch.matmul(im.permute(1, 2, 0), e[:3, :3]).permute(2, 0, 1) + e[:3, 3, None, None]).clamp(0, 1)
+def crop_right(t):
+    return t[..., t.shape[-1] // 2:] if a.right_half else t
 aligned = {im.name: im for im in read_images_binary(str(CC / "aligned/sparse/0/images.bin")).values()}
 chunks = {}
 for cdir in sorted((CC / "chunks").glob("*_*")):
@@ -73,11 +82,13 @@ for tau in a.taus:
             im, n = ch.render(make_cam(m), tau)
         except Exception as ex:
             print(f"[eval] render failed on {name} ({cname}): {type(ex).__name__}: {str(ex)[:120]} | free {torch.cuda.mem_get_info()[0]/2**30:.2f} GiB reserved {torch.cuda.memory_reserved()/2**30:.2f} GiB", flush=True); raise
-        r = {"name": name, "tau": tau, "chunk": cname, "psnr": psnr(im, gt), "psnr_fg": psnr(im, gt, mask) if mask is not None else None, "nodes": n}
-        if a.aligned and name in aligned:
-            im2, _ = ch.render(make_cam(c2w_of(aligned[name])), tau); r["psnr_aligned_pose"] = psnr(im2, gt)
-        rows.append(r)
+        if EXPO: im = apply_expo(im, name)
         if saved < a.save: Image.fromarray((im.permute(1, 2, 0).cpu().numpy() * 255).astype(np.uint8)).save(tdir / name); saved += 1
+        ims, gts = crop_right(im), crop_right(gt); masks = crop_right(mask) if mask is not None else None   # train_test_exp protocol: score the right half only
+        r = {"name": name, "tau": tau, "chunk": cname, "psnr": psnr(ims, gts), "psnr_fg": psnr(ims, gts, masks) if masks is not None else None, "nodes": n}
+        if a.aligned and name in aligned:
+            im2, _ = ch.render(make_cam(c2w_of(aligned[name])), tau); r["psnr_aligned_pose"] = psnr(crop_right(apply_expo(im2, name) if EXPO else im2), gts)
+        rows.append(r)
     rs = [r for r in rows if r["tau"] == tau]
     fg = [r["psnr_fg"] for r in rs if r["psnr_fg"] is not None]
     msg = f"[eval] tau {tau:g}: {len(rs)} views in {time.time()-t1:.0f}s — full-frame PSNR mean {np.mean([r['psnr'] for r in rs]):.2f} median {np.median([r['psnr'] for r in rs]):.2f} dB"
