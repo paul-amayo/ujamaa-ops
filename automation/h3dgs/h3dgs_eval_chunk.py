@@ -16,10 +16,17 @@ ap.add_argument("--hier", default="output/merged.hier"); ap.add_argument("--out"
 ap.add_argument("--save", type=int, default=12, help="save this many renders per tau (first N test views)")
 ap.add_argument("--fg", default="", help="foreground-mask dir override (export_meta fg_masks otherwise)")
 ap.add_argument("--only_chunk", default="", help="score only the test views owned by this chunk (single-chunk hierarchies)")
+ap.add_argument("--train_sample", type=int, default=0, help="score N evenly spaced TRAINING views instead of the held-out set (fit diagnostic)")
+ap.add_argument("--exposure_json", default="", help="apply per-image trained exposure (chunk's exposure.json) before scoring")
+ap.add_argument("--right_half", action="store_true", help="score only the right half of each image (H3DGS train_test_exp protocol)")
 a = ap.parse_args(); PROJ = Path(a.proj); CC = PROJ / "camera_calibration"; OUT = PROJ / a.out; OUT.mkdir(parents=True, exist_ok=True)
 meta = json.load(open(PROJ / "export_meta.json")); fg_dir = a.fg or meta.get("fg_masks"); FG = Path(fg_dir) if fg_dir and Path(fg_dir).exists() else None
 cam = read_cameras_binary(str(CC / "aligned/sparse/0/cameras.bin"))[1]; fx, fy, cx, cy = cam.params[:4]; W, H = cam.width, cam.height
 test = [l.strip() for l in open(CC / "aligned/sparse/0/test.txt") if l.strip()]
+if a.train_sample:
+    tset = set(test); allnames = sorted(im.name for im in read_images_binary(str(CC / "aligned/sparse/0/images.bin")).values() if im.name not in tset)
+    test = allnames[::max(1, len(allnames) // a.train_sample)][:a.train_sample]
+EXPO = json.load(open(a.exposure_json)) if a.exposure_json else {}
 aligned = {im.name: im for im in read_images_binary(str(CC / "aligned/sparse/0/images.bin")).values()}
 chunks = {}
 for cdir in sorted((CC / "chunks").glob("*_*")):

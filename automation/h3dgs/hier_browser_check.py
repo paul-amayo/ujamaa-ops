@@ -4,7 +4,8 @@ the stream stats, then press play for a few seconds and capture again."""
 import base64, json, sys, time, urllib.request
 from playwright.sync_api import sync_playwright
 target = sys.argv[1] if len(sys.argv) > 1 else "kf_001411.png"
-url = "http://127.0.0.1:8001/tassili/?stream_url=ws://127.0.0.1:8006/ws"
+import os
+url = "http://127.0.0.1:8001/tassili/?stream_url=" + os.environ.get("STREAM_URL", "ws://127.0.0.1:8006/ws") + os.environ.get("EXTRA_PARAMS", "")
 traj = json.load(urllib.request.urlopen("http://127.0.0.1:8001/scene/trajectory?stride=1"))["frames"]
 k = next(i for i, f in enumerate(traj) if f["image_name"] == target)
 grab = """()=>{const im=[...document.images].find(i=>i.src.startsWith('blob:'));if(!im||!im.naturalWidth)return null;const c=document.createElement('canvas');c.width=im.naturalWidth;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0);return {w:im.naturalWidth,h:im.naturalHeight,url:window.state.stream.url,stats:window.state.stream.stats,block:window.state.stream.replayBlock,d:c.toDataURL('image/jpeg',0.85).split(',')[1]};}"""
