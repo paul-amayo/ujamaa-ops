@@ -54,7 +54,11 @@ fi
 # 3b. ONE global bundle adjustment (poses free, intrinsics fixed), Sim(3)-snapped onto the prior frame, then
 #     re-triangulated with poses FIXED -> aligned/sparse/0. Per-chunk BAs disagreed by 6-24 cm on shared cameras
 #     (measured on 05 2026-09-22); a single survey-wide solution is consistent by construction.
-if [ "$(cat $CC/aligned/RECIPE 2>/dev/null)" != "globalba" ]; then
+if [ "${H3DGS_SKIP_GLOBAL_BA:-0}" = 1 ] && [ "$(cat $CC/aligned/RECIPE 2>/dev/null)" != "fixedposes" ]; then
+  # A/B variant: keep the exported (e.g. per-block-refined) poses exactly; triangulation only
+  echo fixedposes > $CC/aligned/RECIPE; rm -f $CC/rectified/database.db*; say "global BA SKIPPED (H3DGS_SKIP_GLOBAL_BA=1): fixed-pose triangulation kept as aligned/sparse/0"
+fi
+if [ "${H3DGS_SKIP_GLOBAL_BA:-0}" != 1 ] && [ "$(cat $CC/aligned/RECIPE 2>/dev/null)" != "globalba" ]; then
   DB=$CC/rectified/database.db; t0=$(date +%s); rm -rf $CC/globalba; mkdir -p $CC/globalba/sparse/raw $CC/globalba/sparse/snap
   colmap bundle_adjuster --input_path $CC/rectified/sparse/0 --output_path $CC/globalba/sparse/raw \
     --BundleAdjustment.refine_focal_length 0 --BundleAdjustment.refine_principal_point 0 --BundleAdjustment.refine_extra_params 0 \
@@ -99,7 +103,7 @@ EOF
   say "SfM in $(( $(date +%s)-t0 ))s: $STATS"
 fi
 # 4. chunks + per-chunk BA + depth scales + test split
-if [ "$(ls $CH/*/sparse/0/depth_params.json 2>/dev/null | wc -l)" -eq 0 ] || [ "$(cat $CH/RECIPE 2>/dev/null)" != "globalba" ]; then
+if [ "$(ls $CH/*/sparse/0/depth_params.json 2>/dev/null | wc -l)" -eq 0 ] || [ "$(cat $CH/RECIPE 2>/dev/null)" != "$(cat $CC/aligned/RECIPE)" ]; then
   t0=$(date +%s); rm -rf $CC/raw_chunks $CH
   $PY preprocess/make_chunk.py --base_dir $CC/aligned/sparse/0 --images_dir $IMGS --chunk_size 30 --lapla_thresh 0 --min_n_cams 50 --max_n_cams 1500 --output_path $CC/raw_chunks >> $L 2>&1
   for RC in $(ls $CC/raw_chunks); do
@@ -110,14 +114,14 @@ if [ "$(ls $CH/*/sparse/0/depth_params.json 2>/dev/null | wc -l)" -eq 0 ] || [ "
   done
   $PY preprocess/make_chunks_depth_scale.py --chunks_dir $CH --depths_dir $CC/rectified/depths >> $L 2>&1 || { say "DEPTH SCALE FAILED"; exit 1; }
   $PY preprocess/copy_file_to_chunks.py --file_path $CC/aligned/sparse/0/test.txt --chunks_path $CH >> $L 2>&1
-  echo globalba > $CH/RECIPE
+  cp $CC/aligned/RECIPE $CH/RECIPE
   say "chunks in $(( $(date +%s)-t0 ))s: $(for c in $(ls $CH); do echo -n "$c=$($PY -c "import sys;sys.path.insert(0,'preprocess');from read_write_model import read_images_binary as r;print(len(r('$CH/$c/sparse/0/images.bin')))") "; done)"
 fi
 # 5. scaffold
 mkdir -p $OUT/trained_chunks
 if [ ! -e $SC/point_cloud.ply ]; then
   t0=$(date +%s)
-  python train_coarse.py -s $CC/aligned --save_iterations -1 -i ../rectified/images --skybox_num 100000 --model_path $OUT/scaffold --exposure_lr_init 0.0 --eval >> $FT 2>&1
+  python train_coarse.py --port $((6100 + RANDOM % 900)) -s $CC/aligned --save_iterations -1 -i ../rectified/images --skybox_num 100000 --model_path $OUT/scaffold --exposure_lr_init 0.0 --eval >> $FT 2>&1
   say "scaffold rc=$? in $(( $(date +%s)-t0 ))s $( [ -e $SC/point_cloud.ply ] && echo OK || echo MISSING)"
   [ -e $SC/point_cloud.ply ] || { say "SCAFFOLD FAILED"; exit 1; }
 fi
@@ -131,7 +135,7 @@ for c in $ORDER; do
   if [ -e $T/hierarchy.hier_opt ]; then rm -rf $T/point_cloud $T/hierarchy.hier; continue; fi
   if [ ! -e $T/point_cloud/iteration_30000/point_cloud.ply ]; then
     t0=$(date +%s)
-    python -u train_single.py --save_iterations -1 -i ../../rectified/images -d ../../rectified/depths --scaffold_file $SC --skybox_locked \
+    python -u train_single.py --port $((6100 + RANDOM % 900)) --save_iterations -1 -i ../../rectified/images -d ../../rectified/depths --scaffold_file $SC --skybox_locked \
       --exposure_lr_init 0.0 --eval -s $CH/$c --model_path $T --bounds_file $CH/$c >> $FT 2>&1
     say "train chunk $c rc=$? wall=$(( $(date +%s)-t0 ))s"
     [ -e $T/point_cloud/iteration_30000/point_cloud.ply ] || { say "chunk $c: no point cloud — skipped"; continue; }
@@ -142,7 +146,7 @@ for c in $ORDER; do
   fi
   if [ ! -e $T/hierarchy.hier_opt ]; then
     t0=$(date +%s)
-    python -u train_post.py --iterations 15000 --feature_lr 0.0005 --opacity_lr 0.01 --scaling_lr 0.001 --save_iterations -1 \
+    python -u train_post.py --port $((6100 + RANDOM % 900)) --iterations 15000 --feature_lr 0.0005 --opacity_lr 0.01 --scaling_lr 0.001 --save_iterations -1 \
       -i ../../rectified/images --scaffold_file $SC --exposure_lr_init 0.0 --eval -s $CH/$c --model_path $T --hierarchy $T/hierarchy.hier >> $FT 2>&1
     say "post-opt chunk $c rc=$? wall=$(( $(date +%s)-t0 ))s $( [ -e $T/hierarchy.hier_opt ] && echo OK || echo 'NO hier_opt (OOM?)')"
   fi

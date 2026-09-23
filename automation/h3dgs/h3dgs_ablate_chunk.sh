@@ -13,7 +13,7 @@ export PATH=/home/paperspace/miniconda3/envs/h3dgs/bin:$PATH; cd $REPO
 say "=== ablation $TAG on $(basename $PROJ | cut -c1-12)/$C: $EXTRA"
 t0=$(date +%s)
 DEPTH="-d ../../rectified/depths"; case " $EXTRA " in *" --no-depth "*) DEPTH=""; EXTRA=${EXTRA//--no-depth/};; esac
-python -u train_single.py --save_iterations -1 -i ../../rectified/images $DEPTH --scaffold_file $SC --skybox_locked --eval \
+python -u train_single.py --port $((6100 + RANDOM % 900)) --save_iterations -1 -i ../../rectified/images $DEPTH --scaffold_file $SC --skybox_locked --eval \
   -s $CH/$C --model_path $T --bounds_file $CH/$C $EXTRA > $T/train.log 2>&1
 say "train rc=$? in $(( $(date +%s)-t0 ))s"
 [ -e $T/point_cloud/iteration_30000/point_cloud.ply ] || { say "$TAG: no point cloud ($(grep -aE 'Error|error' $T/train.log | tail -1 | cut -c1-120))"; exit 1; }
