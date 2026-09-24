@@ -1,9 +1,10 @@
 #!/bin/bash
 # image_farm_fleet.sh — phone clips in /home/paperspace/data/image_farm -> image-only splats, one clip at a time:
-#   image_farm_prep.py (frames + GPU SfM) -> image_farm_recipe.sh (prod_image_recipe with an advisory hierarchy gate and
-#   IF_MODE=rgb by default: the HiGH feature chain needs a SAM3 concept that exists on these vegetable beds — 'tree' does not).
+#   image_farm_prep.py (frames, all-frame matching, forward-walk SEGMENTS at the turn dips, per-segment GPU SfM + track
+#   gate; segment survey dirs <clip>_s<k>) -> image_farm_recipe.sh per segment (advisory hierarchy gate, IF_MODE=rgb by
+#   default: the HiGH feature chain needs a SAM3 concept that exists on these vegetable beds — 'tree' does not).
 # Order: validation clip, medium walks, long walks, short walks. Skipped as unusable: IMG_7962 (0.4 s), IMG_7985 (1.2 s),
-# IMG_7992 (2.9 s), IMG_7986 (5.8 s), IMG_8019 (11 s, 720p HEVC/HLG). A clip with a finished splat.ply is skipped.
+# IMG_7992 (2.9 s), IMG_7986 (5.8 s), IMG_8019 (11 s, 720p HEVC/HLG). A segment with a finished splat.ply is skipped.
 set -uo pipefail
 F=/home/paperspace/data/image_farm
 R=${IF_RECIPE:-/home/paperspace/logs/image_farm_recipe.sh}
@@ -17,19 +18,25 @@ say "recipe=$R mode=${IF_MODE:-rgb} prompt=$PROMPT"
 for c in $CLIPS; do
   d=$F/$c
   [ -d "$d" ] || { say "$c: no such clip dir"; continue; }
-  if [ -f "$d/blocks_ns/$CFG/block_000/splats/splat.ply" ]; then say "$c: splat.ply exists — skip"; continue; fi
-  say "=== $c: prep (frames + GPU SfM)"
+  say "=== $c: prep (frames + matching + segments + per-segment GPU SfM)"
   if ! "$PY" "$P" "$d" >> /home/paperspace/logs/prep_$c.log 2>&1; then say "=== $c: PREP FAILED (prep_$c.log)"; continue; fi
-  tail -1 /home/paperspace/logs/prep_$c.log
-  SKY=$(python3 -c "import json; print(json.load(open('$d/capture_meta.json'))['sky'])")
-  say "=== $c: recipe start (prompt=$PROMPT eps=$EPS det=$DET sky=$SKY)"
-  t0=$(date +%s)
-  if bash "$R" "$d" --prompt "$PROMPT" --eps "$EPS" --det-dist "$DET" --sky "$SKY" >> /home/paperspace/logs/fleet_$c.log 2>&1; then
-    say "=== $c: DONE in $(( ($(date +%s)-t0)/60 )) min"
-    grep -E "PSNR" /home/paperspace/logs/recipe_${c}_train.log 2>/dev/null | tail -2
-  else
-    say "=== $c: FAILED after $(( ($(date +%s)-t0)/60 )) min — $(grep -E 'GATE FAILED' /home/paperspace/logs/fleet_$c.log | tail -1)"
-  fi
+  grep -E "segment\(s\)|kept|SFM FAILED" /home/paperspace/logs/prep_$c.log | tail -6
+  for sd in $(ls -d "$F/${c}"_s*/ 2>/dev/null); do
+    sd=${sd%/}; sn=$(basename "$sd")
+    [ -f "$sd/capture_meta.json" ] || { say "$sn: no capture_meta (SfM failed) — skip"; continue; }
+    OK=$(python3 -c "import json; m=json.load(open('$sd/capture_meta.json')); print(int(m['ok']))")
+    SKY=$(python3 -c "import json; print(json.load(open('$sd/capture_meta.json'))['sky'])")
+    [ "$OK" = "1" ] || { say "$sn: gate not ok (kept too few frames) — skip"; continue; }
+    if [ -f "$sd/blocks_ns/$CFG/block_000/splats/splat.ply" ]; then say "$sn: splat.ply exists — skip"; continue; fi
+    say "=== $sn: recipe start (prompt=$PROMPT eps=$EPS det=$DET sky=$SKY)"
+    t0=$(date +%s)
+    if bash "$R" "$sd" --prompt "$PROMPT" --eps "$EPS" --det-dist "$DET" --sky "$SKY" >> /home/paperspace/logs/fleet_$sn.log 2>&1; then
+      say "=== $sn: DONE in $(( ($(date +%s)-t0)/60 )) min"
+      grep -E "PSNR" /home/paperspace/logs/recipe_${sn}_train.log 2>/dev/null | tail -2
+    else
+      say "=== $sn: FAILED after $(( ($(date +%s)-t0)/60 )) min — $(grep -E 'GATE FAILED' /home/paperspace/logs/fleet_$sn.log | tail -1)"
+    fi
+  done
   df -h /home/paperspace/data | tail -1
 done
 say "FLEET COMPLETE"
