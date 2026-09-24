@@ -50,6 +50,7 @@ def c2w_of(im):
 def owner_pose(name):
     best = None
     for cname, (c, e, ims) in chunks.items():
+        if a.only_chunk and cname != a.only_chunk: continue   # score at the named chunk's own poses, even when another cell also holds the view
         if name not in ims: continue
         m = c2w_of(ims[name]); inside = abs(m[0, 3] - c[0]) <= e[0] / 2 and abs(m[1, 3] - c[1]) <= e[1] / 2
         if inside: return cname, m
