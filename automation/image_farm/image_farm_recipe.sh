@@ -11,7 +11,8 @@
 set -uo pipefail
 SURVEY=$(realpath "${1:?usage: image_farm_recipe.sh <survey_dir> [--prompt X ...]}")
 shift
-PROMPT="tree"; EPS=0.3; DETDIST=30; SKY=0; ITERS=5000; STRUCTURE_ONLY=0; MODE=${IF_MODE:-rgb}
+PROMPT="tree"; EPS=0.3; DETDIST=30; SKY=0; ITERS=${IF_ITERS:-5000}; STRUCTURE_ONLY=0; MODE=${IF_MODE:-rgb}
+SCHED=${IF_SCHED:-3000}; STOP_SPLIT=${IF_STOP_SPLIT:-15000}   # resolution_schedule / stop_split_at (nerfstudio defaults)
 while [ $# -gt 0 ]; do case $1 in
   --prompt) PROMPT=$2; shift 2;;
   --eps) EPS=$2; shift 2;;
@@ -223,6 +224,7 @@ say "train ($ITERS iters, mode=$MODE, sky=$SKY)"
   --output-dir "$BD/splat_runs_high" --experiment-name "${NAME}_block_000" \
   --pipeline.datamanager.semantic-dir "$SEMDIR" \
   $FEATFLAGS \
+  --pipeline.model.resolution-schedule "$SCHED" --pipeline.model.stop-split-at "$STOP_SPLIT" \
   --pipeline.model.cull-alpha-thresh 0.01 \
   --pipeline.model.cull-scale-thresh 0.3 \
   --pipeline.model.densify-grad-thresh 0.0006 \

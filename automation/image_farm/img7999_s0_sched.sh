@@ -15,7 +15,7 @@ say "train $TAG"
   --output-dir "$BD/splat_runs_$TAG" --experiment-name "IMG_7999_s0_$TAG" \
   --pipeline.datamanager.semantic-dir /home/paperspace/logs/empty_semantic \
   --pipeline.model.enable-high-features False --pipeline.model.high-loss-weight 0.0 \
-  --pipeline.model.resolution-schedule "$SCHED" \
+  --pipeline.model.resolution-schedule "$SCHED" --pipeline.model.stop-split-at "${STOP_SPLIT:-15000}" \
   --pipeline.model.cull-alpha-thresh 0.01 \
   --pipeline.model.cull-scale-thresh 0.3 \
   --pipeline.model.densify-grad-thresh 0.0006 \
