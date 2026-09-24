@@ -121,6 +121,10 @@ if [ "$NEED" = 1 ]; then
   done
   $PY preprocess/make_chunks_depth_scale.py --chunks_dir $CH --depths_dir $CC/rectified/depths >> $L 2>&1 || { say "DEPTH SCALE FAILED"; exit 1; }
   $PY preprocess/copy_file_to_chunks.py --file_path $CC/aligned/sparse/0/test.txt --chunks_path $CH >> $L 2>&1
+  if [ "${H3DGS_LIDAR_SEED:-0}" = 1 ]; then   # seed every chunk from the blocks' LiDAR inits (2026-09-24: +0.4-0.8 dB over the COLMAP seed on Klapmuts)
+    for c in $(cd $CH && ls -d */ | tr -d /); do [ -e $CH/$c/sparse/0/points3D_colmap.ply ] || $PY /home/paperspace/logs/h3dgs_lidar_init.py $SURVEY $PROJ $c --margin 5 --max ${H3DGS_LIDAR_MAX:-2500000} >> $L 2>&1 || say "chunk $c: LiDAR seed FAILED (COLMAP seed kept)"; done
+    say "LiDAR-seeded chunks: $(grep -ac "lidar-init\] wrote" $L)"
+  fi
   cp $CC/aligned/RECIPE $CH/RECIPE; [ -z "$SKIPBA" ] && echo 1 > $CH/CHUNK_BA
   say "chunks in $(( $(date +%s)-t0 ))s: $(for c in $(cd $CH && ls -d */ | tr -d /); do echo -n "$c=$($PY -c "import sys;sys.path.insert(0,'preprocess');from read_write_model import read_images_binary as r;print(len(r('$CH/$c/sparse/0/images.bin')))") "; done)"
 fi
