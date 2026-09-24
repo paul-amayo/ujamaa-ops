@@ -13,7 +13,7 @@ ap = argparse.ArgumentParser(); ap.add_argument("survey"); ap.add_argument("proj
 ap.add_argument("--variant", default="", help="block dir suffix to prefer (e.g. _ref)"); ap.add_argument("--cfg", default="lio_row100")
 ap.add_argument("--margin", type=float, default=5.0); ap.add_argument("--max", type=int, default=2_000_000); ap.add_argument("--keep_colmap", action="store_true")
 a = ap.parse_args(); S, P = Path(a.survey), Path(a.proj); BL = S / "prod/tassili/blocks_ns" / a.cfg
-R_W = np.array(json.load(open(P / "export_meta.json"))["world_rotation_to_zup"])
+R_W = np.array(json.load(open(P / "export_meta.json"))["world_rotation_to_zup"])[:3, :3]   # stored as a 4x4
 cd = P / "camera_calibration/chunks" / a.chunk; c = np.loadtxt(cd / "center.txt"); e = np.loadtxt(cd / "extent.txt")
 lo, hi = c[:2] - e[:2] / 2 - a.margin, c[:2] + e[:2] / 2 + a.margin
 blocks = sorted(x for x in BL.glob("block_[0-9][0-9][0-9]") if x.name[6:].isdigit())
