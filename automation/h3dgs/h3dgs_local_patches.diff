@@ -1,0 +1,108 @@
+diff --git a/arguments/__init__.py b/arguments/__init__.py
+index a4b63cc..a064e51 100644
+--- a/arguments/__init__.py
++++ b/arguments/__init__.py
+@@ -101,6 +101,8 @@ class OptimizationParams(ParamGroup):
+         self.densify_from_iter = 500
+         self.densify_until_iter = 15_000
+         self.densify_grad_threshold = 0.015
++        self.scale_reg = 0.0           # UJAMAA: anisotropy penalty as in nerfstudio's splatfacto (use_scale_regularization): weight * mean(max(maxscale/minscale - max_gauss_ratio, 0))
++        self.max_gauss_ratio = 10.0
+         self.depth_l1_weight_init = 1.0
+         self.depth_l1_weight_final = 0.01
+         super().__init__(parser, "Optimization Parameters")
+diff --git a/gaussian_renderer/__init__.py b/gaussian_renderer/__init__.py
+index ecc9412..02ffbfd 100644
+--- a/gaussian_renderer/__init__.py
++++ b/gaussian_renderer/__init__.py
+@@ -220,7 +220,7 @@ def render_post(
+             if pc.skybox_points == 0:
+                 skybox_inds = torch.Tensor([]).long()
+             else:
+-                skybox_inds = torch.range(pc._xyz.size(0) - pc.skybox_points, pc._xyz.size(0)-1, device="cuda").long()
++                skybox_inds = torch.arange(pc._xyz.size(0) - pc.skybox_points, pc._xyz.size(0), device="cuda", dtype=torch.long)
+ 
+             means3D = torch.cat((means3D_base, means3D[skybox_inds])).contiguous()  
+             shs = torch.cat((shs_base, shs[skybox_inds])).contiguous() 
+diff --git a/preprocess/database.py b/preprocess/database.py
+index 34efa14..9a2cd44 100644
+--- a/preprocess/database.py
++++ b/preprocess/database.py
+@@ -130,14 +130,14 @@ def pair_id_to_image_ids(pair_id):
+ 
+ def array_to_blob(array):
+     if IS_PYTHON3:
+-        return array.tostring()
++        return array.tobytes()
+     else:
+         return np.getbuffer(array)
+ 
+ 
+ def blob_to_array(blob, dtype, shape=(-1,)):
+     if IS_PYTHON3:
+-        return np.fromstring(blob, dtype=dtype).reshape(*shape)
++        return np.frombuffer(blob, dtype=dtype).reshape(*shape)
+     else:
+         return np.frombuffer(blob, dtype=dtype).reshape(*shape)
+ 
+@@ -198,8 +198,8 @@ class COLMAPDatabase(sqlite3.Connection):
+         self,
+         name,
+         camera_id,
+-        prior_q=np.full(4, np.NaN),
+-        prior_t=np.full(3, np.NaN),
++        prior_q=np.full(4, np.nan),
++        prior_t=np.full(3, np.nan),
+         image_id=None,
+     ):
+         cursor = self.execute(
+diff --git a/preprocess/make_depth_scale.py b/preprocess/make_depth_scale.py
+index 64df5ce..60205d7 100644
+--- a/preprocess/make_depth_scale.py
++++ b/preprocess/make_depth_scale.py
+@@ -59,7 +59,7 @@ def get_scales(key, cameras, images, points3d_ordered, args):
+     if valid.sum() > 10 and (invcolmapdepth.max() - invcolmapdepth.min()) > 1e-3:
+         maps = maps[valid, :]
+         invcolmapdepth = invcolmapdepth[valid]
+-        invmonodepth = cv2.remap(invmonodepthmap, maps[..., 0], maps[..., 1], interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)[..., 0]
++        invmonodepth = cv2.remap(invmonodepthmap, maps[..., 0].reshape(-1, 1), maps[..., 1].reshape(-1, 1), interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)[:, 0]
+         
+         ## Median / dev
+         t_colmap = np.median(invcolmapdepth)
+diff --git a/preprocess/prepare_chunk.py b/preprocess/prepare_chunk.py
+index a19f820..2383c11 100644
+--- a/preprocess/prepare_chunk.py
++++ b/preprocess/prepare_chunk.py
+@@ -112,7 +112,8 @@ if __name__ == '__main__':
+     if args.skip_bundle_adjustment:
+         subprocess.run([colmap_exe, "point_triangulator",
+             "--Mapper.ba_global_max_num_iterations", "5",
+-            "--Mapper.ba_global_max_refinements", "1", 
++            "--Mapper.ba_global_max_refinements", "1",
++            "--Mapper.fix_existing_frames", "1",   # UJAMAA: poses come from one global BA; chunks must not move them
+             "--database_path", f"{bundle_adj_chunk}/database.db",
+             "--image_path", f"{bundle_adj_chunk}/images",
+             "--input_path", f"{bundle_adj_chunk}/sparse/o",
+diff --git a/submodules/gaussianhierarchy b/submodules/gaussianhierarchy
+--- a/submodules/gaussianhierarchy
++++ b/submodules/gaussianhierarchy
+@@ -1 +1 @@
+-Subproject commit 677c8553dc64dfd62c272eca94a291a277733113
++Subproject commit 677c8553dc64dfd62c272eca94a291a277733113-dirty
+diff --git a/train_single.py b/train_single.py
+index 0a3fa71..94a7c28 100644
+--- a/train_single.py
++++ b/train_single.py
+@@ -105,8 +105,11 @@ def training(dataset, opt, pipe, saving_iterations, checkpoint_iterations, check
+                 
+                 Ll1 = l1_loss(image, gt_image)
+                 Lssim = (1.0 - ssim(image, gt_image))
+-                photo_loss = (1.0 - opt.lambda_dssim) * Ll1 + opt.lambda_dssim * Lssim 
++                photo_loss = (1.0 - opt.lambda_dssim) * Ll1 + opt.lambda_dssim * Lssim
+                 loss = photo_loss.clone()
++                if opt.scale_reg > 0:   # UJAMAA: penalise needle gaussians (the streaks along the rows); same form as splatfacto's scale regularisation
++                    sc = gaussians.get_scaling
++                    loss += opt.scale_reg * torch.clamp(sc.amax(dim=1) / sc.amin(dim=1).clamp_min(1e-8) - opt.max_gauss_ratio, min=0.0).mean()
+                 Ll1depth_pure = 0.0
+                 if depth_l1_weight(iteration) > 0 and viewpoint_cam.depth_reliable:
+                     mono_invdepth = viewpoint_cam.invdepthmap.cuda()
