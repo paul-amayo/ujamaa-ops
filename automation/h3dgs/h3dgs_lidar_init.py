@@ -33,7 +33,14 @@ print(f"[lidar-init] chunk {a.chunk}: {len(xyz)} LiDAR points inside the cell+{a
 if len(xyz) > a.max:
     sel = np.random.default_rng(0).choice(len(xyz), a.max, replace=False); xyz, rgb = xyz[sel], rgb[sel]; print(f"[lidar-init] subsampled to {a.max}")
 ply = cd / "sparse/0/points3D.ply"; bak = cd / "sparse/0/points3D_colmap.ply"
-if not bak.exists(): shutil.copy(ply, bak)
+if not bak.exists():
+    if ply.exists(): shutil.copy(ply, bak)
+    else:   # H3DGS only writes points3D.ply from points3D.bin at first training; convert the COLMAP seed here so the backup exists
+        import sys; sys.path.insert(0, "/home/paperspace/code/hierarchical-3d-gaussians/preprocess"); from read_write_model import read_points3D_binary
+        pc = read_points3D_binary(str(cd / "sparse/0/points3D.bin")); cx = np.array([q.xyz for q in pc.values()]); cc = np.array([q.rgb for q in pc.values()]).astype(np.uint8)
+        arr0 = np.empty(len(cx), dtype=[("x", "f4"), ("y", "f4"), ("z", "f4"), ("nx", "f4"), ("ny", "f4"), ("nz", "f4"), ("red", "u1"), ("green", "u1"), ("blue", "u1")])
+        arr0["x"], arr0["y"], arr0["z"] = cx.T; arr0["nx"] = arr0["ny"] = arr0["nz"] = 0; arr0["red"], arr0["green"], arr0["blue"] = cc.T
+        PlyData([PlyElement.describe(arr0, "vertex")]).write(str(bak))
 if a.keep_colmap:
     v = PlyData.read(str(bak))["vertex"]; cx = np.stack([v["x"], v["y"], v["z"]], 1); cc = np.stack([v[k] for k in ("red", "green", "blue")], 1).astype(np.uint8)
     xyz, rgb = np.concatenate([xyz, cx]), np.concatenate([rgb, cc]); print(f"[lidar-init] + {len(cx)} COLMAP points")
