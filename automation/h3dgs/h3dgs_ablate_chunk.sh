@@ -17,7 +17,7 @@ python -u train_single.py --port $((6100 + RANDOM % 900)) --save_iterations -1 -
   -s $CH/$C --model_path $T --bounds_file $CH/$C $EXTRA > $T/train.log 2>&1
 say "train rc=$? in $(( $(date +%s)-t0 ))s"
 PLY=$(ls -d $T/point_cloud/iteration_* 2>/dev/null | sort -t_ -k2 -n | tail -1)/point_cloud.ply   # last saved iteration (variants may train longer than 30k)
-[ -e "$PLY" ] || { say "$TAG: no point cloud ($(grep -aE 'Error|error' $T/train.log | tail -1 | cut -c1-120))"; exit 1; }
+[ -e "$PLY" ] || [ -e "${PLY%.ply}.bin" ] || { say "$TAG: no point cloud ($(grep -aE 'Error|error' $T/train.log | tail -1 | cut -c1-120))"; exit 1; }
 submodules/gaussianhierarchy/build/GaussianHierarchyCreator $PLY $CH/$C $T $SC >> $T/train.log 2>&1
 [ -e $T/hierarchy.hier ] || { say "$TAG: no hierarchy"; exit 1; }
 EX=""; case "$EXTRA" in *train_test_exp*) EX="--exposure_json $T/exposure.json --right_half";; esac

@@ -8,7 +8,9 @@ from pathlib import Path
 import matplotlib; matplotlib.use("Agg"); import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 sys.path.insert(0, "/home/paperspace/code/hierarchical-3d-gaussians/preprocess"); from read_write_model import read_images_binary, qvec2rotmat
-S = Path("/home/paperspace/data/klapmuts/apr_2026_zed"); P = S / "experimental/h3dgs/camera_calibration"; BL = S / "prod/tassili/blocks_ns/lio_row100"
+import sys as _s
+S = Path(_s.argv[1] if len(_s.argv) > 1 else "/home/paperspace/data/klapmuts/apr_2026_zed"); P = S / (_s.argv[2] if len(_s.argv) > 2 else "experimental/h3dgs") / "camera_calibration"; BL = S / "prod/tassili/blocks_ns/lio_row100"
+OUT = _s.argv[3] if len(_s.argv) > 3 else "/home/paperspace/logs/klapmuts_blocks_vs_chunks.png"
 cen = lambda ims: {im.name: -qvec2rotmat(im.qvec).T @ im.tvec for im in ims.values()}
 prior = cen(read_images_binary(str(P / "prior/sparse/0/images.bin")))
 order, block_of = [], {}
@@ -43,5 +45,5 @@ for a, n in zip([axs[0, 0], axs[0, 1], axs[1, 0], axs[1, 1]], ["0_1", "1_1", "0_
         m = ch["trained"] & (B == b); a.text(*X[m].mean(0)[:2], f"{b:02d}", fontsize=7, ha="center", va="center", color="k", bbox=dict(fc="w", ec="none", alpha=.7, pad=0.4))
     a.set_aspect("equal"); a.grid(alpha=.25); a.set_title(f"chunk {n}: {int(ch['inside'].sum())} keyframes inside, {int(ch['trained'].sum())} used for training, from {len(set(B[ch['trained']]))} blocks")
     a.legend(loc="lower right", fontsize=8)
-fig.suptitle("Klapmuts apr — which blocks feed which 30 m chunk (block ids at each block's centre; colours = blocks)", fontsize=13)
-fig.tight_layout(); fig.savefig("/home/paperspace/logs/klapmuts_blocks_vs_chunks.png", dpi=100); print("wrote klapmuts_blocks_vs_chunks.png")
+fig.suptitle(f"{S.name} — which blocks feed which 30 m chunk (block ids at each block's centre; colours = blocks)", fontsize=13)
+fig.tight_layout(); fig.savefig(OUT, dpi=100); print("wrote", OUT)

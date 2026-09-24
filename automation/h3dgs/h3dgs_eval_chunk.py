@@ -29,6 +29,7 @@ test = [l.strip() for l in open(CC / "aligned/sparse/0/test.txt") if l.strip()]
 if a.train_sample:
     tset = set(test); allnames = sorted(im.name for im in read_images_binary(str(CC / "aligned/sparse/0/images.bin")).values() if im.name not in tset)
     test = allnames[::max(1, len(allnames) // a.train_sample)][:a.train_sample]
+if os.environ.get("H3DGS_EVAL_NAMES"): test = os.environ["H3DGS_EVAL_NAMES"].split(",")   # score/save exactly these views (training or test)
 EXPO = json.load(open(a.exposure_json)) if a.exposure_json else {}; N_EXPO = 0
 def apply_expo(im, name):
     """H3DGS/3DGS trained exposure: 3x4 affine on RGB (gaussian_renderer.render with use_trained_exp)."""
