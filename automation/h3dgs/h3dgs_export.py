@@ -74,6 +74,10 @@ Cc = C - C.mean(0); evals, evecs = np.linalg.eigh(Cc.T @ Cc)
 n = evecs[:, 0]; n = n if U.mean(0) @ n > 0 else -n
 x_axis = evecs[:, 2] - (evecs[:, 2] @ n) * n; x_axis /= np.linalg.norm(x_axis); y_axis = np.cross(n, x_axis)
 R = np.stack([x_axis, y_axis, n])            # rows: new axes in old coords -> p' = R p
+if os.environ.get("H3DGS_WORLD_ROT_FROM"):   # reuse another project's frame: the in-plane axes are eigenvector signs (arbitrary), and a scaffold or chunk grid can only be shared when the frame is identical
+    R_ref = np.array(json.load(open(os.environ["H3DGS_WORLD_ROT_FROM"]))["world_rotation_to_zup"])[:3, :3]
+    assert R_ref[2] @ n > 0.99, f"reference frame's up {R_ref[2].round(3)} disagrees with this survey's up {n.round(3)}"
+    print(f"[export] world rotation taken from {os.environ['H3DGS_WORLD_ROT_FROM']} (own estimate differed by {np.degrees(np.arccos(np.clip((np.trace(R_ref @ R.T) - 1) / 2, -1, 1))):.2f} deg)"); R = R_ref
 R_W = np.eye(4); R_W[:3, :3] = R
 print(f"world up (plane normal, signed by camera up) = {n.round(3)}; mean camera-up . up = {(U @ n).mean():.3f}; det R = {np.linalg.det(R):.3f}")
 assert (U @ n).mean() > 0.9 and abs(np.linalg.det(R) - 1) < 1e-6
