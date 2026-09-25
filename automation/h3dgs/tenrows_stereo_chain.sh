@@ -31,10 +31,11 @@ if [ "$(ls $CC/rectified/depths | wc -l)" -lt "$(ls $CC/rectified/images | wc -l
   t0=$(date +%s); H3DGS_PROJ=$X ${H3DGS_DEPTH_PY:-/home/paperspace/envs/hfeval_ft/bin/python} /home/paperspace/logs/h3dgs_depth_05.py > /home/paperspace/logs/tenrows_stereo_depth.log 2>&1 || { say "DEPTH FAILED"; exit 1; }
   say "right depths in $(( $(date +%s)-t0 ))s ($(ls $CC/rectified/depths | wc -l) total)"
 fi
-# 3. train (survey recipe) -> hierarchy -> post-opt
+# 3. train (survey recipe) -> hierarchy -> post-opt; never start a trainer into a full GPU (the goal survey shares it)
+gpu_wait(){ until [ "$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1)" -ge "$1" ]; do sleep 30; done; }
 cd $REPO || exit 1
 if [ ! -e $T/hierarchy.hier_opt ] && [ -z "$(ls -d $T/point_cloud/iteration_*/point_cloud.ply 2>/dev/null)" ]; then
-  t0=$(date +%s)
+  t0=$(date +%s); gpu_wait 14000
   python -u train_single.py --port $((6100 + RANDOM % 900)) --save_iterations -1 -i ../../rectified/images -d ../../rectified/depths --scaffold_file $SC --skybox_locked \
     --exposure_lr_init 0.0 --eval -s $CH --model_path $T --bounds_file $CH ${H3DGS_TRAIN_EXTRA:-} >> $FT 2>&1
   say "train chunk 1_1 stereo rc=$? wall=$(( $(date +%s)-t0 ))s"
@@ -46,7 +47,7 @@ if [ ! -e $T/hierarchy.hier ] && [ ! -e $T/hierarchy.hier_opt ]; then
   [ -e $T/hierarchy.hier ] || { say "NO HIERARCHY"; exit 1; }
 fi
 if [ ! -e $T/hierarchy.hier_opt ]; then
-  t0=$(date +%s)
+  t0=$(date +%s); gpu_wait 20000
   python -u train_post.py --port $((6100 + RANDOM % 900)) --iterations 15000 --feature_lr 0.0005 --opacity_lr 0.01 --scaling_lr 0.001 --save_iterations -1 \
     -i ../../rectified/images --scaffold_file $SC --exposure_lr_init 0.0 --eval -s $CH --model_path $T --hierarchy $T/hierarchy.hier ${H3DGS_POST_EXTRA:-} >> $FT 2>&1
   say "post-opt rc=$? wall=$(( $(date +%s)-t0 ))s $( [ -e $T/hierarchy.hier_opt ] && echo OK || echo 'NO hier_opt')"
