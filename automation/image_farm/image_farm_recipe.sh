@@ -258,6 +258,16 @@ CFG_YML=$(ls "$BD"/splat_runs_high/*/*/*/config.yml | tail -1)
   --output-dir "$BD/splats" ) \
   > "$LOGS/recipe_${NAME}_export.log" 2>&1 || gate "export"
 [ -f "$BD/splats/splat.ply" ] || gate "no splat.ply"
+# keep only the model weights in the checkpoint (the render service and ns-eval load `pipeline` only; the Adam state
+# is 2x the weights and only serves resuming) — Paul's reclaim decision 2026-09-25
+( cd "$NS" && env -u LD_LIBRARY_PATH -u LD_PRELOAD pixi run python - "$BD" << 'PY'
+import sys, os, glob, torch
+for p in glob.glob(os.path.join(sys.argv[1], "splat_runs_high/*/*/*/nerfstudio_models/*.ckpt")):
+    ck = torch.load(p, map_location="cpu", weights_only=False)
+    if set(ck) <= {"step", "pipeline"}: continue
+    torch.save({"step": ck["step"], "pipeline": ck["pipeline"]}, p + ".tmp"); os.replace(p + ".tmp", p); print("stripped", os.path.basename(p))
+PY
+) 2>/dev/null | grep stripped
 python3 - "$SURVEY" "$CFG" << 'PY' || gate "manifests"
 import json, sys
 import numpy as np
