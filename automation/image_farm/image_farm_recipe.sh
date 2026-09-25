@@ -13,6 +13,7 @@ SURVEY=$(realpath "${1:?usage: image_farm_recipe.sh <survey_dir> [--prompt X ...
 shift
 PROMPT="tree"; EPS=0.3; DETDIST=30; SKY=0; ITERS=${IF_ITERS:-5000}; STRUCTURE_ONLY=0; MODE=${IF_MODE:-rgb}
 SCHED=${IF_SCHED:-3000}; STOP_SPLIT=${IF_STOP_SPLIT:-15000}   # resolution_schedule / stop_split_at (nerfstudio defaults)
+EVAL_INTERVAL=${IF_EVAL_INTERVAL:-10}   # held-out split: every N-th frame (HiGH's default train_split_fraction 0.99 leaves 0-1 eval images)
 while [ $# -gt 0 ]; do case $1 in
   --prompt) PROMPT=$2; shift 2;;
   --eps) EPS=$2; shift 2;;
@@ -236,7 +237,7 @@ say "train ($ITERS iters, mode=$MODE, sky=$SKY)"
   --pipeline.model.background-color black \
   --pipeline.model.report-masked-metrics True \
   $SKYFLAGS \
-  nerfstudio-data --data "$BD" ) \
+  nerfstudio-data --data "$BD" --eval-mode interval --eval-interval "$EVAL_INTERVAL" ) \
   > "$LOGS/recipe_${NAME}_train.log" 2>&1 || gate "train"
 if [ "$MODE" = "high" ]; then
   grep -q "HyperEmbedder ckpt: $EMB" "$LOGS/recipe_${NAME}_train.log" \
