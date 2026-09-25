@@ -5,9 +5,15 @@ photo | service render pairs. Run with the nerf_new pixi python.
 import asyncio, json, struct, sys, io, math, urllib.request, numpy as np
 from pathlib import Path
 from PIL import Image
-import websockets
+import websockets, cv2
 SEG = Path(sys.argv[1]); IDX = [int(x) for x in sys.argv[2:]] or [40, 95, 150]
 t = json.load(open(SEG / "transforms.json")); fovy = 2 * math.atan(t["h"] / (2 * t["fl_y"])); W, H = t["w"], t["h"]
+# the model was trained on nerfstudio-UNDISTORTED images (getOptimalNewCameraMatrix alpha=0 + ROI crop): compare against those
+K0 = np.array([[t["fl_x"], 0, t["cx"] - 0.5], [0, t["fl_y"], t["cy"] - 0.5], [0, 0, 1.0]]); dist = np.array([t.get(k, 0.0) for k in ("k1", "k2", "p1", "p2")] + [0.0] * 4)
+newK, roi = cv2.getOptimalNewCameraMatrix(K0, dist, (W, H), 0); rx, ry, rw, rh = roi
+def undistort(im):
+    u = cv2.undistort(np.asarray(im), K0, dist, None, newK); return Image.fromarray(u[ry:ry + rh, rx:rx + rw])
+W, H = rw, rh; print(f"trained (undistorted) camera size {W}x{H}, fx {newK[0,0]:.1f} fy {newK[1,1]:.1f}")
 traj = {f["image_name"]: f for f in json.load(urllib.request.urlopen("http://127.0.0.1:8001/scene/trajectory?stride=1"))["frames"]}
 async def fetch(fr):
     async with websockets.connect("ws://127.0.0.1:8004/ws", max_size=None) as ws:
@@ -21,9 +27,9 @@ def psnr(a, b):
 tiles = []
 for i in IDX:
     name = f"image_{i}.png"; fr = traj[name]; photo = Image.open(SEG / "images" / name).convert("RGB")
-    ren, rms = asyncio.run(fetch(fr)); held = (i % 10 == 0)
-    print(f"{name}: {'HELD-OUT' if held else 'training'} view, service render {rms:.0f} ms, PSNR vs photo {psnr(ren, photo):.2f} dB")
-    tiles.append(np.concatenate([np.asarray(photo), np.full((H, 6, 3), 255, np.uint8), np.asarray(ren.resize((W, H)))], 1))
+    ren, rms = asyncio.run(fetch(fr)); held = (i % 10 == 0); und = undistort(photo)
+    print(f"{name}: {'HELD-OUT' if held else 'training'} view, service render {rms:.0f} ms, PSNR vs undistorted photo {psnr(ren.resize((W, H)), und):.2f} dB (vs raw photo {psnr(ren.resize(photo.size), photo):.2f})")
+    tiles.append(np.concatenate([np.asarray(und), np.full((H, 6, 3), 255, np.uint8), np.asarray(ren.resize((W, H)))], 1))
 sheet = np.concatenate([np.concatenate([tl, np.full((6, tl.shape[1], 3), 255, np.uint8)], 0) for tl in tiles], 0)
 out = f"/home/paperspace/logs/{SEG.name}_render_fidelity.jpg"; Image.fromarray(sheet).resize((sheet.shape[1] // 2, sheet.shape[0] // 2)).save(out, quality=88); print("wrote", out, "(photo | service render, half size)")
 EOF_MARK = None
