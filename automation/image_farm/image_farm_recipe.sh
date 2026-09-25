@@ -61,9 +61,11 @@ print(f"working set: {len(picked)} frames from {len(frames)} originals")
 PY
 fi
 N=$(ls "$SURVEY/images" | wc -l)
+FIRST=$(ls "$SURVEY/images" | sort -t_ -k2 -n | head -1)   # the track gate may have dropped image_0.png
 read -r IW IH <<< "$(python3 -c "
 from PIL import Image
-im = Image.open('$SURVEY/images/image_0.png'); print(im.size[0], im.size[1])")"
+im = Image.open('$SURVEY/images/$FIRST'); print(im.size[0], im.size[1])")"
+[ -n "$IW" ] && [ -n "$IH" ] || gate "could not read frame dimensions from images/$FIRST"
 say "working set: $N frames @ ${IW}x${IH} (mode=$MODE)"
 
 # ---- 1. SfM: OPENCV + exhaustive (skipped when image_farm_prep.py already wrote sparse/0) ----
