@@ -134,7 +134,11 @@ if [ ! -d "$SURVEY/depth_png" ] || [ -z "$(ls "$SURVEY/depth_png" 2>/dev/null | 
   say "DA3 windows (depth for clustering; fused ply kept for the record only)"
   ( cd /home/paperspace/code/sam3 && "$SAM3_PY" "$IPL/da3_windows_fuse.py" \
       --survey "$SURVEY" --write-depth --depth-size "${IW}x${IH}" ) \
-    > "$LOGS/recipe_${NAME}_da3.log" 2>&1 || gate "DA3 windows"
+    > "$LOGS/recipe_${NAME}_da3.log" 2>&1 || {
+      # DA3 only feeds the clustering/marker chain; RGB mode does not need it (IMG_7970_s0: evo Umeyama
+      # "Degenerate covariance rank" when a window of frames barely translates)
+      say "DA3 WINDOWS FAILED: $(tail -1 "$LOGS/recipe_${NAME}_da3.log" | cut -c1-120)"
+      [ "$MODE" = "high" ] && gate "DA3 windows (required for mode=high)"; }
 else
   say "depth_png exists — skip DA3"
 fi
