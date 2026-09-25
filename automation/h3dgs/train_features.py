@@ -101,6 +101,7 @@ def main():
     parser.add_argument("--iters", type=int, default=2000); parser.add_argument("--lr", type=float, default=5e-3)
     parser.add_argument("--feat_dim", type=int, default=32); parser.add_argument("--check", action="store_true")
     parser.add_argument("--out", default="features.bin"); parser.add_argument("--quiet", action="store_true")
+    parser.add_argument("--eval_views", type=int, default=0, help="load <model_path>/<out>, render this many HELD-OUT views' feature maps, score them against the supervision (geodesic on labelled px) and write feat_eval/<name>.npz + PCA PNGs")
     args = parser.parse_args(sys.argv[1:]); safe_state(args.quiet)
     dataset, opt, pipe = lp.extract(args), op.extract(args), pp.extract(args)
     gaussians = GaussianModel(dataset.sh_degree); gaussians.active_sh_degree = dataset.sh_degree
@@ -123,6 +124,33 @@ def main():
             print(f"[check] {cam.image_name}: gsplat vs H3DGS rasterizer {(-10*math.log10(max(mse,1e-12))):.1f} dB agreement; gsplat vs photo {psnr_gt:.2f} dB; {ri.numel()} nodes expanded", flush=True)
         return
     lut, index, lut_path, nb = load_lut_and_index(args.sem_blocks, args.lut)
+    if args.eval_views:
+        F = torch.from_numpy(np.fromfile(os.path.join(dataset.model_path, args.out), dtype=np.float32).reshape(N, args.feat_dim)).cuda()
+        ed = os.path.join(dataset.model_path, "feat_eval"); os.makedirs(ed, exist_ok=True); cache = {}; scores = []
+        from PIL import Image
+        test_cams = scene.getTestCameras(); nT = len(test_cams); step = max(1, nT // args.eval_views)
+        for k in range(0, nT, step)[: args.eval_views]:
+            cam = test_cams[k]
+            for a in ("world_view_transform", "projection_matrix", "full_proj_transform", "camera_center"): setattr(cam, a, getattr(cam, a).cuda())
+            name = cam.image_name if cam.image_name in index else cam.image_name + ".png"; viewmat, Ks, W, H = gsplat_cam(cam, K)
+            with torch.no_grad():
+                means, scales, rots, opac, ri, pi, w = expand_view(gaussians, cam, 0.02, bufs); f = w * F[ri] + (1 - w) * F[pi]
+                out, alpha, _ = rasterization(means=means, quats=rots, scales=scales, opacities=opac, colors=f, viewmats=viewmat, Ks=Ks, width=W, height=H, sh_degree=None, packed=False, near_plane=0.01, far_plane=1e10, render_mode="RGB", rasterize_mode="classic")
+                pred = out[0]; tgt = target_for(name, index, lut, W, H, cache)
+                rec = {"name": name, "nodes": int(ri.numel())}
+                if tgt is not None:
+                    lab = tgt.abs().sum(-1) > 1e-6; d = geodesic(pred[lab], tgt[lab]); rec.update(geodesic_mean=float(d.mean()), labelled=int(lab.sum()), norm_pred_labelled=float(pred[lab].norm(dim=-1).mean()), norm_target=float(tgt[lab].norm(dim=-1).mean()))
+                scores.append(rec); print(f"[feat-eval] {rec}", flush=True)
+                np.savez_compressed(os.path.join(ed, name.replace(".png", "") + ".npz"), features=pred.half().cpu().numpy(), alpha=alpha[0, ..., 0].half().cpu().numpy())
+                # PCA of the 32-d map -> RGB, fitted on pixels the model covers (alpha > 0.5), beside the semantic PNG
+                X = pred.reshape(-1, args.feat_dim); m = (alpha[0, ..., 0].reshape(-1) > 0.5)
+                mu = X[m].mean(0); _, _, V = torch.pca_lowrank(X[m] - mu, q=3); P = ((X - mu) @ V[:, :3]); lo, hi = P[m].quantile(0.02, 0), P[m].quantile(0.98, 0)
+                rgb = ((P - lo) / (hi - lo + 1e-6)).clamp(0, 1).reshape(H, W, 3); rgb[~m.reshape(H, W)] = 0
+                sem = np.asarray(Image.open(index[name][0]).convert("RGB").resize((W, H), Image.NEAREST)) if name in index else np.zeros((H, W, 3), np.uint8)
+                Image.fromarray(np.concatenate([(rgb.cpu().numpy() * 255).astype(np.uint8), sem], 1)).save(os.path.join(ed, name.replace(".png", "") + "_pca_vs_sem.png"))
+        g = [s["geodesic_mean"] for s in scores if "geodesic_mean" in s]
+        print(f"[feat-eval] {len(scores)} held-out views: geodesic-to-target mean {np.mean(g):.3f} (min {np.min(g):.3f} max {np.max(g):.3f}) over {sum(s.get('labelled', 0) for s in scores)} labelled px; outputs in {ed}", flush=True)
+        json.dump(scores, open(os.path.join(ed, "scores.json"), "w"), indent=1); return
     covered = sum(1 for c in train_cams if c.image_name + ".png" in index or c.image_name in index)
     print(f"[feat] supervision: {len(index)} semantic PNGs over {nb} blocks, LUT {lut_path}; {covered}/{len(train_cams)} train views covered", flush=True)
     feats = torch.nn.Parameter(torch.zeros(N, args.feat_dim, device="cuda")); optim = torch.optim.Adam([feats], lr=args.lr, eps=1e-15)
