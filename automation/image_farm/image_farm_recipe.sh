@@ -105,6 +105,8 @@ mkdir -p "$SURVEY/prod/monos" "$SURVEY/prod/scratch_sam3"
 for f in transform_lio.monolithic image_left.monolithic image_left.monolithic.index; do
   [ -f "$SURVEY/$f" ] && mv "$SURVEY/$f" "$SURVEY/prod/monos/"
 done
+# RGB mode never reads the image monolithic (only the HiGH marker/semantic chain does): drop the 0.8 GB it just wrote
+[ "$MODE" = "rgb" ] && rm -f "$SURVEY/prod/monos/image_left.monolithic" "$SURVEY/prod/monos/image_left.monolithic.index"
 python3 - "$SURVEY" << 'PY' || gate "scratch_sam3 staging"
 import shutil, sys
 from pathlib import Path
