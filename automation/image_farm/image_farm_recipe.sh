@@ -145,9 +145,13 @@ fi
 ( cd "$NS" && env -u LD_LIBRARY_PATH -u LD_PRELOAD pixi run python \
   "$IPL/cluster_tree_instances_depth.py" \
   --data-dir "$SURVEY" --max-det-dist-m "$DETDIST" --eps-m "$EPS" --min-samples 3 ) \
-  > "$LOGS/recipe_${NAME}_cluster.log" 2>&1 || gate "clustering"
+  > "$LOGS/recipe_${NAME}_cluster.log" 2>&1 && CLUSTER_OK=1 || CLUSTER_OK=0
 grep -E "total_detections|global IDs" "$LOGS/recipe_${NAME}_cluster.log" | tail -2
-if python3 "$IPL/build_hierarchy_from_clusters.py" "$SURVEY" \
+if [ "$CLUSTER_OK" != "1" ]; then
+  say "CLUSTERING WEAK (prompt='$PROMPT'): $(tail -1 "$LOGS/recipe_${NAME}_cluster.log")"
+  [ "$MODE" = "high" ] && gate "clustering (required for mode=high)"
+fi
+if [ "$CLUSTER_OK" = "1" ] && python3 "$IPL/build_hierarchy_from_clusters.py" "$SURVEY" \
   --row-eps 0.6 --min-members 10 --max-bbox-diag 1.0 \
   > "$LOGS/recipe_${NAME}_hier.log" 2>&1; then
   tail -1 "$LOGS/recipe_${NAME}_hier.log"
