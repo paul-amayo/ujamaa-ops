@@ -91,7 +91,14 @@ for si, (s, e) in enumerate(segs):
         if dropped:
             DD = SD / "images_dropped"; DD.mkdir(exist_ok=True)
             for n in dropped: shutil.move(str(SIM / n), str(DD / n))
-            ims2 = {i: im for i, im in ims.items() if im.name in keep}
+            # renumber the kept frames AND their sparse names sequentially, so the recipe's ingest rename is an identity
+            # on every run (a gap in the names made a second recipe run shift poses onto the wrong files: IMG_7961_s1, 09-25)
+            kept_sorted = sorted(keep, key=frame_no); newname = {n: f"image_{k}.png" for k, n in enumerate(kept_sorted)}
+            for n in kept_sorted:
+                if newname[n] != n: os.rename(SIM / n, SIM / (newname[n] + ".tmp"))
+            for n in kept_sorted:
+                if newname[n] != n: os.rename(SIM / (newname[n] + ".tmp"), SIM / newname[n])
+            ims2 = {i: im._replace(name=newname[im.name]) for i, im in ims.items() if im.name in keep}
             gone = {i for i, im in ims.items() if im.name not in keep}
             for pid, pt in list(pts.items()):
                 m = ~np.isin(pt.image_ids, list(gone))
