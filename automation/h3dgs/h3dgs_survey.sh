@@ -5,7 +5,7 @@
 #   -> merge of the completed chunks -> held-out render (tau 0/3/6) -> per-chunk held-out PSNR summary.
 #   usage: h3dgs_survey.sh <survey_root> <proj_dir>      e.g. .../klapmuts/apr_2026_zed  .../klapmuts/apr_2026_zed/experimental/h3dgs
 SURVEY=${1:?survey root}; PROJ=${2:?project dir}
-SV=$(basename $SURVEY); L=/home/paperspace/logs/h3dgs_${SV}.log; say(){ echo "[$(date '+%m-%d %H:%M:%S')] $*" | tee -a $L; }
+SV=${H3DGS_TAG:-$(basename $SURVEY)}; L=/home/paperspace/logs/h3dgs_${SV}.log; say(){ echo "[$(date '+%m-%d %H:%M:%S')] $*" | tee -a $L; }
 REPO=/home/paperspace/code/hierarchical-3d-gaussians; CC=$PROJ/camera_calibration; IMGS=$CC/rectified/images
 OUT=$PROJ/output; CH=$CC/chunks; SC=$OUT/scaffold/point_cloud/iteration_30000; FT=/home/paperspace/logs/h3dgs_${SV}_train.log
 export PATH=/home/paperspace/miniconda3/envs/h3dgs/bin:/home/paperspace/logs/h3dgs_bin:$PATH
@@ -122,7 +122,7 @@ if [ "$NEED" = 1 ]; then
   $PY preprocess/make_chunks_depth_scale.py --chunks_dir $CH --depths_dir $CC/rectified/depths >> $L 2>&1 || { say "DEPTH SCALE FAILED"; exit 1; }
   $PY preprocess/copy_file_to_chunks.py --file_path $CC/aligned/sparse/0/test.txt --chunks_path $CH >> $L 2>&1
   if [ "${H3DGS_LIDAR_SEED:-0}" = 1 ]; then   # seed every chunk from the blocks' LiDAR inits (2026-09-24: +0.4-0.8 dB over the COLMAP seed on Klapmuts)
-    for c in $(cd $CH && ls -d */ | tr -d /); do [ -e $CH/$c/sparse/0/points3D_colmap.ply ] || $PY /home/paperspace/logs/h3dgs_lidar_init.py $SURVEY $PROJ $c --margin 5 --max ${H3DGS_LIDAR_MAX:-2500000} >> $L 2>&1 || say "chunk $c: LiDAR seed FAILED (COLMAP seed kept)"; done
+    for c in $(cd $CH && ls -d */ | tr -d /); do [ -e $CH/$c/sparse/0/points3D_colmap.ply ] || $PY /home/paperspace/logs/h3dgs_lidar_init.py $SURVEY $PROJ $c ${H3DGS_LIDAR_VARIANT:+--variant $H3DGS_LIDAR_VARIANT} --margin 5 --max ${H3DGS_LIDAR_MAX:-2500000} >> $L 2>&1 || say "chunk $c: LiDAR seed FAILED (COLMAP seed kept)"; done
     say "LiDAR-seeded chunks: $(grep -ac "lidar-init\] wrote" $L)"
   fi
   cp $CC/aligned/RECIPE $CH/RECIPE; [ -z "$SKIPBA" ] && echo 1 > $CH/CHUNK_BA
