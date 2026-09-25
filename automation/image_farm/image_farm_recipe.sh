@@ -110,14 +110,15 @@ done
 # RGB mode never reads the image monolithic (only the HiGH marker/semantic chain does): drop the 0.8 GB it just wrote
 [ "$MODE" = "rgb" ] && rm -f "$SURVEY/prod/monos/image_left.monolithic" "$SURVEY/prod/monos/image_left.monolithic.index"
 python3 - "$SURVEY" << 'PY' || gate "scratch_sam3 staging"
-import shutil, sys
+import os, shutil, sys
 from pathlib import Path
 S = Path(sys.argv[1])
 for p in sorted((S/"images").glob("image_*.png")):
     i = int(p.stem.split("_")[1])
     dst = S/"prod/scratch_sam3"/f"kf_{i:06d}.png"
     if not dst.exists():
-        shutil.copy2(p, dst)
+        try: os.link(p, dst)          # same bytes, no second copy (24 GB of duplicates across the fleet on 09-25)
+        except OSError: shutil.copy2(p, dst)
 print("scratch_sam3 staged")
 PY
 
