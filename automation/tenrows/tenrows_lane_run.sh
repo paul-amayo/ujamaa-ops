@@ -24,7 +24,9 @@ if [ ! -e $W/sparse/0/images.bin ]; then
 fi
 # 2. LO base + hybrid Sim(3) placement + LiDAR init
 $PY /home/paperspace/logs/tenrows_lane_prep.py lo $LD 2>&1 | tail -1 | tee -a $L
-python3 /home/paperspace/logs/klapmuts_apply_refine_orient.py $LD $W transforms_lo.json transforms_ref_lo.json 2>&1 | tail -1 | tee -a $L
+SFMW=${LANE_SFM:-$W}   # LANE_SFM=<dir with transforms.json> to use another solve of the lane (e.g. colmap_free)
+if [ "${LANE_WARP:-1}" = 1 ]; then $PY /home/paperspace/logs/tenrows_lane_warp.py $LD $SFMW/transforms.json --sigma ${LANE_SIGMA:-15} 2>&1 | tail -1 | tee -a $L
+else python3 /home/paperspace/logs/klapmuts_apply_refine_orient.py $LD $SFMW transforms_lo.json transforms_ref_lo.json 2>&1 | tail -1 | tee -a $L; fi
 [ -e $LD/transforms_ref_lo.json ] || { say "ALIGNMENT REFUSED"; exit 1; }
 cp $LD/transforms_ref_lo.json $LD/transforms.json
 $PY /home/paperspace/logs/tenrows_lo_lidar_init.py $LD --stamps $LD/stamps.json --pad-x 6 --pad-y 6 --pad-z 4 2>&1 | grep -v Warn | tail -1 | tee -a $L

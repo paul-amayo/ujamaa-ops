@@ -30,7 +30,7 @@ print('[refine] staged', len(t['frames']), 'kf images, camera $PAR (fixed)')" >>
   unset LD_LIBRARY_PATH
   [ -d $W/sparse/0 ] || { say "$B: no model"; continue; }
   python3 /home/paperspace/code/aru_sil_core/src/scripts/image_pipeline/colmap_to_nerfstudio.py $W > /dev/null 2>&1
-  python3 /home/paperspace/logs/klapmuts_apply_refine_named.py $BD $W $BASE $OUT 2>&1 | tee -a $LOG | tail -1 | sed "s/^/[$(date '+%m-%d %H:%M:%S')] /"
+  python3 ${APPLY_SCRIPT:-/home/paperspace/logs/klapmuts_apply_refine_named.py} $BD $W $BASE $OUT 2>&1 | tee -a $LOG | tail -1 | sed "s/^/[$(date '+%m-%d %H:%M:%S')] /"
   rm -rf $W/images $W/database.db*
   say "$B done in $(( $(date +%s)-t0 ))s"
 done
