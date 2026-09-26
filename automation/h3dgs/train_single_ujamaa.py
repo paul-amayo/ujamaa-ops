@@ -21,6 +21,7 @@ from tqdm import tqdm
 from torch.utils.data import DataLoader
 from argparse import ArgumentParser, Namespace
 from arguments import ModelParams, PipelineParams, OptimizationParams
+MAX_GAUSSIANS = int(os.environ.get("H3DGS_MAX_GAUSSIANS", "0") or 0)   # UJAMAA 2026-09-26: gaussian budget (0 = none); once reached, densification steps prune only (grad threshold inf) so the count sits at the budget instead of growing to the GPU limit
 
 def direct_collate(x):
     return x
@@ -155,7 +156,10 @@ def training(dataset, opt, pipe, saving_iterations, checkpoint_iterations, check
                         gaussians.add_densification_stats(viewspace_point_tensor, visibility_filter)
 
                         if iteration > opt.densify_from_iter and iteration % opt.densification_interval == 0:
-                            gaussians.densify_and_prune(opt.densify_grad_threshold, 0.005, scene.cameras_extent)
+                            over_budget = MAX_GAUSSIANS > 0 and gaussians._xyz.size(0) >= MAX_GAUSSIANS
+                            if over_budget and not getattr(gaussians, "_budget_reported", False):
+                                print(f"\n[ITER {iteration}] gaussian budget {MAX_GAUSSIANS} reached ({gaussians._xyz.size(0)}): clone/split off, pruning continues"); gaussians._budget_reported = True
+                            gaussians.densify_and_prune(float("inf") if over_budget else opt.densify_grad_threshold, 0.005, scene.cameras_extent)
                         
                         if iteration % opt.opacity_reset_interval == 0 or (dataset.white_background and iteration == opt.densify_from_iter):
                             print("-----------------RESET OPACITY!-------------")
