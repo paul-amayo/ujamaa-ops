@@ -14,14 +14,19 @@ R_ = Path("/home/paperspace/data/klapmuts/dec_2025_ten_rows"); MD = R_ / "prod/m
 ap = argparse.ArgumentParser(); ap.add_argument("block_dir"); ap.add_argument("--voxel", type=float, default=0.05); ap.add_argument("--pad-x", type=float, default=10.0)
 ap.add_argument("--pad-y", type=float, default=8.0); ap.add_argument("--pad-z", type=float, default=5.0); ap.add_argument("--min-range", type=float, default=0.45); ap.add_argument("--max-range", type=float, default=40.0)
 ap.add_argument("--max-dt", type=float, default=60.0, help="ms: keyframe-to-scan stamp tolerance"); ap.add_argument("--out-name", default="init_lidar.ply")
+ap.add_argument("--stamps", default="", help="json {image name: ts_ms} for frames that are not survey keyframes (e.g. a lane's full-stream frames)")
 a = ap.parse_args(); BD = Path(a.block_dir)
 J = json.load(open(BD / "transforms.json")); fx, fy, cx, cy, W, H = J["fl_x"], J["fl_y"], J["cx"], J["cy"], J["w"], J["h"]
 kf = {int(e["K"]): float(e["ts_ms"]) for e in json.load(open(MD / "kf_index.json"))}
+STAMPS = {k: float(v) for k, v in json.load(open(a.stamps)).items()} if a.stamps else None
 z = np.load(DUMP / "lo_poses.npz"); ts = z["ts_ms"].astype(np.float64); T = z["T"]; n = int(np.load(DUMP / "n_scans.npy")[0]); scans = np.load(DUMP / "scans_f32.npy", mmap_mode="r")
 GL = np.diag([1.0, -1.0, -1.0, 1.0]); L2C = np.array(json.load(open(R_ / "prod/monos/rig.json"))["laser_to_camera_left"], np.float64)
 cams = []
 for f in J["frames"]:
-    k = int(re.search(r"kf_(\d+)", f["file_path"]).group(1)); c2w_cv = np.asarray(f["transform_matrix"], np.float64) @ GL; cams.append((k, kf[k], c2w_cv, f["file_path"]))
+    name = Path(f["file_path"]).name
+    if STAMPS is not None: k, t = name, STAMPS[name]
+    else: k = int(re.search(r"kf_(\d+)", f["file_path"]).group(1)); t = kf[k]
+    c2w_cv = np.asarray(f["transform_matrix"], np.float64) @ GL; cams.append((k, t, c2w_cv, f["file_path"]))
 C = np.array([c[2][:3, 3] for c in cams]); lo, hi = C.min(0) - [a.pad_x, a.pad_y, a.pad_z], C.max(0) + [a.pad_x, a.pad_y, a.pad_z]
 pts, cols, used = [], [], 0
 for k, t, c2w_cv, fp in cams:
