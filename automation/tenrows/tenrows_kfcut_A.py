@@ -30,7 +30,7 @@ index = [{"K": K, "image_idx": int(i), "ts_ms": int(its[i]), "pos": P[i].round(4
 for K, i in enumerate(kept):
     f = OUT/f"kf_{K:06d}.png"
     if f.exists() and f.stat().st_size > 0: continue
-    img = np.asarray(rdr.read_index(i))[:, :, :3]
-    Image.fromarray(img).save(f, compress_level=1)
+    img = np.asarray(rdr.read_index(i))[:, :, :3][:, :, ::-1]   # the aru_nerf_interface reader yields cv2 BGR; PIL saves RGB (this omission produced the 09-05 colour-swapped keyframes)
+    Image.fromarray(np.ascontiguousarray(img)).save(f, compress_level=1)
     if K % 300 == 0: print(f"  kf {K}/{len(kept)}", flush=True)
 print(f"[kfcut] wrote {len(kept)} PNGs to {OUT} + kf_index.json", flush=True)
