@@ -1,19 +1,25 @@
 """Single-lane H3DGS build for ten_rows (Paul, 2026-09-26: "prove in one row and then scale to the rest"). Two modes:
   lo    <lane dir>                : transforms_lo.json for the lane's full-stream frames (KISS-ICP laser pose slerp'd at
                                     each stamp x L2C^-1, OpenGL c2w, ZED-conf intrinsics) — the base the lane's own SfM
-                                    is Sim(3)-placed on (klapmuts_apply_refine_orient.py)
-  chunk <lane dir> <ref transforms> : the H3DGS project layout under <lane dir>/h3dgs: camera_calibration/chunks/lane/
+                                    is placed on (tenrows_lane_warp.py / klapmuts_apply_refine_orient.py)
+  chunk <lane dir> <ref transforms> [--proj h3dgs] [--keyframes]
+                                  : the H3DGS project layout under <lane dir>/<proj>: camera_calibration/chunks/lane/
                                     sparse/0 (COLMAP bin model in the LO world, one PINHOLE camera; LiDAR init as
-                                    points3D.ply; test.txt every 10th frame), center/extent = lane bounding box,
-                                    rectified/images (hardlinks), aligned/sparse/0 (cameras + test.txt) and a minimal
-                                    export_meta.json so the compact evaluator runs."""
-import json, os, shutil, sys
+                                    points3D.ply; test.txt = every 10th frame of the FULL stream, identical for every
+                                    project of the lane), center/extent = lane bounding box, rectified/images (hardlinks),
+                                    aligned/sparse/0 (cameras + test.txt) and a minimal export_meta.json so the chunk
+                                    evaluator runs. --keyframes (ablation, Paul 2026-09-27 "is it more frames?") keeps
+                                    only the training frames that are >= 20 cm or >= 3 deg from the last kept one (the
+                                    survey's keyframe rule); the held-out frames stay in the model for evaluation."""
+import argparse, json, os, shutil, sys
 from pathlib import Path
 import numpy as np
 from scipy.spatial.transform import Rotation, Slerp
 sys.path.insert(0, "/home/paperspace/code/hierarchical-3d-gaussians/preprocess"); from read_write_model import write_model, Camera, Image, rotmat2qvec
 R_ = Path("/home/paperspace/data/klapmuts/dec_2025_ten_rows"); FX, FY, CX, CY, W, H = 527.985, 527.88, 638.975, 333.1835, 1280, 720
-mode, LD = sys.argv[1], Path(sys.argv[2]); stamps = {k: float(v) for k, v in json.load(open(LD / "stamps.json")).items()}; GL = np.diag([1.0, -1.0, -1.0, 1.0])
+ap = argparse.ArgumentParser(); ap.add_argument("mode", choices=["lo", "chunk"]); ap.add_argument("lane"); ap.add_argument("ref", nargs="?", default="transforms_ref_lo.json")
+ap.add_argument("--proj", default="h3dgs"); ap.add_argument("--keyframes", action="store_true"); ap.add_argument("--kf-dist", type=float, default=0.20); ap.add_argument("--kf-deg", type=float, default=3.0)
+a = ap.parse_args(); mode, LD = a.mode, Path(a.lane); stamps = {k: float(v) for k, v in json.load(open(LD / "stamps.json")).items()}; GL = np.diag([1.0, -1.0, -1.0, 1.0])
 if mode == "lo":
     z = np.load(R_ / "experimental/laser_dump/lo_poses.npz"); ts = z["ts_ms"].astype(np.float64); T = z["T"]; slerp = Slerp(ts, Rotation.from_matrix(T[:, :3, :3]))
     C2L = np.linalg.inv(np.array(json.load(open(R_ / "prod/monos/rig.json"))["laser_to_camera_left"], np.float64)); frames = []
@@ -25,20 +31,29 @@ if mode == "lo":
          "pose_convention": "opengl_c2w (KISS-ICP LiDAR odometry slerp'd to the frame stamp x laser->camera extrinsic; metric)", "frames": frames}
     (LD / "transforms_lo.json").write_text(json.dumps(J, indent=1)); print(f"[lane-prep] transforms_lo.json: {len(frames)} frames", flush=True)
 elif mode == "chunk":
-    J = json.load(open(LD / sys.argv[3])); P = LD / "h3dgs"; CC = P / "camera_calibration"; CH = CC / "chunks/lane"; SP = CH / "sparse/0"
+    J = json.load(open(LD / a.ref)); P = LD / a.proj; CC = P / "camera_calibration"; CH = CC / "chunks/lane"; SP = CH / "sparse/0"
     for d in (SP, CC / "rectified/images", CC / "aligned/sparse/0", P / "output/trained_chunks"): d.mkdir(parents=True, exist_ok=True)
+    allf = sorted(J["frames"], key=lambda f: f["file_path"]); names = [Path(f["file_path"]).name for f in allf]; test = names[::10]; tset = set(test)
+    keep = set(names)
+    if a.keyframes:   # survey keyframe rule over the training candidates only (held-out frames never count as "last kept")
+        keep = set(test); last = None
+        for f in allf:
+            n = Path(f["file_path"]).name
+            if n in tset: continue
+            M = np.asarray(f["transform_matrix"], np.float64)
+            if last is None or np.linalg.norm(M[:3, 3] - last[:3, 3]) >= a.kf_dist or np.degrees(np.arccos(np.clip((np.trace(last[:3, :3].T @ M[:3, :3]) - 1) / 2, -1, 1))) >= a.kf_deg:
+                keep.add(n); last = M
     cams = {1: Camera(id=1, model="PINHOLE", width=W, height=H, params=np.array([FX, FY, CX, CY]))}; ims = {}; C = []
-    for i, f in enumerate(sorted(J["frames"], key=lambda f: f["file_path"]), 1):
+    for i, f in enumerate([f for f in allf if Path(f["file_path"]).name in keep], 1):
         name = Path(f["file_path"]).name; c2w = np.asarray(f["transform_matrix"], np.float64) @ GL; w2c = np.linalg.inv(c2w); C.append(c2w[:3, 3])
         ims[i] = Image(id=i, qvec=rotmat2qvec(w2c[:3, :3]), tvec=w2c[:3, 3], camera_id=1, name=name, xys=np.zeros((0, 2)), point3D_ids=np.zeros((0,), np.int64))
         dst = CC / "rectified/images" / name
         if not dst.exists(): os.link(f["file_path"], dst)
     write_model(cams, ims, {}, str(SP), ".bin"); C = np.array(C); ctr = (C.max(0) + C.min(0)) / 2; ext = (C.max(0) - C.min(0)) + 12.0   # cell = lane bbox + 6 m each side
     np.savetxt(CH / "center.txt", ctr); np.savetxt(CH / "extent.txt", ext)
-    names = [Path(f["file_path"]).name for f in sorted(J["frames"], key=lambda f: f["file_path"])]; test = names[::10]
     (SP / "test.txt").write_text("\n".join(test) + "\n"); (CC / "aligned/sparse/0/test.txt").write_text("\n".join(test) + "\n"); write_model(cams, ims, {}, str(CC / "aligned/sparse/0"), ".bin")
     ply = LD / J.get("ply_file_path", "init_lidar.ply")
     if ply.exists(): shutil.copy2(ply, SP / "points3D.ply")
-    json.dump({"survey_root": str(R_), "n_images": len(ims), "n_test": len(test), "camera": {"fx": FX, "fy": FY, "cx": CX, "cy": CY, "w": W, "h": H}, "sky_masks": None, "fg_masks": None,
+    json.dump({"survey_root": str(R_), "n_images": len(ims), "n_test": len(test), "n_train": len(ims) - len(test), "keyframes_only": a.keyframes, "camera": {"fx": FX, "fy": FY, "cx": CX, "cy": CY, "w": W, "h": H}, "sky_masks": None, "fg_masks": None,
                "world_rotation_to_zup": np.eye(4).tolist(), "pose_convention": "COLMAP w2c (OpenCV) in the LiDAR-odometry world (metric, z up)"}, open(P / "export_meta.json", "w"), indent=1)
-    print(f"[lane-prep] chunk 'lane': {len(ims)} images, {len(test)} held-out, cell centre {ctr.round(2).tolist()} extent {ext.round(1).tolist()} m, LiDAR init {'yes' if ply.exists() else 'NO'} -> {P}", flush=True)
+    print(f"[lane-prep] {a.proj} chunk 'lane': {len(ims)} images ({len(ims) - len(test)} training{' = keyframes' if a.keyframes else ''}, {len(test)} held-out of {len(names)} frames), cell centre {ctr.round(2).tolist()} extent {ext.round(1).tolist()} m, LiDAR init {'yes' if ply.exists() else 'NO'} -> {P}", flush=True)
