@@ -42,7 +42,7 @@ def crop_right(t):
     return t[..., t.shape[-1] // 2:] if a.right_half else t
 aligned = {im.name: im for im in read_images_binary(str(CC / "aligned/sparse/0/images.bin")).values()}
 chunks = {}
-for cdir in sorted((CC / "chunks").glob("*_*")):
+for cdir in sorted(d for d in (CC / "chunks").iterdir() if (d / "center.txt").exists()):   # survey cells X_Y and single-lane projects ('lane')
     c = np.loadtxt(cdir / "center.txt"); e = np.loadtxt(cdir / "extent.txt")
     chunks[cdir.name] = (c, e, {im.name: im for im in read_images_binary(str(cdir / "sparse/0/images.bin")).values()})
 def c2w_of(im):
@@ -70,7 +70,8 @@ def psnr(a, b, m=None):
     if m is not None: d = d[:, m]
     return 10 * math.log10(1.0 / max(d.mean().item(), 1e-12))
 fill = [(chunks[a.only_chunk][0], chunks[a.only_chunk][1])] if (a.fill and a.only_chunk) else None
-t0 = time.time(); ch = CompactHierarchy(str(PROJ / a.hier), str(PROJ / "output/scaffold/point_cloud/iteration_30000"), fill)
+SCAF = PROJ / "output/scaffold/point_cloud/iteration_30000"   # single-lane projects train without a scaffold: hierarchy only
+t0 = time.time(); ch = CompactHierarchy(str(PROJ / a.hier), str(SCAF) if (SCAF / "point_cloud.ply").exists() else "", fill)
 print(f"[eval] {a.hier}: {ch.N} nodes loaded in {time.time()-t0:.0f}s, resident {ch.gpu_gib():.2f} GiB; {len(test)} test views; fg masks: {bool(FG)}", flush=True)
 rows = []
 for tau in a.taus:
