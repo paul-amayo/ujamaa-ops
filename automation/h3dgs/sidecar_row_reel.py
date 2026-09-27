@@ -19,8 +19,11 @@ ap = argparse.ArgumentParser(); ap.add_argument('--survey', required=True); ap.a
 ap.add_argument('--out', required=True); ap.add_argument('--seed-tag', default='glref_bg_f1.0_r2'); ap.add_argument('--tree-thr', type=float, default=0.5); ap.add_argument('--row-thr', type=float, default=0.7)
 ap.add_argument('--fps', type=int, default=8); ap.add_argument('--scale', type=float, default=0.5)
 ap.add_argument('--verdict-log', default='', help="per-block thresholds from this verdict log (default sidecar_<survey>_verdicts.log; words without a line use --tree-thr / --row-thr)")
-ap.add_argument('--verdict-tag', default='bg_f1.0_r2'); a = ap.parse_args()
+ap.add_argument('--verdict-tag', default='bg_f1.0_r2')
+ap.add_argument('--sky-masks', default='', help="sky-mask dir (255 = sky; default <survey>/prod/tassili/sky_masks): sky pixels are blacked out like the block models' sky loss does (Paul, 2026-09-27)")
+a = ap.parse_args()
 S = Path('/home/paperspace/data/citrus_all') / a.survey; EMB = os.environ['HIGH_EMBEDDER_CKPT']; OUT = Path(a.out); (OUT / 'frames').mkdir(parents=True, exist_ok=True)
+sky_dir = a.sky_masks or str(S / 'prod/tassili/sky_masks'); SKY = Path(sky_dir); print(f'[reel] sky masks: {SKY} ({"found" if SKY.exists() else "MISSING — sky not masked"})', flush=True)
 clip, _, _ = open_clip.create_model_and_transforms('ViT-B-16', 'laion2b_s34b_b88k', device=dev); tok = open_clip.get_tokenizer('ViT-B-16')
 hyper = build_hyper_embedder(EMB, dev); curv = hyper.curv.exp()
 def word_vec(words):
@@ -75,6 +78,9 @@ for b in a.blocks:
             over[m] = (0.5 * over[m] + 0.5 * np.array(colour(u), np.float32)).astype(np.uint8)   # no word labels: the words are internal tree indices, not user-facing (Paul, 2026-09-27)
         for ri, rw in enumerate(a.row_words):
             m = (hm[:, :, nT + ri] >= rthr[ri]).astype(np.uint8); cs, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE); cv2.drawContours(over, [c for c in cs if cv2.contourArea(c) > 200], -1, ROWCOL[ri % len(ROWCOL)], 2)
+        sm = SKY / name
+        if sky_dir and sm.exists():   # sky masked out, as the block models' sky loss renders it (black background)
+            skym = cv2.resize(cv2.imread(str(sm), cv2.IMREAD_GRAYSCALE), (over.shape[1], over.shape[0]), interpolation=cv2.INTER_NEAREST) > 127; over[skym] = 0
         cv2.putText(over, f'{a.survey}  block {b}  {name}   tint = tree identity (containment side-car)   outlines = the two rows', (8, 16), font, 0.42, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.imwrite(str(OUT / 'frames' / f'{idx:05d}.png'), over); idx += 1
     del model, pipe; torch.cuda.empty_cache()
