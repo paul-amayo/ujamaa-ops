@@ -37,7 +37,7 @@ else python3 /home/paperspace/logs/klapmuts_apply_refine_orient.py $LD $SFMW tra
 cp $LD/transforms_ref_lo.json $LD/transforms.json
 if [ -e $LD/init_lidar.ply ]; then $PY -c "import json;p='$LD/transforms.json';J=json.load(open(p));J['ply_file_path']='init_lidar.ply';json.dump(J,open(p,'w'),indent=1)"; say "LiDAR init reused ($LD/init_lidar.ply)"
 else $PY /home/paperspace/logs/tenrows_lo_lidar_init.py $LD --stamps $LD/stamps.json --pad-x 6 --pad-y 6 --pad-z 4 2>&1 | grep -v Warn | tail -1 | tee -a $L; fi
-$PY /home/paperspace/logs/tenrows_lane_prep.py chunk $LD transforms_ref_lo.json --proj $PROJ ${LANE_KF:+--keyframes} 2>&1 | tail -1 | tee -a $L
+$PY /home/paperspace/logs/tenrows_lane_prep.py chunk $LD transforms_ref_lo.json --proj $PROJ ${LANE_KF:+--keyframes} ${LANE_EVERY:+--every $LANE_EVERY} 2>&1 | tail -1 | tee -a $L   # LANE_EVERY=N: train on every N-th frame
 # 3. H3DGS: train_single (long, densifying, budgeted), hierarchy, train_post
 P=$LD/$PROJ; CH=$P/camera_calibration/chunks/lane; T=$P/output/trained_chunks/lane; mkdir -p $T; cd $REPO || exit 1; unset CUDA_HOME
 export CUDA_HOME=/home/paperspace/code/_cuda12 H3DGS_MAX_GAUSSIANS=$CAP

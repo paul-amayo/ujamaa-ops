@@ -19,6 +19,8 @@ sys.path.insert(0, "/home/paperspace/code/hierarchical-3d-gaussians/preprocess")
 R_ = Path("/home/paperspace/data/klapmuts/dec_2025_ten_rows"); FX, FY, CX, CY, W, H = 527.985, 527.88, 638.975, 333.1835, 1280, 720
 ap = argparse.ArgumentParser(); ap.add_argument("mode", choices=["lo", "chunk"]); ap.add_argument("lane"); ap.add_argument("ref", nargs="?", default="transforms_ref_lo.json")
 ap.add_argument("--proj", default="h3dgs"); ap.add_argument("--keyframes", action="store_true"); ap.add_argument("--kf-dist", type=float, default=0.20); ap.add_argument("--kf-deg", type=float, default=3.0)
+ap.add_argument("--every", type=int, default=0, help="ablation (Paul 2026-09-27 'and then every fifth frame'): train on every N-th stream frame (stream index %% N == --offset; the every-10th held-out frames are unchanged)")
+ap.add_argument("--offset", type=int, default=2, help="residue of the stream index kept by --every (2 keeps the training frames >= 2 frames from any held-out frame)")
 a = ap.parse_args(); mode, LD = a.mode, Path(a.lane); stamps = {k: float(v) for k, v in json.load(open(LD / "stamps.json")).items()}; GL = np.diag([1.0, -1.0, -1.0, 1.0])
 if mode == "lo":
     z = np.load(R_ / "experimental/laser_dump/lo_poses.npz"); ts = z["ts_ms"].astype(np.float64); T = z["T"]; slerp = Slerp(ts, Rotation.from_matrix(T[:, :3, :3]))
@@ -43,6 +45,8 @@ elif mode == "chunk":
             M = np.asarray(f["transform_matrix"], np.float64)
             if last is None or np.linalg.norm(M[:3, 3] - last[:3, 3]) >= a.kf_dist or np.degrees(np.arccos(np.clip((np.trace(last[:3, :3].T @ M[:3, :3]) - 1) / 2, -1, 1))) >= a.kf_deg:
                 keep.add(n); last = M
+    if a.every:   # every N-th frame by list position (the held-out frames are positions % 10 == 0, so --offset 2 never collides with them)
+        keep = set(test) | {n for p, n in enumerate(names) if p % a.every == a.offset % a.every}
     cams = {1: Camera(id=1, model="PINHOLE", width=W, height=H, params=np.array([FX, FY, CX, CY]))}; ims = {}; C = []
     for i, f in enumerate([f for f in allf if Path(f["file_path"]).name in keep], 1):
         name = Path(f["file_path"]).name; c2w = np.asarray(f["transform_matrix"], np.float64) @ GL; w2c = np.linalg.inv(c2w); C.append(c2w[:3, 3])
@@ -56,4 +60,4 @@ elif mode == "chunk":
     if ply.exists(): shutil.copy2(ply, SP / "points3D.ply")
     json.dump({"survey_root": str(R_), "n_images": len(ims), "n_test": len(test), "n_train": len(ims) - len(test), "keyframes_only": a.keyframes, "camera": {"fx": FX, "fy": FY, "cx": CX, "cy": CY, "w": W, "h": H}, "sky_masks": None, "fg_masks": None,
                "world_rotation_to_zup": np.eye(4).tolist(), "pose_convention": "COLMAP w2c (OpenCV) in the LiDAR-odometry world (metric, z up)"}, open(P / "export_meta.json", "w"), indent=1)
-    print(f"[lane-prep] {a.proj} chunk 'lane': {len(ims)} images ({len(ims) - len(test)} training{' = keyframes' if a.keyframes else ''}, {len(test)} held-out of {len(names)} frames), cell centre {ctr.round(2).tolist()} extent {ext.round(1).tolist()} m, LiDAR init {'yes' if ply.exists() else 'NO'} -> {P}", flush=True)
+    print(f"[lane-prep] {a.proj} chunk 'lane': {len(ims)} images ({len(ims) - len(test)} training{' = keyframes' if a.keyframes else ''}{f' = every {a.every}th frame' if a.every else ''}, {len(test)} held-out of {len(names)} frames), cell centre {ctr.round(2).tolist()} extent {ext.round(1).tolist()} m, LiDAR init {'yes' if ply.exists() else 'NO'} -> {P}", flush=True)
