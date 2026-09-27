@@ -13,7 +13,9 @@ from utils.graphics_utils import getWorld2View2, getProjectionMatrix
 from read_write_model import read_images_binary
 from hier_compact import CompactHierarchy
 ap = argparse.ArgumentParser(); ap.add_argument("--survey", required=True); ap.add_argument("--blocks", nargs="+", required=True); ap.add_argument("--out", required=True)
-ap.add_argument("--scale", type=float, default=0.5); ap.add_argument("--tau", type=float, default=0.0); ap.add_argument("--cfg", default="lio_row100"); a = ap.parse_args()
+ap.add_argument("--scale", type=float, default=0.5); ap.add_argument("--tau", type=float, default=0.0); ap.add_argument("--cfg", default="lio_row100")
+ap.add_argument("--path", default="", help="demo_path.json from sidecar_demo_path.py: render its frames (free poses, H3DGS frame) instead of the blocks' keyframes")
+a = ap.parse_args()
 S = Path("/home/paperspace/data/citrus_all") / a.survey; P = S / "experimental/h3dgs"; OUT = Path(a.out); OUT.mkdir(parents=True, exist_ok=True)
 meta = json.load(open(P / "export_meta.json")); R_W = np.asarray(meta.get("world_rotation_to_zup") or meta["world_rotation_lio_to_h3dgs"], np.float64); GL2CV = np.diag([1.0, -1.0, -1.0, 1.0])
 scaf = P / "output/scaffold/point_cloud/iteration_30000"; scaf_dir = str(scaf) if (scaf / "point_cloud.ply").exists() else ""
@@ -23,6 +25,14 @@ for c in sorted(glob.glob(str(P / "camera_calibration/chunks/*_*"))):
     if (Path(c) / "sparse/0/images.bin").exists() and (P / "output/trained_chunks" / os.path.basename(c) / "hierarchy.hier_opt").exists():
         cells[os.path.basename(c)] = (np.loadtxt(Path(c) / "center.txt"), np.loadtxt(Path(c) / "extent.txt"))
 frames = []
+if a.path:   # free poses from the demo path (already in the H3DGS frame, OpenCV c2w) with the path's single camera
+    pj = json.load(open(a.path)); K0 = (pj["intrinsics"]["fl_x"], pj["intrinsics"]["fl_y"], pj["intrinsics"]["cx"], pj["intrinsics"]["cy"]); W0, H0 = pj["intrinsics"]["w"], pj["intrinsics"]["h"]; a.scale = pj.get("scale", a.scale)
+    for f in pj["frames"]:
+        c2w_h = np.asarray(f["c2w_h"], np.float64); cc = c2w_h[:3, 3]
+        own = [n for n, (ctr, ext) in cells.items() if abs(cc[0] - ctr[0]) <= ext[0] / 2 and abs(cc[1] - ctr[1]) <= ext[1] / 2]
+        if not own: own = [min(cells, key=lambda n: np.hypot(cc[0] - cells[n][0][0], cc[1] - cells[n][0][1]))]
+        frames.append((own[0], f["name"], c2w_h, W0, H0, K0))
+    a.blocks = []
 for b in a.blocks:
     tj = json.load(open(S / "prod/tassili/blocks_ns" / a.cfg / f"block_{b}" / "transforms.json"))
     if not str(tj.get("pose_convention", "")).startswith("opengl"): raise SystemExit(f"block {b}: untagged poses — convention must be checked first")

@@ -60,7 +60,7 @@ for b in a.blocks:
     if not cfgs: print(f'[reel] block {b}: no seed {a.seed_tag} — skipped', flush=True); continue
     z = np.load(O / 'splat_runs_FEATFIX/interaction_W_glref_bg.npz'); labels = [int(u) for u in z['labels'] if int(u) != UNLAB and int(u) < FRUIT_ID_BASE]
     tree_words = [get_word_for_id(u, 'mask') for u in labels]; E = word_vec(tree_words + list(a.row_words)); nT = len(tree_words)
-    _, pipe, _, step = eval_setup(Path(cfgs[-1])); model = pipe.model; model.eval(); model.step = step
+    _, pipe, _, step = eval_setup(Path(cfgs[-1]), test_mode="inference"); model = pipe.model; model.eval(); model.step = step   # inference mode: no 2.3 GB CLIP-cache rebuild (fleet blocks keep no cache)
     cams = []
     for ds in (pipe.datamanager.train_dataset, pipe.datamanager.eval_dataset):
         for i, f in enumerate(ds.image_filenames): cams.append((int(Path(f).name[3:9]), Path(f).name, ds.cameras[i:i + 1]))

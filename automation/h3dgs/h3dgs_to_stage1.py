@@ -20,6 +20,7 @@ ap = argparse.ArgumentParser(); ap.add_argument("--block", required=True); ap.ad
 ap.add_argument("--template", required=True); ap.add_argument("--dataparser", required=True); ap.add_argument("--out", required=True)
 ap.add_argument("--margin", type=float, default=8.0, help="metres around the block's camera bbox (H3DGS frame) to keep leaves from")
 ap.add_argument("--margin-z", type=float, default=6.0); ap.add_argument("--check-chunk", default="", help="chunk whose images.bin gives the chunk-BA camera centres for a residual check")
+ap.add_argument("--cell", default="", help="chunk dir (center.txt/extent.txt): keep leaves in the chunk cell + margin instead of the camera bbox (chunk side-cars)")
 a = ap.parse_args(); t0 = time.time()
 meta = json.load(open(Path(a.h3dgs) / "export_meta.json")); R_W = np.asarray(meta.get("world_rotation_to_zup") or meta["world_rotation_lio_to_h3dgs"], np.float64)[:3, :3]
 dp = json.load(open(a.dataparser)); T = np.asarray(dp["transform"], np.float64); s = float(dp["scale"])
@@ -28,6 +29,9 @@ assert abs(np.linalg.det(R) - 1) < 1e-4 and np.allclose(R @ R.T, np.eye(3), atol
 tj = json.load(open(Path(a.block) / "transforms.json")); assert str(tj.get("pose_convention", "")).startswith("opengl"), tj.get("pose_convention")
 C_lio = np.array([np.asarray(f["transform_matrix"], np.float64)[:3, 3] for f in tj["frames"]]); C_h = C_lio @ R_W.T
 lo, hi = C_h.min(0) - [a.margin, a.margin, a.margin_z], C_h.max(0) + [a.margin, a.margin, a.margin_z]
+if a.cell:   # chunk side-car: the region is the chunk CELL (+ margin) rather than the camera bbox (chunk cameras reach into the neighbouring cells)
+    ctr = np.loadtxt(Path(a.cell) / "center.txt"); ext = np.loadtxt(Path(a.cell) / "extent.txt")
+    lo[:2] = ctr[:2] - ext[:2] / 2 - a.margin; hi[:2] = ctr[:2] + ext[:2] / 2 + a.margin
 if a.check_chunk:
     from read_write_model import read_images_binary, qvec2rotmat
     ims = {im.name: im for im in read_images_binary(str(Path(a.h3dgs) / "camera_calibration/chunks" / a.check_chunk / "sparse/0/images.bin")).values()}; res = []
@@ -61,12 +65,10 @@ sh = shs.numpy()[sel]                                     # (n,16,3)
 sh_rot = np.einsum("ij,njc->nic", M, sh).astype(np.float32)
 chk = np.abs(basis(Dn[:200]) @ sh_rot[:50].transpose(1, 0, 2).reshape(16, -1) - basis(Dn[:200] @ R) @ sh[:50].transpose(1, 0, 2).reshape(16, -1)).max()
 ck = torch.load(a.template, map_location="cpu", weights_only=False); pre = [k for k in ck["pipeline"] if k.endswith("gauss_params.means")][0].rsplit("means", 1)[0]
+ck["pipeline"].pop(pre + "high_features", None)   # a seed checkpoint may serve as the template: the stage-1 output carries no features (the chain adds zeros)
 new = {"means": means, "scales": lsc, "quats": quats, "features_dc": sh_rot[:, 0, :], "features_rest": sh_rot[:, 1:, :], "opacities": opac}
 old_n = ck["pipeline"][pre + "means"].shape[0]
 for k, v in new.items(): ck["pipeline"][pre + k] = torch.from_numpy(np.ascontiguousarray(v)).float()
-for name, o in ck.get("optimizers", {}).items():
-    for st in o["state"].values():
-        for kk, vv in list(st.items()):
-            if hasattr(vv, "shape") and vv.dim() >= 1 and vv.shape[0] == old_n: st[kk] = torch.zeros((len(sel),) + tuple(vv.shape[1:]), dtype=vv.dtype)
+ck["optimizers"] = {}; ck["schedulers"] = {}   # no Adam moments: nerfstudio's load_optimizers iterates the loaded dict (empty = no-op) and eval_setup never reads them; halves the file (fleet of 43 blocks, 2026-09-27)
 Path(a.out).parent.mkdir(parents=True, exist_ok=True); torch.save(ck, a.out)
 print(f"[sidecar] wrote {a.out}: {len(sel)} gaussians (template had {old_n}); scale {s:.4f}; SH rotation max error {chk:.2e}; opacity p50 {np.median(al):.3f}; log-scale p50 {np.median(lsc):.2f}; {time.time()-t0:.0f}s", flush=True)
