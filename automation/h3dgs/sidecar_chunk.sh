@@ -47,7 +47,7 @@ TS=$(basename $(dirname $BOOT)); RUN=$O/splat_runs_FEATFIX/stage2_censusinit_glr
 mv $INIT/*.ckpt $RUN/nerfstudio_models/; sed "s|^experiment_name: .*$|experiment_name: stage2_censusinit_glref_bg_f1.0_r2|" $BOOT > $RUN/config.yml; cp $(dirname $BOOT)/dataparser_transforms.json $RUN/ 2>/dev/null || cp $S1D/dataparser_transforms.json $RUN/
 $PYH -c "
 import torch,sys,glob; p=glob.glob(sys.argv[1]+'/*.ckpt')[0]; ck=torch.load(p,map_location='cpu',weights_only=False); ck['optimizers']={}; ck['schedulers']={}; torch.save(ck,p)" "$RUN/nerfstudio_models"
-rm -rf $O/splat_runs_STAGE1 $O/stage2_init_glref $O/stage2_init_census_glref_bg_f1.0_r2 $O/clip_cache_* $O/splat_runs_FEATFIX/stage2_bootstrap_glref/high/*/nerfstudio_models*
+rm -rf $O/splat_runs_STAGE1 $O/stage2_init_glref $O/stage2_init_census_glref_bg_f1.0_r2 $O/splat_runs_FEATFIX/stage2_bootstrap_glref/high/*/nerfstudio_models*
 # 5. verdict on the chunk's top-painted frame (sanity; block-frame comparisons are scored separately)
 FR=$(pixi run python - "$SUP" << 'PY'
 import sys, numpy as np
@@ -63,4 +63,5 @@ PY
 FIG=/home/paperspace/logs/sidecar_figs_$SV; mkdir -p $FIG
 HIGH_EMBEDDER_CKPT=$EMB timeout 1800 pixi run python $ARU/containment_eval.py --config $RUN/config.yml --hyper-ckpt $EMB --hierarchy-json $HJ --supervision-dir $SUP --frame $FR --kf-images $KF \
   --out $FIG/chunk_${CN}_bg_f1.0_r2_$FR 2>&1 | grep -aE "^(TREE|ROW|FRUIT) " | sed "s/^/[chunk_$CN sidecar bg_f1.0_r2 $FR] /" >> $VL
+rm -rf $O/clip_cache_*   # containment_eval (train-mode eval_setup) rebuilds the 3.6 GB cache; the render passes load in inference mode and never need it
 say "chunk $CN side-car ready in $(( ($(date +%s)-t0)/60 )) min; kept $(du -sh $O | cut -f1) ($(df --output=avail -BG / | tail -1 | tr -dc 0-9)G free); verdict $FR: $(grep -aE "^\[chunk_$CN sidecar" $VL | grep -oE '(TREE|ROW)[^"]*"[a-z]+": thr [0-9.]+ IoU [0-9.]+' | sed -E 's/ +/ /g' | tr '\n' ';' | cut -c1-300)"

@@ -46,7 +46,7 @@ def lookat(pos, target, up=np.array([0, 0, 1.0])):
     f = target - pos; f /= np.linalg.norm(f); r = np.cross(f, up); r /= np.linalg.norm(r); d = np.cross(f, r)
     M = np.eye(4); M[:3, 0], M[:3, 1], M[:3, 2], M[:3, 3] = r, d, f, pos; return M      # OpenCV camera: x right, y down, z forward
 frames = []; fps = a.fps; T_drive = len(drive) / fps
-sched = [(0.0, 'plain', ''), (0.12, 'row', 'show me this row'), (0.30, 'tree', 'which tree is this?'), (0.50, 'all', 'show me every tree'), (0.72, 'rows', 'group them by row'), (0.88, 'orchard', 'the whole orchard')]
+sched = [(0.0, 'plain', ''), (0.12, 'row', 'show me this row'), (0.30, 'tree', 'which tree is this?'), (0.40, 'all', 'show me every tree'), (0.72, 'rows', 'group them by row'), (0.88, 'orchard', 'the whole orchard')]   # 'tree' kept to ~6 s: the chosen tree leaves the view after ~5 s of driving
 for j, (name, M) in enumerate(drive):
     t = j / fps; mode, q = 'plain', ''
     for frac, m_, q_ in sched:

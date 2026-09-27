@@ -13,11 +13,19 @@ S = Path("/home/paperspace/data/citrus_all") / a.survey; P = S / "experimental/h
 meta = json.load(open(P / "export_meta.json")); R_W = np.asarray(meta.get("world_rotation_to_zup") or meta["world_rotation_lio_to_h3dgs"], np.float64); GL2CV = np.diag([1.0, -1.0, -1.0, 1.0])
 cam = read_cameras_binary(str(C / "sparse/0/cameras.bin")); cam = cam[sorted(cam)[0]]; fx, fy, cx, cy = [float(v) for v in cam.params[:4]]
 # where the block keyframes live (any block's transforms.json gives the image root) and the supervision maps per keyframe
-root = None; sup = {}
+root = None; sup = {}; extra = {}
+# a keyframe's id map must come from the block that OWNS the keyframe (its transforms.json lists it): block supervision dirs
+# also carry context frames painted with a different tree set, and the first-in-sorted-order union put those into chunk 0_0
+# (its verdict on kf_001431 scored trees 64/90 where block 018's map has 85/94) — 2026-09-27
 for tj in sorted(glob.glob(str(S / "prod/tassili/blocks_ns" / a.cfg / "block_[0-9][0-9][0-9]" / "transforms.json"))):
-    bd = Path(tj).parent; t = json.load(open(tj))
+    bd = Path(tj).parent; t = json.load(open(tj)); own = {Path(f["file_path"]).name for f in t["frames"]}
     if root is None and t["frames"]: root = Path(t["frames"][0]["file_path"]).parent
-    for f in sorted(glob.glob(str(bd / "supervision/trees_only/kf_*.png"))): sup.setdefault(os.path.basename(f), f)
+    for f in sorted(glob.glob(str(bd / "supervision/trees_only/kf_*.png"))):
+        n = os.path.basename(f)
+        if n in own: sup[n] = f
+        else: extra.setdefault(n, f)
+for n, f in extra.items(): sup.setdefault(n, f)   # frames no block owns: fall back to whoever painted them
+print(f"[chunk-dataset] supervision maps: {len(sup)} keyframes ({len(extra)} context-only maps as fallback)", flush=True)
 ims = read_images_binary(str(C / "sparse/0/images.bin")); frames = []; n_sup = 0
 for im in sorted(ims.values(), key=lambda im: im.name):
     w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec; c2w_h = np.linalg.inv(w2c)
