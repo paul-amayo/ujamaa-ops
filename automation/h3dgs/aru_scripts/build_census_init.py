@@ -39,6 +39,11 @@ ap.add_argument('--bg-competes', action='store_true',
                      "gaussian whose alpha mass into unlabelled pixels exceeds its best label's mass (it mostly "
                      "serves ground/sky and would bleed a shrunk tree feature there, which decodes as the row). "
                      "Off by default (recipe of record unchanged).")
+ap.add_argument('--bg-ratio', type=float, default=1.0,
+                help="with --bg-competes: withhold identity only when the void mass is at least this multiple of the "
+                     "best label's mass (1.0 = void >= label). Silhouette gaussians of a thin canopy against sky have "
+                     "void ~ label and were being withheld at 1.0 (block 013 'refused': 12-19 %% of its pixels with no "
+                     "identity), while ground/sky floaters sit at void >> label.")
 ap.add_argument('--fruit-floor', type=float, default=0.01,
                 help="assignment floor for FRUIT-argmax gaussians. The global "
                      "floor (tot > 1.0) is calibrated on trees, whose gradient "
@@ -94,9 +99,9 @@ is_fruit_maj = fruit_rows_all[maj]
 floor = np.where(is_fruit_maj, args.fruit_floor, args.tree_floor)
 assign = tot > floor
 if args.bg_competes and bg_mass is not None:
-    _withheld = assign & (bg_mass >= W.max(0))
+    _withheld = assign & (bg_mass >= args.bg_ratio * W.max(0))
     assign &= ~_withheld
-    print(f'background competes: {int(_withheld.sum())} gaussians above the floor withheld (void mass >= best label mass)')
+    print(f'background competes: {int(_withheld.sum())} gaussians above the floor withheld (void mass >= {args.bg_ratio:g} x best label mass)')
 n_fr = int((assign & is_fruit_maj).sum())
 print(f'floors: tree {args.tree_floor}, fruit {args.fruit_floor} -> {n_fr} fruit-argmax gaussians assigned')
 if args.fruit_share_min > 0:
