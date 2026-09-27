@@ -36,15 +36,15 @@ $PY /home/paperspace/logs/tenrows_lane_prep.py chunk $LD transforms_ref_lo.json 
 # 3. H3DGS: train_single (long, densifying, budgeted), hierarchy, train_post
 P=$LD/h3dgs; CH=$P/camera_calibration/chunks/lane; T=$P/output/trained_chunks/lane; mkdir -p $T; cd $REPO || exit 1; unset CUDA_HOME
 export CUDA_HOME=/home/paperspace/code/_cuda12 H3DGS_MAX_GAUSSIANS=$CAP
-if [ -z "$(ls -d $T/point_cloud/iteration_*/point_cloud.ply 2>/dev/null)" ]; then
+if [ -z "$(ls -d $T/point_cloud/iteration_*/point_cloud.{ply,bin} 2>/dev/null)" ]; then
   t0=$(date +%s)
   $PY -u train_single.py --port $((6100 + RANDOM % 900)) --save_iterations -1 -i ../../rectified/images --iterations $ITERS --position_lr_max_steps $ITERS --densify_until_iter $DU --densify_grad_threshold $GRAD \
     --exposure_lr_init 0.0 --eval -s $CH --model_path $T --bounds_file $CH > /home/paperspace/logs/tenrows_lane_$(basename $LD)_train.log 2>&1
   say "train rc=$? in $(( $(date +%s)-t0 ))s: $(tr '\r' '\n' < /home/paperspace/logs/tenrows_lane_$(basename $LD)_train.log | grep -oE 'Size=[0-9]+' | tail -1) $(grep -a 'budget' /home/paperspace/logs/tenrows_lane_$(basename $LD)_train.log | head -1 | cut -c1-80)"
-  [ -n "$(ls -d $T/point_cloud/iteration_*/point_cloud.ply 2>/dev/null)" ] || { say "NO POINT CLOUD"; exit 1; }
+  [ -n "$(ls -d $T/point_cloud/iteration_*/point_cloud.{ply,bin} 2>/dev/null)" ] || { say "NO POINT CLOUD"; exit 1; }
 fi
 if [ ! -e $T/hierarchy.hier ]; then
-  PLY=$(ls -d $T/point_cloud/iteration_* | sort -t_ -k2 -n | tail -1)/point_cloud.ply
+  PLY=$(ls -d $T/point_cloud/iteration_* | sort -t_ -k2 -n | tail -1)/point_cloud.ply   # above 8 M gaussians H3DGS saves point_cloud.bin instead; the creator falls back to it from this path
   submodules/gaussianhierarchy/build/GaussianHierarchyCreator $PLY $CH $T >> /home/paperspace/logs/tenrows_lane_$(basename $LD)_train.log 2>&1
   [ -e $T/hierarchy.hier ] || { say "NO HIERARCHY"; exit 1; }
   say "hierarchy $(stat -c %s $T/hierarchy.hier) bytes"
