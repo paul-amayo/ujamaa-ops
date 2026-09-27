@@ -18,6 +18,10 @@ UNLAB = 65535; FRUIT_ID_BASE = 10000; dev = 'cuda'; torch.set_grad_enabled(False
 ap = argparse.ArgumentParser(); ap.add_argument('--survey', required=True); ap.add_argument('--path', required=True); ap.add_argument('--models', nargs='+', required=True)
 ap.add_argument('--backdrop-dir', required=True); ap.add_argument('--out', required=True); ap.add_argument('--seed-tag', default='glref_bg_f1.0_r2'); ap.add_argument('--verdict-tag', default='bg_f1.0_r2')
 ap.add_argument('--max-dist', type=float, default=70.0); ap.add_argument('--tree-thr', type=float, default=0.5); ap.add_argument('--row-thr', type=float, default=0.8); ap.add_argument('--skip-maps', action='store_true')
+ap.add_argument('--row-pick', choices=('raw', 'margin'), default='raw', help="which row word wins a pixel. raw (default): the word the field scores HIGHEST — the two row words compared on one common basis. margin (the old rule, and the row-crossing bug): argmax of score MINUS that word's own per-block verdict threshold, which on block 023 (oak thr 0.70 / pine thr 0.85) hands a pine pixel scoring oak 0.762 / pine 0.871 to oak, because +0.062 > +0.021. Either way the pixel is only claimed where the winning word clears its own threshold.")
+ap.add_argument('--min-area', type=int, default=800, help="drop connected components smaller than this from each ROW region before drawing (0 = off). Compositing only, no re-render. On kf_001508: none -> oak 35 / pine 411 pieces and 1902 wrong-row px; 200 -> 2/3 pieces, 417 px; 800 -> 1/1 piece, 0 wrong-row px, for 4.5% of the drawn area.")
+ap.add_argument('--tree-min-area', type=int, default=200, help='same for each TREE region, kept lower so distant trees still register')
+ap.add_argument('--row-from-tree', action='store_true', help="SUPERSEDED by --row-pick raw, and not needed for a row query: route the row answer through the identified tree's hierarchy row (marker_hierarchy.json) instead of the row decode. Kept only to reproduce demo v3.")
 a = ap.parse_args(); S = Path('/home/paperspace/data/citrus_all') / a.survey; P = S / 'experimental/h3dgs'; OUT = Path(a.out); (OUT / 'frames').mkdir(parents=True, exist_ok=True); (OUT / 'maps').mkdir(exist_ok=True)
 pj = json.load(open(a.path)); FR = pj['frames']; K = pj['intrinsics']; sc = pj['scale']; fps = pj['fps']; W, H = int(round(K['w'] * sc)), int(round(K['h'] * sc))
 meta = json.load(open(P / 'export_meta.json')); R_W = np.asarray(meta.get('world_rotation_to_zup') or meta['world_rotation_lio_to_h3dgs'], np.float64)[:3, :3]; GL2CV = np.diag([1.0, -1.0, -1.0, 1.0])
@@ -69,12 +73,18 @@ if not a.skip_maps:
             if np.linalg.norm(c2w_h[:3, 3] - cen) > a.max_dist: continue
             rgb, alpha, feat = render_frame(model, cam_for(c2w_h), model.config.lang_field_dim); hm = heats(feat, E)
             tm = hm[:, :, :nT] - tthr[None, None]; tid = tm.argmax(-1); tmg = tm.max(-1)
-            if rwords: rm = hm[:, :, nT:] - rthr[None, None]; rid = rm.argmax(-1); rmg = rm.max(-1)
-            else: rid = np.zeros_like(tid); rmg = np.full(tid.shape, -9, np.float32)
-            np.savez_compressed(OUT / 'maps' / b / (f['name'] + '.npz'), tid=np.array(labels, np.int32)[tid].astype(np.int32), tmg=tmg.astype(np.float16), rid=rid.astype(np.int8), rmg=rmg.astype(np.float16), rows=np.array(rwords)); n += 1
+            if rwords:                                                             # both row picks are stored so --row-pick is an A/B on one render pass
+                hr_ = hm[:, :, nT:]; rm = hr_ - rthr[None, None]
+                rid = rm.argmax(-1); rmg = rm.max(-1)                              # margin pick (old): thresholds enter the comparison between row words
+                rid_raw = hr_.argmax(-1)                                           # raw pick: the field's own ranking of the row words, thresholds out of it
+                rmg_raw = np.take_along_axis(rm, rid_raw[..., None], -1)[..., 0]    # the winner's own margin — still the gate and the cross-model arbiter
+            else: rid = np.zeros_like(tid); rmg = np.full(tid.shape, -9, np.float32); rid_raw, rmg_raw = rid, rmg
+            np.savez_compressed(OUT / 'maps' / b / (f['name'] + '.npz'), tid=np.array(labels, np.int32)[tid].astype(np.int32), tmg=tmg.astype(np.float16), rid=rid.astype(np.int8), rmg=rmg.astype(np.float16),
+                                rid_raw=rid_raw.astype(np.int8), rmg_raw=rmg_raw.astype(np.float16), rows=np.array(rwords)); n += 1
         print(f'[maps] block {b}: {n} frames in {time.time()-t0:.0f}s ({len(labels)} trees, rows {rwords})', flush=True); del model, pipe; torch.cuda.empty_cache()
 # ---------------- pass 2: composite
 trees = {int(k): np.array(v) for k, v in pj['trees'].items()}; track = np.array(pj['track']); allrow = sorted({w for v in pj['rows'].values() for w in v}); palette = [(0, 220, 255), (255, 200, 0), (200, 0, 255), (0, 255, 120), (0, 120, 255), (255, 120, 0)]
+HROW = {t: r['id'] for r in json.load(open(S / 'prod/bateleur/scene_graph/marker_hierarchy.json'))['rows'] for t in r['object_ids']}   # tree id -> hierarchy row id
 for i, w in enumerate(allrow): ROWCOL[w] = palette[i % len(palette)]
 seen = {}; tree_row = {}; focus = None; last_mode = None; font = cv2.FONT_HERSHEY_SIMPLEX; t_start = {}
 mx = np.concatenate([track, np.array([v[:2] for v in trees.values()])]); lo, hi = mx.min(0) - 3, mx.max(0) + 3; MS = 220; pad = 12
@@ -86,8 +96,27 @@ for f in FR:
         p = OUT / 'maps' / b / (name + '.npz')
         if not p.exists(): continue
         z = np.load(p); tmg = z['tmg'].astype(np.float32); m = tmg > best_tm; best_t[m] = z['tid'][m]; best_tm[m] = tmg[m]
-        rws = list(z['rows']); rmg = z['rmg'].astype(np.float32); m = rmg > best_rm; best_r[m] = np.array([allrow.index(w) for w in rws], np.int32)[z['rid']][m] if rws else -1; best_rm[m] = rmg[m]
+        rws = list(z['rows']); kr = 'rmg_raw' if (a.row_pick == 'raw' and 'rmg_raw' in z.files) else 'rmg'   # old maps carry only the margin pick
+        rmg = z[kr].astype(np.float32); m = rmg > best_rm; best_r[m] = np.array([allrow.index(w) for w in rws], np.int32)[z['rid_raw' if kr == 'rmg_raw' else 'rid']][m] if rws else -1; best_rm[m] = rmg[m]
     tree_mask = best_tm >= 0; row_mask = best_rm >= 0; mode = f['mode']
+    if a.row_from_tree:   # rows follow the identified tree's hierarchy row (row id r <-> word allrow[r]: containment_eval prints 'ROW 0 "oak"', 'ROW 1 "pine"')
+        hr = np.vectorize(lambda t: HROW.get(int(t), -1))(best_t); ok = tree_mask & (hr >= 0) & (hr < len(allrow)); best_r = np.where(ok, hr, -1); row_mask = ok
+        for u in np.unique(best_t[tree_mask]):
+            if HROW.get(int(u), -1) >= 0: tree_row[int(u)] = HROW[int(u)]
+    sm = SKY / f.get('src', '')                 # sky out FIRST: it is masked to black at the end anyway, but while it is still
+    sky = cv2.resize(cv2.imread(str(sm), 0), (W, H), interpolation=cv2.INTER_NEAREST) > 127 if sm.exists() else np.zeros((H, W), bool)
+    tree_mask &= ~sky; row_mask &= ~sky         # in the mask it bridges the two hedges across the top into ONE component,
+    def despeckle(lab_img, valid, ids, min_area):   # a row (or a tree) is ONE object, not a scatter. The wrong-row pixels are
+        keep = np.zeros_like(valid)                 # canopy seen through: on kf_001508, 198 blobs of median size 2 px
+        for u in ids:
+            m = (lab_img == u) & valid
+            if not m.any(): continue
+            n, lb, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
+            big = [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= min_area]
+            if big: keep |= np.isin(lb, big)
+        return keep
+    if a.min_area > 0: row_mask = despeckle(best_r, row_mask, range(len(allrow)), a.min_area)
+    if a.tree_min_area > 0: tree_mask = despeckle(best_t, tree_mask, [int(u) for u in np.unique(best_t[tree_mask])], a.tree_min_area)
     if mode != last_mode: t_start[mode] = f['t']; last_mode = mode
     counts = {int(u): int(((best_t == u) & tree_mask).sum()) for u in np.unique(best_t[tree_mask])}
     for u, c in counts.items():
@@ -121,7 +150,8 @@ for f in FR:
     for u, c in trees.items():
         col = (70, 70, 70)
         if u in seen and seen[u] <= f['i']:
-            col = colour(u) if mode in ('plain', 'row', 'tree', 'all') else (ROWCOL[allrow[tree_row[u]]] if mode == 'rows' and tree_row.get(u) is not None else ORCHARD if mode == 'orchard' else (70, 70, 70))
+            rw = tree_row.get(u); in_rows = rw is not None and 0 <= rw < len(allrow)
+            col = colour(u) if mode in ('plain', 'row', 'tree', 'all') else (ROWCOL[allrow[rw]] if mode == 'rows' and in_rows else ORCHARD if mode == 'orchard' else (70, 70, 70))
             if mode == 'tree' and u != focus: col = (110, 110, 110)
         cv2.circle(mp, to_map(c), 5, col, -1)
     cx_, cy_ = to_map(np.asarray(f['c2w_h'])[:3, 3]); fwd = np.asarray(f['c2w_h'])[:3, 2]; cv2.circle(mp, (cx_, cy_), 4, (255, 255, 255), -1)

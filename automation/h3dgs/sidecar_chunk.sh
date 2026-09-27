@@ -48,18 +48,11 @@ mv $INIT/*.ckpt $RUN/nerfstudio_models/; sed "s|^experiment_name: .*$|experiment
 $PYH -c "
 import torch,sys,glob; p=glob.glob(sys.argv[1]+'/*.ckpt')[0]; ck=torch.load(p,map_location='cpu',weights_only=False); ck['optimizers']={}; ck['schedulers']={}; torch.save(ck,p)" "$RUN/nerfstudio_models"
 rm -rf $O/splat_runs_STAGE1 $O/stage2_init_glref $O/stage2_init_census_glref_bg_f1.0_r2 $O/splat_runs_FEATFIX/stage2_bootstrap_glref/high/*/nerfstudio_models*
-# 5. verdict on the chunk's top-painted frame (sanity; block-frame comparisons are scored separately)
-FR=$(pixi run python - "$SUP" << 'PY'
-import sys, numpy as np
-from PIL import Image
-from pathlib import Path
-best = (0, None)
-for f in sorted(Path(sys.argv[1]).glob('kf_*.png')):
-    a = np.array(Image.open(f), np.uint16); n = int((a != 65535).sum())
-    if n > best[0]: best = (n, f.name)
-print(best[1])
-PY
-)
+# 5. verdict on the top-supervised frame whose camera is INSIDE the cell. A chunk dataset carries the chunk BA's context
+#    cameras too (~40% sit outside the cell: 0_1 has 488 of 1222) and the leaves are cropped to cell + margin, so scoring
+#    on one of those measures geometry that was deliberately cut away — chunk 0_1's first verdict frame kf_002166 had its
+#    camera 11.0 m beyond the cell edge and scored prec ~0.55 / rec ~0.52 on every query (vs 0.923 on 0_0, frame in cell).
+FR=$(python3 /home/paperspace/logs/sidecar_chunk_frame.py $SV $CN 2>>$L | head -1)
 FIG=/home/paperspace/logs/sidecar_figs_$SV; mkdir -p $FIG
 HIGH_EMBEDDER_CKPT=$EMB timeout 1800 pixi run python $ARU/containment_eval.py --config $RUN/config.yml --hyper-ckpt $EMB --hierarchy-json $HJ --supervision-dir $SUP --frame $FR --kf-images $KF \
   --out $FIG/chunk_${CN}_bg_f1.0_r2_$FR 2>&1 | grep -aE "^(TREE|ROW|FRUIT) " | sed "s/^/[chunk_$CN sidecar bg_f1.0_r2 $FR] /" >> $VL
