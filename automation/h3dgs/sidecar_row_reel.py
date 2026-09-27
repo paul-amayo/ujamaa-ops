@@ -21,6 +21,7 @@ ap.add_argument('--fps', type=int, default=8); ap.add_argument('--scale', type=f
 ap.add_argument('--verdict-log', default='', help="per-block thresholds from this verdict log (default sidecar_<survey>_verdicts.log; words without a line use --tree-thr / --row-thr)")
 ap.add_argument('--verdict-tag', default='bg_f1.0_r2')
 ap.add_argument('--sky-masks', default='', help="sky-mask dir (255 = sky; default <survey>/prod/tassili/sky_masks): sky pixels are blacked out like the block models' sky loss does (Paul, 2026-09-27)")
+ap.add_argument('--backdrop-dir', default='', help="PNGs named by keyframe from sidecar_row_backdrop.py (the FULL H3DGS model at the same pose/scale): used as the base image instead of the side-car's own render, which has no gaussians beyond the block's cut (grey patches)")
 a = ap.parse_args()
 S = Path('/home/paperspace/data/citrus_all') / a.survey; EMB = os.environ['HIGH_EMBEDDER_CKPT']; OUT = Path(a.out); (OUT / 'frames').mkdir(parents=True, exist_ok=True)
 sky_dir = a.sky_masks or str(S / 'prod/tassili/sky_masks'); SKY = Path(sky_dir); print(f'[reel] sky masks: {SKY} ({"found" if SKY.exists() else "MISSING — sky not masked"})', flush=True)
@@ -69,7 +70,10 @@ for b in a.blocks:
     print(f'[reel] block {b}: {len(cams)} keyframes, trees {dict(zip(labels, tree_words))}, thresholds trees {dict(zip(tree_words, tthr.round(2)))} rows {dict(zip(a.row_words, np.round(rthr, 2)))}', flush=True)
     for k, name, cam in cams:
         cam = cam.to(model.device); cam.rescale_output_resolution(a.scale); rgb, alpha, feat = render_frame(model, cam, model.config.lang_field_dim)
-        hm = heats(feat, E); img = np.ascontiguousarray(rgb[:, :, ::-1]); over = img.copy()
+        hm = heats(feat, E); img = np.ascontiguousarray(rgb[:, :, ::-1])
+        if a.backdrop_dir and (Path(a.backdrop_dir) / name).exists():   # full-model backdrop, pixel-aligned (same pose, intrinsics, scale)
+            bd = cv2.imread(str(Path(a.backdrop_dir) / name)); img = bd if bd.shape[:2] == img.shape[:2] else cv2.resize(bd, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_AREA)
+        over = img.copy()
         marg = hm[:, :, :nT] - tthr[None, None, :]          # margin over each tree's own threshold; tint = best margin >= 0
         tmax = marg.max(-1); targ = marg.argmax(-1)
         for ti, u in enumerate(labels):
