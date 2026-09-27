@@ -72,12 +72,10 @@ for b in a.blocks:
         for ti, u in enumerate(labels):
             m = (targ == ti) & (tmax >= 0)
             if m.sum() < 30: continue
-            over[m] = (0.5 * over[m] + 0.5 * np.array(colour(u), np.float32)).astype(np.uint8)
-            ys, xs = np.nonzero(m); cv2.putText(over, tree_words[ti], (int(xs.mean()) - 20, int(ys.mean())), font, 0.45, (255, 255, 255), 2, cv2.LINE_AA); cv2.putText(over, tree_words[ti], (int(xs.mean()) - 20, int(ys.mean())), font, 0.45, colour(u), 1, cv2.LINE_AA)
+            over[m] = (0.5 * over[m] + 0.5 * np.array(colour(u), np.float32)).astype(np.uint8)   # no word labels: the words are internal tree indices, not user-facing (Paul, 2026-09-27)
         for ri, rw in enumerate(a.row_words):
             m = (hm[:, :, nT + ri] >= rthr[ri]).astype(np.uint8); cs, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE); cv2.drawContours(over, [c for c in cs if cv2.contourArea(c) > 200], -1, ROWCOL[ri % len(ROWCOL)], 2)
-        rows_txt = '  '.join(f'{rw} outline>={t:.2f}' for rw, t in zip(a.row_words, rthr))
-        cv2.putText(over, f'{a.survey} block {b} {name}  side-car {a.seed_tag}  tint = best tree over its verdict threshold  {rows_txt}', (8, 16), font, 0.42, (255, 255, 255), 1, cv2.LINE_AA)
+        cv2.putText(over, f'{a.survey}  block {b}  {name}   tint = tree identity (containment side-car)   outlines = the two rows', (8, 16), font, 0.42, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.imwrite(str(OUT / 'frames' / f'{idx:05d}.png'), over); idx += 1
     del model, pipe; torch.cuda.empty_cache()
 print(f'[reel] {idx} frames in {time.time() - t0:.0f}s', flush=True)
