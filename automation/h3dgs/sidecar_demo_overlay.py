@@ -26,6 +26,7 @@ ap.add_argument('--script', help='demo_script.json from sidecar_demo_script.py: 
 ap.add_argument('--fps', type=int, default=5, help='output framerate (the path was laid out at 8; 5 reads slower)')
 ap.add_argument('--outline-close', type=int, default=9, help='morphological close (px) on a row mask before contouring: the canopy silhouette is notched at every leaf gap and the raw contour traces all of it')
 ap.add_argument('--outline-simplify', type=float, default=2.5, help='approxPolyDP epsilon on the row contour')
+ap.add_argument('--sky-fill-max', type=int, default=20000, help='fill holes in the sky mask up to this area (the sun is ~4500 px); anything enclosed by sky is sky')
 ap.add_argument('--fruit-max-dist', type=float, default=15.0, help="a fruit side-car is only trusted near its OWN block: its fruit word decodes confidently on canopy it never saw (block 021's 'flashbacks' landed on the opposite hedge two blocks away, where supervision puts tree 98 on the left)")
 ap.add_argument('--fruit-min-area', type=int, default=30, help='fruit are small: a much lower component floor than rows or trees')
 ap.add_argument('--min-area', type=int, default=800, help="drop connected components smaller than this from each ROW region before drawing (0 = off). Compositing only, no re-render. On kf_001508: none -> oak 35 / pine 411 pieces and 1902 wrong-row px; 200 -> 2/3 pieces, 417 px; 800 -> 1/1 piece, 0 wrong-row px, for 4.5% of the drawn area.")
@@ -181,6 +182,15 @@ for fi, f in enumerate(FR):
     tree_mask = best_tm >= 0; row_mask = best_rm >= 0
     sm = SKY / f.get('src', '')
     sky = cv2.resize(cv2.imread(str(sm), 0), (W, H), interpolation=cv2.INTER_NEAREST) > 127 if sm.exists() else np.zeros((H, W), bool)
+    if sky.any():   # SAM3 does not class the blown-out SUN as sky, so the mask has a sun-shaped hole and the sun is left
+        ns = (~sky).astype(np.uint8)          # floating in the blacked-out sky. Anything fully enclosed by sky IS sky.
+        nlb, lbl, stt, _ = cv2.connectedComponentsWithStats(ns, 8)
+        # the sun reaches the TOP edge of the frame, so "fully enclosed" never catches it. The test that does: an island
+        # that touches no side or bottom edge and stays above the horizon is sky, whatever SAM3 called it.
+        edge = set(lbl[-1, :].tolist()) | set(lbl[:, 0].tolist()) | set(lbl[:, -1].tolist())
+        fill = [k for k in range(1, nlb) if k not in edge and stt[k, cv2.CC_STAT_AREA] <= a.sky_fill_max
+                and stt[k, cv2.CC_STAT_TOP] + stt[k, cv2.CC_STAT_HEIGHT] < H * 0.55]
+        if fill: sky |= np.isin(lbl, fill)
     tree_mask &= ~sky; row_mask &= ~sky
     def despeckle(lab_img, valid, ids, min_area):
         keep = np.zeros_like(valid)
