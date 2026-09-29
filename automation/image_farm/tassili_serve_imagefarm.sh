@@ -3,7 +3,7 @@
 # segment (trajectory = the ingest's OpenCV poses, which ARE the trained poses for image-only surveys) and start the
 # checkpoint render service on :8004 (OpenGL-trained checkpoint -> RENDER_CKPT_POSES=opengl). Stops the H3DGS hierarchy
 # backend (:8006) first so no stale backend answers for a different survey. Kill patterns live here (pkill self-match).
-#   usage: tassili_serve_imagefarm.sh <segment_dir e.g. /home/paperspace/data/image_farm/IMG_7994_s0>
+#   usage: tassili_serve_imagefarm.sh <segment_dir e.g. /home/paperspace/data/image_farm/kendu_bay/2026-05-22/IMG_7994_s0>
 SEG=$(realpath "${1:?segment dir}"); CFG=lio_arc_size15.0_ov0.10_kf20cm_dedup
 L=/home/paperspace/logs/tassili_serve.log; say(){ echo "[$(date '+%m-%d %H:%M:%S')] $*" | tee -a $L; }
 [ -f "$SEG/blocks_ns/$CFG/block_000/splats/splat.ply" ] || { say "no finished splat under $SEG"; exit 1; }

@@ -2,7 +2,7 @@
 # IMG_7999_s0 flag test: same recipe train command (RGB mode) but the resolution schedule finishes inside the run
 # (schedule 1500 -> /4 until 1500, /2 until 3000, full res after), ITERS iterations. Output beside the recipe's run.
 set -uo pipefail
-SD=/home/paperspace/data/image_farm/IMG_7999_s0
+SD=/home/paperspace/data/image_farm/kendu_bay/2026-05-22/IMG_7999_s0
 BD=$SD/blocks_ns/lio_arc_size15.0_ov0.10_kf20cm_dedup/block_000
 NS=/home/paperspace/code/nerf_new
 ITERS=${1:-5000}; SCHED=${2:-1500}; TAG=${3:-sched${SCHED}_it${ITERS}}

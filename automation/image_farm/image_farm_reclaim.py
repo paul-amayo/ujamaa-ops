@@ -37,7 +37,7 @@ saved["1 checkpoints (optimizer state)"] = tot
 if ONLY_CKPT: print("only-ckpt done"); sys.exit(0)
 # ---- 2. scratch_sam3 -> hardlinks
 tot = 0; n = 0
-for sd in sorted(ROOT.glob("IMG_*_s[0-9]")):
+for sd in sorted(ROOT.glob("*/*/IMG_*_s[0-9]")):
     sc = sd / "prod/scratch_sam3"
     if not sc.exists(): continue
     for kf in sc.glob("kf_*.png"):
@@ -50,13 +50,13 @@ for sd in sorted(ROOT.glob("IMG_*_s[0-9]")):
 saved["2 scratch_sam3 copies -> hardlinks"] = tot; log("scratch", f"{n} files, {tot/1e9:.1f} GB")
 # ---- 3. COLMAP databases
 tot = 0; n = 0
-for p in list(ROOT.glob("*/database_gpu.db")) + list(ROOT.glob("*/database.db")):
+for p in list(ROOT.glob("*/*/*/database_gpu.db")) + list(ROOT.glob("*/*/*/database.db")):
     tot += p.stat().st_size; n += 1
     if APPLY: p.unlink()
 saved["3 COLMAP databases"] = tot; log("db", f"{n} files, {tot/1e9:.1f} GB")
 # ---- 4. test runs + quarantine
 tot = 0
-for d in (ROOT / "IMG_7999_s0/blocks_ns_5k_recipe", ROOT / "IMG_7999/_scrambled_run_2046"):
+for d in (ROOT / "kendu_bay/2026-05-22/IMG_7999_s0/blocks_ns_5k_recipe", ROOT / "kendu_bay/2026-05-22/IMG_7999/_scrambled_run_2046"):
     if not d.exists(): continue
     sz = sum(f.stat().st_size for f in d.rglob("*") if f.is_file()); tot += sz; log("dirs", f"{sz/1e9:.1f} GB  {d}")
     if APPLY: shutil.rmtree(d)

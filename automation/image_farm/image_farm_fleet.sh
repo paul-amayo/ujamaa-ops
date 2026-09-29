@@ -8,7 +8,7 @@
 #   yet is waited for (never two preps on one clip). A segment with a finished splat.ply is skipped.
 # Skipped as unusable: IMG_7962 (0.4 s), IMG_7985 (1.2 s), IMG_7992 (2.9 s), IMG_7986 (5.8 s), IMG_8019 (11 s HEVC/HLG).
 set -uo pipefail
-F=/home/paperspace/data/image_farm
+F=${IF_SESSION_DIR:?set IF_SESSION_DIR to a session folder, e.g. /home/paperspace/data/image_farm/kendu_bay/2026-05-22}
 R=${IF_RECIPE:-/home/paperspace/logs/image_farm_recipe.sh}
 P=/home/paperspace/logs/image_farm_prep.py
 PY=/home/paperspace/miniconda3/envs/h3dgs/bin/python

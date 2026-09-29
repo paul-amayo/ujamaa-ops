@@ -2,7 +2,7 @@
 # Prep-only sweep: frames + all-frame matching + segments + per-segment GPU SfM + track gate for every usable clip,
 # so the training fleet finds sparse/0 ready. Skips clips whose segments already have capture_meta.json.
 set -uo pipefail
-F=/home/paperspace/data/image_farm
+F=${IF_SESSION_DIR:?set IF_SESSION_DIR to a session folder, e.g. /home/paperspace/data/image_farm/kendu_bay/2026-05-22}
 P=/home/paperspace/logs/image_farm_prep.py
 PY=/home/paperspace/miniconda3/envs/h3dgs/bin/python
 CLIPS=${IF_CLIPS:-"IMG_7964 IMG_7971 IMG_7975 IMG_7990 IMG_7994 IMG_7995 IMG_7996 IMG_8001 IMG_7959 IMG_7961 IMG_7972 IMG_7974 IMG_7960 IMG_7970 IMG_7967 IMG_7963 IMG_7973 IMG_7984 IMG_7987 IMG_7993 IMG_7997 IMG_7998"}

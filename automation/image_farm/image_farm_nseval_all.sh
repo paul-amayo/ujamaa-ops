@@ -3,7 +3,7 @@
 # and a summary TSV. The fleet's logged "held-out" figure averaged only 3 single-image samples.
 set -uo pipefail
 cd /home/paperspace/code/nerf_new; OUT=/home/paperspace/logs/image_farm_nseval.tsv; echo -e "segment\tframes\tpsnr\tssim\tlpips" > $OUT
-for sd in $(ls -d /home/paperspace/data/image_farm/IMG_*_s[0-9]); do
+for sd in $(ls -d /home/paperspace/data/image_farm/*/*/IMG_*_s[0-9]); do
   sn=$(basename $sd); CFG=$(ls $sd/blocks_ns/*/block_000/splat_runs_high/*/*/*/config.yml 2>/dev/null | tail -1); [ -n "$CFG" ] || continue
   [ -s /home/paperspace/logs/nseval_$sn.json ] || env -u LD_LIBRARY_PATH -u LD_PRELOAD pixi run ns-eval --load-config "$CFG" --output-path /home/paperspace/logs/nseval_$sn.json > /home/paperspace/logs/nseval_$sn.log 2>&1
   python3 -c "
