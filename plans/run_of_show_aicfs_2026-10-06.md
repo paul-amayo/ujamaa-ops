@@ -42,7 +42,7 @@ Klapmuts ledger files, never change them.
 | 1 | Gwakungu **cabbages**: H3DGS IMG_7993_s0 | me | ~1.5 h left | running |
 | 2 | Citrus B side-car on expo 0_0 (identity) | peer | ~30 min | queued (`~/logs/sidecar_demo_queue.sh`) |
 | 3 | Citrus A side-car on 01 chunk 3_1 | peer | ~30 min | queued |
-| 4 | **Citrus B chunk 1_0 on the improved recipe** (trees 5 and 3: 61 + 14 oranges), then side-car + fruit densify; becomes Citrus B's demo chunk (Paul, 14:1x) | peer | ~4.5 h | requested |
+| 4 | **Citrus B chunk 1_0 on the improved recipe** (trees 5 and 3: 61 + 14 oranges): train 2.3 h + post-opt 1 h + in-cell score, then side-car + fruit densify; becomes Citrus B's demo chunk (Paul, 14:1x) | peer | ~4.5 h | chained (`~/logs/sidecar_demo_queue_v2.sh`); walk root `h3dgs_demo/expo_chunk_1_0` ready |
 | 5 | Gwakungu **chillies**: H3DGS IMG_7990_s1 | me | ~2.5 h | waits for the peer's done-file |
 | 6 | Kendu Bay **ground plants**: H3DGS IMG_7975_s0 | me | ~2 h | after 5 |
 | 7 | Klapmuts Dec **berries**: SAM3 counts per ledger bag | me | ~1 h | after 6 |
@@ -51,7 +51,7 @@ Klapmuts ledger files, never change them.
 Why 1_0: the peer found that 05 chunk 0_0 holds 12 trees, of which only tree 90 (8 oranges) and tree 92 (2) carry fruit; tree 5 (61) and tree 3 (14) are in cell 1_0.
 Tassili guard (ujamaa 27563f3): a plant more than 6 m from the served walk is "outside the 3D section": the answer is kept and points to the map, with no walk into empty space.
 
-Estimated to finish Thu ~07:00 SAST. Backlog (peer, after their plan): remaining 05 chunks on the improved recipe, the 01 45 m re-chunk.
+The peer chain hands the GPU back ~22:00 box (~00:00 SAST); the Kenya runs, berries and side-cars finish ~Thu 08:00 SAST. Backlog (peer, after their plan): remaining 05 chunks on the improved recipe, the 01 45 m re-chunk.
 
 Klapmuts Dec 3D stays `h3dgs_e2` (lane 2, half views): training-view median 29.72, held-out 19.82.
 Every 3D shown must measure ≥ 25 dB (training views); each Kenyan segment is shown only if its evaluator says so.
