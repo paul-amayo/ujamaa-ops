@@ -40,18 +40,19 @@ Klapmuts ledger files, never change them.
 | # | job | who | est. | status |
 |---|---|---|---|---|
 | 1 | Gwakungu cabbages, H3DGS 4 M | me | — | **done: 22.78 training / 18.32 held-out, fails the bar** |
-| 2 | Citrus B side-car on expo 0_0 (identity) | peer | 25–55 min | running (started 15:09 box) |
-| 3 | Citrus A side-car on 01 chunk 3_1 | peer | 25–55 min | queued (peer chain v3) |
-| 4 | Citrus B chunk 1_0: improved recipe, in-cell score, side-car, fruit densify, per-fruit containment cuts | peer | ~4.5 h | queued (peer chain v3) |
-| 5 | Gwakungu chillies, H3DGS IMG_7990_s1, **8 M** | me | ~2.5 h | queue v5, after the peer's done-file |
-| 6 | Kendu Bay ground plants, H3DGS IMG_7975_s0, **8 M** | me | ~2 h | queue v5 |
-| 7 | Gwakungu cabbages again at **8 M** (own project `h3dgs_8m`) — Paul 17:1x | me | ~2.5 h | queue v6, after v5 |
-| 8 | cabbage embedder (queue v7), then the cabbage side-car on the 8 M model if it clears 25 dB; Klapmuts Dec berries (SAM3); side-cars for any other Kenyan segment ≥ 25 dB | me | ~3 h | after 7 |
+| 2 | Citrus B side-car on expo 0_0 (identity) | peer | — | **done** (tree 90 IoU 0.93; lights through the stream) |
+| 3 | Citrus A side-car on 01 chunk 3_1 | peer | — | **done** (tree 164 IoU 0.97) |
+| 4 | Citrus B chunk 1_0: improved recipe, in-cell score, side-car, fruit densify — **no fitted cuts** (Paul, 30 Sep 21:2x) | peer | ~4.5 h | relaunch requested after chain v4 exited early |
+| 5 | Gwakungu chillies, H3DGS IMG_7990_s1, **8 M** | me | ~2.5 h | queue v8, after `demo_peer_1_0.done` |
+| 6 | Kendu Bay ground plants, H3DGS IMG_7975_s0, **8 M** | me | ~2 h | queue v8 |
+| 7 | Gwakungu cabbages again at **8 M** (own project `h3dgs_8m`) — Paul 17:1x | me | ~2.5 h | queue v8 |
+| 8 | cabbage embedder (queue v8), then the cabbage side-car on the 8 M model if it clears 25 dB; Klapmuts Dec berries (SAM3); side-cars for any other Kenyan segment ≥ 25 dB | me | ~3 h | after 7 |
 
 Why 1_0: the peer found that 05 chunk 0_0 holds 12 trees, of which only tree 90 (8 oranges) and tree 92 (2) carry fruit; tree 5 (61) and tree 3 (14) are in cell 1_0.
 Tassili guard (ujamaa 27563f3): a plant more than 6 m from the served walk is "outside the 3D section": the answer is kept and points to the map, with no walk into empty space.
+**Lighting rule (Paul, 30 Sep):** trees and fruit light through the containment field's own split; no per-object thresholds fitted to SAM masks ("not real relevancy"). If raw containment misfires, it is reported, not masked.
 
-The peer chain runs slower than estimated (tree cuts ~1 h per chunk): 1_0 fruit result ~02:00 SAST; jobs 5–7 finish ~Thu 11:30 SAST, 8 by ~Thu 14:30 SAST. Backlog (peer, after their plan): remaining 05 chunks on the improved recipe, the 01 45 m re-chunk.
+1_0 relaunched ~21:45 SAST as its own chain: fruit result ~02:30 SAST; jobs 5–7 finish ~Thu 10:00 SAST, 8 by ~Thu 13:00 SAST. Backlog (peer, after their plan): remaining 05 chunks on the improved recipe, the 01 45 m re-chunk.
 
 Klapmuts Dec 3D stays `h3dgs_e2` (lane 2, half views): training-view median 29.72, held-out 19.82.
 Every 3D shown must measure ≥ 25 dB (training views); each Kenyan segment is shown only if its evaluator says so.
