@@ -233,7 +233,7 @@ SKYFLAGS=""
 rm -rf "$BD/splat_runs_high" "$NS/outputs/block_000" /home/paperspace/code/outputs/block_000
 say "train ($ITERS iters, mode=$MODE, sky=$SKY)"
 ( cd "$NS" && echo n | MAX_JOBS=4 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
-  ${EMB:+HIGH_EMBEDDER_CKPT=$EMB} env -u LD_LIBRARY_PATH -u LD_PRELOAD pixi run ns-train high \
+  env -u LD_LIBRARY_PATH -u LD_PRELOAD ${EMB:+HIGH_EMBEDDER_CKPT=$EMB} pixi run ns-train high \
   --max-num-iterations "$ITERS" --vis tensorboard \
   --output-dir "$BD/splat_runs_high" --experiment-name "${NAME}_block_000" \
   --pipeline.datamanager.semantic-dir "$SEMDIR" \
@@ -253,7 +253,7 @@ if [ "$MODE" = "high" ]; then
     || gate "train used WRONG embedder ckpt (env not honoured)"
 fi
 CFG_YML=$(ls "$BD"/splat_runs_high/*/*/*/config.yml | tail -1)
-( cd "$NS" && ${EMB:+HIGH_EMBEDDER_CKPT=$EMB} env -u LD_LIBRARY_PATH -u LD_PRELOAD \
+( cd "$NS" && env -u LD_LIBRARY_PATH -u LD_PRELOAD ${EMB:+HIGH_EMBEDDER_CKPT=$EMB} \
   pixi run ns-export gaussian-splat --load-config "$CFG_YML" \
   --output-dir "$BD/splats" ) \
   > "$LOGS/recipe_${NAME}_export.log" 2>&1 || gate "export"
