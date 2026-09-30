@@ -35,18 +35,20 @@ about 28 GB for jobs, run **one at a time** in a queue. The peer session's
 H3DGS 01 re-chunk (about 36 h) **stays parked until after Tuesday**, and I only read its
 Klapmuts ledger files, never change them.
 
-### Training (GPU), one job at a time: revised 30 Sep 13:00 for the H3DGS bar
+### Training (GPU), one job at a time: status 30 Sep 13:00
 
-| id | what is trained | gives the visitor | est. GPU | status |
-|---|---|---|---|---|
-| **T1** | Citrus B 05: improved H3DGS recipe on chunks 0_1, 0_2, 1_0, 1_1, 1_2 (0_0 done), then merge | Citrus B in 3D at ~27 dB | ~12–15 h | proposed (the recipe of the peer session's 01 run) |
-| **T2** | side-cars on the new H3DGS: 05 (6 chunks) and 01 chunk 3_1 (ratio-2 recipe) | trees and rows lit on demo-standard 3D | ~1 h | after T1 |
-| **T3** | fruit densify on the 05 side-cars (`sidecar_fruit_densify.sh`) for the chunks holding the top fruit trees (5, 72, 3) | oranges lit | ~1–2 h | after T2 |
-| **T4** | Gwakungu cabbages: H3DGS on IMG_7993_s0 (single chunk), plus a side-car from the cabbage supervision | cabbages in 3D at ≥25 dB, each lit | ~1–2 h | the per-block cabbage run (r4, 12:08, ETA ~13:00) produces the registry and supervision the side-car needs |
-| **T5** | Klapmuts Dec berries: SAM3 "berry" pass, counts per ledger bag | "which bushes had berries" | ~1 h | queued |
-| — | Kendu Bay second crop | — | — | dropped unless time remains |
+| id | what | who | status |
+|---|---|---|---|
+| **K1** | Gwakungu **cabbages**: H3DGS on IMG_7993_s0 (lane-2 recipe, 4 M), then a side-car from the cabbage registry (42 ids / 15 objects) | me | training since 12:27 (~2 h incl. post-opt) |
+| **K2** | Gwakungu **chillies**: H3DGS on IMG_7990_s1 ("pepper" 1402 masks / 241 frames) + side-car | me | queued after K1 |
+| **K3** | Kendu Bay **ground plants**: H3DGS on IMG_7975_s0 (groundnut canopy; prompt still being probed) + side-car | me | queued after K2 |
+| **C-A** | Citrus A: chunk 3_1 (28.23 in-cell) made servable: hier service + a walk inside the cell + a tree/row side-car | peer session | requested 12:40 |
+| **C-B** | Citrus B: `h3dgs_expo` chunk 0_0 (27.54 / 28.07) the same, plus a fruit side-car (tree 5, 61 oranges) | peer session | requested 12:40 |
+| **B** | Klapmuts Dec berries: SAM3 "berry" counts per ledger bag | me | after K3 |
+| — | the remaining citrus chunks (05 improved recipe, 01 45 m re-chunk) | peer session | backlog, after the plan for them is ready (Paul) |
 
-**Cancelled:** `fruit_glref_block.sh` on the per-block 05 era (queued 12:2x, cancelled before it started). Per-block isn't the demo standard; T3 does fruit on the H3DGS side-cars.
+Klapmuts Dec 3D stays `h3dgs_e2` (lane 2, half views): training-view median 29.72, held-out 19.82.
+Every 3D shown must measure ≥ 25 dB (training views); each Kenyan segment is shown only if its evaluator says so.
 
 ### Not trained before Tuesday
 - **Klapmuts April 3D.** Tried and reverted on 30 Sep: the per-block models are the damaged August era (~17 dB, rejected 09-23), and April H3DGS is ~18 dB, below the bar.
@@ -59,7 +61,7 @@ Klapmuts ledger files, never change them.
 
 | id | work | when |
 |---|---|---|
-| **E1** | **Adinkra drives the 3D.** Oranges, cabbages and plants are lit by asking in the chat ("show me the tree with the most oranges"), not by a button. Adinkra's Tassili actions gain a fruit target, the app forwards it to the renderer (`{"t":"query","fruit":10000+id}`, already supported), and per-farm facts are added (orange counts, berries, cabbage count) with farm-appropriate example prompts (Klapmuts currently says "trees… row 2") | Thu |
+| **E1** ✅ 441bcc2 | **Adinkra drives the 3D.** Oranges, cabbages and plants are lit by asking in the chat ("show me the tree with the most oranges"), not by a button. Adinkra's Tassili actions gain a fruit target, the app forwards it to the renderer (`{"t":"query","fruit":10000+id}`, already supported), and per-farm facts are added (orange counts, berries, cabbage count) with farm-appropriate example prompts (Klapmuts currently says "trees… row 2") | Thu |
 | **B2** | Citrus B Sankofa: 13D ledger from `assoc_04_05_v4` (04 ↔ 05, 128 canonical trees, confirmed fruit per epoch) | Thu |
 | **C2** | Klapmuts Sankofa: Apr registry bushes ↔ ledger v5 bags (825 Dec↔Apr pairs), plus Dec berries from C3 | Thu |
 | **G1** | Broker keeps every demo farm's 3D warm at once, so switching farms is instant | Thu |
