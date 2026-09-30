@@ -8,7 +8,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 ap = argparse.ArgumentParser(); ap.add_argument('survey'); ap.add_argument('chunk'); ap.add_argument('--out', default=''); ap.add_argument('--proj', default=''); ap.add_argument('--fruit', action='store_true')
-ap.add_argument('--fruit-id', type=int, default=0, help='pick the in-cell frame with the most pixels of THIS fruit id (implies --fruit)'); a = ap.parse_args()
+ap.add_argument('--fruit-id', type=int, default=0, help='pick the in-cell frame with the most pixels of THIS fruit id (implies --fruit)')
+ap.add_argument('--tree-id', type=int, default=-1, help='pick the in-cell frame with the most pixels of THIS tree id (trees_only)'); a = ap.parse_args()
 if a.fruit_id: a.fruit = True
 S = Path('/home/paperspace/data/citrus_all') / a.survey; P = Path(a.proj) if a.proj else S / 'experimental/h3dgs'
 O = Path(a.out) if a.out else S / 'experimental/h3dgs_sidecar_chunks' / f'chunk_{a.chunk}'
@@ -26,7 +27,7 @@ best = (0, None)
 for f in sorted(sup.glob('kf_*.png')):
     if f.name not in inside: continue
     m = np.array(Image.open(f), np.uint16)
-    n = int((m == a.fruit_id).sum()) if a.fruit_id else int(((m >= 10000) & (m != 65535)).sum()) if a.fruit else int((m != 65535).sum())
+    n = int((m == a.tree_id).sum()) if a.tree_id >= 0 else int((m == a.fruit_id).sum()) if a.fruit_id else int(((m >= 10000) & (m != 65535)).sum()) if a.fruit else int((m != 65535).sum())
     if n > best[0]: best = (n, f.name)
 print(best[1] or '')
 print(f'[chunk-frame] {a.chunk}{" fruit" if a.fruit else ""}: {len(inside)}/{len(tj["frames"])} cameras inside the cell; top-supervised inside frame {best[1]} ({best[0]} px) from {sup}', file=sys.stderr)
