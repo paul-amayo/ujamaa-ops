@@ -26,6 +26,7 @@ if ls $O/splat_runs_FEATFIX/stage2_censusinit_glref_bg_f1.0_r2/high/*/nerfstudio
 t0=$(date +%s); say "=== chunk $CN$TAG side-car v2 (margin $MARGIN m) | project $P | hierarchy $(basename $HIER) $(du -h $HIER | cut -f1) | template $(basename $(dirname $(dirname $(dirname $TEMPLATE))))"
 # 1. dataset + dataparser frame (chunk poses come from the survey project's chunk dir; an expo project's chunks are hard-linked copies of it)
 $PYH /home/paperspace/logs/sidecar_chunk_dataset.py $SV $CN $O 2>&1 | grep -a '^\[chunk-dataset\]' | tee -a $L
+python3 /home/paperspace/logs/sidecar_chunk_manifest.py $SV $O 2>&1 | grep -a '^\[chunk-manifest\]' | tee -a $L   # trees_only/manifest.json = the owning blocks' word_table union (render_service resolves "tree N" through it)
 S1D=$O/splat_runs_STAGE1/stage1_bg00_glref/high/h3dgs_sidecar; mkdir -p $S1D/nerfstudio_models
 (cd $NS && pixi run python /home/paperspace/logs/sidecar_dataparser.py $O $S1D 2>&1 | grep -a '^\[dataparser\]' | tee -a $L)
 [ -e $S1D/dataparser_transforms.json ] || { say "chunk $CN$TAG: dataparser failed"; exit 1; }
