@@ -35,17 +35,19 @@ about 28 GB for jobs, run **one at a time** in a queue. The peer session's
 H3DGS 01 re-chunk (about 36 h) **stays parked until after Tuesday**, and I only read its
 Klapmuts ledger files, never change them.
 
-### Training (GPU), one job at a time: status 30 Sep 13:00
+### Training (GPU): the queue, 30 Sep ~13:50 SAST (one job at a time, `~/logs/demo_gpu_queue4_20260930.sh`)
 
-| id | what | who | status |
-|---|---|---|---|
-| **K1** | Gwakungu **cabbages**: H3DGS on IMG_7993_s0 (lane-2 recipe, 4 M), then a side-car from the cabbage registry (42 ids / 15 objects) | me | training since 12:27 (~2 h incl. post-opt) |
-| **K2** | Gwakungu **chillies**: H3DGS on IMG_7990_s1 ("pepper" 1402 masks / 241 frames) + side-car | me | queued after K1 |
-| **K3** | Kendu Bay **ground plants**: H3DGS on IMG_7975_s0 (groundnut canopy; prompt still being probed) + side-car | me | queued after K2 |
-| **C-A** | Citrus A: chunk 3_1 (28.23 in-cell) made servable: hier service + a walk inside the cell + a tree/row side-car | peer session | requested 12:40 |
-| **C-B** | Citrus B: `h3dgs_expo` chunk 0_0 (27.54 / 28.07) the same, plus a fruit side-car (tree 5, 61 oranges) | peer session | requested 12:40 |
-| **B** | Klapmuts Dec berries: SAM3 "berry" counts per ledger bag | me | after K3 |
-| — | the remaining citrus chunks (05 improved recipe, 01 45 m re-chunk) | peer session | backlog, after the plan for them is ready (Paul) |
+| # | job | who | est. | status |
+|---|---|---|---|---|
+| 1 | Gwakungu **cabbages**: H3DGS IMG_7993_s0 (60k → hierarchy → post-opt 30k → eval) | me | ~2 h left | running (21 %) |
+| 2 | Citrus B side-car on `h3dgs_expo` 0_0, then **fruit densify** (tree 5: 61 oranges) | peer | ~1 h | Paul: go (13:4x); starts after 1 |
+| 3 | Citrus A side-car on 01 chunk 3_1 (trees / rows) | peer | ~30 min | after 2 |
+| 4 | Gwakungu **chillies**: H3DGS IMG_7990_s1 (241 frames) | me | ~2.5 h | waits for the peer's done-file |
+| 5 | Kendu Bay **ground plants**: H3DGS IMG_7975_s0 ("plant" 551 masks / 61 frames) | me | ~2 h | after 4 |
+| 6 | Klapmuts Dec **berries**: SAM3 counts per ledger bag | me | ~1 h | after 5 |
+| 7 | side-cars on each Kenyan segment that clears 25 dB (cabbage / pepper / plant supervision) | me | ~20 min each | after its H3DGS |
+
+Estimated to finish overnight (Thu ~03:00 SAST). Backlog (peer, after their plan): remaining 05 chunks on the improved recipe, the 01 45 m re-chunk.
 
 Klapmuts Dec 3D stays `h3dgs_e2` (lane 2, half views): training-view median 29.72, held-out 19.82.
 Every 3D shown must measure ≥ 25 dB (training views); each Kenyan segment is shown only if its evaluator says so.
