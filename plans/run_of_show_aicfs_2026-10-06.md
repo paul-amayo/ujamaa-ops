@@ -46,12 +46,12 @@ Klapmuts ledger files, never change them.
 | 5 | Gwakungu chillies, H3DGS IMG_7990_s1, **8 M** | me | ~2.5 h | queue v5, after the peer's done-file |
 | 6 | Kendu Bay ground plants, H3DGS IMG_7975_s0, **8 M** | me | ~2 h | queue v5 |
 | 7 | Gwakungu cabbages again at **8 M** (own project `h3dgs_8m`) — Paul 17:1x | me | ~2.5 h | queue v6, after v5 |
-| 8 | Klapmuts Dec berries (SAM3) + Kenyan side-cars for any segment ≥ 25 dB + the cabbage depth-scale fix | me | ~2 h | after 7 |
+| 8 | cabbage embedder (queue v7), then the cabbage side-car on the 8 M model if it clears 25 dB; Klapmuts Dec berries (SAM3); side-cars for any other Kenyan segment ≥ 25 dB | me | ~3 h | after 7 |
 
 Why 1_0: the peer found that 05 chunk 0_0 holds 12 trees, of which only tree 90 (8 oranges) and tree 92 (2) carry fruit; tree 5 (61) and tree 3 (14) are in cell 1_0.
 Tassili guard (ujamaa 27563f3): a plant more than 6 m from the served walk is "outside the 3D section": the answer is kept and points to the map, with no walk into empty space.
 
-The peer chain hands the GPU back ~22:00 box (~00:00 SAST); jobs 5–7 finish ~Thu 09:30 SAST, 8 by ~Thu 11:30 SAST. Backlog (peer, after their plan): remaining 05 chunks on the improved recipe, the 01 45 m re-chunk.
+The peer chain runs slower than estimated (tree cuts ~1 h per chunk): 1_0 fruit result ~02:00 SAST; jobs 5–7 finish ~Thu 11:30 SAST, 8 by ~Thu 14:30 SAST. Backlog (peer, after their plan): remaining 05 chunks on the improved recipe, the 01 45 m re-chunk.
 
 Klapmuts Dec 3D stays `h3dgs_e2` (lane 2, half views): training-view median 29.72, held-out 19.82.
 Every 3D shown must measure ≥ 25 dB (training views); each Kenyan segment is shown only if its evaluator says so.
@@ -92,7 +92,7 @@ Switching farms stages that farm's chunk on the render broker in ~12 s; talk ove
 | smallholder / Kenya | **Gwakungu** | only if the cabbage H3DGS clears 25 dB (see §1); otherwise the phone-survey story on the poster and the survey date in chat | "Shamba hili lilipimwa mara ya mwisho lini?" |
 
 **Close (every visitor):** the lesson ("same farm, same data — the gap between languages was far bigger than we expected, even for simple questions") → hand over the keyboard in any of the 8 languages → ASK / OFFER → card / QR.
-**Don't do live:** action requests ("mark tree 12…"); asking to see plants outside the 3D section (the app says so, but it is a dead end on stage); cabbage counts (registry failed its check, 30 Sep).
+**Don't do live:** action requests ("mark tree 12…"); asking to see plants outside the 3D section (the app says so, but it is a dead end on stage). Cabbage count is now honest: 29 heads within 4 m of the walk, two rows (3-frame registry, 30 Sep) — say "counted along the survey path".
 Question bank with expected answers: `automation/adinkra_www/demo_bank_20260930.json` (14 items, 89 question-language pairs) — run against Gemma when the GPU frees.
 
 ## 4. The demo video (idle loop, ~90 s, 1080p, silent, captions)
