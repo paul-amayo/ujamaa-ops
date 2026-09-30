@@ -108,16 +108,18 @@ Frames are rendered offline at fixed poses along each farm's walk (render servic
 | 70–82 s | Citrus A chunk 3_1 walk (28 dB) with a tree lit | scale |
 | 82–90 s | ASK / OFFER, contact, ujamaa.ai | 3, 4 |
 
-## 5. Timeline
+## 5. Timeline (revised 30 Sep 17:40 SAST; Paul: video waits for all training runs)
 
-| day | GPU queue | build / capture | Paul |
-|---|---|---|---|
-| **Wed 30 Sep** | D1 probe + chain; C1 staging; B1 check | plan v2; peer session told | read v2 |
-| **Thu 1 Oct** | C3 berries; D2; B1 densify (overnight, if needed) | B2, C2, G1 | **SSH to the A100 from a phone hotspot** |
-| **Fri 2 Oct** | — | E1 question bank ×8 languages; G2; video capture → v1; screenshot PDF | review video v1 |
-| **Sat–Sun** | — | video v2 | rehearse the 4 farm paths with a timer |
-| **Mon 5 Oct** | freeze 12:00 | tag; dress rehearsal off campus | pack |
-| **Tue 6 Oct** | — | 06:30: all 4 farms staged + Gemma warm + smoke test | present |
+| when | what | who |
+|---|---|---|
+| Wed evening → Thu ~11:30 SAST | the GPU queue (§2): peer side-cars, chunk 1_0 + fruit, Kenyan H3DGS at 8 M, cabbage rerun, berries | GPU |
+| Thu, as results land | each model checked against 25 dB and wired into the catalogue; fruit cuts in; Kenya 3D only if it passes | me |
+| Thu afternoon | question bank (89 pairs) run against Gemma, answers checked; **Paul tests SSH from a phone hotspot** | me, Paul |
+| Thu evening | **video first draft** (offline frames along each walk, lit trees and oranges) | me |
+| Fri | video v2 from feedback; screenshot PDF; portrait stage if Kenya is in | me → Paul reviews |
+| Sat–Sun | Paul rehearses the four farm paths with a timer | Paul |
+| Mon 5 Oct | freeze 12:00; tag `demo-aicfs-2026-10-06`; dress rehearsal off campus on the tunnel (8011 + 8024) | Paul, me |
+| Tue 6 Oct | morning procedure (§6) | Paul |
 
 ## 6. Tuesday morning and packing
 
