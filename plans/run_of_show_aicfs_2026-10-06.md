@@ -80,39 +80,33 @@ The launch app is served on **:8011** (the :8001 server is the old viewer), so t
 Every run is logged in the notebook and committed after it goes green. Known-good states are tagged
 Monday (`demo-aicfs-2026-10-06`).
 
-## 3. The live walkthrough (3 minutes, the farm picked to suit the visitor)
+## 3. The live walkthrough (3 minutes, farm picked to suit the visitor) — as built, 30 Sep evening
 
-All four farms stay warm (G1), so switching is instant.
+Switching farms stages that farm's chunk on the render broker in ~12 s; talk over it ("loading the farm in 3D").
 
-**Hook (15 s):** "One walk through a farm, by robot or on a phone, becomes a 3D twin
-you can question in your own language. Pick a farm."
-
-| visitor | farm | what you show | ask Adinkra |
+| visitor | farm | what you show | ask Adinkra (chat drives the 3D) |
 |---|---|---|---|
-| smallholder / Kenya / food security (**default**) | **Gwakungu cabbages** | "filmed on a phone"; Tassili lights each cabbage; Bateleur counts them | Swahili: *Kuna kabichi ngapi shambani?* |
-| fruit / horticulture | **Citrus farm B** | ask, and Tassili lights that tree's oranges | "Which tree has the most oranges? Show me." |
-| monitoring / seasons | **Klapmuts** | Sankofa: the same bag in December and April; berries in December, none after harvest | Afrikaans or isiXhosa: "Which bushes had berries in December?" |
-| research / scale | **Citrus farm A** | three surveys of one farm; a tree's history | "How many trees were in all three surveys?" |
+| fruit / horticulture (**default**) | **Citrus farm B**, chunk 1_0 (from ~Thu 00:00) | walk the row; ask, and tree 5's oranges light by containment | "Which tree has the most oranges? Show me." → tree 5, 61 |
+| monitoring / seasons | **Klapmuts** | Bateleur: 912 bags in 14 rows; Sankofa: 3 Dec 2025 → 15 Apr 2026, 825 found again (Dec lane in 3D, 29.7 dB) | "How many bushes were found again in April?"; Afrikaans per row |
+| research / scale | **Citrus farm A**, chunk 3_1 | the 3D walk (28.2 dB); three surveys of one farm; a tree's vegetation index over time | "Are any trees getting worse over time?" |
+| smallholder / Kenya | **Gwakungu** | only if the cabbage H3DGS clears 25 dB (see §1); otherwise the phone-survey story on the poster and the survey date in chat | "Shamba hili lilipimwa mara ya mwisho lini?" |
 
-**Close (every visitor):** state the lesson ("same farm, same data: the gap between
-languages was far bigger than we expected, even for simple questions"), then hand
-over the keyboard ("ask it anything, in any of these eight languages"), then ASK / OFFER, then a card or the QR code.
-
-**Don't do this live:**
-- action requests ("mark tree 12…")
-- Kendu Bay clips until G2 lands
-- berries in 3D
+**Close (every visitor):** the lesson ("same farm, same data — the gap between languages was far bigger than we expected, even for simple questions") → hand over the keyboard in any of the 8 languages → ASK / OFFER → card / QR.
+**Don't do live:** action requests ("mark tree 12…"); asking to see plants outside the 3D section (the app says so, but it is a dead end on stage); cabbage counts (registry failed its check, 30 Sep).
+Question bank with expected answers: `automation/adinkra_www/demo_bank_20260930.json` (14 items, 89 question-language pairs) — run against Gemma when the GPU frees.
 
 ## 4. The demo video (idle loop, ~90 s, 1080p, silent, captions)
 
+Frames are rendered offline at fixed poses along each farm's walk (render service / hier service), not screen-recorded — headless browser capture runs at 8–11 fps.
+
 | time | shot | poster link |
 |---|---|---|
-| 0–8 s | landing page, "Western Cape and Kenya", choose a farm | status |
-| 8–25 s | Gwakungu: phone walk → each cabbage lit, the count | story 1, OFFER: phones |
-| 25–40 s | Citrus farm B: robot row, trees lit, then the oranges | story 1 |
-| 40–60 s | Klapmuts: Sankofa, the same bag in Dec and Apr; berries in Dec | story 2 |
-| 60–80 s | Adinkra: the Swahili cabbage question and answer; one in English | story 3 |
-| 80–90 s | ASK / OFFER, contact, ujamaa.ai | 3, 4 |
+| 0–8 s | landing → "Western Cape and Kenya" → choose a farm (the new agent cards: our own render, registry map, found-again pairs) | status |
+| 8–30 s | Citrus B chunk 1_0: walk the row; "which tree has the most oranges?" → tree 5's oranges lit | story 1 |
+| 30–50 s | Klapmuts: December lane in 3D → Bateleur's 912 bags by row → Sankofa December/April pairs, 825 found again | story 2 |
+| 50–70 s | Adinkra: the orange question in Swahili, the found-again question in Afrikaans | story 3 |
+| 70–82 s | Citrus A chunk 3_1 walk (28 dB) with a tree lit | scale |
+| 82–90 s | ASK / OFFER, contact, ujamaa.ai | 3, 4 |
 
 ## 5. Timeline
 
@@ -133,7 +127,7 @@ over the keyboard ("ask it anything, in any of these eight languages"), then ASK
   3. One question per farm.
   4. No training jobs.
 - **Venue, 30 min before:**
-  1. Connect the tunnel; stage every farm.
+  1. Connect the tunnel (ports **8011 and 8024**); stage the first farm.
   2. Ask the Swahili question.
   3. Start the video loop.
   4. Run `caffeinate -dis`; turn on Focus mode.
