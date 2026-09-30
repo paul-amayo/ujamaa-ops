@@ -6,21 +6,27 @@ gives every demo farm the data each agent needs. The demo accompanies the Pillar
 (v13); its three stories are **plants individuated in 3D, the same plant tracked over time,
 and questions answered in the farmer's language**.
 
-## 1. What each farm has today, and what it will show on Tuesday
+## 1. Quality bar and what passes it (Paul, 30 Sep)
 
-Inventory measured on the A100, 2026-09-30.
+**H3DGS is the demo standard. Nothing under 25 dB is shown. Training aims for the
+high 20s to early 30s on training views.** Identity (lighting a plant, a row or fruit)
+on H3DGS comes from side-cars: HiGH features on the H3DGS leaves, the 09-27 recipe with
+the void row, `--bg-competes --bg-ratio 2`, and no opacity boost.
 
-| farm | 3D (Tassili) | registry (Bateleur) | over time (Sankofa) | fruit / crop | gap to close |
-|---|---|---|---|---|---|
-| **Citrus farm A** (13B, survey 01) | per-block, 28–33 fps | 290 trees | ledger v2: surveys 01/02/03 (289/177/303 obs) | none (0 fruit trees on 13B) | none. Also the H3DGS chunk 3_1 hero, 28.2 dB (peer session) |
-| **Citrus farm B** (13D, surveys 04 + 05) | 05 per-block, 43 blocks | 05 registry, 3D-confirmed **oranges** per tree (154 on 20 trees; 04: 108 on 17) | pairing 04↔05 exists (`assoc_04_05_v4`, 128 canonical trees). **Not wired**: catalogue has 05 only, no ledger survey | oranges | B1 fruit lighting on the served models; B2 Sankofa ledger for 04↔05 |
-| **Klapmuts** (blueberries in grow bags) | Dec 2025 H3DGS lane (11 fps). **Apr 2026: 25 trained blocks, not staged** | Apr gen2, 517 | **ledger v5 (today, peer session): Dec↔Apr, 825 bags matched, 0.23 m median** | **berries in Dec** (SAM3 recipe measured 08-08); none in Apr | C1 stage Apr 3D; C2 Sankofa from ledger v5; C3 berry counts per bag in Dec |
-| **Gwakungu** (Kenya, phone) | cabbage bed 22.5 dB, open field 25.9 dB | none (SAM3 'tree' finds nothing on vegetables) | single date | **cabbages** | D1 cabbage registry (retrain with crop prompt) |
-| **Kendu Bay** (Kenya, phone) | 3 segments (towers, beans, seedlings), ~21 dB | none | single date | kale / towers, beans | D2 one crop registry (towers or kale) |
+Measured numbers, notebook of record. "in-cell" means held-out views inside the chunk.
 
-**Rule for the demo:** each agent quotes the same numbers. Bateleur's count, Sankofa's
-matches and Adinkra's answers come from one registry per survey: the one the 3D identity
-field was trained on.
+| farm | H3DGS model | measured | passes 25 dB? | demo 3D |
+|---|---|---|---|---|
+| **Citrus farm A** (01) | improved recipe (12 M cap, 60k/45k, exposure); **5 of 24 chunks** (7_2, 6_2, 2_2, 2_0, 3_1) | in-cell 31.09 / 30.53 / 28.23 (7_2 / 2_0 / 3_1) | **yes**, on built chunks | the walk stays inside the built chunks; hero 3_1 |
+| **Citrus farm B** (05) | original recipe, 6 chunks (09-22); improved recipe on chunk 0_0 only | original 18.97 held-out (whole survey); **0_0 improved 27.54 full / 28.07 sky-masked** in-cell | original no; improved yes | **train the other 5 chunks on the improved recipe** |
+| Citrus farm B (04) | original recipe, 6 chunks (09-27) | not scored at the bar | — | none needed: 04 appears in Sankofa only |
+| **Klapmuts** Dec lane 2 | arm E, 4 M | training 25.13, held-out 21.82 | borderline | Paul reports a 30 dB Klapmuts H3DGS; waiting on which run |
+| Klapmuts Apr | 4 chunks | ~17–18 held-out | **no** | none |
+| **Gwakungu / Kendu Bay** | none (phone per-block only) | per-block ns-eval 18–26 | no H3DGS yet | **H3DGS per segment** (single chunk, improved recipe) |
+
+The per-block models (the Citrus A/B glref fleet, the phone segments) are **not** shown once their H3DGS replacement lands.
+
+Unchanged from v2: Citrus A ledger (01/02/03); Citrus B oranges (154 confirmed on 20 trees; 04: 108 on 17) and the 04↔05 pairing; Klapmuts ledger v5 (825 Dec↔Apr pairs); Gwakungu cabbages (SAM3: 956 masks / 72 frames → 42 ids).
 
 ## 2. Work plan: what I will train and build
 
@@ -29,17 +35,21 @@ about 28 GB for jobs, run **one at a time** in a queue. The peer session's
 H3DGS 01 re-chunk (about 36 h) **stays parked until after Tuesday**, and I only read its
 Klapmuts ledger files, never change them.
 
-### Training (GPU), status as of 30 Sep 11:30 box
+### Training (GPU), one job at a time: revised 30 Sep 13:00 for the H3DGS bar
 
-| id | what is trained | why (what the visitor sees) | GPU | status |
+| id | what is trained | gives the visitor | est. GPU | status |
 |---|---|---|---|---|
-| **D1** | Gwakungu cabbages: HiGH identity model with SAM3 prompt "cabbage" (IMG_7993_s0, copy dir `_cabbage`, served model untouched) | each cabbage lit on its own in Tassili; Bateleur counts them; Adinkra answers "how many cabbages" | ~2 h | probe good (956 masks / 72 frames). **Run 1 failed at the lifting gate**: stale SAM3 outputs reused from the copy, and all 654 detections dropped by the 30-unit distance cut. Diagnosing |
-| **D2** | Kendu Bay: the same chain on one more crop (towers: "pot" 103 masks; "plant" too dense at 5632) | a second Kenyan farm with a registry | ~2 h | after D1 works |
-| **C3** | Klapmuts Dec berries: SAM3 "berry" detection pass over the Dec keyframes (the 08-08 recipe), counted per ledger bag | "which bushes had berries in December" | ~1 h | queued |
-| **B1** | Citrus B oranges: fruit densification + reseed on the demo row blocks (018–023), **only if** the fruit-lit test render looks weak. Recorded fruit IoU on the served blocks is 0.48–0.60 | oranges lit in 3D | 0 or ~3 h | test render in progress |
+| **T1** | Citrus B 05: improved H3DGS recipe on chunks 0_1, 0_2, 1_0, 1_1, 1_2 (0_0 done), then merge | Citrus B in 3D at ~27 dB | ~12–15 h | proposed (the recipe of the peer session's 01 run) |
+| **T2** | side-cars on the new H3DGS: 05 (6 chunks) and 01 chunk 3_1 (ratio-2 recipe) | trees and rows lit on demo-standard 3D | ~1 h | after T1 |
+| **T3** | fruit densify on the 05 side-cars (`sidecar_fruit_densify.sh`) for the chunks holding the top fruit trees (5, 72, 3) | oranges lit | ~1–2 h | after T2 |
+| **T4** | Gwakungu cabbages: H3DGS on IMG_7993_s0 (single chunk), plus a side-car from the cabbage supervision | cabbages in 3D at ≥25 dB, each lit | ~1–2 h | the per-block cabbage run (r4, 12:08, ETA ~13:00) produces the registry and supervision the side-car needs |
+| **T5** | Klapmuts Dec berries: SAM3 "berry" pass, counts per ledger bag | "which bushes had berries" | ~1 h | queued |
+| — | Kendu Bay second crop | — | — | dropped unless time remains |
+
+**Cancelled:** `fruit_glref_block.sh` on the per-block 05 era (queued 12:2x, cancelled before it started). Per-block isn't the demo standard; T3 does fruit on the H3DGS side-cars.
 
 ### Not trained before Tuesday
-- **Klapmuts April 3D.** Tried and reverted on 30 Sep: the only per-block models are the damaged August era (~17 dB held-out, rejected 09-23), and the H3DGS April work sits at ~18 dB against the 20 dB goal. Klapmuts 3D stays December.
+- **Klapmuts April 3D.** Tried and reverted on 30 Sep: the per-block models are the damaged August era (~17 dB, rejected 09-23), and April H3DGS is ~18 dB, below the bar.
 - **H3DGS 01 re-chunk.** Parked by Paul until after Tuesday; Citrus A's hero stays chunk 3_1.
 - **Berries lit in 3D.** Needs a berry side-car on the Dec H3DGS model: days, not hours.
 - **Gemma fine-tune.** G0 failed its generation gate; the demo runs base Gemma 4 12B.
