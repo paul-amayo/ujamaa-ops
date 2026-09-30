@@ -29,26 +29,38 @@ about 28 GB for jobs, run **one at a time** in a queue. The peer session's
 H3DGS 01 re-chunk (about 36 h) **stays parked until after Tuesday**, and I only read its
 Klapmuts ledger files, never change them.
 
-| id | work | kind | GPU | when |
+### Training (GPU), status as of 30 Sep 11:30 box
+
+| id | what is trained | why (what the visitor sees) | GPU | status |
 |---|---|---|---|---|
-| **D1** | Gwakungu cabbages: SAM3 prompt probe ("cabbage" / "cabbage head"), then `image_farm_recipe.sh --prompt <best>` with `IF_MODE=high` on IMG_7993_s0: markers → embedder → HiGH features → registry | **train** | ~2 h | Wed |
-| **C1** | Klapmuts Apr 3D: stage manifests for the 25 blocks (`stage_splat_manifests.py`); check the models' identity ids against the registry; add a render entry | stage + verify | minutes | Wed |
-| **B1** | Citrus B oranges: fruit queries on the served 05 blocks along the demo row (018–023). If weak, run `fruit_chain.sh` (fruit densify + reseed) on those blocks | verify → **train** | 0 or ~3 h (overnight) | Wed → Thu |
-| **C3** | Klapmuts Dec berries: SAM3 'berry' on the Dec keyframes (recipe of 08-08), counts per ledger bag | **SAM3 pass** | ~1 h | Thu |
-| **D2** | Kendu Bay: prompt probe on the tower (IMG_7961_s2) and bean segments; the best crop through the same chain as D1 | **train** | ~2 h | Thu |
-| **B2** | Citrus B Sankofa: 13D ledger from `assoc_04_05_v4` (presence, canopy, confirmed fruit per epoch); survey 04 added to the catalogue | CPU | — | Thu |
-| **C2** | Klapmuts Sankofa: registry bushes ↔ ledger v5 bags (≤ 0.5 m); history "found in Dec and Apr", plus Dec berries | CPU | — | Thu |
-| **E1** | Adinkra: per-farm sources (orange counts, berries, cabbage count). Question bank per farm in 8 languages, answers checked | CPU + Gemma | — | Fri |
-| **G1** | Broker: keep **every demo farm's 3D warm at once** (one renderer per farm, ~5 GB each), so switching farms is instant instead of ~20 s | code | ~20 GB resident | Thu |
-| **G2** | Phone surveys: the stage adopts the clip's portrait aspect instead of black bands | front end | — | Fri |
-| **F1** | Demo video re-cut from the live app (§4) | capture | — | Fri → Sat |
+| **D1** | Gwakungu cabbages: HiGH identity model with SAM3 prompt "cabbage" (IMG_7993_s0, copy dir `_cabbage`, served model untouched) | each cabbage lit on its own in Tassili; Bateleur counts them; Adinkra answers "how many cabbages" | ~2 h | probe good (956 masks / 72 frames). **Run 1 failed at the lifting gate**: stale SAM3 outputs reused from the copy, and all 654 detections dropped by the 30-unit distance cut. Diagnosing |
+| **D2** | Kendu Bay: the same chain on one more crop (towers: "pot" 103 masks; "plant" too dense at 5632) | a second Kenyan farm with a registry | ~2 h | after D1 works |
+| **C3** | Klapmuts Dec berries: SAM3 "berry" detection pass over the Dec keyframes (the 08-08 recipe), counted per ledger bag | "which bushes had berries in December" | ~1 h | queued |
+| **B1** | Citrus B oranges: fruit densification + reseed on the demo row blocks (018–023), **only if** the fruit-lit test render looks weak. Recorded fruit IoU on the served blocks is 0.48–0.60 | oranges lit in 3D | 0 or ~3 h | test render in progress |
+
+### Not trained before Tuesday
+- **Klapmuts April 3D.** Tried and reverted on 30 Sep: the only per-block models are the damaged August era (~17 dB held-out, rejected 09-23), and the H3DGS April work sits at ~18 dB against the 20 dB goal. Klapmuts 3D stays December.
+- **H3DGS 01 re-chunk.** Parked by Paul until after Tuesday; Citrus A's hero stays chunk 3_1.
+- **Berries lit in 3D.** Needs a berry side-car on the Dec H3DGS model: days, not hours.
+- **Gemma fine-tune.** G0 failed its generation gate; the demo runs base Gemma 4 12B.
+- **Per-tree orange change on Citrus B.** Only ~2 trees were seen well in both surveys, so the demo uses farm totals (154 vs 108).
+
+### Built (no training)
+
+| id | work | when |
+|---|---|---|
+| **E1** | **Adinkra drives the 3D.** Oranges, cabbages and plants are lit by asking in the chat ("show me the tree with the most oranges"), not by a button. Adinkra's Tassili actions gain a fruit target, the app forwards it to the renderer (`{"t":"query","fruit":10000+id}`, already supported), and per-farm facts are added (orange counts, berries, cabbage count) with farm-appropriate example prompts (Klapmuts currently says "trees… row 2") | Thu |
+| **B2** | Citrus B Sankofa: 13D ledger from `assoc_04_05_v4` (04 ↔ 05, 128 canonical trees, confirmed fruit per epoch) | Thu |
+| **C2** | Klapmuts Sankofa: Apr registry bushes ↔ ledger v5 bags (825 Dec↔Apr pairs), plus Dec berries from C3 | Thu |
+| **G1** | Broker keeps every demo farm's 3D warm at once, so switching farms is instant | Thu |
+| **G2** | Phone surveys: portrait stage instead of black bands | Fri |
+| **E2** | Question bank per farm in 8 languages, answers checked | Fri |
+| **F1** | Demo video re-cut from the live app (§4) | Fri → Sat |
+
+The launch app is served on **:8011** (the :8001 server is the old viewer), so the Tuesday tunnel forwards 8011.
 
 Every run is logged in the notebook and committed after it goes green. Known-good states are tagged
 Monday (`demo-aicfs-2026-10-06`).
-
-**Out of scope before Tuesday, stated honestly:**
-- Berries lit in 3D on Klapmuts Dec. That needs a side-car with berry supervision on the H3DGS model, which is days of work, not hours. Berries appear as counts and history instead.
-- Per-tree orange *change* on Citrus B. Only about 2 trees were seen well in both surveys (08-29 v4 verdict), so the honest comparison is farm totals (154 vs 108).
 
 ## 3. The live walkthrough (3 minutes, the farm picked to suit the visitor)
 
@@ -60,7 +72,7 @@ you can question in your own language. Pick a farm."
 | visitor | farm | what you show | ask Adinkra |
 |---|---|---|---|
 | smallholder / Kenya / food security (**default**) | **Gwakungu cabbages** | "filmed on a phone"; Tassili lights each cabbage; Bateleur counts them | Swahili: *Kuna kabichi ngapi shambani?* |
-| fruit / horticulture | **Citrus farm B** | "show me the oranges": fruit lit in 3D; the tree with the most | "Which tree has the most oranges?" |
+| fruit / horticulture | **Citrus farm B** | ask, and Tassili lights that tree's oranges | "Which tree has the most oranges? Show me." |
 | monitoring / seasons | **Klapmuts** | Sankofa: the same bag in December and April; berries in December, none after harvest | Afrikaans or isiXhosa: "Which bushes had berries in December?" |
 | research / scale | **Citrus farm A** | three surveys of one farm; a tree's history | "How many trees were in all three surveys?" |
 
