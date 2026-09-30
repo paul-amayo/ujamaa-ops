@@ -32,13 +32,17 @@ export PATH=/home/paperspace/.local/bin:/home/paperspace/.pixi/bin:/usr/local/sb
 NS_PIXI=/home/paperspace/code/nerf_new/pixi.toml
 EMB=${CENSUS_EMBEDDER:?set CENSUS_EMBEDDER}
 
-S1=$(ls -t "$BD"/splat_runs_STAGE1/stage1_bg00/high/*/nerfstudio_models/*.ckpt | head -1)
+# DENSIFY_STAGE1 / DENSIFY_TAG (2026-09-30): run the same pass on another stage-1
+# era (e.g. stage1_bg00_glref, the GL-fixed models served since 09-21) without
+# touching the default era's init or densify dirs.
+STAGE1=${DENSIFY_STAGE1:-stage1_bg00}; TAG=${DENSIFY_TAG:-}
+S1=$(ls -t "$BD"/splat_runs_STAGE1/$STAGE1/high/*/nerfstudio_models/*.ckpt | head -1)
 STEP0=$(basename "$S1" | grep -oE '[0-9]+' | sed 's/^0*//')
 MAXIT=$((STEP0 + ITERS + 1))
 
 # stage2_init (stage1 + zero high_features) — reclaimed after verdicts, rebuild
-if [ ! -f "$BD/stage2_init/nerfstudio_models/$(basename "$S1")" ]; then
-  (cd /home/paperspace/code/nerf_new && pixi run python - "$S1" "$BD/stage2_init/nerfstudio_models" << 'PY'
+if [ ! -f "$BD/stage2_init$TAG/nerfstudio_models/$(basename "$S1")" ]; then
+  (cd /home/paperspace/code/nerf_new && pixi run python - "$S1" "$BD/stage2_init$TAG/nerfstudio_models" << 'PY'
 import sys, torch
 from pathlib import Path
 src, dst = Path(sys.argv[1]), Path(sys.argv[2])
@@ -59,8 +63,8 @@ echo "DENSIFY: resume step $STEP0 -> $MAXIT ($ITERS iters), feature loss ZEROED,
 cd /home/paperspace/code/nerf_new
 echo "n" | MAX_JOBS=4 HIGH_EMBEDDER_CKPT=$EMB HIGH_LOSS_WARMUP_STEP=1000000000 \
   pixi run ns-train high \
-    --data "$BD" --output-dir "$BD/splat_runs_FEATFIX" --experiment-name fruit_densify \
-    --load-dir "$BD/stage2_init/nerfstudio_models" \
+    --data "$BD" --output-dir "$BD/splat_runs_FEATFIX" --experiment-name fruit_densify$TAG \
+    --load-dir "$BD/stage2_init$TAG/nerfstudio_models" \
     --pipeline.model.rasterize-mode antialiased \
     --pipeline.model.high-loss-weight 1.0 \
     --pipeline.model.fruit-protect True \
@@ -76,6 +80,6 @@ echo "n" | MAX_JOBS=4 HIGH_EMBEDDER_CKPT=$EMB HIGH_LOSS_WARMUP_STEP=1000000000 \
     --eval-mode interval --eval-interval 10 \
     || { echo "DENSIFY-FAIL: train"; exit 1; }
 
-CK=$(ls -t "$BD"/splat_runs_FEATFIX/fruit_densify/high/*/nerfstudio_models*/*.ckpt | head -1)
+CK=$(ls -t "$BD"/splat_runs_FEATFIX/fruit_densify$TAG/high/*/nerfstudio_models*/*.ckpt | head -1)
 [ -n "$CK" ] || { echo "DENSIFY-FAIL: no ckpt"; exit 1; }
 echo "DENSIFY-DONE $N -> $CK"
