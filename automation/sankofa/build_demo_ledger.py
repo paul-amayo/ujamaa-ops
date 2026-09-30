@@ -10,7 +10,13 @@ instances at the 2.5 m mask window; Dec 911 / Apr 912 bags; 825 mutual-NN pairs 
     attached to the nearest main line. Row numbers are shared by both surveys (main lines matched in the April frame).
 Sankofa: one combined ledger in the ledger_v2 observation schema (canonical_id, farm, epoch, source_survey,
 source_tree_id, row_id, ndvi_sentinel2) so /api/sankofa/* and Adinkra read every farm from one file, keyed by "farm":
-  * citrus: ledger_v2 observations verbatim (13B: surveys 01/02/03; 13D: 04);
+  * Citrus A (13B): ledger_v2 observations verbatim (surveys 01/02/03);
+  * Citrus B (13D): REBUILT from assoc_04_05_v4 + the gen2 hierarchies (ledger_v2's 13D side predates them: survey 04
+    only, old ids) — the same construction as ujamaa/project/export_bateleur_timeline.py: a pair shares canonical
+    "13D:<05 id>", unpaired 04 trees are "13D:u04:<id>", stale pairs (ids no longer in the hierarchies) dropped;
+    each observation carries the tree's 3D-confirmed fruit ("fruit_confirmed", n_fruit3d). Dates from the ledger:
+    05 = 2023-07-16, 04 = 2023-07-18. Per-tree fruit CHANGE is not a fair statistic here (only ~2 pairs had a fair
+    look in both surveys, 08-29 v4 verdict); farm totals are (154 vs 108);
   * Klapmuts ("KL"): one observation per bag per survey; a matched pair shares a canonical id.
 Recording dates from the data (not the folder names): Dec 2025-12-03, Apr 2026-04-15.
   usage: build_demo_ledger.py [--out-dir /home/paperspace/data/sankofa_demo]"""
@@ -20,6 +26,8 @@ import numpy as np
 
 KL = Path("/home/paperspace/data/klapmuts/dec_2025_ten_rows/experimental/sankofa/klapmuts_ledger_v5.json")
 CITRUS = Path("/home/paperspace/data/citrus_all/sankofa_substrate/ledger_v2.json")
+C13D = {"05_13D_Jackal": "2023-07-16", "04_13D_Jackal": "2023-07-18"}
+ASSOC = Path("/home/paperspace/data/citrus_all/sankofa_substrate/assoc_04_05_v4.npz")
 GAP, MIN_LINE = 0.45, 10
 DEC_SV, APR_SV = "klapmuts_dec_2025", "klapmuts_apr_2026"
 DEC_DATE, APR_DATE = "2025-12-03", "2026-04-15"
@@ -42,6 +50,28 @@ def registry(P, rows, survey, note):
             "rows": out_rows, "fruits": [], "trees": []}
 
 
+def citrus_b_obs():
+    H = {sv: json.loads(Path(f"/home/paperspace/data/citrus_all/{sv}/prod/bateleur/scene_graph/marker_hierarchy.json").read_text()) for sv in C13D}
+    ids = {sv: {o["id"] for o in H[sv]["objects"]} for sv in H}
+    row = {sv: {o["id"]: o.get("row_id") for o in H[sv]["objects"]} for sv in H}
+    fruit = {sv: {f["tree_id"]: f.get("n_fruit3d") or 0 for f in (H[sv].get("fruits") or [])} for sv in H}
+    z = np.load(ASSOC, allow_pickle=True)
+    pairs = [(int(p[0]), int(p[1])) for p in z["pairs"]]
+    pairs = [(a, b) for a, b in pairs if a in ids["04_13D_Jackal"] and b in ids["05_13D_Jackal"]]
+    p04 = {a: b for a, b in pairs}; p05 = {b for _, b in pairs}
+    out = []
+    def ob(sv, tid, cid):
+        return {"canonical_id": cid, "farm": "13D", "epoch": C13D[sv], "epoch_type": "survey", "source_survey": sv,
+                "source_tree_id": tid, "row_id": row[sv].get(tid), "fruit_confirmed": fruit[sv].get(tid, 0), "ndvi_sentinel2": None}
+    for b in sorted(ids["05_13D_Jackal"]):
+        out.append(ob("05_13D_Jackal", b, f"13D:{b}"))
+    for a in sorted(ids["04_13D_Jackal"]):
+        out.append(ob("04_13D_Jackal", a, f"13D:{p04[a]}" if a in p04 else f"13D:u04:{a}"))
+    print(f"[demo-ledger] Citrus B: 05 {len(ids['05_13D_Jackal'])} trees, 04 {len(ids['04_13D_Jackal'])} trees, {len(pairs)} pairs "
+          f"(dropped {len(z['pairs']) - len(pairs)} stale); confirmed fruit 05 {sum(fruit['05_13D_Jackal'].values())} / 04 {sum(fruit['04_13D_Jackal'].values())}")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(); ap.add_argument("--out-dir", default="/home/paperspace/data/sankofa_demo"); a = ap.parse_args()
     out = Path(a.out_dir); out.mkdir(parents=True, exist_ok=True)
@@ -60,7 +90,8 @@ def main():
     (out / "klapmuts_registry_apr_2026_v5.json").write_text(json.dumps(registry(B, rows_B, "April 2026, April frame", note)))
     (out / "klapmuts_registry_dec_2025_v5.json").write_text(json.dumps(registry(A_nat, rows_A, "December 2025, native (lane-2 walk) frame", note)))
 
-    obs = list(json.loads(CITRUS.read_text())["observations"])
+    obs = [o for o in json.loads(CITRUS.read_text())["observations"] if o.get("farm") != "13D"]
+    obs += citrus_b_obs()
     pairB = {p["B_id"]: p for p in d["pairs"]}; pairA = {p["A_id"]: p for p in d["pairs"]}
     for b in range(len(B)):
         cid = f"KL:{b}"
