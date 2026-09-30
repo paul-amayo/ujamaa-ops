@@ -1,0 +1,215 @@
+{
+ "_meta": {
+  "built": "2026-09-30",
+  "for": "AIC FS gallery walk, Tue 6 Oct",
+  "note": "WWW-set questions reuse the native-speaker translations of the 08-25 eval (automation/adinkra_www/questions.json). Demo-specific questions carry only the languages drafted in-house (en/sw/af/xh) and are flagged needs_native_check.",
+  "expect": "answer = grounded answer from the survey's own data; honest_refusal = must say the data does not cover it; show = Tassili lights/walks (only inside the served 3D section)"
+ },
+ "items": [
+  {
+   "survey": "citrus-a-01",
+   "panel": "bateleur",
+   "id": "B1",
+   "expect": "answer: 290 trees",
+   "text": {
+    "en": "How many plants are there in this field?",
+    "af": "Hoeveel plante is daar in hierdie land?",
+    "xh": "Zingaphi izityalo kule ntsimi?",
+    "zu": "Zingaki izitshalo kule nsimu?",
+    "sw": "Kuna mimea mingapi katika shamba hili?",
+    "ha": "Tsirrai nawa ne a wannan gona?",
+    "ar": "كم عدد النباتات في هذا الحقل؟",
+    "am": "በዚህ ማሳ ውስጥ ስንት ተክሎች አሉ?"
+   }
+  },
+  {
+   "survey": "citrus-a-01",
+   "panel": "sankofa",
+   "id": "S4",
+   "expect": "answer from the 3-survey NDVI ledger",
+   "text": {
+    "en": "Are any trees getting worse over time?",
+    "af": "Word enige bome mettertyd slegter?",
+    "xh": "Ingaba ikho imithi eya isiba mandundu ngokuhamba kwexesha?",
+    "zu": "Ingabe kukhona izihlahla eziya ziba zimbi ngokuhamba kwesikhathi?",
+    "sw": "Je, kuna miti inayozidi kuwa mibaya kadri muda unavyopita?",
+    "ha": "Akwai bishiyoyin da ke ta'azzara da lokaci?",
+    "ar": "هل هناك أشجار تزداد سوءًا مع مرور الوقت؟",
+    "am": "በጊዜ ሂደት እየተባባሱ ያሉ ዛፎች አሉ?"
+   }
+  },
+  {
+   "survey": "citrus-a-01",
+   "panel": "tassili",
+   "id": "T5",
+   "expect": "show (row 2 must be inside chunk 3_1, else the in-3D guard answers)",
+   "text": {
+    "en": "Show me the trees at the end of row 2 up close.",
+    "af": "Wys my die bome aan die einde van ry 2 van naby.",
+    "xh": "Ndibonise imithi esekupheleni komgca 2 kufuphi.",
+    "zu": "Ngikhombise izihlahla ekupheleni komugqa 2 eduze.",
+    "sw": "Nionyeshe miti iliyo mwishoni mwa safu ya 2 kwa karibu.",
+    "ha": "Nuna mini bishiyoyin da ke karshen layi na 2 kusa-kusa.",
+    "ar": "أرني الأشجار في نهاية الصف 2 عن قرب.",
+    "am": "በረድፍ 2 መጨረሻ ያሉትን ዛፎች በቅርብ አሳየኝ።"
+   }
+  },
+  {
+   "survey": "citrus-a-01",
+   "panel": "bateleur",
+   "id": "B7",
+   "expect": "honest_refusal (no soil-moisture data)",
+   "text": {
+    "en": "Do the trees need watering today?",
+    "af": "Moet die bome vandag natgemaak word?",
+    "xh": "Ingaba imithi ifuna ukunkcenkceshelwa namhlanje?",
+    "zu": "Ingabe izihlahla zidinga ukuniselwa namuhla?",
+    "sw": "Je, miti inahitaji kumwagiliwa leo?",
+    "ha": "Shin bishiyoyi suna bukatar ruwa yau?",
+    "ar": "هل تحتاج الأشجار إلى الري اليوم؟",
+    "am": "ዛፎቹ ዛሬ ውሃ ማጠጣት ያስፈልጋቸዋል?"
+   }
+  },
+  {
+   "survey": "citrus-b-05",
+   "panel": "tassili",
+   "id": "D-ORANGE",
+   "expect": "show_fruit tree 5 (61); lit by containment once chunk 1_0 + fruit cuts land",
+   "needs_native_check": true,
+   "text": {
+    "en": "Which tree has the most oranges? Show me.",
+    "sw": "Ni mti gani wenye machungwa mengi zaidi? Nionyeshe."
+   }
+  },
+  {
+   "survey": "citrus-b-05",
+   "panel": "bateleur",
+   "id": "D-ORANGE-COUNT",
+   "expect": "answer: 154 confirmed oranges on 20 trees",
+   "needs_native_check": true,
+   "text": {
+    "en": "How many oranges are on this farm?",
+    "xh": "Zingaphi iiorenji kule fama?"
+   }
+  },
+  {
+   "survey": "citrus-b-05",
+   "panel": "sankofa",
+   "id": "D-FOUND-B",
+   "expect": "answer: 79 trees matched; fruit totals differ by visibility, not change",
+   "needs_native_check": true,
+   "text": {
+    "en": "How many trees were found again two days later?",
+    "sw": "Je, machungwa yaliongezeka au kupungua kati ya tafiti mbili?"
+   }
+  },
+  {
+   "survey": "citrus-b-05",
+   "panel": "bateleur",
+   "id": "B1",
+   "expect": "answer: 100 trees",
+   "text": {
+    "en": "How many plants are there in this field?",
+    "af": "Hoeveel plante is daar in hierdie land?",
+    "xh": "Zingaphi izityalo kule ntsimi?",
+    "zu": "Zingaki izitshalo kule nsimu?",
+    "sw": "Kuna mimea mingapi katika shamba hili?",
+    "ha": "Tsirrai nawa ne a wannan gona?",
+    "ar": "كم عدد النباتات في هذا الحقل؟",
+    "am": "በዚህ ማሳ ውስጥ ስንት ተክሎች አሉ?"
+   }
+  },
+  {
+   "survey": "klapmuts-apr26",
+   "panel": "bateleur",
+   "id": "B1",
+   "expect": "answer: 912 bushes",
+   "text": {
+    "en": "How many plants are there in this field?",
+    "af": "Hoeveel plante is daar in hierdie land?",
+    "xh": "Zingaphi izityalo kule ntsimi?",
+    "zu": "Zingaki izitshalo kule nsimu?",
+    "sw": "Kuna mimea mingapi katika shamba hili?",
+    "ha": "Tsirrai nawa ne a wannan gona?",
+    "ar": "كم عدد النباتات في هذا الحقل؟",
+    "am": "በዚህ ማሳ ውስጥ ስንት ተክሎች አሉ?"
+   }
+  },
+  {
+   "survey": "klapmuts-apr26",
+   "panel": "bateleur",
+   "id": "B3",
+   "expect": "answer from row 7's bag line (found-again per row)",
+   "text": {
+    "en": "Are any plants missing along row 7?",
+    "af": "Is daar plante wat langs ry 7 ontbreek?",
+    "xh": "Ingaba zikho izityalo ezingekhoyo kumgca 7?",
+    "zu": "Ingabe kukhona izitshalo ezingekho emgqeni 7?",
+    "sw": "Je, kuna mimea inayokosekana kwenye safu ya 7?",
+    "ha": "Akwai tsirran da suka bace a layi na 7?",
+    "ar": "هل توجد نباتات مفقودة على طول الصف 7؟",
+    "am": "በረድፍ 7 ላይ የጠፉ ተክሎች አሉ?"
+   }
+  },
+  {
+   "survey": "klapmuts-apr26",
+   "panel": "sankofa",
+   "id": "S3",
+   "expect": "answer: 87 April bags not matched to December",
+   "text": {
+    "en": "Is anything here now that was not here in the previous survey?",
+    "af": "Is daar nou iets hier wat nie in die vorige opmeting was nie?",
+    "xh": "Ingaba kukho into ekhoyo ngoku eyayingekho kuphononongo lwangaphambili?",
+    "zu": "Ingabe kukhona okukhona manje okwakungekho ekuhlolweni kwangaphambilini?",
+    "sw": "Je, kuna kitu kilichopo sasa ambacho hakikuwepo katika upimaji uliopita?",
+    "ha": "Akwai wani abu yanzu da ba ya nan a binciken da ya gabata?",
+    "ar": "هل يوجد شيء هنا الآن لم يكن موجودًا في المسح السابق؟",
+    "am": "ባለፈው ቅኝት ያልነበረ አሁን እዚህ ያለ ነገር አለ?"
+   }
+  },
+  {
+   "survey": "klapmuts-apr26",
+   "panel": "sankofa",
+   "id": "D-FOUND-K",
+   "expect": "answer: 825 of 912 found again",
+   "needs_native_check": true,
+   "text": {
+    "en": "How many bushes were found again in April?",
+    "af": "Hoeveel bosse in ry 3 is in April weer gevind?",
+    "xh": "Zingaphi izityalo ezifunyenwe kwakhona ngo-Epreli?"
+   }
+  },
+  {
+   "survey": "klapmuts-apr26",
+   "panel": "sankofa",
+   "id": "S7",
+   "expect": "honest_refusal (no yield data)",
+   "text": {
+    "en": "Will this season's yield be better than last year's?",
+    "af": "Sal hierdie seisoen se oes beter wees as verlede jaar s'n?",
+    "xh": "Ingaba isivuno salo nyaka siza kuba ngcono kunesonyaka ophelileyo?",
+    "zu": "Ingabe isivuno salesi sizini sizoba ngcono kunesonyaka odlule?",
+    "sw": "Je, mavuno ya msimu huu yatakuwa bora kuliko ya mwaka jana?",
+    "ha": "Shin amfanin wannan kakar zai fi na bara?",
+    "ar": "هل سيكون محصول هذا الموسم أفضل من العام الماضي؟",
+    "am": "የዘንድሮው ምርት ካለፈው ዓመት የተሻለ ይሆናል?"
+   }
+  },
+  {
+   "survey": "gwakungu-cabbage",
+   "panel": "tassili",
+   "id": "T1",
+   "expect": "answer: 16 May 2026 (no registry, no 3D until the H3DGS clears 25 dB)",
+   "text": {
+    "en": "When was this field last surveyed?",
+    "af": "Wanneer is hierdie land laas opgemeet?",
+    "xh": "Yayigqityelwe nini ukuphononongwa le ntsimi?",
+    "zu": "Igcine nini ukuhlolwa le nsimu?",
+    "sw": "Shamba hili lilipimwa mara ya mwisho lini?",
+    "ha": "Yaushe aka yi binciken wannan gona na karshe?",
+    "ar": "متى تم مسح هذا الحقل آخر مرة؟",
+    "am": "ይህ ማሳ ለመጨረሻ ጊዜ የተቃኘው መቼ ነው?"
+   }
+  }
+ ]
+}
