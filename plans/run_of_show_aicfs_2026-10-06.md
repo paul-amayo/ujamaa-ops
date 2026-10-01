@@ -118,7 +118,8 @@ Frames are rendered offline at fixed poses along each farm's walk (render servic
 | when | what | who |
 |---|---|---|
 | Thu night | peer's fruit re-test with the corrected gate on chunk 1_0 (~1 h); card otherwise idle | GPU |
-| **Fri morning** | 1. read the fruit result: if the side-car's fruit IoU is usable, wire it into Citrus B's stage (oranges lit) — Paul decides 2. competitive tree scoring (each pixel to the tree that wins; no thresholds) measured on 3_1 and 1_0: lit area + frame time 3. re-shoot one pass per farm at 12 fps with `--from/--to` around the lit tree 4. cabbage side-car (compiled supervision via the colour bridge + name map + empty-fruit path, then the lane converter) | me |
+| Thu night → Fri early | peer: fruit re-test (corrected gate) on chunk 1_0, then the **"ask the orchard" reels** on chunks 1_0 and 3_1 (chunk mode of the 27 Sep chain: one-row drive at 8 fps, questions in Swahili + English, modes over time, map inset, mean exposure; fruit segment only if the re-test is honest) → `~/logs/demo_chunks/{05_1_0,01_3_1}/demo.mp4` | peer |
+| **Fri morning** | 1. read the fruit result; oranges in Citrus B's live stage only if honest — Paul decides 2. live-stream walks at 8 fps, one pass each: Klapmuts lane, Kendu Bay, Gwakungu (registry names on screen) 3. landing / picker / two Adinkra exchanges captured from the browser 4. competitive tree scoring measured on 3_1 and 1_0 for the live stage (no thresholds) 5. cabbage side-car (colour bridge + name map + empty-fruit path, lane converter) | me |
 | Fri midday | video first draft assembled: landing + picker captures, five walks, two Adinkra answers (Swahili oranges, Afrikaans found-again), captions, ASK/OFFER → Paul | me |
 | Fri afternoon | Paul's feedback → v2; screenshot PDF; **Paul tests SSH from a phone hotspot** | me, Paul |
 | Sat–Sun | Paul rehearses the four farm paths with a timer | Paul |
