@@ -27,7 +27,11 @@ STEP0=$(basename $SEED | grep -oE '[0-9]+' | sed 's/^0*//'); MAXIT=$((STEP0 + IT
 DPS=$(python3 -c "import json,sys; print(json.load(open(sys.argv[1]))['scale'])" "$(dirname $(dirname $SEED))/dataparser_transforms.json")
 FD_ARGS=""
 if [ -n "${FD_SCALE_M:-}" ]; then FD_ARGS="--pipeline.model.fruit-densify-scale $(python3 -c "print($FD_SCALE_M*$DPS)") --pipeline.model.fruit-densify-max-scale $(python3 -c "print(${FD_MAXSCALE_M:-0.5}*$DPS)")"; fi
-t0=$(date +%s); say "=== fruit densify $DN: resume step $STEP0 -> $MAXIT ($ITERS iters), features frozen at zero, splits on; dataparser scale $DPS; gate ${FD_SCALE_M:-default(0.04 model units = $(python3 -c "print(round(0.04/$DPS,2))") m)}${FD_SCALE_M:+ m -> $FD_ARGS}"
+# FD_SPLIT_M (metres): gsplat splits a boosted gaussian only above densify_size_thresh x scene_scale (model units; 0.01 = 0.28 m
+# world at scale 0.0355) and DUPLICATES it below — clones inherit protection and are boosted again (x2 per refine round, OOM at
+# 9.4 M on 10-01). Setting the split boundary at the fruit gate makes boosted carriers split (halve) instead of clone.
+if [ -n "${FD_SPLIT_M:-}" ]; then FD_ARGS="$FD_ARGS --pipeline.model.densify-size-thresh $(python3 -c "print($FD_SPLIT_M*$DPS)")"; fi
+t0=$(date +%s); say "=== fruit densify $DN: resume step $STEP0 -> $MAXIT ($ITERS iters), tail ${FD_TAIL:-2000}, features frozen at zero, splits on; dataparser scale $DPS; gate ${FD_SCALE_M:-default(0.04 model units = $(python3 -c "print(round(0.04/$DPS,2))") m)}${FD_SCALE_M:+ m}; split boundary ${FD_SPLIT_M:-default(0.01 model units = $(python3 -c "print(round(0.01/$DPS,2))") m)}${FD_SPLIT_M:+ m}; args: $FD_ARGS"
 Z=$O/fruitdensify_init/nerfstudio_models; mkdir -p $Z
 cd $NS && pixi run python - "$SEED" "$Z/$(basename $SEED)" << 'PY'
 import sys, torch
