@@ -15,14 +15,16 @@ the void row, `--bg-competes --bg-ratio 2`, and no opacity boost.
 
 Measured numbers, notebook of record. "in-cell" means held-out views inside the chunk.
 
-| farm | H3DGS model | measured | passes 25 dB? | demo 3D |
+| farm | H3DGS model | measured | passes 25 dB? | demo 3D (1 Oct) |
 |---|---|---|---|---|
-| **Citrus farm A** (01) | improved recipe (12 M cap, 60k/45k, exposure); **5 of 24 chunks** (7_2, 6_2, 2_2, 2_0, 3_1) | in-cell 31.09 / 30.53 / 28.23 (7_2 / 2_0 / 3_1) | **yes**, on built chunks | the walk stays inside the built chunks; hero 3_1 |
-| **Citrus farm B** (05) | original recipe, 6 chunks (09-22); improved recipe on chunk 0_0 only | original 18.97 held-out (whole survey); **0_0 improved 27.54 full / 28.07 sky-masked** in-cell | original no; improved yes | **train the other 5 chunks on the improved recipe** |
-| Citrus farm B (04) | original recipe, 6 chunks (09-27) | not scored at the bar | — | none needed: 04 appears in Sankofa only |
-| **Klapmuts** Dec lane 2 | arm E, 4 M | training 25.13, held-out 21.82 | borderline | Paul reports a 30 dB Klapmuts H3DGS; waiting on which run |
-| Klapmuts Apr | 4 chunks | ~17–18 held-out | **no** | none |
-| **Gwakungu / Kendu Bay** | none (phone per-block only) | per-block ns-eval 18–26 | no H3DGS yet | **H3DGS per segment** (single chunk, improved recipe) |
+| **Citrus farm A** (01) | improved recipe, chunk 3_1 (+ 7_2, 2_0, 6_2, 2_2 built) | 3_1 in-cell 28.23 / 27.56 sky-masked | **yes** | **chunk 3_1**, side-car: trees lit (tree 164 IoU 0.97, rows 0.85–0.96) |
+| **Citrus farm B** (05) | improved recipe, chunks 0_0 and **1_0** | 1_0 in-cell 26.28 / 26.55 sky-masked; 0_0 27.54 / 28.07 | **yes** | **chunk 1_0** (trees 5 and 3), side-car: trees lit (tree 5 IoU 0.73); **fruit not lit** (containment IoU 0.03 on the fruit-densified side-car — the finding, no cuts) |
+| Citrus farm B (04) | original recipe, 6 chunks | not at the bar | — | Sankofa only |
+| **Klapmuts** Dec lane 2 | h3dgs_e2 (half views) | training views 29.72, held-out 19.82 | **yes** (training views) | served, no side-car |
+| Klapmuts Apr | 4 chunks | ~17–18 | **no** | none; April via its data (ledger v5 registry) |
+| **Kendu Bay** ground crop (IMG_7975_s0) | lane-style H3DGS, 8 M | training views 26.06 / 26.78, held-out 18.74 | **yes** (training views) | **served** (kendu-0514-plants), no side-car yet |
+| Gwakungu chillies (IMG_7990_s1) | lane-style H3DGS, 8 M | training 21.92, held-out 15.19 | **no** | none |
+| Gwakungu cabbages (IMG_7993_s0) | 4 M: 22.78 / 18.32; **8 M rerun queued** | — | pending | registry only (29 heads, two rows) until the 8 M result |
 
 The per-block models (the Citrus A/B glref fleet, the phone segments) are **not** shown once their H3DGS replacement lands.
 
@@ -42,10 +44,10 @@ Klapmuts ledger files, never change them.
 | 1 | Gwakungu cabbages, H3DGS 4 M | me | — | **done: 22.78 training / 18.32 held-out, fails the bar** |
 | 2 | Citrus B side-car on expo 0_0 (identity) | peer | — | **done** (tree 90 IoU 0.93; lights through the stream) |
 | 3 | Citrus A side-car on 01 chunk 3_1 | peer | — | **done** (tree 164 IoU 0.97) |
-| 4 | Citrus B chunk 1_0: improved recipe, in-cell score, side-car, fruit densify — **no fitted cuts** (Paul, 30 Sep 21:2x) | peer | ~4.5 h | relaunch requested after chain v4 exited early |
-| 5 | Gwakungu chillies, H3DGS IMG_7990_s1, **8 M** | me | ~2.5 h | queue v8, after `demo_peer_1_0.done` |
-| 6 | Kendu Bay ground plants, H3DGS IMG_7975_s0, **8 M** | me | ~2 h | queue v8 |
-| 7 | Gwakungu cabbages again at **8 M** (own project `h3dgs_8m`) — Paul 17:1x | me | ~2.5 h | queue v8 |
+| 4 | Citrus B chunk 1_0: improved recipe, in-cell score, side-car, fruit densify — **no fitted cuts** | peer | — | **done 00:02 box**: 26.28 in-cell; trees lit; fruit containment 0.03 (not shown) |
+| 5 | Gwakungu chillies, H3DGS IMG_7990_s1, **8 M** | me | — | **done: 21.92 training, fails** |
+| 6 | Kendu Bay ground plants, H3DGS IMG_7975_s0, **8 M** | me | — | **done: 26.06 training, passes** → served |
+| 7 | Gwakungu cabbages again at **8 M** (own project `h3dgs_8m`) | me | ~2.5 h | queue v9, after the 1_0 stage test |
 | 8 | cabbage embedder (queue v8), then the cabbage side-car on the 8 M model if it clears 25 dB; Klapmuts Dec berries (SAM3); side-cars for any other Kenyan segment ≥ 25 dB | me | ~3 h | after 7 |
 
 Why 1_0: the peer found that 05 chunk 0_0 holds 12 trees, of which only tree 90 (8 oranges) and tree 92 (2) carry fruit; tree 5 (61) and tree 3 (14) are in cell 1_0.
