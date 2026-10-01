@@ -8,10 +8,17 @@ set -uo pipefail
 L=/home/paperspace/logs/fruit_wm_test.log; say(){ echo "[$(date '+%m-%d %H:%M:%S')] $*" | tee -a $L; }
 S05=/home/paperspace/data/citrus_all/05_13D_Jackal; EXPO=$S05/experimental/h3dgs_expo; O=$S05/experimental/h3dgs_sidecar_chunks/chunk_1_0_expo
 gpu_used(){ nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1; }
-say "queued behind the dashboard's runs: waiting for no train_single/train_post/ns-train and < 8 GB used (2 consecutive minutes)"
+# Gate v2 (10-01 17:5x): the first launch stalled on the pgrep self-match trap — the Bash-tool wrapper shell that created and
+# launched this script carried the pattern text in its own argv, so "no trainer alive" never became true. Patterns are now
+# ANCHORED to the start of the command line (a `/bin/bash -c source …` wrapper can never match), and the dashboard's demo
+# work holds the card until 22:30 SAST = 20:30 box, so nothing starts before NOT_BEFORE.
+NOT_BEFORE=${NOT_BEFORE:-"2026-10-01 20:30"}
+busy(){ pgrep -f '^[^ ]*python[0-9.]* -u train_(single|post)\.py|^[^ ]*/ns-train|^ns-train|^bash [^ ]*image_farm_h3dgs\.sh' > /dev/null 2>&1; }
+say "queued behind the dashboard's runs: not before $NOT_BEFORE box, then no trainer alive (anchored patterns) and < 8 GB used for 2 consecutive minutes"
+while [ "$(date '+%Y-%m-%d %H:%M')" \< "$NOT_BEFORE" ]; do sleep 60; done
 quiet=0
 while :; do
-  if pgrep -f 'train_single\.py|train_post\.py|ns-train|image_farm_h3dgs\.sh' > /dev/null 2>&1 || [ "$(gpu_used)" -ge 8000 ]; then quiet=0; else quiet=$((quiet+1)); fi
+  if busy || [ "$(gpu_used)" -ge 8000 ]; then quiet=0; else quiet=$((quiet+1)); fi
   [ $quiet -ge 2 ] && break; sleep 60
 done
 say "=== start: GPU $(nvidia-smi --query-gpu=memory.used,utilization.gpu --format=csv,noheader)"
