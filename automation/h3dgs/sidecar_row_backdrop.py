@@ -70,5 +70,6 @@ for cname, frs in by_chunk.items():
             im, _ = ch.render(make_cam(c2w_h, W, H, fx0 * s, fy0 * s, cx0 * s, cy0 * s), a.tau)
             if EXPO is not None: im = (torch.matmul(im.permute(1, 2, 0), EXPO[0]) + EXPO[1]).permute(2, 0, 1)   # image' = A @ image + b, as H3DGS applies per image
         cv2.imwrite(str(OUT / name), (im.clamp(0, 1).permute(1, 2, 0).cpu().numpy()[:, :, ::-1] * 255).astype(np.uint8)); n += 1
+        if n % 25 == 0: torch.cuda.empty_cache()   # per-frame temporaries vary in size; the caching allocator's hold starved the C++ expand_to_size (cudaMalloc) on 01 3_1 after 43 frames (10-01), as it did the render service
     del ch; torch.cuda.empty_cache()
 print(f"[backdrop] {n} frames -> {OUT} in {time.time()-t1:.0f}s", flush=True)
