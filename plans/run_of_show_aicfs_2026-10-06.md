@@ -118,7 +118,8 @@ Frames are rendered offline at fixed poses along each farm's walk (render servic
 | Wed evening → Thu ~11:30 SAST | the GPU queue (§2): peer side-cars, chunk 1_0 + fruit, Kenyan H3DGS at 8 M, cabbage rerun, berries | GPU |
 | Thu, as results land | each model checked against 25 dB and wired into the catalogue; fruit cuts in; Kenya 3D only if it passes | me |
 | Thu afternoon | question bank (89 pairs) run against Gemma, answers checked; **Paul tests SSH from a phone hotspot** | me, Paul |
-| Thu evening | **video first draft** (offline frames along each walk, lit trees and oranges) | me |
+| Thu evening | **video shots captured** (five farms, lit trees on citrus; no oranges — fruit field pending the gate re-test) | me |
+| Fri morning | video first draft assembled (captions, landing + picker captures, Adinkra answers) → Paul | me |
 | Fri | video v2 from feedback; screenshot PDF; portrait stage if Kenya is in | me → Paul reviews |
 | Sat–Sun | Paul rehearses the four farm paths with a timer | Paul |
 | Mon 5 Oct | freeze 12:00; tag `demo-aicfs-2026-10-06`; dress rehearsal off campus on the tunnel (8011 + 8024) | Paul, me |
