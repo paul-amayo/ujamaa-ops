@@ -2,6 +2,9 @@
 # Mask-driven fruit densification pass (2026-08-26, Paul's design).
 #
 #   usage: densify_block.sh <block_dir> <supervision_dir> [iters]
+#   FD_METRES=1 (2026-10-01): the scale gates (0.04 / 0.5) are METRES, converted through the dataparser scale
+#   (high 0c0d81b). Without it they are model units — 0.42 m on the lio_row100 blocks, 1.13 m on an H3DGS chunk,
+#   where the boost never fired. New fruit chains should set it.
 #
 # WHY: the census argmax hands a fruit's own pixels to the tree — measured on 05
 # b000, fruit-assigned gaussians hold 0-10% of the blend AT the fruit's pixels,
@@ -72,6 +75,7 @@ echo "n" | MAX_JOBS=4 HIGH_EMBEDDER_CKPT=$EMB HIGH_LOSS_WARMUP_STEP=1000000000 \
     --pipeline.model.fruit-anchor-weight 0.0 \
     --pipeline.model.fruit-densify True \
     --pipeline.model.fruit-densify-tail ${FD_TAIL:-2000} \
+    ${FD_METRES:+--pipeline.model.fruit-densify-in-metres True} \
     --pipeline.model.stop-split-at ${STOP_SPLIT:-$MAXIT} \
     --pipeline.model.sky-loss-lambda 1.0 \
     --pipeline.datamanager.semantic-dir "$SUP" \
