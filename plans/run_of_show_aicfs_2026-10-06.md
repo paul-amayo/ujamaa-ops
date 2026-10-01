@@ -98,6 +98,19 @@ Switching farms stages that farm's chunk on the render broker in ~12 s; talk ove
 **Don't do live:** action requests ("mark tree 12…"); asking to see plants outside the 3D section (the app says so, but it is a dead end on stage). Cabbage count is now honest: 29 heads within 4 m of the walk, two rows (3-frame registry, 30 Sep) — say "counted along the survey path".
 Question bank with expected answers: `automation/adinkra_www/demo_bank_20260930.json` (14 items, 89 question-language pairs) — run against Gemma when the GPU frees.
 
+## 4a. Globe framing (Paul, 1 Oct night: "show a globe, go down to citrus farms with NDVI, then global, then Klapmuts, then global, then Gwakungu and Kendu Bay… local observations, local language tagline")
+
+A globe (three.js, vendored, with a public-domain NASA Blue Marble texture) that zooms from space to each farm in turn, cross-fading into OUR top-down of that farm (Bateleur / NDVI dots), with that farm's observations and a tagline in its language, then back out to the globe, before the farm's walk. Rendered headless from a page in the app, so it can also become the landing page's "choose a farm" later.
+
+| farm | coordinates we hold | top-down to fade into | observations | tagline language |
+|---|---|---|---|---|
+| Citrus A / B | per-tree WGS84 in ledger_v2 (748 / 75 obs; Riverside, CA) + Sentinel-2 NDVI per tree (0.07–0.43) | NDVI dot map from the ledger | 290 / 100 trees, 3 surveys, 154 confirmed oranges | English (**location: see question 1**) |
+| Klapmuts | ENU0 anchor from RTK (Aug) + WGS84 anchors + NDVI series (30 Aug) — file to confirm | 912 bags by row, Dec→Apr pairs | 912 bags, 825 found again | Afrikaans / isiXhosa |
+| Kendu Bay | none in the data (phone clips carry no GPS) — **question 2** | 29-head style registry for the ground crop (none yet) | 61-frame phone walk, 26.1 dB | Swahili (Dholuo?) |
+| Gwakungu | none — **question 2** | 29 cabbages in two rows | 29 cabbages counted along the path | Swahili (Kisii?) |
+
+Open: (1) the globe reveals the citrus farms' real location (Riverside, California), against the earlier "citrus A/B with no location" decision — zoom to the continent only, or allow the location? (2) coordinates for the two Kenyan farms (approximate is fine: a pin at village scale). (3) taglines need native-speaker checks; Swahili/Afrikaans/isiXhosa drafts from the question set's vocabulary. Build: Friday, CPU + headless browser only, ~3–4 h; frames into the assembly as the transitions between farms.
+
 ## 4. The demo video (idle loop, ~90 s, 1080p, silent, captions)
 
 Frames are rendered offline at fixed poses along each farm's walk (render service / hier service), not screen-recorded — headless browser capture runs at 8–11 fps.
