@@ -109,7 +109,7 @@ A globe (three.js, vendored, with a public-domain NASA Blue Marble texture) that
 | Kendu Bay | none in the data (phone clips carry no GPS) — **question 2** | 29-head style registry for the ground crop (none yet) | 61-frame phone walk, 26.1 dB | Swahili (Dholuo?) |
 | Gwakungu | none — **question 2** | 29 cabbages in two rows | 29 cabbages counted along the path | Swahili (Kisii?) |
 
-Open: (1) the globe reveals the citrus farms' real location (Riverside, California), against the earlier "citrus A/B with no location" decision — zoom to the continent only, or allow the location? (2) coordinates for the two Kenyan farms (approximate is fine: a pin at village scale). (3) taglines need native-speaker checks; Swahili/Afrikaans/isiXhosa drafts from the question set's vocabulary. Build: Friday, CPU + headless browser only, ~3–4 h; frames into the assembly as the transitions between farms.
+Decided (Paul, 1 Oct night): citrus zooms to the **continent only** (no location on screen); Blue Marble texture downloaded (NASA, public domain) for vendoring. Open: (2) coordinates for the two Kenyan farms (a pin at village scale). (3) taglines need native-speaker checks; Swahili/Afrikaans/isiXhosa drafts from the question set's vocabulary. Build: Friday, CPU + headless browser only, ~3–4 h; frames into the assembly as the transitions between farms.
 
 ## 4. The demo video (idle loop, ~90 s, 1080p, silent, captions)
 
