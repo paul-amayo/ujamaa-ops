@@ -14,8 +14,8 @@ stage(){ curl -s -X POST -H "content-type: application/json" -d "{\"survey\":\"$
   say "staged $1: $(echo $r | head -c 120)"; }
 shot(){ sv=$1; shift; stage $sv || return 1; rm -rf $OUT/$sv; t0=$(date +%s)
   $PY $CAP $sv $OUT/$sv "$@" 2>&1 | grep -E "frames from|record|wrote" | tee -a $L; say "shot $sv in $(( $(date +%s)-t0 )) s"; }
-shot citrus-b-05 --stride 2 --light tree:5@40
-shot citrus-a-01 --stride 2 --light tree:164@60
+shot citrus-b-05 --stride 2 --light-near tree:5:60
+shot citrus-a-01 --stride 2 --light-near tree:164:60
 shot klapmuts-dec25 --stride 2
 shot kendu-0514-plants --stride 1 --w 720 --h 1280
 shot gwakungu-cabbage --stride 1 --w 720 --h 1280
