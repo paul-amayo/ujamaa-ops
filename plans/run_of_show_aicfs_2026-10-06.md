@@ -24,7 +24,7 @@ Measured numbers, notebook of record. "in-cell" means held-out views inside the 
 | Klapmuts Apr | 4 chunks | ~17–18 | **no** | none; April via its data (ledger v5 registry) |
 | **Kendu Bay** ground crop (IMG_7975_s0) | lane-style H3DGS, 8 M | training views 26.06 / 26.78, held-out 18.74 | **yes** (training views) | **served** (kendu-0514-plants), no side-car yet |
 | Gwakungu chillies (IMG_7990_s1) | lane-style H3DGS, 8 M | training 21.92, held-out 15.19 | **no** | none |
-| Gwakungu cabbages (IMG_7993_s0) | 4 M: 22.78 / 18.32; **8 M rerun queued** | — | pending | registry only (29 heads, two rows) until the 8 M result |
+| Gwakungu cabbages (IMG_7993_s0) | 8 M: training views 23.43 / 23.61, held-out 18.16 | **below 25, shown by Paul's call (1 Oct)** | **served** in portrait; registry 29 heads in two rows; side-car pending (compiled supervision needed) |
 
 The per-block models (the Citrus A/B glref fleet, the phone segments) are **not** shown once their H3DGS replacement lands.
 
@@ -47,7 +47,7 @@ Klapmuts ledger files, never change them.
 | 4 | Citrus B chunk 1_0: improved recipe, in-cell score, side-car, fruit densify — **no fitted cuts** | peer | — | **done 00:02 box**: 26.28 in-cell; trees lit; fruit containment 0.03 (not shown) |
 | 5 | Gwakungu chillies, H3DGS IMG_7990_s1, **8 M** | me | — | **done: 21.92 training, fails** |
 | 6 | Kendu Bay ground plants, H3DGS IMG_7975_s0, **8 M** | me | — | **done: 26.06 training, passes** → served |
-| 7 | Gwakungu cabbages again at **8 M** (own project `h3dgs_8m`) | me | ~2.5 h | queue v9, after the 1_0 stage test |
+| 7 | Gwakungu cabbages again at **8 M** (own project `h3dgs_8m`) | me | — | **done: 23.43 training; shown (Paul)**; embedder done |
 | 8 | cabbage embedder (queue v8), then the cabbage side-car on the 8 M model if it clears 25 dB; Klapmuts Dec berries (SAM3); side-cars for any other Kenyan segment ≥ 25 dB | me | ~3 h | after 7 |
 
 Why 1_0: the peer found that 05 chunk 0_0 holds 12 trees, of which only tree 90 (8 oranges) and tree 92 (2) carry fruit; tree 5 (61) and tree 3 (14) are in cell 1_0.
