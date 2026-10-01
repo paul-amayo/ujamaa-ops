@@ -111,19 +111,19 @@ Frames are rendered offline at fixed poses along each farm's walk (render servic
 | 70–82 s | Citrus A chunk 3_1 walk (28 dB) with a tree lit | scale |
 | 82–90 s | ASK / OFFER, contact, ujamaa.ai | 3, 4 |
 
-## 5. Timeline (revised 30 Sep 17:40 SAST; Paul: video waits for all training runs)
+## 5. Timeline (revised Thu 1 Oct, 22:40 SAST)
+
+**Done Thu:** four farms at the bar + cabbages by Paul's call, all verified live; trees lit on both citrus chunks; mean exposure on; portrait stage; question bank 87/89 grounded (2 output-length failures); detector rebuilt from the question sets; oracle containment 1.000 (fruit failure is the rendered field); densify gate fixed in HiGH; five raw shots captured.
 
 | when | what | who |
 |---|---|---|
-| Wed evening → Thu ~11:30 SAST | the GPU queue (§2): peer side-cars, chunk 1_0 + fruit, Kenyan H3DGS at 8 M, cabbage rerun, berries | GPU |
-| Thu, as results land | each model checked against 25 dB and wired into the catalogue; fruit cuts in; Kenya 3D only if it passes | me |
-| Thu afternoon | question bank (89 pairs) run against Gemma, answers checked; **Paul tests SSH from a phone hotspot** | me, Paul |
-| Thu evening | **video shots captured** (five farms, lit trees on citrus; no oranges — fruit field pending the gate re-test) | me |
-| Fri morning | video first draft assembled (captions, landing + picker captures, Adinkra answers) → Paul | me |
-| Fri | video v2 from feedback; screenshot PDF; portrait stage if Kenya is in | me → Paul reviews |
+| Thu night | peer's fruit re-test with the corrected gate on chunk 1_0 (~1 h); card otherwise idle | GPU |
+| **Fri morning** | 1. read the fruit result: if the side-car's fruit IoU is usable, wire it into Citrus B's stage (oranges lit) — Paul decides 2. competitive tree scoring (each pixel to the tree that wins; no thresholds) measured on 3_1 and 1_0: lit area + frame time 3. re-shoot one pass per farm at 12 fps with `--from/--to` around the lit tree 4. cabbage side-car (compiled supervision via the colour bridge + name map + empty-fruit path, then the lane converter) | me |
+| Fri midday | video first draft assembled: landing + picker captures, five walks, two Adinkra answers (Swahili oranges, Afrikaans found-again), captions, ASK/OFFER → Paul | me |
+| Fri afternoon | Paul's feedback → v2; screenshot PDF; **Paul tests SSH from a phone hotspot** | me, Paul |
 | Sat–Sun | Paul rehearses the four farm paths with a timer | Paul |
-| Mon 5 Oct | freeze 12:00; tag `demo-aicfs-2026-10-06`; dress rehearsal off campus on the tunnel (8011 + 8024) | Paul, me |
-| Tue 6 Oct | morning procedure (§6) | Paul |
+| Mon 5 Oct | freeze 12:00; tag `demo-aicfs-2026-10-06` in ujamaa, aru_sil_core, ops; dress rehearsal off campus on the tunnel (8011 + 8024); unstage/stage procedure rehearsed | Paul, me |
+| Tue 6 Oct | morning procedure (§6): unstage → no training → stage the first farm → Gemma warm → one question per farm | Paul |
 
 ## 6. Tuesday morning and packing
 
