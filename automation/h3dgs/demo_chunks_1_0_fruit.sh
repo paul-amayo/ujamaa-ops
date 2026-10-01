@@ -13,7 +13,7 @@ FS="--fruit-models $model --fruit-count 61 --fruit-tree 5"
 gpu_used(){ nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits | head -1; }
 busy(){ pgrep -f '^[^ ]*python[0-9.]* -u train_(single|post)\.py|^[^ ]*/ns-train|^ns-train|^bash [^ ]*image_farm_h3dgs\.sh|^bash [^ ]*demo_chunks_720(_queue)?\.sh|^[^ ]*python[0-9.]* [^ ]*sidecar_(demo_overlay|row_backdrop)\.py' > /dev/null 2>&1; }
 say "05 1_0 fruit reels queued: waiting for demo_chunks_720_queue done, then a quiet card"
-until grep -qE 'demo_chunks_720_queue done' $L 2>/dev/null; do sleep 120; done
+until grep -qE '^\[[0-9 :-]+\] === demo_chunks_720_queue done' $L 2>/dev/null; do sleep 120; done   # anchored on the queue's own end marker: the earlier pattern matched THIS script's 'waiting for … done' line
 quiet=0; while :; do if busy || [ "$(gpu_used)" -ge 8000 ]; then quiet=0; else quiet=$((quiet+1)); fi; [ $quiet -ge 2 ] && break; sleep 60; done
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 # (a) 640x360 re-composite with fruit
