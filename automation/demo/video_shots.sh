@@ -17,6 +17,6 @@ shot(){ sv=$1; shift; stage $sv || return 1; rm -rf $OUT/$sv; t0=$(date +%s)
 shot citrus-b-05 --stride 2 --light-near tree:5:60
 shot citrus-a-01 --stride 2 --light-near tree:164:60
 shot klapmuts-dec25 --stride 2
-shot kendu-0514-plants --stride 1 --w 720 --h 1280
-shot gwakungu-cabbage --stride 1 --w 720 --h 1280
+shot kendu-0514-plants --stride 1 --w 720 --h 1280 --fps 12
+shot gwakungu-cabbage --stride 1 --w 720 --h 1280 --fps 12
 say "=== all shots done: $(ls $OUT/*.mp4 2>/dev/null | tr '\n' ' ')"
