@@ -32,7 +32,12 @@ ap.add_argument('--fruit-min-area', type=int, default=30, help='fruit are small:
 ap.add_argument('--min-area', type=int, default=800, help="drop connected components smaller than this from each ROW region before drawing (0 = off). Compositing only, no re-render. On kf_001508: none -> oak 35 / pine 411 pieces and 1902 wrong-row px; 200 -> 2/3 pieces, 417 px; 800 -> 1/1 piece, 0 wrong-row px, for 4.5% of the drawn area.")
 ap.add_argument('--tree-min-area', type=int, default=200, help='same for each TREE region, kept lower so distant trees still register')
 ap.add_argument('--row-from-tree', action='store_true', help="SUPERSEDED by --row-pick raw, and not needed for a row query: route the row answer through the identified tree's hierarchy row (marker_hierarchy.json) instead of the row decode. Kept only to reproduce demo v3.")
-a = ap.parse_args(); S = Path('/home/paperspace/data/citrus_all') / a.survey; P = S / 'experimental/h3dgs'; OUT = Path(a.out); (OUT / 'frames').mkdir(parents=True, exist_ok=True); (OUT / 'maps').mkdir(exist_ok=True)
+ap.add_argument('--sidecar-root', default='experimental/h3dgs_sidecar', help='chunk side-cars: experimental/h3dgs_sidecar_chunks, with --models as dir names (chunk_1_0_expo)')
+ap.add_argument('--proj', default='experimental/h3dgs', help='H3DGS project (export_meta for the frame rotation): h3dgs_expo for the 05 demo chunks')
+a = ap.parse_args(); S = Path('/home/paperspace/data/citrus_all') / a.survey; P = S / a.proj; OUT = Path(a.out); (OUT / 'frames').mkdir(parents=True, exist_ok=True); (OUT / 'maps').mkdir(exist_ok=True)
+def model_dir(b):
+    d = S / a.sidecar_root / b
+    return d if d.exists() else S / a.sidecar_root / f'block_{b}'
 pj = json.load(open(a.path)); FR = pj['frames']; K = pj['intrinsics']; sc = pj['scale']; fps = pj['fps']; W, H = int(round(K['w'] * sc)), int(round(K['h'] * sc))
 meta = json.load(open(P / 'export_meta.json')); R_W = np.asarray(meta.get('world_rotation_to_zup') or meta['world_rotation_lio_to_h3dgs'], np.float64)[:3, :3]; GL2CV = np.diag([1.0, -1.0, -1.0, 1.0])
 SKY = S / 'prod/tassili/sky_masks'; VL = f'/home/paperspace/logs/sidecar_{a.survey}_verdicts.log'
@@ -65,7 +70,7 @@ if not a.skip_maps:
     for b in a.models:
         if a.reuse_maps and list((OUT / 'maps' / b).glob('*.npz')):
             print(f'[maps] block {b}: reusing {len(list((OUT / "maps" / b).glob("*.npz")))} existing maps', flush=True); continue
-        O = S / 'experimental/h3dgs_sidecar' / f'block_{b}'; run = sorted((O / 'splat_runs_FEATFIX').glob(f'stage2_censusinit_{a.seed_tag}/high/*'))[-1]
+        O = model_dir(b); run = sorted((O / 'splat_runs_FEATFIX').glob(f'stage2_censusinit_{a.seed_tag}/high/*'))[-1]
         z = np.load(O / 'splat_runs_FEATFIX/interaction_W_glref_bg.npz'); labels = [int(u) for u in z['labels'] if int(u) != UNLAB and int(u) < FRUIT_ID_BASE]; twords = [get_word_for_id(u, 'mask') for u in labels]
         rwords = pj['rows'].get(b, []); E = word_vec(twords + rwords); nT = len(twords); vt = verdict_thr(b)
         tthr = np.array([vt.get(w, a.tree_thr) for w in twords], np.float32); rthr = np.array([vt.get(w, a.row_thr) for w in rwords], np.float32)
@@ -100,7 +105,7 @@ if not a.skip_maps:
     for b in a.fruit_models:
         if a.reuse_maps and list((OUT / 'maps_fruit' / b).glob('*.npz')):
             print(f'[maps-fruit] block {b}: reusing existing maps', flush=True); continue
-        O = S / 'experimental/h3dgs_sidecar' / f'block_{b}'; runs = sorted((O / 'splat_runs_FEATFIX').glob(f'stage2_censusinit_{a.fruit_seed_tag}/high/*'))
+        O = model_dir(b); runs = sorted((O / 'splat_runs_FEATFIX').glob(f'stage2_censusinit_{a.fruit_seed_tag}/high/*'))
         if not runs: print(f'[maps-fruit] block {b}: no {a.fruit_seed_tag} run, skipping', flush=True); continue
         run = runs[-1]; z = np.load(O / 'splat_runs_FEATFIX/interaction_W_fruitdensify_bg.npz')
         flab = [int(u) for u in z['labels'] if FRUIT_ID_BASE <= int(u) < UNLAB]
@@ -140,7 +145,7 @@ HROW = {t: r['id'] for r in json.load(open(S / 'prod/bateleur/scene_graph/marker
 # the question script: every frame gets its segment's mode, question, answer and focus tree
 FCEN = {}
 for _b in a.fruit_models:
-    _tj = json.load(open(S / 'experimental/h3dgs_sidecar' / f'block_{_b}' / 'transforms.json'))
+    _tj = json.load(open(model_dir(_b) / 'transforms.json'))
     FCEN[_b] = (np.array([np.asarray(x['transform_matrix'], float)[:3, 3] for x in _tj['frames']]) @ R_W.T).mean(0)
 SCR = json.load(open(a.script)) if a.script else None
 segof = [None] * len(FR); LABEL = {}

@@ -15,8 +15,10 @@ from hier_compact import CompactHierarchy
 ap = argparse.ArgumentParser(); ap.add_argument("--survey", required=True); ap.add_argument("--blocks", nargs="+", required=True); ap.add_argument("--out", required=True)
 ap.add_argument("--scale", type=float, default=0.5); ap.add_argument("--tau", type=float, default=0.0); ap.add_argument("--cfg", default="lio_row100")
 ap.add_argument("--path", default="", help="demo_path.json from sidecar_demo_path.py: render its frames (free poses, H3DGS frame) instead of the blocks' keyframes")
+ap.add_argument("--proj", default="experimental/h3dgs", help="H3DGS project under the survey (h3dgs_expo for the 05 demo chunks)")
+ap.add_argument("--exposure", default="", choices=("", "mean"), help="mean: apply the mean of the chunk's trained per-image exposure (exposure.json, 3x4 affine on RGB) to every frame — the improved recipe's raw colours render dark and blue-cast (hier_render_service HIER_EXPOSURE=mean does the same)")
 a = ap.parse_args()
-S = Path("/home/paperspace/data/citrus_all") / a.survey; P = S / "experimental/h3dgs"; OUT = Path(a.out); OUT.mkdir(parents=True, exist_ok=True)
+S = Path("/home/paperspace/data/citrus_all") / a.survey; P = S / a.proj; OUT = Path(a.out); OUT.mkdir(parents=True, exist_ok=True)
 meta = json.load(open(P / "export_meta.json")); R_W = np.asarray(meta.get("world_rotation_to_zup") or meta["world_rotation_lio_to_h3dgs"], np.float64); GL2CV = np.diag([1.0, -1.0, -1.0, 1.0])
 scaf = P / "output/scaffold/point_cloud/iteration_30000"; scaf_dir = str(scaf) if (scaf / "point_cloud.ply").exists() else ""
 # frames (pose + intrinsics in the H3DGS frame) and the chunk whose cell holds each camera
@@ -55,9 +57,18 @@ n = 0; t1 = time.time()
 for cname, frs in by_chunk.items():
     t0 = time.time(); ch = CompactHierarchy(str(P / "output/trained_chunks" / cname / "hierarchy.hier_opt"), scaf_dir, [cells[cname]] if scaf_dir else None)
     print(f"[backdrop] chunk {cname}: {ch.n_hier} nodes + skybox {ch.skybox} + fill {ch.fill}, resident {ch.gpu_gib():.2f} GiB, loaded in {time.time()-t0:.0f}s; {len(frs)} frames", flush=True)
+    EXPO = None
+    if a.exposure == "mean":
+        ej = P / "output/trained_chunks" / cname / "exposure.json"
+        if ej.exists():
+            E = np.array(list(json.load(open(ej)).values()), np.float32); EXPO = (torch.tensor(E[:, :, :3].mean(0)).cuda(), torch.tensor(E[:, :, 3].mean(0)).cuda())
+            print(f"[backdrop] chunk {cname}: mean trained exposure of {len(E)} images applied (diag {np.round(np.diag(E[:, :, :3].mean(0)), 3).tolist()})", flush=True)
+        else: print(f"[backdrop] chunk {cname}: --exposure mean requested but {ej} is missing; raw colours", flush=True)
     for _, name, c2w_h, W0, H0, (fx0, fy0, cx0, cy0) in frs:
         W, H = int(round(W0 * a.scale)), int(round(H0 * a.scale)); s = W / W0
-        with torch.no_grad(): im, _ = ch.render(make_cam(c2w_h, W, H, fx0 * s, fy0 * s, cx0 * s, cy0 * s), a.tau)
+        with torch.no_grad():
+            im, _ = ch.render(make_cam(c2w_h, W, H, fx0 * s, fy0 * s, cx0 * s, cy0 * s), a.tau)
+            if EXPO is not None: im = (torch.matmul(im.permute(1, 2, 0), EXPO[0]) + EXPO[1]).permute(2, 0, 1)   # image' = A @ image + b, as H3DGS applies per image
         cv2.imwrite(str(OUT / name), (im.clamp(0, 1).permute(1, 2, 0).cpu().numpy()[:, :, ::-1] * 255).astype(np.uint8)); n += 1
     del ch; torch.cuda.empty_cache()
 print(f"[backdrop] {n} frames -> {OUT} in {time.time()-t1:.0f}s", flush=True)
