@@ -44,14 +44,14 @@ echo "n" | MAX_JOBS=4 HIGH_EMBEDDER_CKPT=$EMB HIGH_LOSS_WARMUP_STEP=1000000000 P
     --pipeline.model.fruit-densify True --pipeline.model.fruit-densify-tail ${FD_TAIL:-2000} --pipeline.model.stop-split-at $MAXIT $FD_ARGS \
     --pipeline.model.sky-loss-lambda 1.0 --pipeline.datamanager.semantic-dir $SUP \
     --max-num-iterations $MAXIT --steps-per-save $((MAXIT - 1)) --vis tensorboard nerfstudio-data --eval-mode interval --eval-interval 10 \
-    > /home/paperspace/logs/sidecar_${SV}_${DN}_fruitdensify.log 2>&1 || { say "densify $DN: train FAILED"; exit 1; }
+    > /home/paperspace/logs/sidecar_${SV}_${DN}_fruitdensify${RS}.log 2>&1 || { say "densify $DN: train FAILED"; exit 1; }
 DRUN=$(ls -dt $O/splat_runs_FEATFIX/$EXP/high/*/ | head -1); DCK=$(ls -t $DRUN/nerfstudio_models*/*.ckpt | head -1)
 [ -n "$DCK" ] || { say "densify $DN: no ckpt"; exit 1; }
-grep -aE '^\[fruit-protect\]|^\[fruit-densify\]' /home/paperspace/logs/sidecar_${SV}_${DN}_fruitdensify.log | tail -2 | tee -a $L
+grep -aE '^\[fruit-protect\]|^\[fruit-densify\]' /home/paperspace/logs/sidecar_${SV}_${DN}_fruitdensify${RS}.log | tail -4 | tee -a $L
 say "densify $DN trained in $(( ($(date +%s)-t0)/60 )) min -> $(basename $DCK)"
 t1=$(date +%s); W=$O/splat_runs_FEATFIX/interaction_W_fruitdensify${RS}_bg.npz
 CENSUS_WITH_BG=1 HIGH_EMBEDDER_CKPT=$EMB pixi run python $ARU/gaussian_interaction_census.py --run-glob "$DRUN/config.yml" \
-  --supervision-dir $SUP --out-npz $W > /home/paperspace/logs/sidecar_${SV}_${DN}_fruitdensify_census.log 2>&1
+  --supervision-dir $SUP --out-npz $W > /home/paperspace/logs/sidecar_${SV}_${DN}_fruitdensify${RS}_census.log 2>&1
 [ -e $W ] || { say "densify $DN: census failed"; exit 1; }; say "census in $(( $(date +%s)-t1 ))s"
 INIT=$O/stage2_init_fruitdensify${RS}_r2/nerfstudio_models
 HIGH_EMBEDDER_CKPT=$EMB pixi run python $ARU/build_census_init.py --w-npz $W --embedder $EMB --src-ckpt $DCK --dst-dir $INIT \
