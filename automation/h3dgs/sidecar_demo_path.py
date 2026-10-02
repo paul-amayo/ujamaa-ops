@@ -20,8 +20,8 @@ ap.add_argument('--scale', type=float, default=0.5); ap.add_argument('--seed-tag
 # H3DGS project is --proj (h3dgs_expo for 05), and the drive is the side-car dataset's cameras INSIDE the chunk cell, in time
 # order, as passes of >= --min-pass frames (a 30 m cell holds ~110-frame row passes; several passes = jump cuts between rows).
 ap.add_argument('--sidecar-root', default='experimental/h3dgs_sidecar'); ap.add_argument('--proj', default='experimental/h3dgs')
-ap.add_argument('--chunk-drive', action='store_true'); ap.add_argument('--min-pass', type=int, default=40); ap.add_argument('--chunk', default='', help='chunk name for the cell test in --chunk-drive (default: from the model name chunk_<c>[_tag])')
-a = ap.parse_args(); S = Path('/home/paperspace/data/citrus_all') / a.survey; P = S / a.proj; OUT = Path(a.out); OUT.mkdir(parents=True, exist_ok=True)
+ap.add_argument('--survey-root', default='', help='absolute survey root (default citrus_all/<survey>)'); ap.add_argument('--chunk-drive', action='store_true'); ap.add_argument('--min-pass', type=int, default=40); ap.add_argument('--chunk', default='', help='chunk name for the cell test in --chunk-drive (default: from the model name chunk_<c>[_tag])')
+a = ap.parse_args(); S = Path(a.survey_root) if a.survey_root else Path('/home/paperspace/data/citrus_all') / a.survey; P = S / a.proj; OUT = Path(a.out); OUT.mkdir(parents=True, exist_ok=True)
 import sys; sys.path.insert(0, '/home/paperspace/code/aru_sil_core/src/interfaces/rerun/HiGH'); from word_utils import get_word_for_id
 def model_dir(b):
     d = S / a.sidecar_root / b
@@ -31,7 +31,7 @@ def block_frames(b):
     if a.chunk_drive:   # the chunk side-car's own dataset: every camera the chunk BA used; keep those INSIDE the cell, as passes
         tj = json.load(open(model_dir(b) / 'transforms.json')); assert str(tj.get('pose_convention', '')).startswith('opengl'), b
         import re as _re
-        cn = a.chunk or _re.match(r'chunk_(\d+_\d+)', b).group(1); ctr = np.loadtxt(P / f'camera_calibration/chunks/{cn}/center.txt'); ext = np.loadtxt(P / f'camera_calibration/chunks/{cn}/extent.txt')
+        cn = a.chunk or _re.match(r'chunk_([0-9]+_[0-9]+)', b).group(1); ctr = np.loadtxt(P / f'camera_calibration/chunks/{cn}/center.txt'); ext = np.loadtxt(P / f'camera_calibration/chunks/{cn}/extent.txt')
         fr = sorted(tj['frames'], key=lambda f: int(_re.search(r'(\d+)', Path(f['file_path']).stem).group(1))); out = []
         for f in fr:
             M = R_W @ (np.asarray(f['transform_matrix'], np.float64) @ GL2CV); c = M[:3, 3]

@@ -32,9 +32,10 @@ ap.add_argument('--fruit-min-area', type=int, default=30, help='fruit are small:
 ap.add_argument('--min-area', type=int, default=800, help="drop connected components smaller than this from each ROW region before drawing (0 = off). Compositing only, no re-render. On kf_001508: none -> oak 35 / pine 411 pieces and 1902 wrong-row px; 200 -> 2/3 pieces, 417 px; 800 -> 1/1 piece, 0 wrong-row px, for 4.5% of the drawn area.")
 ap.add_argument('--tree-min-area', type=int, default=200, help='same for each TREE region, kept lower so distant trees still register')
 ap.add_argument('--row-from-tree', action='store_true', help="SUPERSEDED by --row-pick raw, and not needed for a row query: route the row answer through the identified tree's hierarchy row (marker_hierarchy.json) instead of the row decode. Kept only to reproduce demo v3.")
+ap.add_argument('--survey-root', default='', help='absolute survey root (default citrus_all/<survey>)'); ap.add_argument('--noun', default='tree', help="plant noun for on-screen text ('cabbage')")
 ap.add_argument('--sidecar-root', default='experimental/h3dgs_sidecar', help='chunk side-cars: experimental/h3dgs_sidecar_chunks, with --models as dir names (chunk_1_0_expo)')
 ap.add_argument('--proj', default='experimental/h3dgs', help='H3DGS project (export_meta for the frame rotation): h3dgs_expo for the 05 demo chunks')
-a = ap.parse_args(); S = Path('/home/paperspace/data/citrus_all') / a.survey; P = S / a.proj; OUT = Path(a.out); (OUT / 'frames').mkdir(parents=True, exist_ok=True); (OUT / 'maps').mkdir(exist_ok=True)
+a = ap.parse_args(); S = Path(a.survey_root) if a.survey_root else Path('/home/paperspace/data/citrus_all') / a.survey; P = S / a.proj; OUT = Path(a.out); (OUT / 'frames').mkdir(parents=True, exist_ok=True); (OUT / 'maps').mkdir(exist_ok=True)
 def model_dir(b):
     d = S / a.sidecar_root / b
     return d if d.exists() else S / a.sidecar_root / f'block_{b}'

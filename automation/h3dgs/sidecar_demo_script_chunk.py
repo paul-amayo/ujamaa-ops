@@ -17,9 +17,11 @@ ap.add_argument('--models', nargs='+', required=True); ap.add_argument('--fruit-
 ap.add_argument('--fruit-max-dist', type=float, default=30.0); ap.add_argument('--out', required=True); ap.add_argument('--hold', type=int, default=16, help='frames to freeze on an answer (16 = 2 s at 8 fps)')
 ap.add_argument('--fruit-count', type=int, default=0, help='confirmed fruit count to state in the answer (from the registry, e.g. 61 for 05 tree 5); 0 = count not stated')
 ap.add_argument('--fruit-tree', type=int, default=-1, help='force the fruit answer tree (default: the tree with the most fruit pixels over the drive)')
+ap.add_argument('--survey-root', default=''); ap.add_argument('--noun', default='tree', help="plant noun in questions/answers ('cabbage')"); ap.add_argument('--ask-count', action='store_true', help="insert 'how many <noun>s are there?' -> '<N> <noun>s in <R> rows' from the registry, before 'show me every <noun>'")
 ap.add_argument('--end-of-row', type=int, default=-1, help="ask 'Show me the trees at the end of row N' (1-based hierarchy row id as presented) instead of 'which tree is this?'")
 a = ap.parse_args()
-S = Path('/home/paperspace/data/citrus_all') / a.survey
+S = Path(a.survey_root) if a.survey_root else Path('/home/paperspace/data/citrus_all') / a.survey
+NOUN = a.noun; NOUNS = NOUN + ('es' if NOUN.endswith(('s', 'x', 'ch', 'sh')) else 's')
 pj = json.load(open(a.path)); FR = pj['frames']; trees = {int(k): np.array(v) for k, v in pj['trees'].items()}; N = len(FR)
 H = json.load(open(S / 'prod/bateleur/scene_graph/marker_hierarchy.json'))
 rows_out = {}; label = {}; row_of = {}
@@ -28,7 +30,7 @@ for r in sorted(H['rows'], key=lambda r: r['id']):
     if len(ids) < 2: continue
     P = np.array([trees[t][:2] for t in ids]); d = P - P.mean(0); axis = np.linalg.svd(d, full_matrices=False)[2][0]
     seq = [ids[i] for i in np.argsort(d @ axis)]; lab = f"row {r['id'] + 1}"; rows_out[lab] = seq
-    for k, t in enumerate(seq): label[t] = f"tree {k + 1} of {lab}"; row_of[t] = lab
+    for k, t in enumerate(seq): label[t] = f"{NOUN} {k + 1} of {lab}"; row_of[t] = lab
 def tree_counts():
     per = {}
     for i, f in enumerate(FR):
@@ -70,12 +72,15 @@ if a.end_of_row > 0 and f'row {a.end_of_row}' in rows_out:
     last = rows_out[f'row {a.end_of_row}'][-1]; f_, n_ = window(last, 0, N - 1)
     if f_ is not None and n_ > 0:
         lo2, hi2 = max(0, f_ - 12), min(N - 1, f_ + 28)
-        segments.append(seg(lo2, hi2, 'tree', f'show me the trees at the end of row {a.end_of_row}', label[last].capitalize(), last, f_))
+        segments.append(seg(lo2, hi2, 'tree', f'show me the {NOUNS} at the end of row {a.end_of_row}', label[last].capitalize(), last, f_))
 else:
     cand = max(((t, window(t, lo, hi)[1]) for t in per), key=lambda kv: kv[1], default=(None, 0))
     if cand[0] is not None and cand[1] > 0:
-        f_, _ = window(cand[0], lo, hi); segments.append(seg(lo, hi, 'tree', 'which tree is this?', label.get(cand[0], f'tree {cand[0]}').capitalize(), cand[0], f_))
-segments.append(seg(F(0.36) + 1, F(0.58), 'all', 'show me every tree', ''))
+        f_, _ = window(cand[0], lo, hi); segments.append(seg(lo, hi, 'tree', f'which {NOUN} is this?', label.get(cand[0], f'{NOUN} {cand[0]}').capitalize(), cand[0], f_))
+if a.ask_count:
+    nrows = len([r for r in H['rows'] if len(r['object_ids']) > 0]); ntot = len(H['objects'])
+    segments.append(seg(F(0.36) + 1, F(0.58), 'all', f'how many {NOUNS} are there?', f'{ntot} {NOUNS} in {nrows} rows', None, F(0.47)))
+else: segments.append(seg(F(0.36) + 1, F(0.58), 'all', f'show me every {NOUN}', ''))
 segments.append(seg(F(0.58) + 1, F(0.74), 'rows', 'group them by row', ''))
 if best_fruit is not None and best_fruit in fruit_per:
     v = fruit_per[best_fruit]; w = min(40, N); conv = np.convolve(v, np.ones(w, int), 'valid'); st = int(np.argmax(conv)); pk = st + int(np.argmax(v[st:st + w]))
@@ -84,7 +89,7 @@ if best_fruit is not None and best_fruit in fruit_per:
                         f'{label.get(best_fruit, "tree " + str(best_fruit)).capitalize()}{cnt}', best_fruit, pk))
     print(f'[script] fruit window {st}-{st + w - 1} on tree {best_fruit} (peak frame {pk}, {int(v[pk])} fruit px; drive total {fruit.get(best_fruit, 0)} px)', flush=True)
 elif a.fruit_models: print('[script] fruit requested but no fruit pixels on the drive — no fruit segment', flush=True)
-segments.append(seg(F(0.74) + 1, N - 1, 'orchard', 'the whole orchard', ''))
+segments.append(seg(F(0.74) + 1, N - 1, 'orchard', 'the whole orchard' if NOUN == 'tree' else 'the whole field', ''))
 slot = [None] * N
 for sg_ in segments:
     if sg_['answer']: continue

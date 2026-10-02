@@ -9,9 +9,9 @@ import numpy as np
 from PIL import Image
 ap = argparse.ArgumentParser(); ap.add_argument('survey'); ap.add_argument('chunk'); ap.add_argument('--out', default=''); ap.add_argument('--proj', default=''); ap.add_argument('--fruit', action='store_true')
 ap.add_argument('--fruit-id', type=int, default=0, help='pick the in-cell frame with the most pixels of THIS fruit id (implies --fruit)')
-ap.add_argument('--tree-id', type=int, default=-1, help='pick the in-cell frame with the most pixels of THIS tree id (trees_only)'); a = ap.parse_args()
+ap.add_argument('--tree-id', type=int, default=-1, help='pick the in-cell frame with the most pixels of THIS tree id (trees_only)'); ap.add_argument('--survey-root', default=''); a = ap.parse_args()
 if a.fruit_id: a.fruit = True
-S = Path('/home/paperspace/data/citrus_all') / a.survey; P = Path(a.proj) if a.proj else S / 'experimental/h3dgs'
+S = Path(a.survey_root) if a.survey_root else Path('/home/paperspace/data/citrus_all') / a.survey; P = Path(a.proj) if a.proj else S / 'experimental/h3dgs'
 O = Path(a.out) if a.out else S / 'experimental/h3dgs_sidecar_chunks' / f'chunk_{a.chunk}'
 meta = json.load(open(P / 'export_meta.json')); R_W = np.asarray(meta.get('world_rotation_to_zup') or meta['world_rotation_lio_to_h3dgs'], float)[:3, :3]
 c = np.array([float(x) for x in open(P / f'camera_calibration/chunks/{a.chunk}/center.txt').read().split()])

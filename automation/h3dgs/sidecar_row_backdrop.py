@@ -16,14 +16,15 @@ ap = argparse.ArgumentParser(); ap.add_argument("--survey", required=True); ap.a
 ap.add_argument("--scale", type=float, default=0.5); ap.add_argument("--tau", type=float, default=0.0); ap.add_argument("--cfg", default="lio_row100")
 ap.add_argument("--path", default="", help="demo_path.json from sidecar_demo_path.py: render its frames (free poses, H3DGS frame) instead of the blocks' keyframes")
 ap.add_argument("--proj", default="experimental/h3dgs", help="H3DGS project under the survey (h3dgs_expo for the 05 demo chunks)")
+ap.add_argument("--survey-root", default="", help="absolute survey root (default /home/paperspace/data/citrus_all/<survey>); a shim root with the citrus sub-paths works for phone segments")
 ap.add_argument("--exposure", default="", choices=("", "mean"), help="mean: apply the mean of the chunk's trained per-image exposure (exposure.json, 3x4 affine on RGB) to every frame — the improved recipe's raw colours render dark and blue-cast (hier_render_service HIER_EXPOSURE=mean does the same)")
 a = ap.parse_args()
-S = Path("/home/paperspace/data/citrus_all") / a.survey; P = S / a.proj; OUT = Path(a.out); OUT.mkdir(parents=True, exist_ok=True)
+S = Path(a.survey_root) if a.survey_root else Path("/home/paperspace/data/citrus_all") / a.survey; P = S / a.proj; OUT = Path(a.out); OUT.mkdir(parents=True, exist_ok=True)
 meta = json.load(open(P / "export_meta.json")); R_W = np.asarray(meta.get("world_rotation_to_zup") or meta["world_rotation_lio_to_h3dgs"], np.float64); GL2CV = np.diag([1.0, -1.0, -1.0, 1.0])
 scaf = P / "output/scaffold/point_cloud/iteration_30000"; scaf_dir = str(scaf) if (scaf / "point_cloud.ply").exists() else ""
 # frames (pose + intrinsics in the H3DGS frame) and the chunk whose cell holds each camera
 cells = {}
-for c in sorted(glob.glob(str(P / "camera_calibration/chunks/*_*"))):
+for c in sorted(glob.glob(str(P / "camera_calibration/chunks/*"))):   # any chunk dir (phone segments use "lane")
     if (Path(c) / "sparse/0/images.bin").exists() and (P / "output/trained_chunks" / os.path.basename(c) / "hierarchy.hier_opt").exists():
         cells[os.path.basename(c)] = (np.loadtxt(Path(c) / "center.txt"), np.loadtxt(Path(c) / "extent.txt"))
 frames = []
