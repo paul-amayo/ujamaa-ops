@@ -52,8 +52,10 @@ def titled_globe(name, src, title, lines, accent_line):
     """The idle globe with the title composited on the left (transparent PNG overlay, fades with the clip)."""
     im = Image.new("RGBA", (W, H), (0, 0, 0, 0)); draw_card(im, title, lines, accent_line, y=300)
     png = WORK / f"{name}_ovl.png"; im.save(png); mp4 = WORK / f"{name}.mp4"; dur = probe(src)
+    # the globe is centred in its clip; shift it 420 px right so the title column on the left stays clear of it
     run(["ffmpeg", "-v", "error", "-y", "-i", src, "-i", png, "-filter_complex",
-         f"[0:v][1:v]overlay=0:0,fade=t=in:st=0:d=0.8,fade=t=out:st={dur-0.6:.2f}:d=0.6,format=yuv420p",
+         f"[0:v]crop={W-420}:{H}:0:0,pad={W}:{H}:420:0:color=0x0b0f0a[g];[g][1:v]overlay=0:0,"
+         f"fade=t=in:st=0:d=0.8,fade=t=out:st={dur-0.6:.2f}:d=0.6,format=yuv420p",
          "-c:v", "libx264", "-crf", "18", "-r", str(FPS), "-an", mp4])
     return mp4
 
@@ -84,8 +86,9 @@ segs = [
                  "Western Cape  ·  Kenya  ·  a citrus orchard"),
     # citrus (continent only)
     clip("g_cit", G / "citrus.mp4"),
-    card("c1", "Citrus farm B", ["100 trees · 3 surveys · 154 oranges confirmed by hand"], 3,
-         accent_line="Ni mti gani wenye machungwa mengi zaidi?  ·  Which tree has the most oranges?"),
+    card("c1", "Citrus farm B", ["100 trees · 3 surveys · 154 oranges confirmed by hand",
+                                 "Which tree has the most oranges?"], 3,
+         accent_line="Ni mti gani wenye machungwa mengi zaidi?"),
     clip("r_00", R / "05_0_0_720" / "demo.mp4"),
     fruit,
     card("c2", "Citrus farm A", ["290 trees · surveyed July 2023 · 28 dB reconstruction"], 3,
