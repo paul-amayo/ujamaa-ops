@@ -18,6 +18,8 @@ ap.add_argument('--fruit-max-dist', type=float, default=30.0); ap.add_argument('
 ap.add_argument('--fruit-count', type=int, default=0, help='confirmed fruit count to state in the answer (from the registry, e.g. 61 for 05 tree 5); 0 = count not stated')
 ap.add_argument('--fruit-tree', type=int, default=-1, help='force the fruit answer tree (default: the tree with the most fruit pixels over the drive)')
 ap.add_argument('--survey-root', default=''); ap.add_argument('--noun', default='tree', help="plant noun in questions/answers ('cabbage')"); ap.add_argument('--ask-count', action='store_true', help="insert 'how many <noun>s are there?' -> '<N> <noun>s in <R> rows' from the registry, before 'show me every <noun>'")
+ap.add_argument('--tree-min-iou', type=float, default=0.0, help="honesty rule (dashboard, 2026-10-02): ask 'which <noun> is this?' only on a head whose side-car verdict IoU >= this (read from ~/logs/sidecar_<survey>_verdicts.log for --verdict-model/--verdict-tag); the count/row questions stay everywhere")
+ap.add_argument('--verdict-model', default=''); ap.add_argument('--verdict-tag', default='bg_f1.0_r2')
 ap.add_argument('--end-of-row', type=int, default=-1, help="ask 'Show me the trees at the end of row N' (1-based hierarchy row id as presented) instead of 'which tree is this?'")
 a = ap.parse_args()
 S = Path(a.survey_root) if a.survey_root else Path('/home/paperspace/data/citrus_all') / a.survey
@@ -46,6 +48,18 @@ def tree_counts():
         for u_, c_ in zip(u.tolist(), c.tolist()): per.setdefault(int(u_), np.zeros(N, int))[i] = int(c_)
     return per
 per = tree_counts()
+if a.tree_min_iou > 0 and a.verdict_model:
+    import re as _re
+    viou = {}
+    vl = Path(f'/home/paperspace/logs/sidecar_{a.survey}_verdicts.log')
+    if vl.exists():
+        for ln in open(vl):
+            if ln.startswith(f'[{a.verdict_model} sidecar {a.verdict_tag} '):
+                m = _re.search(r'TREE +(\d+) +"[a-z]+": thr [0-9.na]+ IoU ([0-9.]+)', ln)
+                if m: viou[int(m.group(1))] = max(viou.get(int(m.group(1)), 0.0), float(m.group(2)))
+    ok = {t for t, v in viou.items() if v >= a.tree_min_iou}
+    dropped = sorted(t for t in per if t not in ok); per = {t: v for t, v in per.items() if t in ok}
+    print(f'[script] honesty rule: {len(ok)} heads with verdict IoU >= {a.tree_min_iou} ({sorted(ok)}); not eligible for "which {NOUN} is this?": {dropped}', flush=True)
 fruit = {}; fruit_per = {}
 if a.fruit_models and a.fruit_maps:
     for i, f in enumerate(FR):
