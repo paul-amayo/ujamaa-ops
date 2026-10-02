@@ -111,7 +111,7 @@ A globe (three.js, vendored, with a public-domain NASA Blue Marble texture) that
 
 Decided (Paul, 1 Oct night): citrus zooms to the **continent only** (no location on screen); Blue Marble texture downloaded (NASA, public domain) for vendoring. Open: (2) coordinates for the two Kenyan farms (a pin at village scale). (3) taglines need native-speaker checks; Swahili/Afrikaans/isiXhosa drafts from the question set's vocabulary. Build: Friday, CPU + headless browser only, ~3–4 h; frames into the assembly as the transitions between farms.
 
-## 4. The demo video (idle loop, ~90 s, 1080p, silent, captions)
+## 4. The demo video (idle loop, 1080p, silent, captions) — **v1 cut exists (2 Oct 07:xx SAST): `ujamaa_demo_v1.mp4`, 196 s, 720p; `automation/demo/assemble_v1.py`.** Below is the target shape; v2 = Paul's card words, globe transitions, chosen Citrus B cell, re-shot Kenyan/Klapmuts walks at 8 fps, 1080p.
 
 Frames are rendered offline at fixed poses along each farm's walk (render service / hier service), not screen-recorded — headless browser capture runs at 8–11 fps.
 
