@@ -100,7 +100,7 @@ Question bank with expected answers: `automation/adinkra_www/demo_bank_20260930.
 
 ## 4a. Globe framing (Paul, 1 Oct night: "show a globe, go down to citrus farms with NDVI, then global, then Klapmuts, then global, then Gwakungu and Kendu Bay… local observations, local language tagline")
 
-A globe (three.js, vendored, with a public-domain NASA Blue Marble texture) that zooms from space to each farm in turn, cross-fading into OUR top-down of that farm (Bateleur / NDVI dots), with that farm's observations and a tagline in its language, then back out to the globe, before the farm's walk. Rendered headless from a page in the app, so it can also become the landing page's "choose a farm" later.
+A globe (three.js, vendored, with a public-domain NASA Blue Marble texture) that zooms from space to each farm in turn, cross-fading into OUR top-down of that farm (Bateleur / NDVI dots), with that farm's observations and a tagline in its language, then back out to the globe, before the farm's walk. **Video only (Paul, 2 Oct morning): the globe is not part of Tassili or the launch app.** Built as a standalone page under ops `automation/demo/globe/` (three.js + vendored textures in `assets/`), rendered headless to frames for the assembly; the app's landing page stays as it is.
 
 | farm | coordinates we hold | top-down to fade into | observations | tagline language |
 |---|---|---|---|---|
