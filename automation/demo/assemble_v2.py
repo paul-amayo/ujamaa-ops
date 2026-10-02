@@ -82,7 +82,7 @@ else:
 
 segs = [
     titled_globe("t0", G / "earth_idle.mp4", "UJAMAA",
-                 ["Ask the orchard: farms that answer questions", "in the farmer's own language."],
+                 ["Ask the orchard.", "Farms that answer questions", "in the farmer's own language."],
                  "Western Cape  ·  Kenya  ·  a citrus orchard"),
     # citrus (continent only)
     clip("g_cit", G / "citrus.mp4"),
