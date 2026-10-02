@@ -79,7 +79,7 @@ segments.append(seg(F(0.36) + 1, F(0.58), 'all', 'show me every tree', ''))
 segments.append(seg(F(0.58) + 1, F(0.74), 'rows', 'group them by row', ''))
 if best_fruit is not None and best_fruit in fruit_per:
     v = fruit_per[best_fruit]; w = min(40, N); conv = np.convolve(v, np.ones(w, int), 'valid'); st = int(np.argmax(conv)); pk = st + int(np.argmax(v[st:st + w]))
-    cnt = f' — {a.fruit_count} oranges' if a.fruit_count else ''
+    cnt = f' - {a.fruit_count} oranges' if a.fruit_count else ''   # ASCII hyphen: cv2's Hershey font draws an em dash as '???'
     segments.append(seg(st, min(N - 1, st + w - 1), 'fruit', 'Ni mti gani wenye machungwa mengi zaidi? Nionyeshe.  /  Which tree has the most oranges? Show me.',
                         f'{label.get(best_fruit, "tree " + str(best_fruit)).capitalize()}{cnt}', best_fruit, pk))
     print(f'[script] fruit window {st}-{st + w - 1} on tree {best_fruit} (peak frame {pk}, {int(v[pk])} fruit px; drive total {fruit.get(best_fruit, 0)} px)', flush=True)
