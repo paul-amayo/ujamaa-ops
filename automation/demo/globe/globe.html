@@ -1,0 +1,273 @@
+<!doctype html>
+<!--
+  UJAMAA demo video — globe zoom sequence (video only; not part of any app).
+
+  Deterministic: every frame is a pure function of (stop, mode, frame index), nothing
+  depends on wall-clock. Drive it with
+      globe.html?stop=klapmuts&mode=in&frame=42        (renders that one frame on load)
+      globe.html?stop=klapmuts&mode=in&play=1          (human preview: loops the clip)
+  or from a headless driver (render_globe.py) via
+      window.setClip(stop, mode); const dataUrl = window.renderFrame(i);   // PNG data URL
+  window.__ready becomes true once the texture is loaded and the first frame drawn.
+
+  Stops: klapmuts | kendu_bay | gendia | citrus (continent only) | earth_idle.
+  Modes: in (Earth -> stop), out (stop -> Earth). earth_idle ignores mode.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<title>UJAMAA globe</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #0b0f0a; overflow: hidden; }
+  #stage { position: relative; width: 1920px; height: 1080px; }
+  #stage canvas { position: absolute; left: 0; top: 0; }
+  #hud { position: absolute; left: 0; top: 0; }
+  /* label typography lives in JS (canvas text) so it is part of the exported frame */
+</style>
+<script src="assets/three.min.js"></script>
+</head>
+<body>
+<div id="stage"><canvas id="gl"></canvas><canvas id="hud"></canvas></div>
+<script>
+(function () {
+  'use strict';
+
+  // ---------------------------------------------------------------- config
+  const W = 1920, H = 1080, FPS = 30, N = 180;          // 6 s clips
+  const BG = 0x0b0f0a;
+  const EARTH_R = 1.0;                                   // 6371 km
+  const KM_PER_UNIT = 6371;
+  const FOV = 30;                                        // vertical, degrees
+
+  // Full-Earth view: Africa centred, slow spin (west-moving camera = east-spinning Earth)
+  const FULL_ALT = 3.9;                                  // camera altitude above surface (units)
+  const FULL_LAT = 6.0, FULL_LON0 = 24.0, SPIN_DEG_PER_S = 1.5;
+
+  // End altitude: 2*h*tan(FOV/2) = visible height. h=0.076 -> ~260 km tall x ~460 km wide.
+  const PIN_ALT = 0.076;
+  const CONTINENT_ALT = 1.46;                            // ~5000 km tall: continent scale only
+
+  const STOPS = {
+    klapmuts:  { lat: -33.818, lon: 18.930, label: 'Klapmuts, Western Cape',
+                 tagline: '912 bags · 825 found again, Dec → Apr', pin: true, alt: PIN_ALT },
+    kendu_bay: { lat: -0.360, lon: 34.655, label: 'Kendu Bay, Kenya',
+                 tagline: 'ground crop · phone survey, 14 May 2026', pin: true, alt: PIN_ALT },
+    gendia:    { lat: -0.404, lon: 34.665, label: 'Gendia (Gwakungu), Kenya',
+                 tagline: '29 cabbages · phone survey, 16 May 2026', pin: true, alt: PIN_ALT },
+    // continent only: no pin, no location text, never closer than continent scale
+    citrus:    { lat: 39.0, lon: -98.0, label: 'A citrus orchard', tagline: '', pin: false, alt: CONTINENT_ALT },
+    earth_idle:{ idle: true }
+  };
+
+  // ---------------------------------------------------------------- maths
+  const d2r = Math.PI / 180;
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const clamp01 = (x) => Math.min(1, Math.max(0, x));
+  const smooth = (x) => { x = clamp01(x); return x * x * (3 - 2 * x); };
+  const smoother = (x) => { x = clamp01(x); return x * x * x * (x * (x * 6 - 15) + 10); };
+  const ramp = (p, a, b) => smooth((p - a) / (b - a));
+
+  // SphereGeometry UV convention (three r160): u=0.5 (lon 0) at +x, lon +90E at -z.
+  function dirFromLatLon(lat, lon) {
+    const la = lat * d2r, lo = lon * d2r;
+    return new THREE.Vector3(Math.cos(la) * Math.cos(lo), Math.sin(la), -Math.cos(la) * Math.sin(lo));
+  }
+
+  // Camera state for (stop, mode, frame). Returns {lat, lon, alt, pinA, labelA}
+  function cameraState(stopName, mode, i) {
+    const stop = STOPS[stopName];
+    const t = i / FPS;                   // seconds, for the spin (always forwards in time)
+    const p = i / (N - 1);               // clip progress 0..1
+    const spinLon = FULL_LON0 - SPIN_DEG_PER_S * t;
+    if (!stop || stop.idle) return { lat: FULL_LAT, lon: spinLon, alt: FULL_ALT, pinA: 0, labelA: 0 };
+
+    // e: 0 = full Earth, 1 = at the stop
+    const e = (mode === 'out') ? 1 - smoother(p) : smoother(p);
+    const alt = Math.exp(lerp(Math.log(FULL_ALT), Math.log(stop.alt), e));
+    const lat = lerp(FULL_LAT, stop.lat, e);
+    const lon = lerp(spinLon, stop.lon, e);
+
+    let pinA, labelA;
+    if (mode === 'out') {
+      labelA = 1 - ramp(p, 0.0, 1 / 6);       // fades out during the first second
+      pinA = 1 - ramp(p, 0.28, 0.45);
+    } else {
+      labelA = ramp(p, 5 / 6, 1.0);           // fades in during the last second
+      pinA = ramp(p, 0.55, 0.72);
+    }
+    if (!stop.pin) pinA = 0;
+    return { lat, lon, alt, pinA, labelA };
+  }
+
+  // ---------------------------------------------------------------- three.js scene
+  const glCanvas = document.getElementById('gl');
+  const hud = document.getElementById('hud');
+  glCanvas.width = W; glCanvas.height = H; hud.width = W; hud.height = H;
+  const hctx = hud.getContext('2d');
+
+  const renderer = new THREE.WebGLRenderer({ canvas: glCanvas, antialias: true, preserveDrawingBuffer: true, alpha: false });
+  renderer.setPixelRatio(1);
+  renderer.setSize(W, H, false);
+  renderer.setClearColor(BG, 1);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(FOV, W / H, 0.01, 50);
+  scene.add(camera);
+
+  // Lights ride with the camera so the zoomed-in view is evenly lit; a soft key from
+  // upper-left gives the full Earth a gentle limb falloff.
+  scene.add(new THREE.AmbientLight(0xffffff, 1.55));
+  const key = new THREE.DirectionalLight(0xffffff, 1.35);
+  key.position.set(-0.6, 0.7, 1.0);
+  camera.add(key);
+
+  const earthGeo = new THREE.SphereGeometry(EARTH_R, 256, 128);
+  const earthMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+  const earth = new THREE.Mesh(earthGeo, earthMat);
+  scene.add(earth);
+
+  // Subtle atmosphere rim: a slightly larger shell, additive, strongest at the limb.
+  const atmoMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.FrontSide,
+    uniforms: { glow: { value: new THREE.Color(0x4f8fd6) }, strength: { value: 0.55 } },
+    vertexShader: `
+      varying vec3 vN; varying vec3 vP;
+      void main(){ vN = normalize(mat3(modelMatrix) * normal); vP = (modelMatrix * vec4(position,1.0)).xyz;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+    fragmentShader: `
+      uniform vec3 glow; uniform float strength; varying vec3 vN; varying vec3 vP;
+      void main(){ vec3 v = normalize(cameraPosition - vP); float d = clamp(dot(vN, v), 0.0, 1.0);
+        float rim = pow(1.0 - d, 4.0); gl_FragColor = vec4(glow * rim * strength, rim); }`
+  });
+  const atmo = new THREE.Mesh(new THREE.SphereGeometry(EARTH_R * 1.025, 192, 96), atmoMat);
+  scene.add(atmo);
+
+  // ---------------------------------------------------------------- texture
+  let ready = false;
+  const tex = new THREE.TextureLoader().load('assets/earth_5400.jpg', (t) => {
+    t.colorSpace = THREE.SRGBColorSpace;
+    t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    t.minFilter = THREE.LinearMipmapLinearFilter; t.magFilter = THREE.LinearFilter;
+    t.generateMipmaps = true; t.needsUpdate = true;
+    earthMat.map = t; earthMat.needsUpdate = true;
+    boot();
+  }, undefined, (err) => { console.error('texture failed', err); window.__error = String(err); });
+
+  // ---------------------------------------------------------------- HUD (pin + labels)
+  const AMBER = '#e99637';
+  const FONT = '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif';
+
+  function shadowOn(ctx, blur) { ctx.shadowColor = 'rgba(0,0,0,0.65)'; ctx.shadowBlur = blur; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 1; }
+  function shadowOff(ctx) { ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; }
+
+  function drawHud(stopName, st) {
+    hctx.clearRect(0, 0, W, H);
+    const stop = STOPS[stopName];
+    if (!stop || stop.idle) return;
+
+    if (stop.pin && st.pinA > 0) {
+      // project the surface point; only draw if it faces the camera
+      const P = dirFromLatLon(stop.lat, stop.lon).multiplyScalar(EARTH_R);
+      const toCam = camera.position.clone().sub(P);
+      if (toCam.dot(P) > 0) {
+        const ndc = P.clone().project(camera);
+        const x = (ndc.x * 0.5 + 0.5) * W, y = (0.5 - ndc.y * 0.5) * H;
+        hctx.save();
+        hctx.globalAlpha = st.pinA;
+        // dark halo for contrast on bright land
+        hctx.fillStyle = 'rgba(0,0,0,0.35)';
+        hctx.beginPath(); hctx.arc(x, y, 9, 0, Math.PI * 2); hctx.fill();
+        hctx.fillStyle = AMBER;
+        hctx.beginPath(); hctx.arc(x, y, 5, 0, Math.PI * 2); hctx.fill();
+        hctx.strokeStyle = AMBER; hctx.lineWidth = 1.5; hctx.globalAlpha = st.pinA * 0.9;
+        hctx.beginPath(); hctx.arc(x, y, 14, 0, Math.PI * 2); hctx.stroke();
+        hctx.restore();
+
+        if (st.labelA > 0) {
+          const lx = x + 30, ly = y - 6;      // label to the right of the pin
+          hctx.save();
+          hctx.globalAlpha = st.labelA;
+          hctx.textBaseline = 'alphabetic'; hctx.textAlign = 'left';
+          shadowOn(hctx, 10);
+          hctx.fillStyle = '#ffffff'; hctx.font = `600 38px ${FONT}`;
+          hctx.fillText(stop.label, lx, ly);
+          if (stop.tagline) {
+            hctx.fillStyle = '#c3c7c0'; hctx.font = `400 26px ${FONT}`;
+            hctx.fillText(stop.tagline, lx, ly + 36);
+          }
+          shadowOff(hctx);
+          hctx.restore();
+        }
+      }
+    } else if (!stop.pin && st.labelA > 0) {
+      // continent-only stop: a centred caption in the lower third, nothing locating it
+      hctx.save();
+      hctx.globalAlpha = st.labelA;
+      hctx.textBaseline = 'alphabetic'; hctx.textAlign = 'center';
+      shadowOn(hctx, 12);
+      hctx.fillStyle = '#ffffff'; hctx.font = `600 44px ${FONT}`;
+      hctx.fillText(stop.label, W / 2, H * 0.86);
+      shadowOff(hctx);
+      hctx.restore();
+    }
+  }
+
+  // ---------------------------------------------------------------- rendering
+  let curStop = 'earth_idle', curMode = 'in';
+  const composite = document.createElement('canvas'); composite.width = W; composite.height = H;
+  const cctx = composite.getContext('2d');
+
+  function renderState(stopName, mode, i) {
+    const st = cameraState(stopName, mode, i);
+    const dist = EARTH_R + st.alt;
+    camera.position.copy(dirFromLatLon(st.lat, st.lon).multiplyScalar(dist));
+    camera.up.set(0, 1, 0);
+    camera.lookAt(0, 0, 0);
+    camera.near = Math.max(0.002, st.alt * 0.3);
+    camera.far = dist + 2.0;
+    camera.updateProjectionMatrix();
+    camera.updateMatrixWorld(true);
+    renderer.render(scene, camera);
+    drawHud(stopName, st);
+    return st;
+  }
+
+  window.setClip = function (stopName, mode) {
+    if (!STOPS[stopName]) throw new Error('unknown stop ' + stopName);
+    curStop = stopName; curMode = (mode === 'out') ? 'out' : 'in';
+  };
+  // Renders frame i of the current clip and returns the composited PNG as a data URL.
+  window.renderFrame = function (i) {
+    renderState(curStop, curMode, i);
+    cctx.fillStyle = '#0b0f0a'; cctx.fillRect(0, 0, W, H);
+    cctx.drawImage(glCanvas, 0, 0);
+    cctx.drawImage(hud, 0, 0);
+    return composite.toDataURL('image/png');
+  };
+  // Same, but only draws (for ?frame= screenshots); returns the camera state for debugging.
+  window.showFrame = function (i) { return renderState(curStop, curMode, i); };
+  window.clipInfo = function () {
+    return { frames: N, fps: FPS, width: W, height: H, stops: Object.keys(STOPS),
+             webgl: renderer.getContext().getParameter(renderer.getContext().RENDERER) };
+  };
+
+  function boot() {
+    const q = new URLSearchParams(location.search);
+    const stop = q.get('stop') || 'earth_idle';
+    const mode = q.get('mode') || 'in';
+    window.setClip(STOPS[stop] ? stop : 'earth_idle', mode);
+    const frame = parseInt(q.get('frame') || '0', 10);
+    if (q.get('play')) {
+      let i = 0;
+      const tick = () => { window.showFrame(i % N); i++; requestAnimationFrame(tick); };
+      tick();
+    } else {
+      window.showFrame(isFinite(frame) ? frame : 0);
+    }
+    ready = true; window.__ready = true;
+  }
+})();
+</script>
+</body>
+</html>
