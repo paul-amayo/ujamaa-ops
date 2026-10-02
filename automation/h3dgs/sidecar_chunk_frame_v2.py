@@ -24,7 +24,7 @@ for f in tj['frames']:
     if lo[0] <= p[0] <= hi[0] and lo[1] <= p[1] <= hi[1]: inside.add(Path(f['file_path']).name)
 sup = O / ('supervision/trees_fruit_v3' if a.fruit else 'supervision/trees_only')
 best = (0, None)
-for f in sorted(sup.glob('kf_*.png')):
+for f in sorted(sup.glob('*.png')):   # kf_*.png on the citrus surveys, image_N.png on phone segments
     if f.name not in inside: continue
     m = np.array(Image.open(f), np.uint16)
     n = int((m == a.tree_id).sum()) if a.tree_id >= 0 else int((m == a.fruit_id).sum()) if a.fruit_id else int(((m >= 10000) & (m != 65535)).sum()) if a.fruit else int((m != 65535).sum())

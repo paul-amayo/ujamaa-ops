@@ -33,6 +33,8 @@ ap.add_argument('--min-area', type=int, default=800, help="drop connected compon
 ap.add_argument('--tree-min-area', type=int, default=200, help='same for each TREE region, kept lower so distant trees still register')
 ap.add_argument('--row-from-tree', action='store_true', help="SUPERSEDED by --row-pick raw, and not needed for a row query: route the row answer through the identified tree's hierarchy row (marker_hierarchy.json) instead of the row decode. Kept only to reproduce demo v3.")
 ap.add_argument('--survey-root', default='', help='absolute survey root (default citrus_all/<survey>)'); ap.add_argument('--noun', default='tree', help="plant noun for on-screen text ('cabbage')")
+ap.add_argument('--frames', default='', help="composite only these path-frame index ranges, e.g. '13-52,346-360' (a standalone clip; maps/backdrop reused)")
+ap.add_argument('--slow-fruit', type=int, default=1, help='write each fruit-mode frame this many times (x2 = half speed inside the reel)')
 ap.add_argument('--sidecar-root', default='experimental/h3dgs_sidecar', help='chunk side-cars: experimental/h3dgs_sidecar_chunks, with --models as dir names (chunk_1_0_expo)')
 ap.add_argument('--proj', default='experimental/h3dgs', help='H3DGS project (export_meta for the frame rotation): h3dgs_expo for the 05 demo chunks')
 a = ap.parse_args(); S = Path(a.survey_root) if a.survey_root else Path('/home/paperspace/data/citrus_all') / a.survey; P = S / a.proj; OUT = Path(a.out); (OUT / 'frames').mkdir(parents=True, exist_ok=True); (OUT / 'maps').mkdir(exist_ok=True)
@@ -162,8 +164,14 @@ def banner(img, text, y, col, scale=0.62, pad_=9):
     (tw, th), _ = cv2.getTextSize(text, font, scale, 2)
     cv2.rectangle(img, (10, y - th - pad_), (14 + tw + pad_, y + pad_), INK, -1)
     cv2.putText(img, text, (14, y), font, scale, col, 2, cv2.LINE_AA)
+KEEP = None
+if a.frames:
+    KEEP = set()
+    for part in a.frames.split(','):
+        lo_, hi_ = (part.split('-') + [part])[:2]; KEEP.update(range(int(lo_), int(hi_) + 1))
 outn = 0
 for fi, f in enumerate(FR):
+    if KEEP is not None and fi not in KEEP: continue
     name = f['name']; img = cv2.imread(str(Path(a.backdrop_dir) / name)); img = cv2.resize(img, (W, H)) if img.shape[:2] != (H, W) else img; over = img.copy()
     si = segof[fi]; sg = SCR['segments'][si] if (SCR and si is not None) else None
     mode = sg['mode'] if sg else f['mode']; question = sg['question'] if sg else f.get('question', '')
@@ -281,7 +289,8 @@ for fi, f in enumerate(FR):
         if mode == 'fruit' and nfr: cv2.putText(dst, f'{nfr} fruit clusters', (12, H - 14), font, 0.55, FRUITCOL, 1, cv2.LINE_AA)
     rq = min(1.0, (fi - seg_lo + 1) / 8.0) if (sg is None or sg.get('retype', True)) else 1.0
     base = over.copy(); draw_text(over, rq, 0.0)
-    cv2.imwrite(str(OUT / 'frames' / f'{outn:05d}.png'), over); outn += 1
+    for _rep in range(a.slow_fruit if mode == 'fruit' else 1):
+        cv2.imwrite(str(OUT / 'frames' / f'{outn:05d}.png'), over); outn += 1
     # hold: freeze this frame and type the answer in
     if sg and answer and fi == sg.get('hold_at'):
         for k in range(sg.get('hold', 10)):
