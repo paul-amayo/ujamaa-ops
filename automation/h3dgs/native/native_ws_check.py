@@ -11,7 +11,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument('--port', type=int, default=8036); ap.add_argument('--proj', required=True); ap.add_argument('--chunk', required=True)
 ap.add_argument('--frame', required=True); ap.add_argument('--queries', nargs='+', required=True); ap.add_argument('--out', required=True)
 a = ap.parse_args(); os.makedirs(a.out, exist_ok=True)
-R_W = np.array(json.load(open(f"{a.proj}/export_meta.json"))["world_rotation_lio_to_h3dgs"])
+_meta = json.load(open(f"{a.proj}/export_meta.json")); R_W = np.array(_meta.get("world_rotation_to_zup") or _meta["world_rotation_lio_to_h3dgs"])   # both export-meta key names, as hier_render_service
 src = f"{a.proj}/camera_calibration/chunks/{a.chunk}/sparse/0"
 cam = list(read_cameras_binary(f"{src}/cameras.bin").values())[0]; W, H = int(cam.width), int(cam.height); fx, fy, cx, cy = cam.params[:4]
 im = next(v for v in read_images_binary(f"{src}/images.bin").values() if v.name == a.frame)
