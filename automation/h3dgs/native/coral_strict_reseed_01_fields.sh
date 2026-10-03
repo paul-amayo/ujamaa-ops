@@ -14,12 +14,13 @@ L=/home/paperspace/logs/coral_strict_reseed_01_$PART.log; say() { echo "[$(date 
 cd /home/paperspace/code/nerf_new
 reseed_ckpt() {   # <run nerfstudio_models dir> <W npz> <era dir> [census-init flags...]
     local MD=$1 W=$2 E=$3; shift 3
-    local CK=$MD/step-000015000.ckpt
+    local CK; CK=$(ls "$MD"/*.ckpt "$E"/*.ckpt 2>/dev/null | head -1); [ -n "$CK" ] || { say "  no seed ckpt in $MD"; return 1; }
+    local NAME; NAME=$(basename "$CK"); CK=$MD/$NAME     # seeds keep stage 1's step name (step-000005000/10000/15000)
     mkdir -p "$E"
-    if [ -f "$E/step-000015000.ckpt" ]; then say "  era copy already there ($E) — re-using it as the source"; else mv "$CK" "$E/step-000015000.ckpt" || return 1; fi
-    HIGH_EMBEDDER_CKPT=$EMB pixi run python $ARU/build_census_init.py --w-npz "$W" --embedder $EMB --src-ckpt "$E/step-000015000.ckpt" --dst-dir "$MD" "$@" 2>&1 \
+    if [ -f "$E/$NAME" ]; then say "  era copy already there ($E/$NAME) — re-using it as the source"; else mv "$CK" "$E/$NAME" || return 1; fi
+    HIGH_EMBEDDER_CKPT=$EMB pixi run python $ARU/build_census_init.py --w-npz "$W" --embedder $EMB --src-ckpt "$E/$NAME" --dst-dir "$MD" "$@" 2>&1 \
         | grep -aE 'background|floors|assigned|census-init checkpoint|Error|Traceback' | sed 's/^/    /' | tee -a $L
-    [ -f "$CK" ] && [ "$CK" -nt "$EMB" ]
+    [ -f "$MD/$NAME" ] && [ "$MD/$NAME" -nt "$EMB" ]
 }
 case $PART in
 sidecar)
@@ -44,7 +45,7 @@ fleet)
         say "$(basename $BD)"
         if reseed_ckpt "$RUN/nerfstudio_models" "$W" "$BD/splat_runs_FEATFIX/$ERA"; then
             printf '{"embedder": "%s", "embedder_mtime": "%s", "hierarchy": "%s", "row_solver": "coral 0.985", "census_w": "%s", "old_seed": "%s"}\n' \
-              "$EMB" "$(date -r $EMB '+%F %T')" "$HJ" "$W" "$BD/splat_runs_FEATFIX/$ERA/step-000015000.ckpt" > $BD/splat_runs_FEATFIX/stage2_reseed_coral985.json
+              "$EMB" "$(date -r $EMB '+%F %T')" "$HJ" "$W" "$(ls $BD/splat_runs_FEATFIX/$ERA/*.ckpt | head -1)" > $BD/splat_runs_FEATFIX/stage2_reseed_coral985.json
             ok=$((ok+1))
         else fail=$((fail+1)); say "$(basename $BD) FAILED"; fi
     done
