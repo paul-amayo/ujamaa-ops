@@ -4,8 +4,10 @@
 row of the nearest scene-graph tree in front (demo_path trees). A pixel is lit for the row when that row's word scores highest
 among ALL row words (own point + non-extrapolated walk, max), identity norm >= 0.5 - no split, no threshold, no cut. The live
 rule (per-frame Otsu + absence check) lights nothing on these frames: the row fills the frame, p99 - p50 < 0.04. Also scored:
-IoU vs the SAM3 supervision of the row's trees. Usage: row_argmax_frame.py K [K ...]"""
-import sys, math, json, numpy as np, torch
+IoU vs the SAM3 supervision of the row's trees. ADD_MASKS="K:path.npy,..." adds SAM3 detections the global-id lifting left without
+an id (boolean HxW owned masks, picked by LiDAR depth/3D box, not by the prediction) to that frame's row ground truth and reports
+the IoU against it too (dashed green). Usage: row_argmax_frame.py K [K ...]"""
+import sys, os, math, json, numpy as np, torch
 ks = [int(a) for a in sys.argv[1:]] or [3112]
 sys.argv = [sys.argv[0], '18', '0', '0']
 exec(open('/home/paperspace/code/automation/demo/row_iou_frames.py').read().split("try: F = ImageFont")[0])   # loader: CH, NI, ims, Cam, row_of (prod hierarchy), NB
@@ -41,15 +43,22 @@ for i, k in enumerate(ks):
     lit = (valid & (am == RIDS.index(r0))).cpu().numpy().astype(np.uint8)
     lit = np.array(Image.fromarray(lit * 255).resize((W, H), Image.NEAREST)) > 0
     sup = np.array(Image.open(f'{NB}/supervision/trees_only/{kf}'), np.uint16); gt = np.isin(sup, members)
+    add = np.zeros_like(gt)
+    for spec in [x for x in os.environ.get('ADD_MASKS', '').split(',') if x]:
+        kk, pth = spec.split(':', 1)
+        if int(kk) == k: add |= np.load(pth)
+    gtp = gt | add; iou_p = float((lit & gtp).sum() / max((lit | gtp).sum(), 1)) if add.any() else None
     iou = float((lit & gt).sum() / max((lit | gt).sum(), 1)); prec = float((lit & gt).sum() / max(lit.sum(), 1)); rec = float((lit & gt).sum() / max(gt.sum(), 1))
     per = {t: int((sup == t).sum()) for t in sorted(int(u) for u in np.unique(sup) if u < 10000)}
     lit_on = {t: round(float((lit & (sup == t)).sum() / max(per[t], 1)), 2) for t in per if per[t] > 500}
     print(f'{kf}: nearest tree in front {t0} -> row {r0} ("{NI.row_words[str(r0)]}"), members {members}; argmax-lit {int(lit.sum())} px; '
-          f'IoU vs SAM3 {iou:.3f} (precision {prec:.2f}, recall {rec:.2f}); fraction of each labelled tree lit: ' + ', '.join(f'{t} (row {row_of.get(t)}) {f}' for t, f in lit_on.items()))
+          f'IoU vs SAM3 {iou:.3f} (precision {prec:.2f}, recall {rec:.2f})' + (f'; with the id-less SAM3 masks added {iou_p:.3f} (recall {float((lit & gtp).sum() / max(gtp.sum(), 1)):.2f})' if iou_p is not None else '') + '; fraction of each labelled tree lit: ' + ', '.join(f'{t} (row {row_of.get(t)}) {f}' for t, f in lit_on.items()))
     fr = rgb.astype(np.float32); fr[lit] = fr[lit] * 0.45 + np.array([235, 104, 52], np.float32) * 0.55
     ax = axs[i, 0]; ax.imshow(fr.astype(np.uint8)); ax.contour(gt, levels=[0.5], colors=['#00c853'], linewidths=1.6); ax.set_axis_off()
+    if add.any(): ax.contour(add & ~gt, levels=[0.5], colors=['#00c853'], linewidths=1.6, linestyles='--')
     ax.set_title(f'{kf}: "this row" = row {r0} (nearest tree in front: {t0}). Orange = pixels whose best row word is row {r0}; green outline = SAM3 trees of row {r0}.\n'
-                 f'Row {r0} trees: {", ".join(map(str, members))}. IoU vs SAM3 {iou:.2f} (precision {prec:.2f}, recall {rec:.2f}).', fontsize=10, loc='left')
+                 f'Row {r0} trees: {", ".join(map(str, members))}. IoU vs SAM3 {iou:.2f} (precision {prec:.2f}, recall {rec:.2f})'
+                 + (f'; {iou_p:.2f} with SAM3\'s id-less mask of the missing tree added (dashed green).' if iou_p is not None else '.'), fontsize=10, loc='left')
     ax = axs[i, 1]; cc = xz[t0]
     for r in sorted({v for v in row_of.values() if v >= 0}):
         Q = np.array([xz[t] for t in row_of if row_of[t] == r]); Q = Q[np.argsort(Q[:, 1])]
