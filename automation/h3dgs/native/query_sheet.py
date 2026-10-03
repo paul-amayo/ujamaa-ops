@@ -17,6 +17,7 @@ from read_write_model import read_images_binary, read_cameras_binary, qvec2rotma
 ap = argparse.ArgumentParser()
 for k in ('--proj', '--chunk', '--features', '--embedder', '--bank', '--sup', '--hj', '--sidecar-dir', '--query', '--out'): ap.add_argument(k, required=True)
 ap.add_argument('--frames', nargs='+', required=True); ap.add_argument('--cut', type=float, default=0.8); ap.add_argument('--scaffold', default='')
+ap.add_argument('--alpha-norm-panel', action='store_true', help='4th panel = native, no cut, alpha-normalised (instead of the fixed cut)')
 a = ap.parse_args(); os.makedirs(a.out, exist_ok=True)
 src = f'{a.proj}/camera_calibration/chunks/{a.chunk}/sparse/0'
 cam0 = list(read_cameras_binary(f'{src}/cameras.bin').values())[0]; W, H = int(cam0.width), int(cam0.height); fx, fy, cx, cy = cam0.params[:4]
@@ -56,15 +57,18 @@ for fr in a.frames:
         NI.set_query({kind: oid}); al_n = NI.mask(CH, cam, 3.0)
         sc = torch.from_numpy(np.load(os.path.join(a.sidecar_dir, fr[:-4] + '_sidecar.npz'))['features']).float().cuda()
         al_s = NI.alpha(NI.heat(sc, (H, W))); al_s = None if al_s is None else al_s.float().cpu().numpy()
-        NI.set_query({kind: oid, 'cut': a.cut}); al_c = NI.mask(CH, cam, 3.0)
+        if a.alpha_norm_panel:
+            NI.alpha_norm = True; NI.set_query({kind: oid}); al_c = NI.mask(CH, cam, 3.0); NI.alpha_norm = False
+        else:
+            NI.set_query({kind: oid, 'cut': a.cut}); al_c = NI.mask(CH, cam, 3.0)
     panels = [(tint(rgb, gt.astype(np.float32) * 0.6), f'supervision: {a.query} ({int(gt.sum())} px)'),
               (tint(rgb, al_s) if al_s is not None else rgb, f"today's side-car, no cut: {stats(al_s, gt)}"),
               (tint(rgb, al_n) if al_n is not None else rgb, f'native, no cut (live rule): {stats(al_n, gt)}'),
-              (tint(rgb, al_c) if al_c is not None else rgb, f'native, fixed cut {a.cut:g}: {stats(al_c, gt)}')]
+              (tint(rgb, al_c) if al_c is not None else rgb, (f'native, no cut, alpha-normalised: ' if a.alpha_norm_panel else f'native, fixed cut {a.cut:g}: ') + stats(al_c, gt))]
     tiles = []
     for arr, label in panels:
         t = Image.fromarray(arr).resize((960, 540), Image.LANCZOS); d = ImageDraw.Draw(t)
         d.rectangle([0, 0, 960, 34], fill=(0, 0, 0)); d.text((10, 5), label, fill=(255, 255, 255), font=font); tiles.append(t)
     sheet = Image.new('RGB', (1920, 1080)); [sheet.paste(t, ((i % 2) * 960, (i // 2) * 540)) for i, t in enumerate(tiles)]
-    fn = os.path.join(a.out, f'{a.query.replace(":", "")}_{fr[:-4]}.jpg'); sheet.save(fn, quality=88)
-    print(f'[sheet] {fr}: side-car {stats(al_s, gt)} | native {stats(al_n, gt)} | native cut {a.cut:g} {stats(al_c, gt)} -> {fn}', flush=True)
+    fn = os.path.join(a.out, f'{a.query.replace(":", "")}_{fr[:-4]}{"_anorm" if a.alpha_norm_panel else ""}.jpg'); sheet.save(fn, quality=88)
+    print(f'[sheet] {fr}: side-car {stats(al_s, gt)} | native {stats(al_n, gt)} | {"native alpha-norm" if a.alpha_norm_panel else "native cut"} {stats(al_c, gt)} -> {fn}', flush=True)
