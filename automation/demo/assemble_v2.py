@@ -16,7 +16,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(os.environ.get("DEMO_ROOT", "/Users/paulamayo/data/for_a100/demo_video_20261001"))
-OUT = ROOT / "ujamaa_demo_v2.mp4"
+OUT = ROOT / os.environ.get("DEMO_OUT", "ujamaa_demo_v3.mp4")
 WORK = ROOT / "_v2_work"; WORK.mkdir(exist_ok=True)
 W, H, FPS = 1920, 1080, 30
 FONT_B = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
