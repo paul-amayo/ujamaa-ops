@@ -130,3 +130,33 @@ for name in [KF] + [p['view'] for p in per[:3]]:
 w0, h0 = tiles[0].size; sheet = Image.new('RGB', (2 * w0 + 10, 2 * h0 + 10), (255, 255, 255))
 for k, t in enumerate(tiles): sheet.paste(t, ((k % 2) * (w0 + 10), (k // 2) * (h0 + 10)))
 sheet.save(f'{OUT}/fruit_fp_trace.jpg', quality=88); print(f'[trace] -> {OUT}/fruit_fp_trace.jpg, {OUT}/fruit_fp_trace.json', flush=True)
+# ---- 4. ONE cluster followed across views (2026-10-04 v2: the full-frame sheet was too small to read) ----
+np.savez_compressed(f'{OUT}/fruit_fp_trace_nodes.npz', sel=sel, xyz=xyz[sel], red=red[sel], fshare=fshare[sel], cat=cat[sel],
+                    views=np.array(list(node_fruit_by_view)), fruit_by_view=np.stack(list(node_fruit_by_view.values())))
+kd = cKDTree(xyz[sel]); R_ = 0.3; mass = np.array([red[sel][kd.query_ball_point(xyz[sel][j], R_)].sum() for j in range(sel.size)])
+cl = np.array(kd.query_ball_point(xyz[sel][mass.argmax()], R_)); print(f'[trace] cluster: {cl.size} of the {sel.size} red fruit nodes within {R_} m, '
+      f'{red[sel][cl].sum() / red[sel].sum():.0%} of their red weight', flush=True)
+Fb = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 22); Fs = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 20)
+views4 = sorted({KF} | {p['view'] for p in per[:3]}, key=lambda n: int(n[3:9])); crops = []; CW, CH_, Z = 200, 120, 4
+for name in views4:
+    cam = cams[name]; vm = cam.world_view_transform.transpose(0, 1).cpu().numpy(); fx, fy, cx, cy = K0
+    P = xyz[sel][cl]; pc = (vm[:3, :3] @ P.T + vm[:3, 3:4]).T; u = fx * pc[:, 0] / pc[:, 2] + cx; vv = fy * pc[:, 1] / pc[:, 2] + cy
+    img = np.array(Image.open(f'{PH}/{name}').convert('RGB')).astype(np.float32); H, W = img.shape[:2]
+    sup = np.array(Image.open(f'{SUP}/{name}'), np.uint16); s5 = sup == 10001
+    img[s5] = 0.45 * img[s5] + 0.55 * np.array([0, 235, 255]); img = img.astype(np.uint8)
+    if name == KF:
+        fp = v == 4; img[fp] = (255, 40, 40)
+    x0 = int(np.clip(np.median(u) - CW / 2, 0, W - CW)); y0 = int(np.clip(np.median(vv) - CH_ / 2, 0, H - CH_))
+    im = Image.fromarray(img).crop((x0, y0, x0 + CW, y0 + CH_)).resize((CW * Z, CH_ * Z), Image.NEAREST); d = ImageDraw.Draw(im)
+    for j in range(cl.size):
+        X, Y = (u[j] - x0) * Z, (vv[j] - y0) * Z
+        if 0 <= X < CW * Z and 0 <= Y < CH_ * Z: d.ellipse([X - 5, Y - 5, X + 5, Y + 5], fill=(255, 0, 220), outline=(255, 255, 255))
+    pv = next((p for p in per if p['view'] == name), None); wv_ = node_fruit_by_view.get(name, np.zeros(sel.size))[cl].sum()
+    t = (f'{name} (the frame in question): red = lit as fruit on leaves' if name == KF else f'{name}: these Gaussians sit inside SAM3 fruit (cyan) -> fruit credit {wv_:.1f}')
+    d.rounded_rectangle([6, 6, 18 + d.textlength(t, font=Fb), 38], 6, fill=(11, 11, 11)); d.text((12, 9), t, font=Fb, fill=(255, 255, 255)); crops.append(im)
+w0, h0 = crops[0].size; sheet = Image.new('RGB', (2 * w0 + 12, 2 * h0 + 12 + 70), (255, 255, 255)); dd = ImageDraw.Draw(sheet)
+dd.text((8, 8), f'The same {cl.size} Gaussians (magenta dots; {R_} m cluster, 4x zoom) in four training views of tree 5', font=Fb, fill=(0, 0, 0))
+dd.text((8, 40), 'cyan = SAM3 fruit mask of tree 5 in that view, red = pixels kf_000025 lights as fruit on leaves', font=Fs, fill=(0, 0, 0))
+for k, t in enumerate(crops): sheet.paste(t, ((k % 2) * (w0 + 12), 70 + (k // 2) * (h0 + 12)))
+sheet.save(f'{OUT}/fruit_fp_cluster.jpg', quality=90); print(f'[trace] -> {OUT}/fruit_fp_cluster.jpg', flush=True)
+
