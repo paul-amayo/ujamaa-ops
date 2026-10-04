@@ -37,8 +37,8 @@ from hier_compact import CompactHierarchy
 from native_identity import NativeIdentity, _otsu
 import lorentz as L
 from read_write_model import read_images_binary, read_cameras_binary, qvec2rotmat
-S = '/home/paperspace/data/image_farm/gwakungu/2026-05-16/IMG_7993_s0_cabbage/demo_root'; P = f'{S}/experimental/h3dgs'; CN = 'lane'; NB = f'{S}/experimental/h3dgs_native/chunk_lane'
-SUPD = f'{S}/experimental/h3dgs_sidecar_chunks/chunk_lane/supervision/trees_only'; FEAT = f'{NB}/features_census.bin'
+S = '/home/paperspace/data/image_farm/gwakungu/2026-05-16/IMG_7993_s0_cabbage/demo_root'; P = f'{S}/experimental/h3dgs'; CN = 'lane'; NB = f'{S}/experimental/h3dgs_native/chunk_lane_ud'
+SUPD = f'{NB}/supervision/trees_only'; FEAT = f'{NB}/features_census_v3g.bin'   # v2 (10-04): masks undistorted into the training camera, embedder v3g (citrus graph recipe)
 FULL = os.environ.get('FULL', '1') == '1'   # every frame: held-out views with the MEAN exposure, no PSNR minimum (PSNR still captioned)
 R = Path('/home/paperspace/logs/demo_chunks/gwakungu_7993'); OUT = Path('/home/paperspace/data/demo_video_v2/cabbage_cut'); (OUT / 'frames').mkdir(parents=True, exist_ok=True)
 BAR_DB, BAR_IOU = 25.0, None   # no IoU minimum (v3)
@@ -129,7 +129,7 @@ for f in FRAMES:
     with torch.no_grad():
         img, _ = CH.render(cam, 3.0); img = torch.einsum('ij,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
         rgb = (img.clamp(0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy()
-    photo = np.asarray(Image.open(f'{S}/prod/scratch_sam3/{kf}').convert('RGB')).astype(np.float32)
+    photo = np.asarray(Image.open(f'{P}/camera_calibration/rectified/images/{kf}').convert('RGB')).astype(np.float32)   # the TRAINING (undistorted) image, not the raw phone frame
     psnr = float(10 * np.log10(255 ** 2 / max(((rgb.astype(np.float32) - photo) ** 2).mean(), 1e-9)))
     if psnr < BAR_DB and not FULL: rows_out.append((f['i'], kf, mode, round(psnr, 2), '', '', 'dropped: render < 25 dB')); continue
     sup = np.array(Image.open(f'{SUPD}/{kf}'), np.uint16)
@@ -150,7 +150,7 @@ for f in FRAMES:
             bw = best_of(ff, list(range(len(ALLW))), ALLW); al = (bw == ALLW.index(fw))     # the fruit word beats every other bank word
             lights.append((al.astype(np.float32) * 0.9, (255, 0, 220))); ious.append(iou(al, sup == FID)); FRUIT_EDGE = al   # magenta + white edge
         answer = f"{LABEL.get(FTREE, f'tree {FTREE}').capitalize()}: its oranges"
-    if mode in ('row', 'tree', 'all', 'rows') and vis:
+    if mode in ('row', 'tree', 'all', 'rows') and (vis or (mode == 'tree' and TSEG.get('focus') is not None)):   # the phone scene is not metric: the 0.5-unit front check can drop the close-up cabbage
         with torch.no_grad(): feat = NI.feature_pass(CH, cam, 3.0)
         if mode == 'row':
             r = SEG_ROW
@@ -158,9 +158,19 @@ for f in FRAMES:
                 am = row_argmax(feat); a = (am == r).astype(np.float32) * 0.55; g = np.isin(sup, [k for k, rr in row_of.items() if rr == r])
                 lights.append((a, PAL[0])); ious.append(iou(a > 0, g)); answer = f'Row {r}'
         elif mode == 'tree':
-            t = vis[0][1] if not TSEG.get('focus') or TSEG['focus'] not in [x for _, x in vis] else TSEG['focus']
+            bt = best_of(feat, TREE_IDS, TWORDS); cen = bt[bt >= 0]
+            t = int(np.bincount(cen).argmax()) if cen.size else -1   # "this cabbage" = the cabbage the field gives the most pixels (the close-up; the script's focus id 30 is stale)
+            _geo = []
+            for _t, _x in TREES.items():
+                _p = w2c[:3, :3] @ _x + w2c[:3, 3]
+                if _p[2] > 0:
+                    _u, _v = fx * _p[0] / _p[2] + cx, fy * _p[1] / _p[2] + cy
+                    if 0 <= _u < W and 0 <= _v < H: _geo.append((float(np.linalg.norm(_x - c2w[:3, 3])), _t))
+            _geo.sort(); _cnt = np.bincount(cen) if cen.size else []
+            if _geo: t = _geo[0][1]   # "this cabbage" = the nearest cabbage in front (geometry, no distance cutoff: the phone scene is not metric)
+            if os.environ.get('DEBUG_TREE'): print(f'[debug] {kf}: most-pixels {t}, nearest in front {_geo[:3]}, SAM3 ids {[int(u) for u in np.unique(sup) if u < 10000]}, pixels per id { {i: int(c) for i, c in enumerate(_cnt) if c > 2000} }', flush=True)
             if str(t) in NI.word_table:
-                bt = best_of(feat, TREE_IDS, TWORDS); a = (bt == t).astype(np.float32) * 0.55; g = sup == t
+                a = (bt == t).astype(np.float32) * 0.55; g = sup == t
                 lights.append((a, PAL[1])); ious.append(iou(a > 0, g))
                 answer = LABEL.get(t, f'tree {t}').capitalize()
         else:
