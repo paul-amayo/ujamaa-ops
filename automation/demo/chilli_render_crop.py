@@ -9,14 +9,15 @@ Frames kept: image_11 .. image_141.
   - tail image_142 .. image_240: the poses collapse there (141 -> 142 jumps 7.3x the median camera step with a 17 deg turn,
     then steps shrink to ~0.04x), so even trained views render smeared at ~17 dB. A pose failure, not a render one.
 Held-out views (every 10th) stay in, captioned. Outputs <out>/frames, <out>/metrics.csv, <out>/chilli_render_crop.mp4 + phone copy."""
-import csv, subprocess
+import csv, os, subprocess
 from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
-SRC = Path('/home/paperspace/data/demo_video_v2/chilli/chilli_render'); OUT = Path('/home/paperspace/data/demo_video_v2/chilli/chilli_render_crop')
-(OUT / 'frames').mkdir(parents=True, exist_ok=True)
-W, H, CROP, FIRST, LAST = 1080, 1920, 0.5, 11, 141
-x0, y0 = int(W * (1 - CROP) / 2), int(H * (1 - CROP) / 2); x1, y1 = W - x0, H - y0
+CROP_W, CROP_H = float(os.environ.get('CROP_W', 0.5)), float(os.environ.get('CROP_H', 0.5))   # v2 (Paul: "two thirds height rather than half"): CROP_H=0.6667
+SRC = Path('/home/paperspace/data/demo_video_v2/chilli/chilli_render'); OUT = Path('/home/paperspace/data/demo_video_v2/chilli/chilli_render_crop' + ('' if (CROP_W, CROP_H) == (0.5, 0.5) else f'_w{round(CROP_W * 100)}_h{round(CROP_H * 100)}'))
+W, H, FIRST, LAST = 1080, 1920, 11, 141
+x0, y0 = int(round(W * (1 - CROP_W) / 2)), int(round(H * (1 - CROP_H) / 2)); x1, y1 = W - x0, H - y0
+(OUT / 'frames').mkdir(parents=True, exist_ok=True); print(f'[crop] panel {x1 - x0} x {y1 - y0} (x {x0}-{x1}, y {y0}-{y1}) -> {OUT}', flush=True)
 rows = list(csv.reader(open(SRC / 'metrics.csv')))[1:]
 F1 = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 22); F2 = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 18)
 out, n = [], 0
