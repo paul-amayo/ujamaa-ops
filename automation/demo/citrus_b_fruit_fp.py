@@ -60,6 +60,7 @@ for n, kf in sel:
              sam3_fruit=len(m5), found=found, missed=len(m5) - found, lit_px=int(field.sum()), bleed_px=int((field & (v == 1) & ~s5).sum()),
              orange_px=int((v == 3).sum()), leaf_px=int((v == 4).sum()), hidden_px=int(hidden.sum()))
     per.append(d); keep[kf] = (n, field, s5, m5, v, photo)
+    (C / 'verdicts').mkdir(exist_ok=True); np.savez_compressed(C / 'verdicts' / f'{kf}.npz', v=v.astype(np.int8), s5=s5, hidden=hidden)   # for fruit_fp_trace.py
     for a, b in (('tp', 'tp'), ('wrong', 'wrong_tree'), ('orange', 'orange_no_sam3'), ('leaf', 'leaf_fp'), ('found', 'found'), ('missed', 'missed'), ('lit', 'lit_px'), ('bleed', 'bleed_px'), ('leaf_px', 'leaf_px'), ('orange_px', 'orange_px')): T[a] += d[b]
     print(d, flush=True)
 nb_all = T['tp'] + T['wrong'] + T['orange'] + T['leaf']
