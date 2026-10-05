@@ -45,6 +45,7 @@ for x in pick:
     tiles.append(t.resize((t.width // 2, t.height // 2)))
 w0, h0 = tiles[0].size; sheet = Image.new('RGB', (2 * w0 + 16, 2 * h0 + 16 + 90), (255, 255, 255)); dd = ImageDraw.Draw(sheet)
 dd.text((8, 6), 'Where are the peppers? Chilli splat, class-level pepper identity on training views (left: photo, right: what the field lights)', font=F2, fill=(0, 0, 0))
-dd.text((8, 46), 'green = lit on a SAM3 pepper, red = lit off SAM3 pepper, cyan outline = SAM3 pepper mask. Training-view mean IoU 0.31 (precision 0.52, recall 0.51)', font=F2, fill=(0, 0, 0))
+tr = [x for x in json.load(open(f'{NB}/pepper_bc_s03.json')) if x['group'] == 'trained 0-141']; tp = sum(x['own']['tp'] for x in tr); lit = sum(x['own']['lit'] for x in tr); gt = sum(x['gt'] for x in tr)
+dd.text((8, 46), f"green = lit on a SAM3 pepper, red = lit off SAM3 pepper, cyan outline = SAM3 pepper mask. Training-view mean IoU {np.mean([x['own']['iou'] for x in tr if x['own']['iou'] is not None]):.2f} (precision {tp / max(lit, 1):.2f}, recall {tp / max(gt, 1):.2f})", font=F2, fill=(0, 0, 0))
 for k, t in enumerate(tiles): sheet.paste(t, ((k % 2) * (w0 + 16), 90 + (k // 2) * (h0 + 16)))
 sheet.save(f'{NB}/pepper_vs_sam3.jpg', quality=88); print('[fig]', [(x['kf'], round(x['own']['iou'], 3)) for x in pick], '->', f'{NB}/pepper_vs_sam3.jpg', sheet.size)
