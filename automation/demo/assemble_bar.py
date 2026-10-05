@@ -60,7 +60,8 @@ segs = [
     clip("ca", src("citrus_a_bar_v4")),
     card("c2", "Citrus farm B", ["100 trees · 3 surveys · 154 oranges confirmed by hand"], 3,
          accent_line="Ni mti gani wenye machungwa mengi zaidi?  ·  Which tree has the most oranges?"),
-    clip("cb", src("citrus_b_cut"), slow=2.5),   # Paul: too fast to read
+    # Paul: too fast to read — the peer's _nocap version is already re-timed (3 fps, 2 s holds); only the 8 fps original gets slowed
+    clip("cb", src("citrus_b_cut"), slow=1.0 if src("citrus_b_cut").name.endswith("_nocap.mp4") else 2.5),
 ]
 if (B / "klapmuts_bar" / "klapmuts_bar.mp4").exists():
     segs += [zoom("g_kl", "klapmuts.mp4"),
