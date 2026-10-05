@@ -38,39 +38,42 @@ def titled_globe(name, src, secs, title, lines, accent_line):
          f"[0:v]crop={W-420}:{H}:0:0,pad={W}:{H}:420:0:color=0x0b0f0a[g];[g][1:v]overlay=0:0,fade=t=in:st=0:d=0.6,fade=t=out:st={secs-0.5:.2f}:d=0.5,format=yuv420p",
          "-c:v", "libx264", "-crf", "18", "-r", str(FPS), "-an", mp4])
     return mp4
-def clip(name, src, start=0.0, secs=None, portrait=False, fade_in=0.4, fade_out=0.5):
-    dur = secs if secs else probe(src) - start
-    vf = [f"scale=-2:{H}:flags=lanczos,pad={W}:{H}:(ow-iw)/2:0:color=0x0b0f0a" if portrait else f"scale={W}:{H}:flags=lanczos",
+def clip(name, src, start=0.0, secs=None, portrait=False, fade_in=0.4, fade_out=0.5, slow=1.0):
+    dur = (secs if secs else probe(src) - start) * slow
+    vf = ([f"setpts={slow}*PTS"] if slow != 1.0 else []) + [f"scale=-2:{H}:flags=lanczos,pad={W}:{H}:(ow-iw)/2:0:color=0x0b0f0a" if portrait else f"scale={W}:{H}:flags=lanczos",
           f"fade=t=in:st=0:d={fade_in}", f"fade=t=out:st={dur-fade_out:.2f}:d={fade_out}", "format=yuv420p"]
     mp4 = WORK / f"{name}.mp4"; cmd = ["ffmpeg", "-v", "error", "-y", "-ss", str(start), "-i", src]
     if secs: cmd += ["-t", str(secs)]
     cmd += ["-vf", ",".join(vf), "-r", str(FPS), "-an", "-c:v", "libx264", "-crf", "18", mp4]; run(cmd); return mp4
 
 G, B = ROOT / "globe", ROOT / "box_weekend"
+def src(n):
+    """The box video without dB / training-view captions once the peer delivers it (Paul, 5 Oct); else the captioned one."""
+    nc = B / n / f"{n}_nocap.mp4"
+    return nc if nc.exists() else B / n / f"{n}.mp4"
 zoom = lambda n, f: clip(n, G / f, start=1.5, secs=4.5, fade_in=0.2)
 segs = [
     titled_globe("t0", G / "earth_idle.mp4", 5, "UJAMAA", ["Ask the orchard.", "Farms that answer questions", "in the farmer's own language."],
                  "Western Cape  ·  Kenya  ·  a citrus orchard"),
-    zoom("g_cit", "citrus.mp4"),
-    card("c1", "Citrus farm A", ["290 trees · 36 rows · every frame ≥ 25 dB against the photo", "Identity by containment, IoU on screen"], 3,
+    card("c1", "Citrus farm A", ["290 trees · 36 rows · surveyed July 2023", "Identity by containment, IoU on screen"], 3,
          accent_line="Show me this row · which tree is this? · group them by row"),
-    clip("ca", B / "citrus_a_bar_v4" / "citrus_a_bar_v4.mp4"),
+    clip("ca", src("citrus_a_bar_v4")),
     card("c2", "Citrus farm B", ["100 trees · 3 surveys · 154 oranges confirmed by hand"], 3,
          accent_line="Ni mti gani wenye machungwa mengi zaidi?  ·  Which tree has the most oranges?"),
-    clip("cb", B / "citrus_b_cut" / "citrus_b_cut.mp4"),
+    clip("cb", src("citrus_b_cut"), slow=2.5),   # Paul: too fast to read
 ]
 if (B / "klapmuts_bar" / "klapmuts_bar.mp4").exists():
     segs += [zoom("g_kl", "klapmuts.mp4"),
              card("c3", "Klapmuts, Western Cape", ["912 berry bags in December · 911 in April · 825 found again"], 3, accent_line="How many bushes did we find again?"),
-             clip("kl", B / "klapmuts_bar" / "klapmuts_bar.mp4")]
+             clip("kl", src("klapmuts_bar"))]
 segs += [zoom("g_gw", "gendia.mp4"),   # the 'gendia' stop is Gwakungu, Nyahururu (relabelled 5 Oct)
-         card("c4", "Gwakungu, Nyahururu", ["Phone survey, 16 May 2026 · cabbages counted along the path", "Shown at 23 dB by exception"], 3,
+         card("c4", "Gwakungu, Nyahururu", ["Phone survey, 16 May 2026 · cabbages counted along the path"], 3,
               accent_line="Which cabbage is this?  ·  How many cabbages are there?"),
-         clip("cab", B / "cabbage_cut" / "cabbage_cut.mp4", portrait=True)]
+         clip("cab", src("cabbage_cut"), portrait=True)]
 if (B / "kendu_bar" / "kendu_bar.mp4").exists():
     segs += [zoom("g_kb", "kendu_bay.mp4"),
              card("c5", "Gendia, Kendu Bay", ["Phone survey, 14 May 2026 · a ground crop in 61 frames"], 3),
-             clip("kb", B / "kendu_bar" / "kendu_bar.mp4", portrait=True)]
+             clip("kb", src("kendu_bar"), portrait=True)]
 segs += [card("c6", "Ask us · Offer", ["ASK: farms and phone surveys to twin; partners for the Kenyan sites", "OFFER: the pipeline, trained models, and answers in your language"], 6,
               accent_line="Paul Amayo · UCT · paul.amayo@uct.ac.za")]
 lst = WORK / "concat.txt"; lst.write_text("".join(f"file '{p}'\n" for p in segs))
