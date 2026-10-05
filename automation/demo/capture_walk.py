@@ -40,7 +40,8 @@ async def go():
             while li < len(lights) and lights[li][0] <= idx:
                 await ws.send(json.dumps(lights[li][1])); ack = await ws.recv(); print(f"  record {idx}: {lights[li][1]} -> {ack[:80]}"); li += 1
                 await asyncio.sleep(2.0)   # the side-car applies a new query on its next frame; give the block a beat
-            await ws.send(json.dumps({"t": "pose", "seq": n, "c2w": c2w_of(r).flatten().tolist(), "w": a.w, "h": a.h, "fovy": a.fovy, "quality": 92}))
+            await ws.send(json.dumps({"t": "pose", "seq": n, "c2w": c2w_of(r).flatten().tolist(), "w": a.w, "h": a.h, "fovy": a.fovy, "quality": 92,
+                                      "image_name": r.get("image_name")}))   # that view's own trained exposure (HIER_EXPOSURE=nearest exact match)
             data = await ws.recv()
             while isinstance(data, str): data = await ws.recv()
             (out / f"f_{n:05d}.jpg").write_bytes(data[20:])
