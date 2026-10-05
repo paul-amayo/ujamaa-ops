@@ -147,7 +147,7 @@ Frames are rendered offline at fixed poses along each farm's walk (render servic
   3. One question per farm.
   4. No training jobs.
 - **Venue, 30 min before:**
-  1. Connect the tunnel (ports **8011 and 8024**); stage the first farm.
+  1. Connect the tunnel (ports **8011 and 8024**): `ssh -N -f -L 8011:localhost:8011 -L 8024:localhost:8024 paperspace@184.105.3.25`; open **http://localhost:8011/app/** (root is 404); stage the first farm (Citrus A 12 s + side-car preload ~40 s; Citrus B 25 s + 30 s; others 15–25 s). Keep the browser tab visible — a hidden tab throttles the stream to 1 fps.
   2. Ask the Swahili question.
   3. Start the video loop.
   4. Run `caffeinate -dis`; turn on Focus mode.
