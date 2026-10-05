@@ -15,7 +15,7 @@ import lorentz as L
 from read_write_model import read_images_binary, read_cameras_binary, qvec2rotmat
 torch.set_grad_enabled(False)
 FEAT, TAG = sys.argv[1], sys.argv[2]
-S = '/home/paperspace/data/image_farm/gwakungu/2026-05-16/IMG_7990_s1'; P = f'{S}/h3dgs'; CN = 'lane'; NB = f'{S}/experimental/pepper_class/cell'; SUP = f'{NB}/supervision/pepper_class'
+S = '/home/paperspace/data/image_farm/gwakungu/2026-05-16/IMG_7990_s1'; P = f'{S}/h3dgs'; CN = 'lane'; NB = f'{S}/experimental/pepper_class/' + __import__('os').environ.get('CELL', 'cell'); SUP = f'{NB}/supervision/pepper_class'
 src = f'{P}/camera_calibration/chunks/{CN}/sparse/0'; cam0 = list(read_cameras_binary(f'{src}/cameras.bin').values())[0]; W, H = int(cam0.width), int(cam0.height); fx, fy, cx, cy = cam0.params[:4]
 ims = {v.name: v for v in read_images_binary(f'{src}/images.bin').values()}; T = {l.strip() for l in open(f'{src}/test.txt') if l.strip()}
 class Cam:

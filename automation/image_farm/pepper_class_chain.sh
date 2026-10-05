@@ -1,5 +1,6 @@
 #!/bin/bash
 # Class-level PEPPER identity on the chilli splat (UJAMAA 2026-10-05; Paul: "go class-level pepper after the renders").
+# v2: TILED=<tiled SAM3 dir> CELL=<cell name> select the mask set and the output cell ('red chili pepper' masks -> cell_red).
 # Segment gwakungu IMG_7990_s1, H3DGS h3dgs/ (chunk lane, 8 M, RGB). Frames 142-240 have collapsed SfM poses (chilli crop entry,
 # notebook 10-04), so the census uses training views 0-141 only.
 #   maps     tiled SAM3 'pepper' class maps (sam3_tiled_class.py) -> uint16 supervision: pepper = fruit 10000, every other pixel =
@@ -12,7 +13,7 @@
 #   score    pepper_bc_score.py per seed: best containment over {plant, pepper} vs the undistorted SAM3 pepper maps
 set -uo pipefail
 S=/home/paperspace/data/image_farm/gwakungu/2026-05-16/IMG_7990_s1; P=$S/h3dgs; C=$P/camera_calibration/chunks/lane; X=$S/experimental/pepper_class
-NB=$X/cell; SUP=$NB/supervision/pepper_class; RAW=$NB/supervision/pepper_raw; HJ=$NB/marker_hierarchy_graph.json; EN=IMG_7990_s1_pepper_v1
+NB=$X/${CELL:-cell}; SUP=$NB/supervision/pepper_class; RAW=$NB/supervision/pepper_raw; HJ=$NB/marker_hierarchy_graph.json; EN=IMG_7990_s1_pepper_v1
 EMB=$X/embedder/$EN/ckpts/model_best.pth; L=/home/paperspace/logs/pepper_class_chain.log; say() { echo "[$(date '+%m-%d %H:%M:%S')] $*" | tee -a $L; }
 H3=/home/paperspace/code/hierarchical-3d-gaussians; PYH=/home/paperspace/miniconda3/envs/h3dgs/bin/python; NT=/home/paperspace/code/automation/h3dgs/native
 ARU=/home/paperspace/code/aru_sil_core/src/scripts; HIGH=/home/paperspace/code/aru_sil_core/src/interfaces/rerun/HiGH; NS=/home/paperspace/code/nerf_new
@@ -20,7 +21,7 @@ HENV="env CUDA_HOME=/home/paperspace/code/_cuda12 PATH=/home/paperspace/code/_cu
 STAGES=${*:-maps graph embedder census seeds bank score}
 for st in $STAGES; do say "=== $st"; case $st in
 maps)
-  $PYH - $X/sam3_tiled/class $RAW <<'PY' | tee -a $L
+  $PYH - ${TILED:-$X/sam3_tiled}/class $RAW <<'PY' | tee -a $L
 import json, sys
 from pathlib import Path
 import numpy as np
@@ -76,6 +77,6 @@ seeds)
 bank)
   (cd $NS && pixi run python $NT/build_text_bank.py --manifest $SUP/manifest.json --hierarchy-json $HJ --out $NB/text_bank.npz) 2>&1 | grep -a "text-bank\|Error" | tee -a $L ;;
 score)
-  for t in maj s03 s01; do (cd /home/paperspace/code && $HENV $PYH /home/paperspace/code/automation/image_farm/pepper_bc_score.py $NB/features_$t.bin $t) 2>&1 | grep -a "^\[pepper\]\|Error\|Traceback" | tee -a $L; done ;;
+  for t in maj s03 s01; do (cd /home/paperspace/code && CELL=${CELL:-cell} $HENV $PYH /home/paperspace/code/automation/image_farm/pepper_bc_score.py $NB/features_$t.bin $t) 2>&1 | grep -a "^\[pepper\|Error\|Traceback" | tee -a $L; done ;;
 esac; done
 say "=== done: $STAGES"
