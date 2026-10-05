@@ -136,7 +136,7 @@ Frames are rendered offline at fixed poses along each farm's walk (render servic
 | Fri midday | video first draft assembled: landing + picker captures, five walks, two Adinkra answers (Swahili oranges, Afrikaans found-again), captions, ASK/OFFER → Paul | me |
 | Fri afternoon | Paul's feedback → v2; screenshot PDF; **Paul tests SSH from a phone hotspot** | me, Paul |
 | Sat–Sun | Paul rehearses the four farm paths with a timer | Paul |
-| Mon 5 Oct | freeze 12:00; tag `demo-aicfs-2026-10-06` in ujamaa, aru_sil_core, ops; dress rehearsal off campus on the tunnel (8011 + 8024); unstage/stage procedure rehearsed | Paul, me |
+| Mon 5 Oct | freeze 12:00; tag `demo-aicfs-2026-10-06` in ujamaa, aru_sil_core, ops; dress rehearsal on the tunnel (8011 + 8024) from the laptop — **no hotspot exists (Paul, 5 Oct): the demo runs over the venue network + SSH tunnel; the 'demo website' is the app at http://localhost:8011/app/ through the tunnel; :8011/:8024 are localhost-only on the box**; unstage/stage procedure rehearsed | Paul, me |
 | Tue 6 Oct | morning procedure (§6): unstage → no training → stage the first farm → Gemma warm → one question per farm | Paul |
 
 ## 6. Tuesday morning and packing
