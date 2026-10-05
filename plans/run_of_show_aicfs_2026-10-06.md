@@ -139,6 +139,9 @@ Frames are rendered offline at fixed poses along each farm's walk (render servic
 | Mon 5 Oct | freeze 12:00; tag `demo-aicfs-2026-10-06` in ujamaa, aru_sil_core, ops; dress rehearsal on the tunnel (8011 + 8024) from the laptop — **no hotspot exists (Paul, 5 Oct): the demo runs over the venue network + SSH tunnel; the 'demo website' is the app at http://localhost:8011/app/ through the tunnel; :8011/:8024 are localhost-only on the box**; unstage/stage procedure rehearsed | Paul, me |
 | Tue 6 Oct | morning procedure (§6): unstage → no training → stage the first farm → Gemma warm → one question per farm | Paul |
 
+## 5a. Live-stage state at the freeze (6 Oct 01:4x SAST)
+Identity on citrus A/B and Gwakungu cabbages is NATIVE (hierarchy features, no side-car) under the best-containment rule (`HIER_IDENTITY_RULE=argmax`; live == the videos' rule, measured). Adinkra gets the viewer's position (5 nearest plants, ahead/behind, left/right) and the last 6 chat turns; prompts are relative ("Which tree is in front of me? Show me."). Highlight moves the walk to the frame that best sees the plant (5–10 m, in view). Citrus B walks the lane-only trained poses with each view's own exposure; Citrus A per-view exposure where the walk pose is a trained camera. Phone stages render at their trained FOV (cabbage / Kendu 63°, chilli 46°). New: gwakungu-chilli (colour only). No auto-play; the walk loops; a fresh page clears the shared highlight; reload after any re-stage. Known limits: oranges light only at close poses (IoU ~0.4); cabbage heads other than 14/30 barely light; Klapmuts / Kendu Bay colour only; three Kendu Bay entries have no 3D.
+
 ## 6. Tuesday morning and packing
 
 - **06:30 (box):**
