@@ -16,7 +16,9 @@ from hier_compact import CompactHierarchy
 from read_write_model import read_images_binary, read_cameras_binary, qvec2rotmat
 ap = argparse.ArgumentParser(); ap.add_argument('--proj', required=True); ap.add_argument('--out', required=True); ap.add_argument('--title', required=True)
 ap.add_argument('--chunk', default='lane'); ap.add_argument('--scaffold', default=''); ap.add_argument('--tau', type=float, default=3.0); ap.add_argument('--bar', type=float, default=25.0); ap.add_argument('--fps', type=int, default=8)
-a = ap.parse_args(); P = a.proj; OUT = Path(a.out); (OUT / 'frames').mkdir(parents=True, exist_ok=True); torch.set_grad_enabled(False)
+ap.add_argument('--nocap', action='store_true', help='final cut (2026-10-05): no title / PSNR caption, the SAME frames as metrics.csv -> frames_nocap/, metrics_nocap.csv, <name>_nocap.mp4')
+a = ap.parse_args(); P = a.proj; OUT = Path(a.out); FR = 'frames_nocap' if a.nocap else 'frames'; (OUT / FR).mkdir(parents=True, exist_ok=True); torch.set_grad_enabled(False)
+KEEP = {r['image'] for r in csv.DictReader(open(OUT / 'metrics.csv')) if r['kept'] == '1'} if a.nocap else None
 src = f'{P}/camera_calibration/chunks/{a.chunk}/sparse/0'; cam0 = list(read_cameras_binary(f'{src}/cameras.bin').values())[0]; W, H = int(cam0.width), int(cam0.height); fx, fy, cx, cy = cam0.params[:4]
 ims = {v.name: v for v in read_images_binary(f'{src}/images.bin').values()}; TEST = {l.strip() for l in open(f'{src}/test.txt') if l.strip()}
 EXPO = json.load(open(f'{P}/output/trained_chunks/{a.chunk}/exposure.json'))
@@ -39,21 +41,22 @@ for kf in trained:
     img, _ = CH.render(cam, a.tau); img = torch.einsum('ij,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
     rgb = (img.clamp(0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy()
     photo = np.asarray(Image.open(f'{P}/camera_calibration/rectified/images/{kf}').convert('RGB')).astype(np.float32)
-    psnr = float(10 * np.log10(255 ** 2 / max(((rgb.astype(np.float32) - photo) ** 2).mean(), 1e-9))); keep = psnr >= a.bar
+    psnr = float(10 * np.log10(255 ** 2 / max(((rgb.astype(np.float32) - photo) ** 2).mean(), 1e-9))); keep = (kf in KEEP) if a.nocap else psnr >= a.bar
     rows.append((kf, round(psnr, 2), int(keep))); torch.cuda.empty_cache()
     if not keep: continue
     pim = Image.fromarray(rgb); d = ImageDraw.Draw(pim); m = int(16 * sc)
+    if a.nocap: pim.save(OUT / FR / f'{n:05d}.png'); n += 1; continue
     d.rounded_rectangle([m, m, m + int(14 * sc) + d.textlength(a.title, font=F1), m + int(44 * sc)], int(8 * sc), fill=(11, 11, 11)); d.text((m + int(8 * sc), m + int(6 * sc)), a.title, font=F1, fill=(255, 255, 255))
     foot = f'render {psnr:.1f} dB vs the photo'
     d.rounded_rectangle([m, H - m - int(34 * sc), m + int(14 * sc) + d.textlength(foot, font=F2), H - m], int(8 * sc), fill=(11, 11, 11)); d.text((m + int(8 * sc), H - m - int(29 * sc)), foot, font=F2, fill=(255, 255, 255))
-    pim.save(OUT / 'frames' / f'{n:05d}.png'); n += 1
-with open(OUT / 'metrics.csv', 'w', newline='') as fh:
+    pim.save(OUT / FR / f'{n:05d}.png'); n += 1
+with open(OUT / ('metrics_nocap.csv' if a.nocap else 'metrics.csv'), 'w', newline='') as fh:
     w = csv.writer(fh); w.writerow(['image', 'psnr_db', 'kept']); w.writerows(rows)
 p = np.array([r[1] for r in rows]); k = p[p >= a.bar]
 print(f'[bar] {len(rows)} trained views, PSNR median {np.median(p):.2f} (min {p.min():.2f}, max {p.max():.2f}); kept {n} at >= {a.bar:g} dB' + (f', kept median {np.median(k):.2f}' if k.size else ''), flush=True)
 if n:
-    name = OUT.name
+    name = OUT.name + ('_nocap' if a.nocap else '')
     for suf, crf, scl in (('', 20, 'iw:ih'), ('_phone', 27, '1280:-2' if W >= H else '720:-2')):
         f = OUT / f'{name}{suf}.mp4'
-        subprocess.run(['ffmpeg', '-y', '-v', 'error', '-framerate', str(a.fps), '-i', str(OUT / 'frames' / '%05d.png'), '-vf', f'scale={scl},fps=24,format=yuv420p', '-c:v', 'libx264', '-crf', str(crf), '-preset', 'slow', '-movflags', '+faststart', str(f)], check=True)
+        subprocess.run(['ffmpeg', '-y', '-v', 'error', '-framerate', str(a.fps), '-i', str(OUT / FR / '%05d.png'), '-vf', f'scale={scl},fps=24,format=yuv420p', '-c:v', 'libx264', '-crf', str(crf), '-preset', 'slow', '-movflags', '+faststart', str(f)], check=True)
         print(f'[bar] wrote {f} ({f.stat().st_size / 2**20:.1f} MiB, {n / a.fps:.1f} s)', flush=True)

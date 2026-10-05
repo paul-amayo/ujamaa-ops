@@ -32,6 +32,11 @@ import lorentz as L
 from read_write_model import read_images_binary, read_cameras_binary, qvec2rotmat
 S = '/home/paperspace/data/citrus_all/01_13B_Jackal'; P = f'{S}/experimental/h3dgs'; CN = '3_1'; NB = f'{S}/experimental/h3dgs_native/chunk_3_1_sam3'
 R = Path('/home/paperspace/logs/demo_chunks/01_3_1_720'); OUT = Path('/home/paperspace/data/demo_video_v2/citrus_a_bar_v4'); (OUT / 'frames').mkdir(parents=True, exist_ok=True)
+NOCAP = os.environ.get('NOCAP') == '1'   # final cut, 2026-10-05 (Paul: "remove all the 25 dB and training view references"): the SAME frames as
+# metrics.csv (kept by its 'shown' rows, not re-decided), footer keeps only the IoU / not-labelled parts -> frames_nocap/, metrics_nocap.csv, *_nocap.mp4
+FR = 'frames_nocap' if NOCAP else 'frames'
+(OUT / FR).mkdir(parents=True, exist_ok=True)
+SHOWN = __import__('collections').Counter((int(r['path_i']), r['keyframe'], r['mode']) for r in csv.DictReader(open(OUT / 'metrics.csv')) if r['status'] == 'shown') if NOCAP else None
 BAR_DB, BAR_IOU = 25.0, None   # no IoU minimum (v3)
 torch.set_grad_enabled(False)   # inference only (the embedder decoder has trainable weights)
 src = f'{P}/camera_calibration/chunks/{CN}/sparse/0'; cam0 = list(read_cameras_binary(f'{src}/cameras.bin').values())[0]; W, H = int(cam0.width), int(cam0.height); fx, fy, cx, cy = cam0.params[:4]
@@ -107,6 +112,9 @@ except Exception: F1 = F2 = ImageFont.load_default()
 rows_out, n = [], 0
 for f in path['frames']:
     kf = f['src']; mode = f['mode']; q = f['question']
+    if NOCAP:
+        if SHOWN[(f['i'], kf, mode)] <= 0: continue
+        SHOWN[(f['i'], kf, mode)] -= 1
     if kf in TEST or kf not in ims or kf not in EXPO: continue                       # untrained view: never shown
     im = ims[kf]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec; c2w = np.linalg.inv(w2c)
     cam = Cam(c2w, W, H, 2 * math.atan(H / (2 * fy)), cx / W, cy / H); E_ = np.array(EXPO[kf], np.float32)
@@ -115,7 +123,7 @@ for f in path['frames']:
         rgb = (img.clamp(0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy()
     photo = np.asarray(Image.open(f'{S}/prod/scratch_sam3/{kf}').convert('RGB')).astype(np.float32)
     psnr = float(10 * np.log10(255 ** 2 / max(((rgb.astype(np.float32) - photo) ** 2).mean(), 1e-9)))
-    if psnr < BAR_DB: rows_out.append((f['i'], kf, mode, round(psnr, 2), '', '', 'dropped: render < 25 dB')); continue
+    if psnr < BAR_DB and not NOCAP: rows_out.append((f['i'], kf, mode, round(psnr, 2), '', '', 'dropped: render < 25 dB')); continue
     sup = np.array(Image.open(f'{NB}/supervision/trees_only/{kf}'), np.uint16)
     if sup.shape != (H, W): sup = np.array(Image.fromarray(sup).resize((W, H), Image.NEAREST))
     # trees in front of the camera, nearest first (scene-graph geometry, not the supervision)
@@ -160,17 +168,18 @@ for f in path['frames']:
     if answer: d.rounded_rectangle([16, 68, 30 + d.textlength(answer, font=F2), 102], 8, fill=(255, 122, 0)); d.text((24, 73), answer, font=F2, fill=(11, 11, 11))
     mi = [x for x in ious if x is not None]; na = len(ious) - len(mi)
     foot = f'render {psnr:.1f} dB vs the photo' + (f'  ·  IoU {min(mi):.2f}' + (f'-{max(mi):.2f}' if len(mi) > 1 else '') if mi else '') + (f'  ·  {na} not labelled by SAM3' if na else '')
-    d.rounded_rectangle([16, H - 50, 30 + d.textlength(foot, font=F2), H - 16], 8, fill=(11, 11, 11)); d.text((24, H - 45), foot, font=F2, fill=(255, 255, 255))
-    pim.save(OUT / 'frames' / f'{n:05d}.png'); n += 1
+    if NOCAP: foot = '  ·  '.join(([f'IoU {min(mi):.2f}' + (f'-{max(mi):.2f}' if len(mi) > 1 else '')] if mi else []) + ([f'{na} not labelled by SAM3'] if na else []))
+    if foot: d.rounded_rectangle([16, H - 50, 30 + d.textlength(foot, font=F2), H - 16], 8, fill=(11, 11, 11)); d.text((24, H - 45), foot, font=F2, fill=(255, 255, 255))
+    pim.save(OUT / FR / f'{n:05d}.png'); n += 1
     rows_out.append((f['i'], kf, mode, round(psnr, 2), len(ious), round(min(mi), 3) if mi else '', 'shown'))
     if n % 50 == 0: print(f'[bar] {n} frames written', flush=True)
-with open(OUT / 'metrics.csv', 'w', newline='') as fh:
+with open(OUT / ('metrics_nocap.csv' if NOCAP else 'metrics.csv'), 'w', newline='') as fh:
     w = csv.writer(fh); w.writerow(['path_i', 'keyframe', 'mode', 'psnr_db', 'objects_lit', 'min_iou', 'status']); w.writerows(rows_out)
 shown = [r for r in rows_out if r[6] == 'shown']
 print(f'[bar] shown {len(shown)} of {len(path["frames"])} path frames; dropped: untrained {sum(1 for f in path["frames"] if f["src"] in TEST)}, render < 25 dB {sum(1 for r in rows_out if r[6].startswith("dropped: render"))}, object IoU < 0.8 {sum(1 for r in rows_out if r[6].startswith("dropped: object"))}', flush=True)
 for m in ('plain', 'row', 'tree', 'all', 'rows', 'orchard'):
     ss = [r for r in shown if r[2] == m]
     if ss: print(f'[bar]   {m:8s}: {len(ss)} frames, PSNR min {min(r[3] for r in ss):.1f} median {np.median([r[3] for r in ss]):.1f}' + (f', lit objects {sum(r[4] for r in ss if r[4] != "")}, min IoU {min(r[5] for r in ss if r[5] != ""):.2f}' if any(r[5] != '' for r in ss) else ''), flush=True)
-mp4 = OUT / 'citrus_a_bar_v4.mp4'
-subprocess.run(['ffmpeg', '-y', '-v', 'error', '-framerate', '8', '-i', str(OUT / 'frames' / '%05d.png'), '-vf', 'fps=30,format=yuv420p', '-c:v', 'libx264', '-crf', '20', '-movflags', '+faststart', str(mp4)], check=True)
+mp4 = OUT / ('citrus_a_bar_v4_nocap.mp4' if NOCAP else 'citrus_a_bar_v4.mp4')
+subprocess.run(['ffmpeg', '-y', '-v', 'error', '-framerate', '8', '-i', str(OUT / FR / '%05d.png'), '-vf', 'fps=30,format=yuv420p', '-c:v', 'libx264', '-crf', '20', '-movflags', '+faststart', str(mp4)], check=True)
 print(f'[bar] wrote {mp4} ({mp4.stat().st_size / 2**20:.1f} MiB, {n / 8:.1f} s)', flush=True)
