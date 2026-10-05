@@ -71,6 +71,12 @@ segs += [zoom("g_gw", "gendia.mp4"),   # the 'gendia' stop is Gwakungu, Nyahurur
          card("c4", "Gwakungu, Nyahururu", ["Phone survey, 16 May 2026 · cabbages counted along the path"], 3,
               accent_line="Which cabbage is this?  ·  How many cabbages are there?"),
          clip("cab", src("cabbage_cut"), portrait=True)]
+# Paul, 6 Oct: "add the chilli cut to the video, this is a special one off" (class-level red-chilli identity, own-decode rule;
+# below the 25 dB bar on the full frame) — same farm as the cabbages, so no extra globe stop
+if (B / "chilli_cut" / "chilli_cut.mp4").exists():
+    segs += [card("c4b", "Gwakungu chillies", ["Same farm, same phone · a red-chilli bed"], 3,
+                  accent_line="Pilipili nyekundu ziko wapi?  ·  Where are the red chillies?"),
+             clip("chl", B / "chilli_cut" / "chilli_cut.mp4", portrait=True)]
 if (B / "kendu_bar" / "kendu_bar.mp4").exists():
     segs += [zoom("g_kb", "kendu_bay.mp4"),
              card("c5", "Gendia, Kendu Bay", ["Phone survey, 14 May 2026 · a ground crop in 61 frames"], 3),
