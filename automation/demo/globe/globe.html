@@ -44,7 +44,7 @@
   const FULL_LAT = 6.0, FULL_LON0 = 24.0, SPIN_DEG_PER_S = 1.5;
 
   // End altitude: 2*h*tan(FOV/2) = visible height. h=0.076 -> ~260 km tall x ~460 km wide.
-  const PIN_ALT = 0.076;
+  const PIN_ALT = 0.15;   // 5 Oct: end ~500 km up so the last frames stay crisp (texture 7 km/px)
   const CONTINENT_ALT = 1.46;                            // ~5000 km tall: continent scale only
 
   const STOPS = {
