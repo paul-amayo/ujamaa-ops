@@ -9,7 +9,8 @@
 # 5 census on the chunk's TRAIN views (H3DGS split), survey embedder; 6 seeds: A block defaults, B + bg-competes/ratio 2
 #   + fruit share 0.1; 7-9 render held-out + a few train frames, score against the new supervision (no side-car anywhere;
 #   the earlier side-car-routed native seed is scored too, for reference only).
-# Env: SVN (survey id), PROJ (H3DGS project), CN (chunk), OUT (cell dir)
+# Env: SVN (survey id), PROJ (H3DGS project), CN (chunk), OUT (cell dir); FRUIT_GLOB (2026-10-07: another fruit ledger set, e.g. the
+#      few-shot fine-tuned SAM3 ledgers under experimental/sam3_fruit_<tag>; default = prod/bateleur/sam3_fruit)
 set -uo pipefail
 : ${SVN:?} ${PROJ:?} ${CN:?} ${OUT:?}
 S=/home/paperspace/data/citrus_all/$SVN; C=$PROJ/camera_calibration/chunks/$CN; N=$OUT; mkdir -p $N
@@ -45,7 +46,7 @@ PY
 grep -aE '^\[(palette|save)\]|Error|Traceback|wrote|written' $L.paint | tail -4 | tee -a $L
 [ -f $N/semantic_v2_B/palette.json ] || { say "paint FAILED (see $L.paint)"; exit 1; }
 (cd $NS && pixi run python $ARU/compile_supervision.py --block-dir $N --tree-source colour_png_bridge --hierarchy $HJ \
-   --fruit-ledger-glob "$B/sam3_fruit/clip_*/frame_entries.json" --filter strict_fruit_tree_v1 --out-dir $N/supervision/trees_only) > $L.compile 2>&1
+   --fruit-ledger-glob "${FRUIT_GLOB:-$B/sam3_fruit/clip_*/frame_entries.json}" --filter strict_fruit_tree_v1 --out-dir $N/supervision/trees_only) > $L.compile 2>&1
 grep -aE '^\[|Error|Traceback' $L.compile | tail -6 | cut -c1-250 | tee -a $L
 [ -f $N/supervision/trees_only/manifest.json ] || { say "compile FAILED (see $L.compile)"; exit 1; }
 python3 - $S $N <<'PY' | tee -a $L
