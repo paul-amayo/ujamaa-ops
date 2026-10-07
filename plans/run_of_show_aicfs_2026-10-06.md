@@ -136,8 +136,11 @@ Frames are rendered offline at fixed poses along each farm's walk (render servic
 | Fri midday | video first draft assembled: landing + picker captures, five walks, two Adinkra answers (Swahili oranges, Afrikaans found-again), captions, ASK/OFFER → Paul | me |
 | Fri afternoon | Paul's feedback → v2; screenshot PDF; **Paul tests SSH from a phone hotspot** | me, Paul |
 | Sat–Sun | Paul rehearses the four farm paths with a timer | Paul |
-| Mon 5 Oct | freeze 12:00; tag `demo-aicfs-2026-10-06` in ujamaa, aru_sil_core, ops; dress rehearsal off campus on the tunnel (8011 + 8024); unstage/stage procedure rehearsed | Paul, me |
+| Mon 5 Oct | freeze 12:00; tag `demo-aicfs-2026-10-06` in ujamaa, aru_sil_core, ops; dress rehearsal on the tunnel (8011 + 8024) from the laptop — **no hotspot exists (Paul, 5 Oct): the demo runs over the venue network + SSH tunnel; the 'demo website' is the app at http://localhost:8011/app/ through the tunnel; :8011/:8024 are localhost-only on the box**; unstage/stage procedure rehearsed | Paul, me |
 | Tue 6 Oct | morning procedure (§6): unstage → no training → stage the first farm → Gemma warm → one question per farm | Paul |
+
+## 5a. Live-stage state at the freeze (6 Oct 01:4x SAST)
+Identity on citrus A/B and Gwakungu cabbages is NATIVE (hierarchy features, no side-car) under the best-containment rule (`HIER_IDENTITY_RULE=argmax`; live == the videos' rule, measured). Adinkra gets the viewer's position (5 nearest plants, ahead/behind, left/right) and the last 6 chat turns; prompts are relative ("Which tree is in front of me? Show me."). Highlight moves the walk to the frame that best sees the plant (5–10 m, in view). Citrus B walks the lane-only trained poses with each view's own exposure; Citrus A per-view exposure where the walk pose is a trained camera. Phone stages render at their trained FOV (cabbage / Kendu 63°, chilli 46°). New: gwakungu-chilli (colour only). No auto-play; the walk loops; a fresh page clears the shared highlight; reload after any re-stage. Known limits: oranges light only at close poses (IoU ~0.4); cabbage heads other than 14/30 barely light; Klapmuts / Kendu Bay colour only; three Kendu Bay entries have no 3D.
 
 ## 6. Tuesday morning and packing
 
@@ -147,7 +150,7 @@ Frames are rendered offline at fixed poses along each farm's walk (render servic
   3. One question per farm.
   4. No training jobs.
 - **Venue, 30 min before:**
-  1. Connect the tunnel (ports **8011 and 8024**); stage the first farm.
+  1. Connect the tunnel (ports **8011 and 8024**): `ssh -N -f -L 8011:localhost:8011 -L 8024:localhost:8024 paperspace@184.105.3.25`; open **http://localhost:8011/app/** (root is 404); stage the first farm (Citrus A 12 s + side-car preload ~40 s; Citrus B 25 s + 30 s; others 15–25 s). Keep the browser tab visible — a hidden tab throttles the stream to 1 fps. **Reload the tab after any re-stage** (the page keeps the previous farm's walk until reloaded). The walk does NOT auto-play (Paul): press ▶ or ask Adinkra; it loops at the end. A fresh page clears the shared highlight.
   2. Ask the Swahili question.
   3. Start the video loop.
   4. Run `caffeinate -dis`; turn on Focus mode.

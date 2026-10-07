@@ -44,15 +44,16 @@
   const FULL_LAT = 6.0, FULL_LON0 = 24.0, SPIN_DEG_PER_S = 1.5;
 
   // End altitude: 2*h*tan(FOV/2) = visible height. h=0.076 -> ~260 km tall x ~460 km wide.
-  const PIN_ALT = 0.076;
+  const PIN_ALT = 0.15;   // 5 Oct: end ~500 km up so the last frames stay crisp (texture 7 km/px)
   const CONTINENT_ALT = 1.46;                            // ~5000 km tall: continent scale only
 
   const STOPS = {
     klapmuts:  { lat: -33.818, lon: 18.930, label: 'Klapmuts, Western Cape',
                  tagline: '912 bags · 825 found again, Dec → Apr', pin: true, alt: PIN_ALT },
-    kendu_bay: { lat: -0.360, lon: 34.655, label: 'Kendu Bay, Kenya',
+    // Paul, 5 Oct: Gendia is in Kendu Bay (the ground-crop clip); Gwakungu is in Nyahururu (cabbages, chillies).
+    kendu_bay: { lat: -0.404, lon: 34.665, label: 'Gendia, Kendu Bay',
                  tagline: 'ground crop · phone survey, 14 May 2026', pin: true, alt: PIN_ALT },
-    gendia:    { lat: -0.404, lon: 34.665, label: 'Gendia (Gwakungu), Kenya',
+    gendia:    { lat: 0.036, lon: 36.363, label: 'Gwakungu, Nyahururu',
                  tagline: '29 cabbages · phone survey, 16 May 2026', pin: true, alt: PIN_ALT },
     // continent only: no pin, no location text, never closer than continent scale
     citrus:    { lat: 39.0, lon: -98.0, label: 'A citrus orchard', tagline: '', pin: false, alt: CONTINENT_ALT },
