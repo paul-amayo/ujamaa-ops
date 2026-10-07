@@ -45,12 +45,13 @@ def heats(feat, words):
     return out.view(len(words), h_, w_)
 for kf in KFS:
     im = ims[kf]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec; cam = Cam(np.linalg.inv(w2c))
-    a = NI.mask(CH, cam, 3.0); live = (np.asarray(a) > 0) if a is not None else np.zeros((H, W), bool)
+    torch.cuda.synchronize(); _t = __import__('time').time(); a = NI.mask(CH, cam, 3.0); torch.cuda.synchronize(); ms = (__import__('time').time() - _t) * 1000
+    live = (np.asarray(a) > 0) if a is not None else np.zeros((H, W), bool)
     if live.shape != (H, W): live = np.array(Image.fromarray(live.astype(np.uint8)).resize((W, H), Image.NEAREST)) > 0
     words = ALLW if KIND == 'fruit' else TREES; hm = heats(NI.feature_pass(CH, cam, 3.0), words); valid = (hm > -1).any(0)
     bc = (valid & (hm.argmax(0) == words.index(word))).cpu().numpy(); bc = np.array(Image.fromarray(bc.astype(np.uint8)).resize((W, H), Image.NEAREST)) > 0
     sup = np.array(Image.open(f'{SUP}/{kf}'), np.uint16); g = sup == OID
     iou = lambda m: float((m & g).sum() / max((m | g).sum(), 1)) if g.sum() else float('nan')
-    print(f'[live] {kf}: SAM3 {int(g.sum()):,} px | live rule lit {int(live.sum()):,} px (IoU {iou(live):.2f}, precision {float((live & g).sum() / max(live.sum(), 1)):.2f}) '
+    print(f'[live {__import__("os").environ.get("HIER_IDENTITY_RULE") or "otsu"}] {kf}: mask {ms:.0f} ms | SAM3 {int(g.sum()):,} px | live rule lit {int(live.sum()):,} px (IoU {iou(live):.2f}, precision {float((live & g).sum() / max(live.sum(), 1)):.2f}) '
           f'| best containment lit {int(bc.sum()):,} px (IoU {iou(bc):.2f})', flush=True)
     torch.cuda.empty_cache()
