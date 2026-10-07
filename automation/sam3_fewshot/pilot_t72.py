@@ -15,7 +15,7 @@ import json, os, sys, time
 from pathlib import Path
 import numpy as np
 from PIL import Image
-W = Path(os.environ.get("FRUIT3D_WORK", "/home/paperspace/data/citrus_all/05_13D_Jackal/prod/scratch_sam3/fruit3d_t72")); OUT = W / "fewshot"; OUT.mkdir(exist_ok=True)
+W = Path(os.environ.get("FRUIT3D_WORK", "/home/paperspace/data/citrus_all/05_13D_Jackal/prod/scratch_sam3/fruit3d_t72")); OUT = W / os.environ.get("FEWSHOT_DIR", "fewshot"); OUT.mkdir(exist_ok=True)   # FEWSHOT_DIR: a separate folder per detector (e.g. fewshot_10shot)
 meta = json.load(open(W / "meta.json")); FR = meta["frames"]; names = [r["name"] for r in FR]; stock = {r["name"]: r["detections"] for r in json.load(open(W / "detections.json"))}
 root = Path(meta["root"]); T = json.load(open(next(root.glob("prod/tassili/blocks_ns/*/block_*/transforms.json")))); K = np.array([[T["fl_x"], 0, T["cx"]], [0, T["fl_y"], T["cy"]], [0, 0, 1]]); Kinv = np.linalg.inv(K)
 H3 = json.load(open(root / "prod/bateleur/scene_graph/marker_hierarchy.json")); CENT = np.array(next(o["xyz"] for o in H3["objects"] if o["id"] == meta["tree"]))
@@ -29,8 +29,8 @@ if os.environ.get("POSES", "lio") == "refined":   # trained keyframe pose (H3DGS
             im = _ims[f"kf_{r['donor_kf']:06d}.png"]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec; _TR[r["donor_kf"]] = (np.linalg.inv(w2c), np.array(r["pose"], float))
     POSE = {r["name"]: _TR[r["donor_kf"]][0] @ np.linalg.inv(_TR[r["donor_kf"]][1]) @ np.array(r["pose"], float) for r in FR}
     CENT = (_RW @ np.array([*CENT, 1.0]))[:3]; print(f"[poses] refined: {len(_TR)} trained keyframe poses x LIO relative motion; tree centroid in the export frame {CENT.round(2).tolist()}", flush=True)
-ts = np.array([r["ts_ms"] for r in FR]); cut = int(np.where(np.diff(ts) > 500)[0][0]) + 1; WINDOWS = [list(range(0, cut)), list(range(cut, len(FR)))]
-PAD, UP, OVERLAP, R_MATCH, MIN_VIEWS = 24, 2.0, 0.5, 12.0, 3; SUF = ("_refined" if os.environ.get("POSES", "lio") == "refined" else "") + ("_kfonly" if os.environ.get("KF_ONLY") else "")
+ts = np.array([r["ts_ms"] for r in FR]); _cuts = [0] + (np.where(np.diff(ts) > 500)[0] + 1).tolist() + [len(FR)]; WINDOWS = [list(range(a, b)) for a, b in zip(_cuts[:-1], _cuts[1:]) if b > a]   # one window per sighting (gaps > 500 ms); a tree may have 1..n
+DUMP_MASKS = os.environ.get("TRACK_MASKS") == "1"; PAD, UP, OVERLAP, R_MATCH, MIN_VIEWS = 24, 2.0, 0.5, 12.0, 3; SUF = ("_refined" if os.environ.get("POSES", "lio") == "refined" else "") + ("_kfonly" if os.environ.get("KF_ONLY") else "")
 def tmask(n): return np.array(Image.open(W / "masks" / f"{n}.png")) > 127
 def canon_crop(n):   # fruit3d_detect.py's crop: tree bbox + pad, 2x
     t = tmask(n); ys, xs = np.where(t); H, Wd = t.shape; y0, y1 = max(0, ys.min() - PAD), min(H, ys.max() + PAD); x0, x1 = max(0, xs.min() - PAD), min(Wd, xs.max() + PAD)
@@ -49,6 +49,8 @@ def track():
     # the video model's own detector thresholds (model_builder hard-codes new-object 0.7 / detection 0.5; the canonical image recipe keeps everything >= 0.5,
     # and only 131 of tree 72's 534 stock detections score >= 0.7, so at 0.7 the tracker carried a quarter of what the image recipe finds)
     pred.model.new_det_thresh = float(os.environ.get("NEW_DET", "0.5")); pred.model.score_threshold_detection = float(os.environ.get("SCORE_DET", "0.5")); print(f"[track] thresholds: new object {pred.model.new_det_thresh}, detection {pred.model.score_threshold_detection}", flush=True)
+    if os.environ.get("SAM3_DET_CKPT"):   # the loop: a fine-tuned IMAGE model (trainer checkpoint) as the video model's detector; tracks -> 3D check then counts what it finds that is real
+        sd = torch.load(os.environ["SAM3_DET_CKPT"], map_location="cpu", weights_only=False)["model"]; miss, unexp = pred.model.detector.load_state_dict(sd, strict=False); print(f"[track] detector weights from {os.environ['SAM3_DET_CKPT']}: {len(sd)} tensors, missing {len(miss)}, unexpected {len(unexp)}", flush=True)
     for wi, idx in enumerate(WINDOWS):
         bb = [np.where(tmask(names[i])) for i in idx]; cw = int(max(b[1].max() - b[1].min() for b in bb) + 2 * PAD); ch = int(max(b[0].max() - b[0].min() for b in bb) + 2 * PAD); imgs, offs = [], []
         for i, b in zip(idx, bb):   # fixed-size window on the tree centroid, clamped to the frame
@@ -62,6 +64,9 @@ def track():
                 if not m.any(): continue
                 ys, xs = np.where(m); u, v = x0 + xs.mean() / UP, y0 + ys.mean() / UP; area = m.sum() / UP ** 2
                 tracks.setdefault(f"w{wi}_{oid}", []).append({"f": idx[fi], "name": names[idx[fi]], "u": float(u), "v": float(v), "area": float(area), "prob": float(p), "in_tree": bool(t[min(719, int(v)), min(1279, int(u))])})
+                if DUMP_MASKS:   # full-frame mask (crop @2x -> frame px) as COCO RLE, for pseudo-label training sets (make_pseudo_coco.py)
+                    from pycocotools import mask as _mu; fm = np.zeros((720, 1280), bool); small = np.array(Image.fromarray(m.astype(np.uint8) * 255).resize((m.shape[1] // int(UP), m.shape[0] // int(UP)), Image.BILINEAR)) > 127
+                    fm[y0:y0 + small.shape[0], x0:x0 + small.shape[1]] = small[:720 - y0, :1280 - x0]; r = _mu.encode(np.asfortranarray(fm.astype(np.uint8))); r["counts"] = r["counts"].decode(); tracks[f"w{wi}_{oid}"][-1]["rle"] = r
         pred.handle_request(request=dict(type="close_session", session_id=sid)); print(f"[track] window {wi}: {len(idx)} frames, crop {cw}x{ch} @2x, tracks so far {len(tracks)}", flush=True)
     json.dump(tracks, open(OUT / "tracks.json", "w"), indent=1)
     L = [len(v) for v in tracks.values()]; print(f"[track] {len(tracks)} tracks in {time.time() - t0:.0f}s, peak GPU {torch.cuda.max_memory_allocated() / 2**30:.1f} GiB; views per track median {np.median(L):.0f} max {max(L)}; tracks with >= {MIN_VIEWS} views: {sum(l >= MIN_VIEWS for l in L)}", flush=True)
@@ -79,6 +84,7 @@ def tri():
         D = np.array([r[1] for r in rays]); par = float(np.degrees(np.arccos(np.clip((D @ D.T).min(), -1, 1))))
         out[tid] = {"X": X.tolist(), "n_views": len(obs), "reproj_med_px": float(np.median(err)), "reproj_p90_px": float(np.percentile(err, 90)), "parallax_deg": par, "depth_min": float(min(depth)), "depth_max": float(max(depth)), "dist_centroid": float(np.linalg.norm(X - CENT)), "prob_med": float(np.median([o["prob"] for o in obs])), "views": [o["f"] for o in obs]}
     json.dump(out, open(OUT / f"tri{SUF}.json", "w"), indent=1)
+    if not out: print(f"[tri] 0 tracks with >= {MIN_VIEWS} in-tree views (nothing to confirm)", flush=True); return
     e = np.array([v["reproj_med_px"] for v in out.values()]); p = np.array([v["parallax_deg"] for v in out.values()]); dc = np.array([v["dist_centroid"] for v in out.values()])
     print(f"[tri] {len(out)} tracks with >= {MIN_VIEWS} in-tree views; reprojection median px: p25 {np.percentile(e, 25):.1f} p50 {np.median(e):.1f} p75 {np.percentile(e, 75):.1f} p90 {np.percentile(e, 90):.1f}; parallax deg p50 {np.median(p):.1f}; dist to centroid p50 {np.median(dc):.2f} m", flush=True)
     for thr in (4, 6, 8, 12): print(f"[tri]   confirmed at reproj <= {thr} px & parallax >= 2 deg & 0.5 < depth < 12 & within 6 m: {sum(1 for v in out.values() if ok(v, thr))}", flush=True)
@@ -128,7 +134,33 @@ def exemplar(thr=6.0):
         R = [r for r in rows if r["K"] == Kx]
         if not R: print(f"[exemplar] K={Kx}: no frame has {Kx} found exemplars + a test orange"); continue
         nt = sum(r["n_test"] for r in R); print(f"[exemplar] K={Kx}: {len(R)} frames, {nt} test orange-views: recall text-only {sum(r['base_hit'] for r in R) / nt:.3f} -> text+{Kx} exemplars {sum(r['ex_hit'] for r in R) / nt:.3f}; detections per frame {np.mean([r['base_n'] for r in R]):.1f} -> {np.mean([r['ex_n'] for r in R]):.1f}, of which not on any confirmed orange {np.mean([r['base_unmatched'] for r in R]):.1f} -> {np.mean([r['ex_unmatched'] for r in R]):.1f}", flush=True)
+def ckpt(thr=6.0):
+    """Text-only canonical recipe with another checkpoint (SAM3_CKPT, e.g. a few-shot fine-tune; empty = stock) scored on ALL confirmed
+    orange-views of each frame + unmatched detections per frame -> ckpt_<SAM3_TAG>.json. Stock and fine-tuned are compared on the same views."""
+    import torch; from sam3.model_builder import build_sam3_image_model; from sam3.model.sam3_image_processor import Sam3Processor
+    ck = os.environ.get("SAM3_CKPT") or None; tag = os.environ.get("SAM3_TAG", "stock"); C = confirmed(thr); model = build_sam3_image_model()   # stock weights (HF)
+    TRK = {}
+    for obs in json.load(open(OUT / "tracks.json")).values():
+        for o in obs:
+            if o["in_tree"]: TRK.setdefault(o["name"], []).append(o)
+    if ck:   # trainer checkpoint: {'model': image-model state dict}; model_builder._load_checkpoint expects the VIDEO layout (detector.* keys) and silently loads nothing from this file
+        sd = torch.load(ck, map_location="cpu", weights_only=False)["model"]; miss, unexp = model.load_state_dict(sd, strict=False); print(f"[ckpt {tag}] loaded {ck}: {len(sd)} tensors, missing {len(miss)}, unexpected {len(unexp)}" + (f" e.g. {miss[:2]}" if miss else ""), flush=True); model.eval()
+    proc = Sam3Processor(model); by_frame = {}
+    for tid, obs in C.items():
+        for o in obs: by_frame.setdefault(o["name"], []).append((tid, o))
+    rows = []
+    for n in names:
+        if n not in by_frame: continue
+        crop, box, t = canon_crop(n)
+        with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
+            st = proc.set_image(crop); r = proc.set_text_prompt(state=st, prompt="fruit")
+        d = dets_from(r.get("masks", []), r.get("scores", []).float().cpu().numpy() if hasattr(r.get("scores"), "cpu") else [], box, t); allc = [(o["u"], o["v"]) for _, o in by_frame[n]]
+        trk = TRK.get(n, []); unm = [x for x in d if not any(np.hypot(x["u"] - u, x["v"] - v) <= R_MATCH for u, v in allc)]   # detections off every confirmed orange: on a tracker object (multi-frame) or on nothing
+        rows.append({"name": n, "n_views": len(allc), "hit": sum(near(d, u, v) for u, v in allc), "n_det": len(d), "unmatched": len(unm), "unmatched_on_track": sum(1 for x in unm if any(np.hypot(x["u"] - o["u"], x["v"] - o["v"]) <= R_MATCH for o in trk)), "scores": [round(x["score"], 3) for x in d], "dets": [{k: round(x[k], 1) for k in ("u", "v", "area", "score")} for x in d]})
+    json.dump(rows, open(OUT / f"ckpt_{tag}{SUF}_thr{thr:g}.json", "w"), indent=1); nv = sum(r["n_views"] for r in rows)
+    print(f"[ckpt {tag}] {len(rows)} frames, {nv} confirmed orange-views: recall {sum(r['hit'] for r in rows) / max(nv, 1):.3f}; detections per frame {np.mean([r['n_det'] for r in rows]) if rows else 0:.1f}, off confirmed oranges {np.mean([r['unmatched'] for r in rows]) if rows else 0:.1f} (of which on a tracker object {np.mean([r['unmatched_on_track'] for r in rows]) if rows else 0:.1f}, on nothing {np.mean([r['unmatched'] - r['unmatched_on_track'] for r in rows]) if rows else 0:.1f})", flush=True)
 stage = sys.argv[1] if len(sys.argv) > 1 else "all"; thr = float(os.environ.get("REPROJ_PX", "6"))
+if stage == "ckpt": ckpt(thr)
 if stage in ("track", "all"): track()
 if stage in ("tri", "all"): tri()
 if stage in ("score", "all"): score(thr)
