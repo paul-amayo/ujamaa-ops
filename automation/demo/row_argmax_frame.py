@@ -30,7 +30,7 @@ fig, axs = plt.subplots(len(ks), 2, figsize=(22, 6.4 * len(ks)), dpi=90, gridspe
 for i, k in enumerate(ks):
     kf = f'kf_{k:06d}.png'; im = ims[kf]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec; c2w = np.linalg.inv(w2c)
     cam = Cam(c2w, W, H, 2 * math.atan(H / (2 * fy)), cx / W, cy / H); img, _ = CH.render(cam, 3.0)
-    if kf in EXPO: E_ = np.array(EXPO[kf], np.float32); img = torch.einsum('ij,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
+    if kf in EXPO: E_ = np.array(EXPO[kf], np.float32); img = torch.einsum('ji,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
     rgb = (img.clamp(0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy()
     vis = []
     for t, x in TREES.items():

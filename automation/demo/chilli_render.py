@@ -36,7 +36,7 @@ for kf in names:
     im = ims[kf]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec; c2w = np.linalg.inv(w2c)
     cam = Cam(c2w, W, H, 2 * math.atan(H / (2 * fy)), cx / W, cy / H); held = kf in TEST or kf not in EXPO
     E_ = MEAN_EXPO if held else np.array(EXPO[kf], np.float32)
-    img, _ = CH.render(cam, TAU); img = torch.einsum('ij,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
+    img, _ = CH.render(cam, TAU); img = torch.einsum('ji,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
     rgb = (img.clamp(0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy()
     photo = np.asarray(Image.open(f'{P}/camera_calibration/rectified/images/{kf}').convert('RGB'))
     psnr = float(10 * np.log10(255 ** 2 / max(((rgb.astype(np.float32) - photo.astype(np.float32)) ** 2).mean(), 1e-9)))

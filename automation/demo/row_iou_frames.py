@@ -54,7 +54,7 @@ for k in range(K0, K1 + 1):
     cam = Cam(np.linalg.inv(w2c), W, H, 2 * math.atan(H / (2 * fy)), cx / W, cy / H)
     img, _ = CH.render(cam, 3.0)
     if kf in EXPO:
-        E_ = np.array(EXPO[kf], np.float32); img = torch.einsum('ij,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
+        E_ = np.array(EXPO[kf], np.float32); img = torch.einsum('ji,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
     rgb = (img.clamp(0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy()
     hm = heat(NI.feature_pass(CH, cam, 3.0)); valid = hm > -1; v = hm[valid]
     p50, p99 = float(torch.quantile(v, 0.5)), float(torch.quantile(v, 0.99)); ot = _otsu(v); thr = max(ot, p50); absent = (p99 - p50) < 0.04

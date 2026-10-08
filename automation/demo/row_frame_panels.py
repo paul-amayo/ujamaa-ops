@@ -16,7 +16,7 @@ for r, kf in enumerate(frames):
     im = ims[kf]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec
     cam = Cam(np.linalg.inv(w2c), W, H, 2 * math.atan(H / (2 * fy)), cx / W, cy / H); img, _ = CH.render(cam, 3.0)
     if kf in EXPO:
-        E_ = np.array(EXPO[kf], np.float32); img = torch.einsum('ij,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
+        E_ = np.array(EXPO[kf], np.float32); img = torch.einsum('ji,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
     rgb = (img.clamp(0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy()
     hm = heat(NI.feature_pass(CH, cam, 3.0)); a = NI.alpha(hm); lit = (a.float().cpu().numpy() > 0) if a is not None else np.zeros((H, W), bool)
     v = hm[hm > -1]; split = max(_otsu(v), float(torch.quantile(v, 0.5))); hm = hm.cpu().numpy()

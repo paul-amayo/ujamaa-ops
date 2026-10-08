@@ -47,7 +47,7 @@ for f in clip:
     if kf not in ims: continue
     im = ims[kf]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec
     cam = Cam(np.linalg.inv(w2c), W, H, 2 * math.atan(H / (2 * fy)), cx / W, cy / H); E_ = np.array(EXPO[kf], np.float32) if kf in EXPO else MEAN
-    img, _ = CH.render(cam, TAU); img = torch.einsum('ij,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
+    img, _ = CH.render(cam, TAU); img = torch.einsum('ji,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
     rgb = (img.clamp(0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy().astype(np.float32)
     photo = np.asarray(Image.open(f'{S}/prod/scratch_sam3/{kf}').convert('RGB')).astype(np.float32); psnr = float(10 * np.log10(255 ** 2 / max(((rgb - photo) ** 2).mean(), 1e-9)))
     hm = heats(NI.feature_pass(CH, cam, TAU), ALLW); valid = (hm > -1).any(0); am = hm.argmax(0)

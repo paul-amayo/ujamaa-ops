@@ -40,7 +40,7 @@ Fq = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 
 rows = []
 for n, kf in enumerate(frames):
     im = ims[kf]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec; cam = Cam(np.linalg.inv(w2c)); E_ = np.array(EXPO[kf], np.float32)
-    img, _ = CH.render(cam, 3.0); img = torch.einsum('ij,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
+    img, _ = CH.render(cam, 3.0); img = torch.einsum('ji,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
     rgb = (img.clamp(0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy()
     feat = NI.feature_pass(CH, cam, 3.0); h_, w_, Dd = feat.shape; ft = feat.reshape(-1, Dd).float()
     d0 = NI.hyper.decode_features(L.exp_map0(ft, curv=NI.curv), project=True); d0 = d0 / d0.norm(dim=-1, keepdim=True)
