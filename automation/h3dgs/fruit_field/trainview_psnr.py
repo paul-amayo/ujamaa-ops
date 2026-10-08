@@ -23,7 +23,8 @@ for lab, P in runs:
     with torch.no_grad():
         for kf in pick:
             im = ims[kf]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec; cam = Cam(np.linalg.inv(w2c)); E_ = np.array(EXPO[kf], np.float32)
-            img, _ = CH.render(cam, TAUV); img = torch.einsum('ji,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]   # H3DGS convention: pixel-row x E (gaussian_renderer use_trained_exp), i.e. E^T on column vectors
+            img, _ = CH.render(cam, TAUV)
+            if os.environ.get('NOEXP') != '1': img = torch.einsum('ji,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]   # NOEXP=1: raw render, for A/Bs against models without an exposure model   # H3DGS convention: pixel-row x E (gaussian_renderer use_trained_exp), i.e. E^T on column vectors
             gt = torch.from_numpy(np.array(Image.open(f'{P}/camera_calibration/rectified/images/{kf}').convert('RGB'))).float().permute(2, 0, 1).cuda() / 255
             mse = float(((img.clamp(0, 1) - gt) ** 2).mean()); ps.append(10 * math.log10(1 / max(mse, 1e-10)))
     print(f'[trainview] {lab:28s} chunk {CN}: {len(ps)} trained views, own exposure, tau {TAUV:g}: PSNR mean {np.mean(ps):.2f} median {np.median(ps):.2f} (nodes {CH.N:,})', flush=True); del CH; torch.cuda.empty_cache()
