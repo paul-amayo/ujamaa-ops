@@ -10,7 +10,7 @@ import json, sys, time
 from pathlib import Path
 import numpy as np, cv2
 sys.path.insert(0, "/home/paperspace/code/aru_sil_core/src/interfaces/build/temp.linux-x86_64-cpython-310/lib"); import aru_py_logger
-M = "/home/paperspace/data/klapmuts/apr_2026_zed/prod/monos"; k0, k1, OUT = int(sys.argv[1]), int(sys.argv[2]), Path(sys.argv[3]); (OUT / "images").mkdir(parents=True, exist_ok=True)
+M = __import__("os").environ.get("LANE_SURVEY", "/home/paperspace/data/klapmuts/apr_2026_zed") + "/prod/monos"; k0, k1, OUT = int(sys.argv[1]), int(sys.argv[2]), Path(sys.argv[3]); (OUT / "images").mkdir(parents=True, exist_ok=True)
 lg = aru_py_logger.MonoImageLogger(f"{M}/image_left_kf20cm.monolithic", False); i = 0; t0 = t1 = None
 while not lg.end_of_file():
     img, ts = lg.read_from_file()

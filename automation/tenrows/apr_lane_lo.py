@@ -17,7 +17,7 @@ usage: apr_lane_lo.py dump <lane>   (nerf_new python3.10 + aru_py_logger)   |   
 import json, re, sys
 from pathlib import Path
 import numpy as np
-mode, LD = sys.argv[1], Path(sys.argv[2]); M = Path("/home/paperspace/data/klapmuts/apr_2026_zed/prod/monos"); D = LD / "laser_dump"
+mode, LD = sys.argv[1], Path(sys.argv[2]); M = Path(__import__("os").environ.get("LANE_SURVEY", "/home/paperspace/data/klapmuts/apr_2026_zed")) / "prod/monos"; D = LD / "laser_dump"   # LANE_SURVEY (2026-10-08): another A300 survey root (Lindendhof)
 FX, FY, CX, CY, W, H = 527.985, 527.88, 638.975, 333.1835, 1280, 720   # the ZED conf December's lane recipe used (same sensor head)
 stamps = {k: float(v) for k, v in json.load(open(LD / "stamps.json")).items()}; names = sorted(stamps, key=lambda n: int(re.sub(r"\D", "", n)))
 if mode == "base" and (LD / "lane_window.json").exists():

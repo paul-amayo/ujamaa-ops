@@ -14,7 +14,7 @@ import numpy as np, cv2
 from scipy.spatial.transform import Rotation, Slerp
 sys.path.insert(0, "/home/paperspace/code/aru_sil_core/src/interfaces/build/temp.linux-x86_64-cpython-310/lib"); import aru_py_logger
 sys.path.insert(0, "/home/paperspace/code/hierarchical-3d-gaussians/preprocess"); from read_write_model import read_images_binary, qvec2rotmat
-S = Path("/home/paperspace/data/klapmuts/apr_2026_zed"); M = S / "prod/monos"; EXP = S / "experimental/h3dgs"; LD = Path(sys.argv[1])
+S = Path(__import__("os").environ.get("LANE_SURVEY", "/home/paperspace/data/klapmuts/apr_2026_zed")); M = S / "prod/monos"; EXP = S / "experimental/h3dgs"; LD = Path(sys.argv[1])   # LANE_SURVEY (2026-10-08): another A300 survey root
 rig = json.load(open(M / "rig.json")); L2C = np.array(json.loads(rig["laser_to_camera_left"]) if isinstance(rig["laser_to_camera_left"], str) else rig["laser_to_camera_left"], np.float64)
 intr = rig["intrinsics"]; intr = json.loads(intr.replace("'", '"')) if isinstance(intr, str) else intr
 FX, FY, CX, CY, W, H = intr["fx"], intr["fy"], intr["cx"], intr["cy"], int(intr["img_w"]), int(intr["img_h"])

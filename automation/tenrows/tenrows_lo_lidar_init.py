@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 from plyfile import PlyData, PlyElement
-R_ = Path("/home/paperspace/data/klapmuts/dec_2025_ten_rows"); MD = R_ / "prod/monos/monolithics"; DUMP = R_ / "experimental/laser_dump"
+R_ = Path(__import__("os").environ.get("LANE_SURVEY", "/home/paperspace/data/klapmuts/dec_2025_ten_rows")); MD = R_ / "prod/monos/monolithics"; DUMP = R_ / "experimental/laser_dump"   # LANE_SURVEY (2026-10-08): Lindendhof
 ap = argparse.ArgumentParser(); ap.add_argument("block_dir"); ap.add_argument("--voxel", type=float, default=0.05); ap.add_argument("--pad-x", type=float, default=10.0)
 ap.add_argument("--pad-y", type=float, default=8.0); ap.add_argument("--pad-z", type=float, default=5.0); ap.add_argument("--min-range", type=float, default=0.45); ap.add_argument("--max-range", type=float, default=40.0)
 ap.add_argument("--max-dt", type=float, default=60.0, help="ms: keyframe-to-scan stamp tolerance"); ap.add_argument("--out-name", default="init_lidar.ply")

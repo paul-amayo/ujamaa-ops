@@ -16,7 +16,7 @@ from pathlib import Path
 import numpy as np
 from scipy.spatial.transform import Rotation, Slerp
 sys.path.insert(0, "/home/paperspace/code/hierarchical-3d-gaussians/preprocess"); from read_write_model import write_model, Camera, Image, rotmat2qvec
-R_ = Path("/home/paperspace/data/klapmuts/apr_2026_zed"); FX, FY, CX, CY, W, H = 527.985, 527.88, 638.975, 333.1835, 1280, 720
+R_ = Path(__import__("os").environ.get("LANE_SURVEY", "/home/paperspace/data/klapmuts/apr_2026_zed")); FX, FY, CX, CY, W, H = 527.985, 527.88, 638.975, 333.1835, 1280, 720
 ap = argparse.ArgumentParser(); ap.add_argument("mode", choices=["lo", "chunk"]); ap.add_argument("lane"); ap.add_argument("ref", nargs="?", default="transforms_ref_lo.json")
 ap.add_argument("--proj", default="h3dgs"); ap.add_argument("--keyframes", action="store_true"); ap.add_argument("--kf-dist", type=float, default=0.20); ap.add_argument("--kf-deg", type=float, default=3.0)
 ap.add_argument("--every", type=int, default=0, help="ablation (Paul 2026-09-27 'and then every fifth frame'): train on every N-th stream frame (stream index %% N == --offset; the every-10th held-out frames are unchanged)")

@@ -10,7 +10,9 @@ import json
 from pathlib import Path
 import numpy as np
 PAD_S = 1.5   # seconds added at both ends of the straight core (the hand-picked lane 2 ran 1.4 s / 0.8 s further into the turns and trained well)
-R = Path("/home/paperspace/data/klapmuts/dec_2025_ten_rows/experimental"); z = np.load(R / "laser_dump/lo_poses.npz"); ts = z["ts_ms"].astype(np.float64); P = z["T"][:, :3, 3]
+import os
+# LANE_ROOT (2026-10-08): another A300 survey's experimental/ (Lindendhof)
+R = Path(os.environ.get("LANE_ROOT", "/home/paperspace/data/klapmuts/dec_2025_ten_rows/experimental")); z = np.load(R / "laser_dump/lo_poses.npz"); ts = z["ts_ms"].astype(np.float64); P = z["T"][:, :3, 3]
 # horizontal plane = the two principal axes of the track (the field is flat); row axis = dominant heading of the moving frames
 mu = P.mean(0); U, S, Vt = np.linalg.svd(P - mu, full_matrices=False); xy = (P - mu) @ Vt[:2].T
 dt = np.gradient(ts) / 1e3; vel = np.gradient(xy, axis=0) / dt[:, None]; speed = np.linalg.norm(vel, axis=1); moving = speed > 0.3

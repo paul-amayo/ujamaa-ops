@@ -37,3 +37,15 @@ init = the chunk's points3D.ply), 30k iterations, no hierarchy, no post-opt. Exp
 ## Open measurements
 - 01 3_1 and 05 0_0 under v3 (are the gains general?); a Klapmuts lane under v3 (the 8 M lane recipe
   is H3DGS 60k: 29.7 training / 19.8 held-out); render speed of the grid at 1280 px.
+
+## Progress (2026-10-08 evening)
+1. Builder DONE: `automation/h3dgs/v3/build_chunk_ws.py` + `train_chunk.sh` (reproduces the A/B workspace exactly). v3 runs of 05 0_0
+   and 01 3_1 launched concurrently 17:58 (the two-per-card measurement). v2 bar on the same 60 views: 0_0 25.48 / 25.11, 3_1 26.82 / 26.45.
+3. Identity port MEASURED on 05 1_0 (`v3_identity_cell.sh`: `splat_census.py` 32 s, seed B unchanged, `splat_feature_render.py`,
+   same scorer / supervision / frames as the native cell): TREE eval 0.716 vs native 0.700, train 0.743 vs 0.765; ROW 0.804 vs 0.811;
+   FRUIT 0.355 vs 0.402 (eval, 2 frames), 0.164 vs 0.297 (train, 3 frames). Trees/rows at parity, fruit lower. 2 min end to end.
+2. Serving MEASURED on 05 1_0 (`v3_render_service.py`, `launch_api.py` kind "v3", checker `v3_ws_check.py`): recorded trained poses
+   23.56 dB median (JPEG q90; scorer 24.12), free poses 23.49 (3-nearest grid blend), 0.26 GiB resident, 9.2 fps at 1280x720 while
+   two trainings shared the card (re-measure idle); tree 5 lit IoU 0.682, fruit 10001 IoU 0.305 vs the SAM3 masks (fruit ids are
+   10000+ in the word table). Not yet in sites.json (the live site is frozen; the entry is one "render" block with kind "v3").
+4. Two chunks per card: NO gain (each 65-100 ms/it vs 34 alone) - run v3 chunks sequentially.

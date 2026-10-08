@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np, cv2
 sys.path.insert(0, "/home/paperspace/code/aru_sil_core/src/interfaces/build/temp.linux-x86_64-cpython-310/lib"); import aru_py_logger
 t0, t1, OUT = float(sys.argv[1]), float(sys.argv[2]), Path(sys.argv[3]); (OUT / "images").mkdir(parents=True, exist_ok=True)
-lg = aru_py_logger.MonoImageLogger("/home/paperspace/data/klapmuts/dec_2025_ten_rows/prod/monos/monolithics/image_left.monolithic", False); i = 0; kept = {}; tt = time.time()
+lg = aru_py_logger.MonoImageLogger(__import__("os").environ.get("LANE_SURVEY", "/home/paperspace/data/klapmuts/dec_2025_ten_rows") + "/prod/monos/monolithics/image_left.monolithic", False); i = 0; kept = {}; tt = time.time()
 while not lg.end_of_file():
     img, ts = lg.read_from_file()
     if img is None or getattr(img, "size", 0) == 0: break
