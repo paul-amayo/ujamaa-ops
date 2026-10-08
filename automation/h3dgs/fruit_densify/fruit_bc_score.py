@@ -14,7 +14,7 @@ from native_identity import NativeIdentity
 import lorentz as L
 from read_write_model import read_images_binary, read_cameras_binary, qvec2rotmat
 torch.set_grad_enabled(False)
-P, NB, TAG = sys.argv[1], sys.argv[2], sys.argv[3]; S = '/home/paperspace/data/citrus_all/05_13D_Jackal'; CN = '1_0'; FID = 10001
+import os; P, NB, TAG = sys.argv[1], sys.argv[2], sys.argv[3]; TAU = float(os.environ.get('TAU', '3.0')); FEAT_OVERRIDE = os.environ.get('FEAT'); S = '/home/paperspace/data/citrus_all/05_13D_Jackal'; CN = '1_0'; FID = 10001
 src = f'{P}/camera_calibration/chunks/{CN}/sparse/0'; cam0 = list(read_cameras_binary(f'{src}/cameras.bin').values())[0]; W, H = int(cam0.width), int(cam0.height); fx, fy, cx, cy = cam0.params[:4]
 ims = {v.name: v for v in read_images_binary(f'{src}/images.bin').values()}; TEST = {l.strip() for l in open(f'{src}/test.txt') if l.strip()}
 EXPO = json.load(open(f'{P}/output/trained_chunks/{CN}/exposure.json')); MEAN = np.mean([np.array(v, np.float32) for v in EXPO.values()], axis=0)
@@ -28,7 +28,7 @@ class Cam:
         self.full_proj_transform = (self.world_view_transform.unsqueeze(0).bmm(self.projection_matrix.unsqueeze(0))).squeeze(0)
         self.camera_center = self.world_view_transform.inverse()[3, :3]
 CH = CompactHierarchy(f'{P}/output/trained_chunks/{CN}/hierarchy.hier_opt', f'{P}/output/scaffold/point_cloud/iteration_30000')
-NI = NativeIdentity(f'{NB}/features_B_bg2share.bin', sorted(Path(f'{S}/prod/bateleur/embedder').glob('*/ckpts/model_best.pth'))[-1].as_posix(), f'{NB}/text_bank.npz', CH.N, n_hier=CH.n_hier)
+NI = NativeIdentity(FEAT_OVERRIDE or f'{NB}/features_B_bg2share.bin', sorted(Path(f'{S}/prod/bateleur/embedder').glob('*/ckpts/model_best.pth'))[-1].as_posix(), f'{NB}/text_bank.npz', CH.N, n_hier=CH.n_hier)
 ALLW = [w for w in NI.words if w in NI.widx]; FW = NI.word_table.get(str(FID)); assert FW in ALLW, 'fruit word missing'
 def heats(feat, words):
     E = NI.E[[NI.widx[w] for w in words]]; h_, w_, D = feat.shape; ft = feat.reshape(-1, D).float()
@@ -47,10 +47,10 @@ for f in clip:
     if kf not in ims: continue
     im = ims[kf]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec
     cam = Cam(np.linalg.inv(w2c), W, H, 2 * math.atan(H / (2 * fy)), cx / W, cy / H); E_ = np.array(EXPO[kf], np.float32) if kf in EXPO else MEAN
-    img, _ = CH.render(cam, 3.0); img = torch.einsum('ij,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
+    img, _ = CH.render(cam, TAU); img = torch.einsum('ij,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
     rgb = (img.clamp(0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy().astype(np.float32)
     photo = np.asarray(Image.open(f'{S}/prod/scratch_sam3/{kf}').convert('RGB')).astype(np.float32); psnr = float(10 * np.log10(255 ** 2 / max(((rgb - photo) ** 2).mean(), 1e-9)))
-    hm = heats(NI.feature_pass(CH, cam, 3.0), ALLW); valid = (hm > -1).any(0); am = hm.argmax(0)
+    hm = heats(NI.feature_pass(CH, cam, TAU), ALLW); valid = (hm > -1).any(0); am = hm.argmax(0)
     lit = (valid & (am == ALLW.index(FW))).cpu().numpy().astype(np.uint8); lit = np.array(Image.fromarray(lit * 255).resize((W, H), Image.NEAREST)) > 0
     sup = np.array(Image.open(f'{NB}/supervision/trees_only/{kf}'), np.uint16); gt = sup == FID
     iou = float((lit & gt).sum() / max((lit | gt).sum(), 1)) if gt.sum() > 0 else None
