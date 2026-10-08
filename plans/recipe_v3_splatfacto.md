@@ -34,6 +34,11 @@ init = the chunk's points3D.ply), 30k iterations, no hierarchy, no post-opt. Exp
 5. **Not covered by v3**: survey-scale LoD (one merged model rendered at a budget) - H3DGS's hierarchy remains the tool for that
    view; v3 serves chunks, as the demo does today.
 
+## Decision (2026-10-08, Paul: "Bar accepted")
+v3 fixed 60k is the prod recipe as measured on the three demo cells: training views 1_0 -0.2 / 0_0 -1.0 / 3_1 -1.3 dB median vs v2,
+held-out +1 to +6 dB, identity at parity, ~10x cheaper. Capacity x2 (+0.24, -1.35 held-out) and 150k (+0.27 at 2.5x time) measured
+and not adopted. Item 4's "training views >= v2" is replaced by this bar. Fleet: logs/v3_fleet_queue_20261008.txt (89 cells).
+
 ## Open measurements
 - 01 3_1 and 05 0_0 under v3 (are the gains general?); a Klapmuts lane under v3 (the 8 M lane recipe
   is H3DGS 60k: 29.7 training / 19.8 held-out); render speed of the grid at 1280 px.
