@@ -163,6 +163,23 @@ QUEUE, planned against this roadmap, results auto-logged to the notebook. Queues
       registry, regression harness).
 
 ### Phase 3 — Demo software (late Sep → early Nov)
+- [x] **Prod splat recipe v3 DECIDED 2026-10-08 (Paul: "Bar accepted")** — per chunk,
+      stock nerfstudio splatfacto + bilateral grid, 60k, on the H3DGS chunk exports
+      (`plans/recipe_v3_splatfacto.md`, `automation/h3dgs/v3/`). Measured against
+      H3DGS v2 on the three demo cells, same views: training views −0.2 / −1.0 / −1.3 dB
+      median, held-out +1 to +6 dB, identity (flat-gaussian census, seed B) at tree/row
+      parity, 34 min and 0.8 M gaussians vs 3.2 h and 12 M. Capacity ×2 and 150k
+      schedules measured and rejected. Serving: `v3_render_service.py` (hier protocol,
+      kind "v3" in launch_api; 23.6 dB on recorded poses, 0.26 GiB). Two chunks per
+      card = no gain.
+- [ ] **v3 fleet (started 2026-10-08 22:23, sequential, this A100):** 89 cells queued —
+      01 ×24, 05 ×6, 04 ×6, 02 ×22 (export 38 min), 03 ×24 (export 89 min), April ×4 +
+      5 lane projects; ≈ 60 h → ~Oct 11. Then lanes: Dec 1, 3–10 and Lindendhof 1–5
+      (5 lanes from its own KISS-ICP odometry; same A300 head; `v3_lane_chain.sh`)
+      ≈ 30 h → ~Oct 12. Identity for Klapmuts/Lindendhof needs SAM3 + scene graph
+      (not started). Results: `logs/v3_fleet_results.jsonl` + the PSNR Log artifact.
+- [ ] Put the v3 chunks on the stage (sites.json "v3" render entries per survey) once
+      the fleet lands; serving-root symlinks + identity cells per chunk.
 - [ ] Convert the design bundle (`ujamaa/project/`) into the real web app for the four
       slice pillars; wire to the live servers (splat viewer, top-down, ledger, query).
 - [ ] Public hosting story (static site + hosted demo data, or tunnel/VPS for live servers).
