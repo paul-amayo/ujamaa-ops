@@ -12,7 +12,7 @@ init = the chunk's points3D.ply), 30k iterations, no hierarchy, no post-opt. Exp
 |---|---|---|---|---|
 | v2 = H3DGS 60k + 15k post-opt, exposure affine | 24.29 / 24.14 | 15.76 | 3.2 h | 12 M |
 | v3 = splatfacto 30k + bilateral grid (grid applied) | 23.64 / 24.13 | 16.47 | 17 min | ~0.7 M |
-| splatfacto 60k + bilateral grid | (pending) | | ~35 min | |
+| splatfacto 60k + bilateral grid (grid applied) | **24.12 / 24.64** | 16.50 | 34 min | ~0.7 M |
 - Same walkthrough quality, better generalisation, 11x faster, 16x smaller; two chunks per 40 GB card.
 - Post-geometry exposure is NOT enough (frozen-geometry affine + colour refit: 22.9); the grid must be co-trained.
 - The held-out ceiling (~16-17 dB) is the drive's geometry, shared by every recipe tried.
@@ -35,5 +35,5 @@ init = the chunk's points3D.ply), 30k iterations, no hierarchy, no post-opt. Exp
    view; v3 serves chunks, as the demo does today.
 
 ## Open measurements
-- 60k + bilateral (running); 01 3_1 and 05 0_0 under v3 (are the gains general?); a Klapmuts lane under v3 (the 8 M lane recipe
+- 01 3_1 and 05 0_0 under v3 (are the gains general?); a Klapmuts lane under v3 (the 8 M lane recipe
   is H3DGS 60k: 29.7 training / 19.8 held-out); render speed of the grid at 1280 px.
