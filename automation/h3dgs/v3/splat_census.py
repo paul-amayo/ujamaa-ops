@@ -18,7 +18,17 @@ UNLAB = 65535
 ap = argparse.ArgumentParser()
 ap.add_argument('--config', required=True); ap.add_argument('--supervision-dir', required=True); ap.add_argument('--names-json', required=True)
 ap.add_argument('--out-npz', required=True); ap.add_argument('--render-scale', type=float, default=0.5); ap.add_argument('--with-bg', action='store_true')
+ap.add_argument('--fruit-views-npz', default='', help='also write a second census W2 (same labels) in which a view\'s votes for a gaussian count ONLY if that gaussian '
+                'touches a FRUIT mask in that view (Paul 2026-10-14: "surely we\'d just use 24 and 25" — a fruit is judged on the views that label it; '
+                'tree / unlabelled votes from views where the fruit is not visible do not count against it)')
+ap.add_argument('--vis-weight', action='store_true', help='visibility-weighted census (2026-10-14): each view\'s label mass for a gaussian is scaled by '
+                'its VISIBILITY there, v = (its total blend weight in the view) / (its unoccluded footprint integral opacity x 2 pi sqrt(det Sigma2d)) '
+                '= its alpha-weighted mean transmittance, so mass seen through foliage counts ~v^2. Without it a small fruit hidden in most views '
+                'collects the occluders\' / unlabelled pixels (05 1_0 orange #20: 3 visible vs 98 hidden views, unlabelled 183 vs fruit 73) and strict '
+                'seeding rules withhold its carriers. (A depth test at the centre pixel was tried first and rejected: it dropped the carriers in the '
+                'very views that show them.)')
 args = ap.parse_args()
+DPS = float(json.load(open(Path(args.config).parent / 'dataparser_transforms.json'))['scale'])   # world metres -> model units
 _, pipe, _, step = eval_setup(Path(args.config), test_mode='test'); model = pipe.model; model.eval(); model.step = step; dev = model.device
 tr = pipe.datamanager.train_dataset; idx = {Path(p).name: i for i, p in enumerate(tr.image_filenames)}
 g = model.gauss_params; N = g['means'].shape[0]
@@ -26,7 +36,7 @@ means, quats = g['means'].detach(), g['quats'].detach(); scales = torch.exp(g['s
 names = json.load(open(args.names_json))['train']
 print(f'[census] {Path(args.config).parent.parent.name}: {N} gaussians (step {step}); {len(tr)} training cameras; {len(names)} census views requested; '
       f'render scale {args.render_scale}; bg row {"on" if args.with_bg else "off"}', flush=True)
-rows, done, skipped, t0 = {}, 0, [], time.time()
+rows, rows2, done, skipped, t0 = {}, {}, 0, [], time.time(); vis_frac = []
 torch.set_grad_enabled(True)
 for name in names:
     sf = os.path.join(args.supervision_dir, name)
@@ -43,14 +53,32 @@ for name in names:
         skipped.append(name); continue
     lab = torch.from_numpy(a.astype(np.int64)).to(dev); onehot = torch.stack([(lab == u) for u in uids], -1).float()   # [h, w, C]
     col = torch.zeros(N, len(uids), device=dev, requires_grad=True)
-    out, _, _ = rasterization(means=means, quats=quats, scales=scales, opacities=opac, colors=col, viewmats=viewmat, Ks=K, width=Wr, height=Hr,
+    out, _, meta = rasterization(means=means, quats=quats, scales=scales, opacities=opac, colors=col, viewmats=viewmat, Ks=K, width=Wr, height=Hr,
                               sh_degree=None, packed=False, near_plane=0.01, far_plane=1e10, render_mode='RGB', rasterize_mode=model.config.rasterize_mode)
     gcol, = torch.autograd.grad((out[0] * onehot).sum(), col)
+    vis = None
+    if args.vis_weight:
+        with torch.no_grad():
+            m = gcol.sum(1)                                                     # the gaussian's total blend weight in this view (every px has a uid)
+            con = meta['conics'][0]; op = meta['opacities'][0] if meta.get('opacities') is not None else opac
+            det = (con[:, 0] * con[:, 2] - con[:, 1] ** 2).clamp(min=1e-12); foot = op * 2 * np.pi / det.sqrt()
+            rad = meta['radii'][0]; onscreen = (rad > 0) if rad.dim() == 1 else (rad > 0).any(-1)
+            vis = torch.where(onscreen & (foot > 1e-8), (m / foot).clamp(0, 1), torch.zeros_like(m))
+            c_ = m > 1e-6; vis_frac.append(float(vis[c_].median()) if c_.any() else float('nan'))
+    fv = None
+    if args.fruit_views_npz:
+        fcols = [k for k, u in enumerate(uids) if 10000 <= u < UNLAB]
+        fv = (gcol[:, fcols].sum(1) > 1e-6).float() if fcols else torch.zeros(N, device=dev)
     for k, u in enumerate(uids):
         r = rows.get(u)
         if r is None:
             r = rows[u] = torch.zeros(N, device=dev)
-        r += gcol[:, k]
+        r += gcol[:, k] if vis is None else gcol[:, k] * vis
+        if fv is not None:
+            r2 = rows2.get(u)
+            if r2 is None:
+                r2 = rows2[u] = torch.zeros(N, device=dev)
+            r2 += gcol[:, k] * fv
     done += 1
     if done % 50 == 0 or done == 1:
         print(f'[census] {done} views ({time.time() - t0:.0f}s), {len(rows)} labels so far', flush=True)
@@ -59,8 +87,12 @@ labels = sorted(rows)
 Wm = torch.stack([rows[u] for u in labels]).cpu().numpy().astype(np.float32)
 os.makedirs(os.path.dirname(os.path.abspath(args.out_npz)), exist_ok=True)
 np.savez_compressed(args.out_npz, W=Wm, labels=np.array(labels))
+if args.fruit_views_npz:
+    W2 = torch.stack([rows2.get(u, torch.zeros(N, device=dev)) for u in labels]).cpu().numpy().astype(np.float32); np.savez_compressed(args.fruit_views_npz, W=W2, labels=np.array(labels))
+    print(f'[census] fruit-views census W2 {W2.shape} -> {args.fruit_views_npz} (votes counted only in views where the gaussian touches a fruit mask)', flush=True)
 tot = Wm[[i for i, u in enumerate(labels) if u != UNLAB]].sum(0)
 stats = {'gaussians': int(N), 'views': done, 'skipped': len(skipped), 'skipped_first': skipped[:5], 'labels': len(labels), 'render_scale': args.render_scale,
-         'config': args.config, 'gaussians_with_label_weight': int((tot > 0).sum()), 'gaussians_label_weight_gt1': int((tot > 1.0).sum()), 'minutes': round((time.time() - t0) / 60, 2)}
+         'config': args.config, 'gaussians_with_label_weight': int((tot > 0).sum()), 'gaussians_label_weight_gt1': int((tot > 1.0).sum()), 'minutes': round((time.time() - t0) / 60, 2), 'vis_weight': bool(args.vis_weight),
+         'median_visibility_of_contributors': float(np.nanmedian(vis_frac)) if vis_frac else None}
 json.dump(stats, open(args.out_npz.replace('.npz', '.json'), 'w'), indent=1)
 print(f'[census] saved W {Wm.shape} -> {args.out_npz}; {json.dumps(stats)}', flush=True)
