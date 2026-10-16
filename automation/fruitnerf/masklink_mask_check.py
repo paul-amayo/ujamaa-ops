@@ -7,7 +7,7 @@ import json, sys
 from collections import defaultdict
 from pathlib import Path
 import numpy as np
-T = sys.argv[1]; tag = sys.argv[2] if len(sys.argv) > 2 else 'plain30k'; dtag = sys.argv[3] if len(sys.argv) > 3 else tag; S = Path(f'/home/paperspace/data/public/fruitnerf/high/{T}'); R = S / 'fruit_registry'
+T = sys.argv[1]; tag = sys.argv[2] if len(sys.argv) > 2 else 'plain30k'; dtag = sys.argv[3] if len(sys.argv) > 3 else tag; S = Path(T) if '/' in T else Path(f'/home/paperspace/data/public/fruitnerf/high/{T}'); T = S.name; R = S / 'fruit_registry'
 v = np.load(R / f'masklink_votes_{tag}.npz'); c = np.load(R / f'masklink_components_{dtag}.npz'); comp = c['comp']; apple = c['apple']; names = list(v['names'])
 sam = S / 'prod/bateleur/sam3_v2'
 if not sam.exists(): sam = S / 'sam3_v2'

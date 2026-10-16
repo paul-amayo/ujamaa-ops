@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 from pycocotools import mask as mask_utils
-T = sys.argv[1]; S = Path(f'/home/paperspace/data/public/fruitnerf/high/{T}'); out = S / 'fruit_masks'; out.mkdir(exist_ok=True)
+T = sys.argv[1]; S = Path(T) if '/' in T else Path(f'/home/paperspace/data/public/fruitnerf/high/{T}'); T = S.name; out = S / 'fruit_masks'; out.mkdir(exist_ok=True)   # a path argument = any survey (Fuji-SfM, 10-16)
 sam = S / 'prod/bateleur/sam3_v2'
 if not sam.exists(): sam = S / 'sam3_v2'
 tj = json.loads((S / 'transforms.json').read_text()); W, H = tj['w'], tj['h']; n = 0; fr = []

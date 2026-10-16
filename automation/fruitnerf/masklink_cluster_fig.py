@@ -10,7 +10,7 @@ from PIL import Image
 from pycocotools import mask as mask_utils
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 T = sys.argv[1]; tag = sys.argv[2] if len(sys.argv) > 2 else 'plain30k'; dtag = sys.argv[3] if len(sys.argv) > 3 else tag; arg4 = sys.argv[4] if len(sys.argv) > 4 else '0'; fixed_view = int(arg4[5:]) if arg4.startswith('view:') else None; rank = 0 if fixed_view is not None else int(arg4)
-S = Path(f'/home/paperspace/data/public/fruitnerf/high/{T}'); R = S / 'fruit_registry'; v = np.load(R / f'masklink_votes_{tag}.npz'); c = np.load(R / f'masklink_components_{dtag}.npz')
+S = Path(T) if '/' in T else Path(f'/home/paperspace/data/public/fruitnerf/high/{T}'); T = S.name; R = S / 'fruit_registry'; v = np.load(R / f'masklink_votes_{tag}.npz'); c = np.load(R / f'masklink_components_{dtag}.npz')
 comp, apple, names = c['comp'], c['apple'], list(v['names']); vi, lab, row, uv = v['vi'].astype(np.int64), v['lab'].astype(np.int64), v['row'].astype(np.int64), v['uv']
 cv = comp[row]; size = np.bincount(comp)
 # clusters: per component, median over views of the number of distinct masks its visible members hit

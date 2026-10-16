@@ -2,7 +2,7 @@
 # fruitnerf_splat.sh <tree_0X> — splat per FruitNeRF tree for the splat-based fruit registry: v3 recipe (splatfacto + bilateral grid, cull alpha
 # 0.005, 30k) on the undistorted 1620x1080 working set with FruitNeRF's poses, ALL frames in training (eval-mode all), init = the DA3 fused cloud
 # (same frame as the poses) subsampled to 500k points.
-set -uo pipefail; T=${1:?}; S=/home/paperspace/data/public/fruitnerf/high/$T; NS=/home/paperspace/code/nerf_new; L=/home/paperspace/logs/fruitnerf_${T}_splat.log
+set -uo pipefail; T=${1:?}; case $T in */*) S=$T; T=$(basename $S);; *) S=/home/paperspace/data/public/fruitnerf/high/$T;; esac; NS=/home/paperspace/code/nerf_new; L=/home/paperspace/logs/fruitnerf_${T}_splat.log   # a path argument = any survey (Fuji-SfM, 10-16)
 python3 - "$S" <<'PY'
 import sys, json, numpy as np
 from pathlib import Path

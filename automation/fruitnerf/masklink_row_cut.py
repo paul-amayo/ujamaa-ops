@@ -8,7 +8,7 @@ the ring and between the cuts. GT-blind: nothing here reads the hand count. Para
 import json, sys
 from pathlib import Path
 import numpy as np
-T = sys.argv[1]; tag = sys.argv[2] if len(sys.argv) > 2 else 'plain30k'; PEAK = float(sys.argv[3]) if len(sys.argv) > 3 else 0.25; R = Path(f'/home/paperspace/data/public/fruitnerf/high/{T}/fruit_registry')
+T = sys.argv[1]; tag = sys.argv[2] if len(sys.argv) > 2 else 'plain30k'; PEAK = float(sys.argv[3]) if len(sys.argv) > 3 else 0.25; R = (Path(T) if '/' in T else Path(f'/home/paperspace/data/public/fruitnerf/high/{T}')) / 'fruit_registry'; T = R.parent.name
 d = np.load(R / f'masklink_components_{tag}.npz'); cen, nv, LOOK, UP, cam_r, mv = d['centroid'], d['nviews'], d['LOOK'], d['UP'], float(d['cam_r']), int(d['min_views'])
 e1 = np.cross(UP, [1, 0, 0]); e1 /= np.linalg.norm(e1); e2 = np.cross(UP, e1); X = np.stack([(cen - LOOK) @ e1, (cen - LOOK) @ e2], 1) / cam_r
 cand = d['apple'] if 'apple' in d.files else (nv >= mv); ring = cand & (np.linalg.norm(X, axis=1) <= 1.0); Xr = X[ring]   # the dump's apple flag carries the ring, min views and (--no-ground) the windfall exclusion

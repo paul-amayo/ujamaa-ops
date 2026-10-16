@@ -191,7 +191,7 @@ def count(link_views, min_views, crop, conflict=True, dump=False):
         pair = gk.astype(np.int64) * k + cm_; pv, pc_ = np.unique(pair, return_counts=True); gtot = np.bincount(gk); g_ = pv // k; c_ = pv % k; dom_ = pc_ >= 0.5 * gtot[g_]
         view_of_group = np.zeros(gk.max() + 1, np.int64); view_of_group[gk] = vi; dv = np.unique(np.stack([c_[dom_], view_of_group[g_[dom_]]], 1), axis=0); nviews = np.bincount(dv[:, 0], minlength=k)
     cen = (Cm @ P) / size[:, None]; ext = np.sqrt(np.bincount(comp, weights=((P - cen[comp]) ** 2).sum(1), minlength=k) / size)
-    inside = hd(cen) <= crop * cam_r; apple = inside & (nviews >= min_views)
+    inside = (hd(cen) <= crop * cam_r) if crop > 0 else np.ones(k, bool); apple = inside & (nviews >= min_views)   # crop 0 = no crop (Fuji-SfM: a row walk has no ring; the evaluator applies the GT region)
     if a.no_ground and apple.any():   # ground layer: the lowest mode of the counted apples' heights and the first empty bin above it
         hh = (cen - LOOK) @ UP / cam_r; hv = hh[apple]; edges = np.arange(np.floor(hv.min() / 0.025) * 0.025, hv.max() + 0.025, 0.025); hist = np.histogram(hv, bins=edges)[0]
         top = int(np.argmax(hist[: max(1, len(hist) // 3)])); empty = np.where(hist[top:] == 0)[0]; floor = edges[top + int(empty[0])] if len(empty) else hv.min()
