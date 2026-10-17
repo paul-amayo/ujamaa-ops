@@ -61,8 +61,11 @@ ours_total = sum(r[4] for r in rows); print(f"[trees] ({a.out_tag}{', posts kept
 json.dump({'trunks_along': TR.tolist(), 'rows': [dict(zip(('tree', 'gt', 'trunk', 'gt_median', 'ours', 'tp', 'p', 'r', 'f1'), map(lambda v: v.item() if hasattr(v, 'item') else v, r))) for r in rows], 'right_tree': [n_right, n_matched]}, open(JS, 'w'), indent=1)
 try:
     import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(2, 1, figsize=(16, 8), sharex=True); cols = plt.cm.tab20(np.arange(len(TR)) % 20)
-    ax[0].scatter(Prf[:, 0], Prf[:, 2], s=6, c=cols[assign]); [ax[0].axvline(p, color='k', lw=0.8) for p in TR]; ax[0].set_ylabel('z [m]'); ax[0].set_title('our merged apples coloured by assigned trunk (black lines = trunks)')
-    ax[1].scatter(GTrf[:, 0], GTrf[:, 2], s=6, c=[plt.cm.tab20(trees.index(t_) % 20) for t_ in GT_tree]); [ax[1].axvline(m_, color='0.5', lw=0.8, ls='--') for m_ in gmed]; ax[1].set_ylabel('z [m]'); ax[1].set_xlabel('along the row [m]'); ax[1].set_title('GT apples coloured by GT tree (dashed = tree medians)')
-    fig.tight_layout(); fig.savefig(FIG, dpi=90); print('[trees] figure', FIG)
+    fig, ax = plt.subplots(2, 1, figsize=(7.2, 3.1), sharex=True); cols = plt.cm.tab20(np.arange(len(TR)) % 20)   # print size: a two-column figure, 7-8 pt text
+    ax[0].scatter(Prf[:, 0], Prf[:, 2], s=2.5, c=cols[assign], linewidths=0); [ax[0].axvline(p, color='k', lw=0.7) for p in TR]; ax[0].set_ylabel('height [m]', fontsize=8)
+    ax[0].text(0.004, 0.96, 'ours: apples coloured by the trunk anchor they are assigned to (black lines: the anchors)', fontsize=7.5, transform=ax[0].transAxes, va='top')
+    ax[1].scatter(GTrf[:, 0], GTrf[:, 2], s=2.5, c=[plt.cm.tab20(trees.index(t_) % 20) for t_ in GT_tree], linewidths=0); [ax[1].axvline(m_, color='0.5', lw=0.7, ls='--') for m_ in gmed]; ax[1].set_ylabel('height [m]', fontsize=8); ax[1].set_xlabel('along the row [m]', fontsize=8)
+    ax[1].text(0.004, 0.96, 'ground truth: apples coloured by their tree (dashed lines: the tree medians)', fontsize=7.5, transform=ax[1].transAxes, va='top')
+    for a_ in ax: a_.tick_params(labelsize=7); a_.spines['top'].set_visible(False); a_.spines['right'].set_visible(False)
+    fig.tight_layout(h_pad=0.4); fig.savefig(FIG, dpi=200); print('[trees] figure', FIG)
 except Exception as ex: print('[trees] figure skipped:', ex)

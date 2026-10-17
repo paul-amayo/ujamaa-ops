@@ -9,7 +9,9 @@ import argparse, json, os
 import numpy as np
 ap = argparse.ArgumentParser(); ap.add_argument('--inventory', default='/home/paperspace/logs/identity_inventory.jsonl'); ap.add_argument('--tag', default='v3')
 ap.add_argument('--md', default=''); ap.add_argument('--json', default=''); ap.add_argument('--surveys', default='')
-ap.add_argument('--compare', default='', help='comma-separated tags (ablation arms) to put side by side on the heads they all scored, e.g. v3,hyper_own,flat96,euclid'); a = ap.parse_args()
+ap.add_argument('--compare', default='', help='comma-separated tags (ablation arms) to put side by side on the heads they all scored, e.g. v3,hyper_own,flat96,euclid')
+ap.add_argument('--min-frac', type=float, default=0.0, help='minimum supervised area of a head as a fraction of the frame (10-17: 0.002 = the paper protocol; heads below it are projected scene-graph instances of 1-460 px that no annotator would draw, 4,400 of the 5,395 Klapmuts Dec tree heads); dropped heads are counted per survey x level as excluded')
+a = ap.parse_args()
 THR = np.concatenate([np.linspace(0.4, 0.95, 45), np.linspace(0.955, 0.999, 12)]); STRATA = ((0.03, 1.01, '>=3%'), (0.01, 0.03, '1-3%'), (0.002, 0.01, '0.2-1%'), (0, 0.002, '<0.2%'))
 cells = [json.loads(l) for l in open(a.inventory)]; heads, frames = [], []
 for c in cells:
@@ -17,12 +19,17 @@ for c in cells:
     if not os.path.exists(p): continue
     for r in map(json.loads, open(p)):
         r['survey'] = c['survey']; r['cell'] = c['identity']; (frames if r['kind'] == 'FRAME' else heads).append(r)
+excluded = {}
+if a.min_frac > 0:
+    for h in heads:
+        if h['gt_frac'] < a.min_frac: excluded[(h['survey'], h['kind'], h['split'])] = excluded.get((h['survey'], h['kind'], h['split']), 0) + 1
+    heads = [h for h in heads if h['gt_frac'] >= a.min_frac]
 surveys = [s for s in dict.fromkeys(c['survey'] for c in cells) if any(h['survey'] == s for h in heads)]
 if a.surveys: surveys = [s for s in surveys if s in a.surveys.split(',')]
 med = lambda v: float(np.median(v)) if len(v) else float('nan'); mean = lambda v: float(np.mean(v)) if len(v) else float('nan')
 def fit(hs):   # threshold index maximising the mean argmax+threshold IoU over a set of census heads
     return int(np.argmax(np.mean([h['curve_argmax_thr'] for h in hs], 0))) if hs else None
-thr_s = {}; out = {'tag': a.tag, 'cells': sum(1 for c in cells if os.path.exists(f"{c['identity']}/protocol_{a.tag}.jsonl")), 'surveys': {}, 'transfer': {}}
+thr_s = {}; out = {'tag': a.tag, 'min_frac': a.min_frac, 'cells': sum(1 for c in cells if os.path.exists(f"{c['identity']}/protocol_{a.tag}.jsonl")), 'heads': len(heads), 'surveys': {}, 'transfer': {}}
 rows = []
 for s in surveys:
     H = [h for h in heads if h['survey'] == s]; F = [f for f in frames if f['survey'] == s]; out['surveys'][s] = {'cells': len({h['cell'] for h in H}), 'frames': len(F),
@@ -42,6 +49,7 @@ for s in surveys:
             d[name] = {'n': len(hs), 'oracle_med': med([h['oracle']['iou'] for h in hs]), 'oracle_mean': mean([h['oracle']['iou'] for h in hs]),
                        'argmax_med': med([h['argmax']['iou'] for h in hs]), 'argmax_mean': mean([h['argmax']['iou'] for h in hs]),
                        'argmax_prec_med': med([h['argmax']['prec'] for h in hs]), 'argmax_rec_med': med([h['argmax']['rec'] for h in hs])}
+        d['eval']['excluded'] = excluded.get((s, kind, 'eval'), 0); d['train']['excluded'] = excluded.get((s, kind, 'train'), 0)
         d['eval'].update({'fixed_cell_med': med(fixed_cell), 'fixed_cell_mean': mean(fixed_cell), 'fixed_survey_med': med(fixed_s), 'fixed_survey_mean': mean(fixed_s),
                           'thr_survey': float(THR[i_s]) if i_s is not None else None,
                           'strata': {lab: {'n': len(v), 'argmax_med': med([h['argmax']['iou'] for h in v]), 'oracle_med': med([h['oracle']['iou'] for h in v])}
@@ -52,7 +60,7 @@ for s in surveys:   # cross-survey transfer of the TREE threshold
     for t in surveys:
         i = thr_s.get((s, 'TREE')); ev = [h for h in heads if h['survey'] == t and h['kind'] == 'TREE' and h['split'] == 'eval']
         if i is not None and ev: out['transfer'].setdefault(s, {})[t] = med([h['curve_argmax_thr'][i] for h in ev])
-L = [f"# E1 protocol table ({a.tag}) — {out['cells']} cells, {len(heads)} heads, {len(frames)} frames", '',
+L = [f"# E1 protocol table ({a.tag}) — {out['cells']} cells, {len(heads)} heads (min head area {a.min_frac:g} of the frame; excluded: {sum(excluded.values())}), {len(frames)} frames", '',
      '| survey | level | census n | oracle | argmax | held-out n | oracle | argmax (prec / rec) | fixed cell | fixed survey (thr) | >=3% n: argmax | 1-3% | 0.2-1% | <0.2% |', '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|']
 for s, kind, d in rows:
     e, t = d['eval'], d['train']; st = e['strata']
@@ -79,6 +87,7 @@ if a.compare:   # ablation arms side by side: held-out argmax IoU medians per su
         for kind in ('TREE', 'ROW', 'FRUIT') + tuple(f'CAT:{w}' for w in cat_words) + ('FRAME',):
             if kind.startswith('CAT:'): rows_ = [v for k, v in byk.items() if k[0] == s_ and k[3] == 'CAT' and k[5] == kind[4:] and all(t in v for t in tags) and v[tags[0]]['split'] == 'eval']
             else: rows_ = [v for k, v in byk.items() if k[0] == s_ and k[3] == kind and all(t in v for t in tags) and (kind == 'FRAME' or v[tags[0]]['split'] == 'eval')]
+            if kind != 'FRAME': rows_ = [v for v in rows_ if v[tags[0]].get('gt_frac', 1.0) >= a.min_frac]
             if not rows_: continue
             if kind == 'FRAME':
                 vals = {t: mean([v[t]['nesting'] for v in rows_ if v[t]['nesting'] == v[t]['nesting']]) for t in tags}; L.append(f"| {s_} | nesting | {len(rows_)} | " + ' | '.join(f"{vals[t]:.3f}" for t in tags) + ' |')
@@ -89,7 +98,7 @@ if a.compare:   # ablation arms side by side: held-out argmax IoU medians per su
                 row = {'survey': s_, 'level': kind, 'n': len(rows_), 'values': vals, 'near_n': len(near), 'near_values': {t: med([v[t]['argmax']['iou'] for v in near]) for t in tags}}
                 if kind.startswith('CAT:'): row['oracle_values'] = {t: med([v[t]['oracle']['iou'] for v in rows_]) for t in tags}; row['rel05_values'] = {t: med([v[t]['rel05']['iou'] for v in rows_ if 'rel05' in v[t]]) for t in tags}
                 out['arms']['rows'].append(row)
-        ru = [v for k, v in byk.items() if k[0] == s_ and k[3] == 'ROW' and all(t in v for t in tags) and v[tags[0]]['split'] == 'eval' and all('argmax_union' in v[t] for t in tags)]
+        ru = [v for k, v in byk.items() if k[0] == s_ and k[3] == 'ROW' and all(t in v for t in tags) and v[tags[0]]['split'] == 'eval' and all('argmax_union' in v[t] for t in tags) and v[tags[0]].get('gt_frac', 1.0) >= a.min_frac]
         if ru:
             vals = {t: med([v[t]['argmax_union']['iou'] for v in ru]) for t in tags}; L.append(f"| {s_} | ROW (union of member trees) | {len(ru)} | " + ' | '.join(f"{vals[t]:.3f}" for t in tags) + ' |')
             out['arms']['rows'].append({'survey': s_, 'level': 'ROW_union', 'n': len(ru), 'values': vals})

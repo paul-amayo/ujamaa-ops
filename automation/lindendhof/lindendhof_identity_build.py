@@ -19,6 +19,11 @@ sys.path.insert(0, '/home/paperspace/code/aru_sil_core/src/interfaces/rerun/HiGH
 S, ID = Path(sys.argv[1]), Path(sys.argv[2]); LANES = [int(x) for x in (sys.argv[3] if len(sys.argv) > 3 else '1,2,3,4,5').split(',')]
 import os; ROW_HALF, TREE_HALF, ZLO, ZHI = (float(os.environ.get(k, d)) for k, d in (('ROW_HALF', '1.2'), ('TREE_HALF', '1.0'), ('CZLO', '0.5'), ('CZHI', '4.0'))) ; UNLAB = 65535   # env for other sites (Dec: bushes 0.25-2.0 m, rows 0.6, bags 0.6)
 WSMAP = dict(kv.split(':') for kv in os.environ.get('WSMAP', '').split(',') if kv); MASKS = os.environ.get('MASKS', 'trunk_masks')
+MODE = os.environ.get('MODE', 'canopy')   # 'masks_only' (2026-10-17, Paul: "start with masks only"): the reference is the SAM3 masks alone, each labelled with the anchor the
+# census assigned it or, failing that, the majority anchor of its pixels snapped through the depth (row within ROW_HALF, tree within TREE_HALF along the row, no
+# height band; >= 30 % of the mask with a snapped anchor and the majority >= 50 % of those); nothing outside a mask is labelled.
+# 'masks_canopy' (Paul: "now add the plants above the grow bags"): the masks as in masks_only, plus the canopy pixels (CZLO..CZHI above ground, the depth rule)
+# whose snapped anchor owns a labelled mask in the same frame — the plant above each labelled bag; anchors without a mask in the frame get no canopy pixels
 cen = json.load(open(ID / 'tree_census.json')); ax = np.array(cen['row_axis'], np.float64); perp = np.array([-ax[1], ax[0]])
 trees = cen['trees']; rows = cen['rows']
 H = {'objects': [{'id': t['id'], 'name': f"Object Object({t['id']})", 'row_id': t['row_id'], 'super_row_id': -1, 'section_id': -1, 'xyz': t['xyz']} for t in trees],
@@ -53,7 +58,7 @@ for n in LANES:
     cams = {}
     for ds in (pipe.datamanager.train_dataset, pipe.datamanager.eval_dataset):
         for i, p in enumerate(ds.image_filenames): cams[Path(p).name] = (ds, i)
-    split = json.load(open(S / f'experimental/v3/{wsn}/split.json')); present = set(); done = []
+    split = json.load(open(S / f'experimental/v3/{wsn}/split.json')); present = set(); done = []; mstats = {}
     for jf in sorted((ID / f'{MASKS}/{lane}').glob('f_*.json')):
         fname = jf.name.replace('.json', '.png')
         if fname not in cams: continue
@@ -64,7 +69,7 @@ for n in LANES:
         pc = np.stack([(uu.reshape(-1) - cx) / fx * z, -(vv.reshape(-1) - cy) / fy * z, -z], 1); pw = ((pc @ c2w[:3, :3].T + c2w[:3, 3]) / s - tT) @ RT
         gij = np.clip(np.floor((pw[:, :2] - g0) / 0.5).astype(int), 0, shape - 1); hgt = pw[:, 2] - grid[gij[:, 0], gij[:, 1]]
         cc, aa = pw[:, :2] @ perp, pw[:, :2] @ ax; lab = np.full(Hh * Ww, UNLAB, np.uint16)
-        canopy = np.isfinite(z) & (z > 0) & (hgt > ZLO) & (hgt < ZHI)
+        band = (hgt > ZLO) & (hgt < ZHI); canopy = np.isfinite(z) & (z > 0) & (band if MODE == 'canopy' else True)
         dr = np.abs(cc[:, None] - row_off[None, :]); ri = dr.argmin(1); inrow = canopy & (dr[np.arange(len(ri)), ri] < ROW_HALF)
         for r in rows:
             sel = np.flatnonzero(inrow & (ri == rows.index(r)))
@@ -73,18 +78,34 @@ for n in LANES:
             k = np.clip(np.searchsorted(al, aa[sel]), 1, len(al) - 1); k = np.where(np.abs(aa[sel] - al[k - 1]) <= np.abs(aa[sel] - al[k]), k - 1, k)
             ok = np.abs(aa[sel] - al[k]) < TREE_HALF; lab[sel[ok]] = ids[k[ok]]
         lab = lab.reshape(Hh, Ww); tm = np.array(Image.open(jf.with_suffix('.png')))
-        for it in json.load(open(jf)):
-            t = assigned.get((lane, fname, it['idx']))
-            if t is not None: lab[tm == it['idx']] = t
+        if MODE in ('masks_only', 'masks_canopy'):
+            pix = lab; lab = np.full((Hh, Ww), UNLAB, np.uint16); owned = set()
+            for it in json.load(open(jf)):
+                m = tm == it['idx']; t = assigned.get((lane, fname, it['idx'])); how = 'census'
+                if t is None or t < 0:
+                    v = pix[m]; v = v[v != UNLAB]; t = None; how = 'unassigned'
+                    if len(v) >= max(20, 0.3 * m.sum()):
+                        u_, c_ = np.unique(v, return_counts=True); j = int(c_.argmax())
+                        if c_[j] >= 0.5 * len(v): t = int(u_[j]); how = 'depth'
+                if t is not None and t >= 0: lab[m] = t; owned.add(int(t))
+                mstats[how] = mstats.get(how, 0) + 1
+            if MODE == 'masks_canopy' and owned:   # the plant above each labelled bag: canopy-band pixels snapped to an anchor that owns a mask in this frame
+                fill = band.reshape(Hh, Ww) & np.isin(pix, list(owned)) & (lab == UNLAB); lab[fill] = pix[fill]; mstats['plant_px'] = mstats.get('plant_px', 0) + int(fill.sum()); mstats['mask_px'] = mstats.get('mask_px', 0) + int((tm > 0).sum())
+        else:
+            for it in json.load(open(jf)):
+                t = assigned.get((lane, fname, it['idx']))
+                if t is not None: lab[tm == it['idx']] = t
         Image.fromarray(lab, mode='I;16').save(SUP / fname); present |= set(np.unique(lab).tolist()); done.append(fname)
     present.discard(UNLAB)
     man = {'schema': 'supervision_manifest/v1', 'created': datetime.datetime.now().isoformat(timespec='seconds'), 'unlabelled_value': UNLAB, 'fruit_id_base': 10000,
-           'filter_spec': {'name': 'lindendhof_trunk_canopy_v1', 'rule': f'canopy {ZLO}-{ZHI} m above ground within {ROW_HALF} m of a row -> nearest tree along the row (< {TREE_HALF} m); census-assigned SAM3 trunk masks override'},
+           'filter_spec': ({'name': 'lindendhof_trunk_canopy_v1', 'rule': f'canopy {ZLO}-{ZHI} m above ground within {ROW_HALF} m of a row -> nearest tree along the row (< {TREE_HALF} m); census-assigned SAM3 trunk masks override'} if MODE == 'canopy' else
+                           {'name': 'anchor_masks_only_v1', 'rule': f'SAM3 masks only: the anchor the census assigned the mask, else the majority anchor of its pixels snapped through the v3 depth (row within {ROW_HALF} m, tree within {TREE_HALF} m along the row, no height band; >= 30 % of the mask snapped, majority >= 50 %); nothing outside a mask is labelled', 'masks': mstats} if MODE == 'masks_only' else
+                           {'name': 'anchor_masks_canopy_v1', 'rule': f'SAM3 masks as anchor_masks_only_v1, plus the plant above each labelled mask: pixels {ZLO}-{ZHI} m above ground within {ROW_HALF} m of a row whose nearest anchor along the row (< {TREE_HALF} m) owns a labelled mask in the frame', 'masks': mstats}),
            'word_table': {str(k): get_word_for_id(int(k), 'mask') for k in sorted(present)}, 'level_table': {str(k): 'tree' for k in sorted(present)},
            'tree_source': {'census': str(ID / 'tree_census.json'), 'depth': f'v3 {cfg}', 'trunk_masks': str(ID / f'{MASKS}/{lane}')},
            'hierarchy': {'path': str(ID / 'marker_hierarchy.json')}, 'counts': {'frames': len(done)}}
     json.dump(man, open(SUP / 'manifest.json', 'w'), indent=1)
     have = set(done); json.dump({'source': f'{lane} v3 workspace split x frames with maps', 'train': [f for f in split['train'] if f in have], 'eval': [f for f in split['test'] if f in have]}, open(OUT / 'split_names.json', 'w'), indent=0)
-    print(f'[build] {lane}: {len(done)} maps ({sum(1 for f in split["train"] if f in have)} census / {sum(1 for f in split["test"] if f in have)} held-out), {len(present)} tree ids present', flush=True)
+    print(f'[build] {lane}: {len(done)} maps ({sum(1 for f in split["train"] if f in have)} census / {sum(1 for f in split["test"] if f in have)} held-out), {len(present)} tree ids present' + (f', masks {mstats}' if MODE != 'canopy' else ''), flush=True)
     del pipe, model; torch.cuda.empty_cache()
 print(f"[build] hierarchy: {len(trees)} trees, {len(rows)} rows -> {ID / 'marker_hierarchy.json'}")
