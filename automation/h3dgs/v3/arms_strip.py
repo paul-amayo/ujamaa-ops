@@ -26,23 +26,23 @@ def strip(panels, out, title_fmt):
     fig.subplots_adjust(0.003, 0.004, 0.997, 0.996, 0.012, 0)
     for ax, (label, pred, truth) in zip(np.atleast_1d(axes), panels):
         img, iou = paint(pred, truth); ax.imshow(img); ax.axis('off')
-        ax.text(0.02, 0.95, label, fontsize=6, color='white', va='top', ha='left', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.55, pad=1.2, lw=0))
-        ax.text(0.98, 0.05, f'IoU {iou:.2f}', fontsize=6, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.55, pad=1.2, lw=0)); print(f'[strip] {out.name} {label}: IoU {iou:.3f}')
+        ax.text(0.02, 0.95, label, fontsize=5.5, color='white', va='top', ha='left', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.55, pad=1.2, lw=0))
+        ax.text(0.98, 0.05, f'IoU {iou:.2f}', fontsize=5.5, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.55, pad=1.2, lw=0)); print(f'[strip] {out.name} {label}: IoU {iou:.3f}')
     fig.savefig(out, dpi=220); plt.close(fig); print('[strip] wrote', out)
 if a.e2:
     truth = np.isin(ids, [t for t, r in row_of.items() if r == a.row]); panels = []
     for item in a.e2.split(','):
-        name, arm = item.split('='); d = np.load(N / 'dumps' / arm / f'{stem}.npz'); panels.append((f'{name}: "row {a.row}"', (d['row'] == a.row) & d['live'], truth))
+        name, arm = item.split('='); d = np.load(N / 'dumps' / arm / f'{stem}.npz'); panels.append((name, (d['row'] == a.row) & d['live'], truth))
     strip(panels, FIG / 'fig_e2_strip.png', '')
 if a.e2b:
     truth = ids == a.tree; panels = []
     for item in a.e2b.split(','):
-        name, arm = item.split('='); d = np.load(N / 'dumps' / arm / f'{stem}.npz'); panels.append((f'{name}: "tree {a.tree}"', (d['tree'] == a.tree) & d['live'], truth))
+        name, arm = item.split('='); d = np.load(N / 'dumps' / arm / f'{stem}.npz'); panels.append((name, (d['tree'] == a.tree) & d['live'], truth))
     strip(panels, FIG / 'fig_e2b_strip.png', '')
 if a.e3:
     truth = (ids != 65535) & (ids < 10000); panels = []
     for item in a.e3.split(','):
-        name, arm = item.split('='); d = np.load(N / 'dumps' / arm / f'{stem}.npz'); j = list(d['words']).index('tree'); panels.append((f'{name}: "tree"', (d['S'][..., j] >= 0.5) & d['live'], truth))
+        name, arm = item.split('='); d = np.load(N / 'dumps' / arm / f'{stem}.npz'); j = list(d['words']).index('tree'); panels.append((name, (d['S'][..., j] >= 0.5) & d['live'], truth))
     if a.e3_lite:
-        z = np.load(a.e3_lite, allow_pickle=True); panels.append(('LangSplat-style: "tree"', (z['tree'] >= 0.5) & ~z['void'].astype(bool), truth))
+        z = np.load(a.e3_lite, allow_pickle=True); panels.append(('LangSplat-style', (z['tree'] >= 0.5) & ~z['void'].astype(bool), truth))
     strip(panels, FIG / 'fig_e3_strip.png', '')
