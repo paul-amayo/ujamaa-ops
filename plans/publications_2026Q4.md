@@ -35,7 +35,7 @@ only as a system component, never with new ablations of the embedding.
 
 | Week of | HiGH (RA-L) | JIRS 4D twin | Release report |
 |---|---|---|---|
-| 19 Oct | close open items: scene-graph figure (placeholder names Paul — anonymity), Acknowledgement withheld, last `\todo`, 19 unsourced numbers, reference fixes (types, published versions, DOIs) | read the collection; decide title + contribution list | — |
+| 19 Oct | remaining after re-check: the scene-graph figure (still a placeholder box), four head counts (1,444 / 5,893 / 1,557 / 1,317) to add to `numbers/`, `% num-ok` on three design constants (512/256 layer widths, 1,024-word vocabulary), reference metadata fixes (entry types, published versions, DOIs). Acknowledgement and `\todo` were false alarms of the new checks (fixed) | read the collection; decide title + contribution list | — |
 | 26 Oct | Paul's claim-by-claim pass; co-author list and order; LLM disclosure wording | outline (sn-jnl skeleton in its own Overleaf repo); list the measurements the paper needs that do not exist | — |
 | 2 Nov | co-author read; final build, anon check, arXiv decision (post at submission or after) | gap experiments planned and queued on the A100 (see below) | — |
 | 9 Nov | **submit Fri 13 Nov** via PaperPlaza | gap experiments run; numbers files | outline from the release README |
