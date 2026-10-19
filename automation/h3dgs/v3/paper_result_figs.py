@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """paper_result_figs.py (2026-10-17) — the HiGH paper's result figures from numbers/*.json: fig_iou_by_size.pdf (E1 strata), fig_arms.pdf (E2
-geometry arms), fig_seeding.pdf (E2b seeding arms), fig_e1_survey.pdf (Table I per survey), fig_e3.pdf (E3 category bars), fig_fruit.pdf (counts and per-apple scores). Fonts sized for the printed column (9 pt body): 8-9 pt in a 3.5-in figure.
+geometry arms), fig_seeding.pdf (E2b seeding arms), fig_e1_survey.pdf (Table I per survey), fig_e3.pdf (E3 category bars), fig_fruit.pdf (counts and per-apple scores), fig_cost.pdf (storage per cell, serving fps and query latency from numbers/e5_cost.json). Fonts sized for the printed column (9 pt body): 8-9 pt in a 3.5-in figure.
 system python3:  paper_result_figs.py <paper dir>"""
 import json, sys
 from pathlib import Path
@@ -32,10 +32,10 @@ axes[0].set_ylabel('median'); fig.legend(*axes[0].get_legend_handles_labels(), f
 fig.tight_layout(rect=(0, 0.09, 1, 1)); fig.savefig(F / 'fig_arms.pdf'); print('fig_arms')
 # E2b: the seeding arms
 fig, axes = plt.subplots(1, 2, figsize=(3.5, 2.7), sharey=True); arms = ['v3', 'zero3000', 'refine3000', 'projvote']; names = ['census seed', 'learned from zero', 'seed + refine', 'projection vote']
-rows = {(r['survey'], r['level']): r for r in e2b['arms']['rows']}
+rows = {(r['survey'], r['level']): r for r in e2b['arms']['rows']}; SV7 = CIT + ['apr_2026_zed', 'nov_2025_a300']; XT7 = ['01', '02', '03', '04', '05', 'K.Apr', 'Lind.']
 for ax, lvl, title in zip(axes, ['TREE', 'ROW'], ['trees', 'rows by address']):
-    for i, a_ in enumerate(arms): ax.bar(np.arange(5) + (i - 1.5) * 0.2, [rows[(sv, lvl)]['values'].get(a_, np.nan) for sv in CIT], 0.2, color=COLS[i], label=names[i])
-    ax.set_xticks(np.arange(5)); ax.set_xticklabels(XT, fontsize=8); ax.set_title(title, fontsize=9); ax.set_ylim(0, 1); ax.set_xlabel('citrus survey', fontsize=8)
+    for i, a_ in enumerate(arms): ax.bar(np.arange(len(SV7)) + (i - 1.5) * 0.2, [rows[(sv, lvl)]['values'].get(a_, np.nan) for sv in SV7], 0.2, color=COLS[i], label=names[i])
+    ax.set_xticks(np.arange(len(SV7))); ax.set_xticklabels(XT7, fontsize=6.5, rotation=45, ha='right'); ax.set_title(title, fontsize=9); ax.set_ylim(0, 1); ax.set_xlabel('survey', fontsize=8)
 axes[0].set_ylabel('held-out IoU (median)', fontsize=8); fig.legend(*axes[0].get_legend_handles_labels(), fontsize=7, ncol=2, frameon=False, loc='lower center', bbox_to_anchor=(0.5, 0.0))
 fig.tight_layout(rect=(0, 0.15, 1, 1)); fig.savefig(F / 'fig_seeding.pdf'); print('fig_seeding')
 
@@ -57,14 +57,28 @@ ax.set_ylim(0, 1.18); ax.legend(fontsize=6.5, frameon=False, loc='upper center',
 # fruit: FruitNeRF counts per tree and Fuji per-apple scores against the references
 fr = json.load(open(N / 'fruit_registry.json')); fn = fr['fruitnerf']; fj = fr['fuji_sfm']
 fig, axes = plt.subplots(1, 2, figsize=(3.5, 2.1), gridspec_kw={'width_ratios': [1.25, 1]})
-ax = axes[0]; trees = ['tree_01', 'tree_02', 'tree_03']; series = [('hand count', [fn['hand_counts'][t] for t in trees], '0.3'), ('ours', [fn['ours_record'][t] for t in trees], COLS[0]), ('FruitLangGS', [fn['literature']['FruitLangGS'][t] for t in trees], COLS[2]), ('FruitNeRF', [fn['literature']['FruitNeRF_best_per_tree'][t] for t in trees], COLS[3])]
+ax = axes[0]; trees = ['tree_01', 'tree_02', 'tree_03']; series = [('hand', [fn['hand_counts'][t] for t in trees], '0.3'), ('ours', [fn['ours_record'][t] for t in trees], COLS[0]), ('FLGS', [fn['literature']['FruitLangGS'][t] for t in trees], COLS[2]), ('FNeRF', [fn['literature']['FruitNeRF_best_per_tree'][t] for t in trees], COLS[3])]
 for i, (nm, v, c) in enumerate(series): ax.bar(np.arange(3) + (i - 1.5) * 0.2, v, 0.2, color=c, label=nm)
-ax.set_xticks(np.arange(3)); ax.set_xticklabels(['tree 01', 'tree 02', 'tree 03'], fontsize=7); ax.set_ylabel('apples counted', fontsize=8); ax.set_ylim(0, 360); ax.legend(fontsize=5.5, frameon=False, loc='upper left', ncol=2); ax.set_title('FruitNeRF trees', fontsize=8)
+ax.set_xticks(np.arange(3)); ax.set_xticklabels(['01', '02', '03'], fontsize=7); ax.set_xlabel('FruitNeRF tree', fontsize=7); ax.set_ylabel('apples counted', fontsize=8); ax.set_ylim(0, 380); ax.legend(fontsize=5.5, frameon=False, loc='upper left', ncol=2, columnspacing=0.8, handlelength=1.2); ax.set_title('counts per tree', fontsize=8)
 ax = axes[1]; r10 = fj['merged_10cm_merge']['r10']; r15 = fj['merged_15cm_merge']['r15']
-for i, (nm, d) in enumerate((('10 cm', r10), ('15 cm', r15))): ax.bar(np.arange(3) + (i - 0.5) * 0.36, [d['P'], d['R'], d['F1']], 0.36, color=[COLS[0], COLS[1]][i], label=f'ours, {nm}')
+for i, (nm, d) in enumerate((('10 cm', r10), ('15 cm', r15))): ax.bar(np.arange(3) + (i - 0.5) * 0.36, [d['P'], d['R'], d['F1']], 0.36, color=[COLS[0], COLS[1]][i], label=nm)
 f1a, f1b = fj['literature']['FruitNeRF++']['F1'], fj['literature']['Gene-Mola_2020_CEA']['F1']
 ax.axhline(f1a, color=COLS[3], lw=1, ls='--'); ax.text(2.4, f1a - 0.02, f'FruitNeRF++ {f1a:.2f}', fontsize=5.5, ha='left', va='top', color=COLS[3])
 ax.axhline(f1b, color='0.3', lw=1, ls=':'); ax.text(2.4, f1b + 0.02, f'in-cloud {f1b:.2f}', fontsize=5.5, ha='left', va='bottom', color='0.3')
-ax.set_xticks(np.arange(3)); ax.set_xticklabels(['P', 'R', 'F1'], fontsize=7); ax.set_xlim(-0.6, 3.9); ax.set_ylim(0, 1.2); ax.set_title('Fuji-SfM per apple', fontsize=8); ax.legend(fontsize=5.5, frameon=False, loc='upper left', ncol=2)
+ax.set_xticks(np.arange(3)); ax.set_xticklabels(['P', 'R', 'F1'], fontsize=7); ax.set_xlim(-0.6, 3.9); ax.set_ylim(0, 1.2); ax.set_title('Fuji-SfM per apple', fontsize=8); ax.legend(fontsize=5.5, frameon=False, loc='upper left', ncol=2, title='ours, match radius', title_fontsize=5.5, columnspacing=0.8, handlelength=1.2)
 for a_ in axes: a_.tick_params(labelsize=6.5)
 fig.tight_layout(w_pad=0.6); fig.savefig(F / 'fig_fruit.pdf'); print('fig_fruit')
+
+# cost: storage per cell of the identity designs, serving rate and query latency (numbers/e5_cost.json)
+c = json.load(open(N / 'e5_cost.json')); st = c['storage_mb']
+fig, axes = plt.subplots(1, 2, figsize=(3.5, 1.8), gridspec_kw={'width_ratios': [1.3, 1]})
+ax = axes[0]; names = ['HiGH\n32-d', 'flat\n3×10', 'flat\n3×32', 'LangSplat-\nstyle']; vals = [st['features_B'], st['flat_equal_storage'], st['flat_3x32'], st['langsplat_lite']]
+bars = ax.bar(np.arange(4), vals, 0.62, color=[COLS[0], COLS[1], COLS[2], COLS[3]]); ax.set_xticks(np.arange(4)); ax.set_xticklabels(names, fontsize=5.5); ax.set_ylabel('MB per cell', fontsize=7); ax.set_title(f"identity features, {c['gaussians'] / 1e6:.2f} M Gaussians", fontsize=7)
+for b, v in zip(bars, vals): ax.text(b.get_x() + b.get_width() / 2, v + 4, f'{v:.0f}', ha='center', fontsize=6)
+ax.set_ylim(0, max(vals) * 1.18); ax.tick_params(labelsize=6)
+ax = axes[1]; lat = [c['render_ms'], c['round_trip_ms'], c['query_ms_row'], c['query_ms_first_tree']]; lnames = ['render', 'round\ntrip', 'row\nquery', '1st tree\nquery']
+bars = ax.bar(np.arange(4), lat, 0.62, color=COLS[0]); ax.set_xticks(np.arange(4)); ax.set_xticklabels(lnames, fontsize=5.5); ax.set_ylabel('ms', fontsize=7); ax.set_title(f"serving at {c['fps']} fps", fontsize=7)
+for b, v in zip(bars, lat): ax.text(b.get_x() + b.get_width() / 2, v + 4, f'{v:.0f}', ha='center', fontsize=6)
+ax.set_ylim(0, max(lat) * 1.18); ax.tick_params(labelsize=6)
+for a_ in axes: a_.spines['top'].set_visible(False); a_.spines['right'].set_visible(False)
+fig.tight_layout(w_pad=0.5); fig.savefig(F / 'fig_cost.pdf'); print('fig_cost')

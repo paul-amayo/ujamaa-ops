@@ -37,6 +37,7 @@ ap.add_argument('--void-norm', type=float, default=None, help="presence check ||
 ap.add_argument('--void-ref', nargs=2, default=None, metavar=('ARM_BIN', 'HYPER_BIN'), help='scale the 0.5 check to the arm: 0.5 x median nonzero seed norm of ARM_BIN / that of HYPER_BIN (fields whose targets are not tangent-sized)')
 ap.add_argument('--out', default=''); ap.add_argument('--sup', default=''); ap.add_argument('--hier', default=''); ap.add_argument('--emb', default='')
 ap.add_argument('--dump-pred', default='', help='write <dir>/<frame>.npz per frame: tree / fruit_level / fruit_mixed argmax ids per pixel (-1 = none) + live, for qualitative figures')
+ap.add_argument('--dump-cat', default='', help='category protocol: write <dir>/<frame>.npz with the relevancy map S [H, W, n_cat] (void = -1) and live, for qualitative figures')
 ap.add_argument('--check-oracle', action='store_true', help='compare the oracle sweep with the [<tag> frame] lines already in verdicts.log')
 ap.add_argument('--clip-model', default='ViT-B-16'); ap.add_argument('--clip-pretrained', default='laion2b_s34b_b88k')
 a = ap.parse_args(); N = Path(a.identity); dev = 'cuda'; torch.set_grad_enabled(False); t0 = time.time()
@@ -146,6 +147,7 @@ for fr in frames:
                     dp = nrm(hyper.decode_features(path, project=True)).view(sl.shape[0], STEPS, -1).masked_fill(mask.to(dev).bool().unsqueeze(-1), 0.0); dec = torch.cat([dp, own], 1)
             S[j:j + 8192] = rel_from_cos(dec @ E_CAT.T, dec @ E_NEG.T).max(1).values
         S[void] = -1.0; live = ~void; lab_c = S.argmax(1); split = 'eval' if fr in ev else 'train'
+        if a.dump_cat: Path(a.dump_cat).mkdir(parents=True, exist_ok=True); np.savez_compressed(Path(a.dump_cat) / f'{stem}.npz', S=S.view(H, W, len(CAT)).cpu().numpy().astype(np.float32), live=live.view(H, W).cpu().numpy(), words=np.array([w for w, _ in CAT]))
         lines.append({'tag': a.tag, 'frame': fr, 'split': split, 'kind': 'FRAME', 'space': SPACE, 'void_frac': void.float().mean().item(), 'nesting': float('nan'), 'heads': len(heads), 'hw': [H, W]})
         for kind, ci, gt in heads:
             heat = S[:, ci]; cv, cp, cr = sweep(heat, gt); b = int(np.argmax(cv)); o_iou, o_prec, o_rec = (float(cv[b]), float(cp[b]), float(cr[b])) if cv[b] > 0 else (0.0, 0.0, 0.0); o_thr = float(THR[b]) if cv[b] > 0 else float('nan')
@@ -189,7 +191,8 @@ for fr in frames:
         fids = torch.tensor(fruit_ids if fruit_ids else [-1], device=dev)
         f_lvl = torch.where(live & deep, fids[lab_f_only], none) if (R_MID is not None and len(fruit_ids)) else none
         f_mix = torch.where(live & (lab_ft < len(fruit_ids)), fids[lab_ft.clamp(max=max(len(fruit_ids) - 1, 0))], none)
-        np.savez_compressed(Path(a.dump_pred) / f'{stem}.npz', tree=tree_px.view(H, W).cpu().numpy().astype(np.int32), fruit_level=f_lvl.view(H, W).cpu().numpy().astype(np.int32),
+        row_px = torch.where(live, torch.tensor(row_ids, device=dev)[lab_r], none) if lab_r is not None else none
+        np.savez_compressed(Path(a.dump_pred) / f'{stem}.npz', tree=tree_px.view(H, W).cpu().numpy().astype(np.int32), row=row_px.view(H, W).cpu().numpy().astype(np.int32), fruit_level=f_lvl.view(H, W).cpu().numpy().astype(np.int32),
                             fruit_mixed=f_mix.view(H, W).cpu().numpy().astype(np.int32), live=live.view(H, W).cpu().numpy())
     lines.append({'tag': a.tag, 'frame': fr, 'split': split, 'kind': 'FRAME', 'space': SPACE, 'void_frac': void.float().mean().item(), 'nesting': nest, 'heads': len(heads), 'hw': [H, W]})
     for kind, i, gt in heads:

@@ -46,10 +46,13 @@ def mask_panel(name, prompt, label, truth, floor=0.5):
     ax.text(0.988, 0.05, f'{nsel} of {len(masks)} trees selected', fontsize=20, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.55, pad=2.5, lw=0)); fig.savefig(OUT / f'{name}.png', dpi=150); plt.close(fig); print(f'[sel] {name} {prompt}: {nsel} of {len(masks)} selected (IoU vs truth {lit:.3f}, circular)')
 ALL_TREES = (ID_PHOTO != 65535) & (ID_PHOTO < 10000); T36 = ID_PHOTO == 36
 mask_panel('hero_b', 'tree', 'query: "tree"', ALL_TREES); mask_panel('hero_c', 'the tree on the right', 'query: "the tree on the right"', T36); mask_panel('hero_d', 'cena', 'query: "tree 36" (its address)', T36)
+def argmax_mask(z, words, target):
+    heats = np.stack([z[w] for w in words]); return (heats.argmax(0) == words.index(target)) & ~z['void'].astype(bool)
+TREE_WORDS = [wt[t] for t in sorted(wt) if t < 10000 and wt[t] in zt.files]; ROW_WORDS = [rw[r] for r in sorted(rw) if rw[r] in zt.files]
 ID_T = idmap('kf_002411.png', (zt['rgb'].shape[1], zt['rgb'].shape[0])); ROW4 = np.isin(ID_T, [t for t, r in row_of.items() if r == 4]); T36m = ID_T == 36
-for name, h, lab, truth in (('hero_e', zt[rw[4]], 'query: "row 4"', ROW4), ('hero_f', zt[wt[36]], 'query: "tree 36"', T36m)):
-    img, m = overlay(zt['rgb'], h, 0.85); v = iou(m, truth); save_panel(name, img, lab, v); print(f'[iou] {name}: {v:.3f}')
-ID_F = idmap('kf_000024.png', (zf['rgb'].shape[1], zf['rgb'].shape[0])); F1 = ID_F == 10001; cy, cx = 125, 136; img, m = overlay(zf['rgb'], zf[wt[10001]], 0.85, crop=(max(0, cy - 70), cy + 70, max(0, cx - 150), cx + 150)); v = iou(m, F1); save_panel('hero_g', img, 'query: "fruit 1"', v); print(f'[iou] hero_g fruit 1: {v:.3f} (fruit px in supervision {int(F1.sum())})')
+for name, h, lab, truth, pred in (('hero_e', zt[rw[4]], 'query: "row 4"', ROW4, argmax_mask(zt, ROW_WORDS, rw[4])), ('hero_f', zt[wt[36]], 'query: "tree 36"', T36m, argmax_mask(zt, TREE_WORDS, wt[36]))):
+    img, m = overlay(zt['rgb'], h, 0.85); v = iou(pred, truth); save_panel(name, img, lab, v); print(f'[iou] {name}: argmax {v:.3f} (heat >= 0.85 would give {iou(m, truth):.3f})')
+ID_F = idmap('kf_000024.png', (zf['rgb'].shape[1], zf['rgb'].shape[0])); F1 = ID_F == 10001; cy, cx = 125, 136; FW = [wt[t] for t in sorted(wt) if (t >= 10000 or t < 10000) and wt[t] in zf.files]; predF = argmax_mask(zf, FW, wt[10001]); img, m = overlay(zf['rgb'], zf[wt[10001]], 0.85, crop=(max(0, cy - 70), cy + 70, max(0, cx - 150), cx + 150)); v = iou(predF, F1); save_panel('hero_g', img, 'query: "fruit 1"', v); print(f'[iou] hero_g fruit 1: {v:.3f} (fruit px in supervision {int(F1.sum())})')
 save_panel('hero_a', (zt['rgb'][:300]).copy(), 'a held-out frame: which row, which tree, which fruit?', None)
 # ---- method (a): the scene graph of the cell
 cell_trees = sorted(k for k in wt if k < 10000); cell_fruit = sorted(k - 10000 for k in wt if k >= 10000); rows_present = sorted(set(obj_row[t] for t in cell_trees if t in obj_row and obj_row[t] >= 0)); unassigned = [t for t in cell_trees if obj_row.get(t, -1) < 0]
