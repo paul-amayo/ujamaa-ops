@@ -9,8 +9,8 @@ from pathlib import Path
 import numpy as np
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 from PIL import Image
-ap = argparse.ArgumentParser(); ap.add_argument('parts'); ap.add_argument('frame'); ap.add_argument('tree', type=int); ap.add_argument('nodes'); ap.add_argument('out'); ap.add_argument('--crop', default=''); ap.add_argument('--rel', type=float, default=0.5); a = ap.parse_args()
-P = Path(a.parts); stem = a.frame.replace('.png', ''); d = np.load(P / 'super_dump' / f'{stem}.npz'); H, W = d['tree_super'].shape; k = a.tree; wi = list(d['words']).index('trunk')
+ap = argparse.ArgumentParser(); ap.add_argument('parts'); ap.add_argument('frame'); ap.add_argument('tree', type=int); ap.add_argument('nodes'); ap.add_argument('out'); ap.add_argument('--crop', default=''); ap.add_argument('--rel', type=float, default=0.5); ap.add_argument('--dump-dir', default='super_dump'); a = ap.parse_args()
+P = Path(a.parts); stem = a.frame.replace('.png', ''); d = np.load(P / a.dump_dir / f'{stem}.npz'); H, W = d['tree_super'].shape; k = a.tree; wi = list(d['words']).index('trunk')
 nz = np.load(a.nodes); trunk_node = next((int(i) for i, t, ty in zip(nz['ids'], nz['tree'], nz['type']) if int(t) == k and int(ty) == 0), None)
 recs = json.load(open(P / 'verdict' / f'{stem}.json')); zp = np.load(P / 'verdict' / f'{stem}.npz'); Hf, Wf = zp['shape']; M = np.unpackbits(zp['masks'], axis=1)[:, :Hf * Wf].reshape(-1, Hf, Wf).astype(bool)
 truth = np.zeros((Hf, Wf), bool)
