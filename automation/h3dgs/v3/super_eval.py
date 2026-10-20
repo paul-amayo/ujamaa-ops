@@ -17,8 +17,8 @@ sys.path.insert(0, '/home/paperspace/code/aru_sil_core/src/scripts'); sys.path.i
 from high_splat_hierarchy_accuracy import build_hyper_embedder
 import lorentz as L
 ap = argparse.ArgumentParser(); ap.add_argument('--identity', required=True); ap.add_argument('--parts', required=True); ap.add_argument('--emb-super', required=True); ap.add_argument('--out', default=''); ap.add_argument('--dump', default='')
-ap.add_argument('--min-frac', type=float, default=0.002); ap.add_argument('--words', default='trunk,bark,stem'); ap.add_argument('--rel', type=float, default=0.5); a = ap.parse_args()
-N, P = Path(a.identity), Path(a.parts); dev = 'cuda'; torch.set_grad_enabled(False); VOID, MAXD, STEPS, FRUIT, PART = 0.5, 11.1, 4, 10000, 20000
+ap.add_argument('--min-frac', type=float, default=0.002); ap.add_argument('--words', default='trunk,bark,stem'); ap.add_argument('--rel', type=float, default=0.5); ap.add_argument('--max-dist', type=float, default=11.1); ap.add_argument('--maps-dir', default='maps_super'); a = ap.parse_args()
+N, P = Path(a.identity), Path(a.parts); dev = 'cuda'; torch.set_grad_enabled(False); VOID, MAXD, STEPS, FRUIT, PART = 0.5, a.max_dist, 4, 10000, 20000
 bank = np.load(N / 'text_bank.npz', allow_pickle=True); meta = json.loads(str(bank['meta'])); wt = {int(k): w for k, w in meta['word_table'].items()}; words = [str(w) for w in bank['words']]; sup = Path(meta['manifest']).parent
 E = torch.tensor(bank['emb'], dtype=torch.float32, device=dev); E = E / E.norm(dim=-1, keepdim=True); tree_ids = sorted(k for k in wt if k < FRUIT and wt[k] in words); T_cols = torch.tensor([words.index(wt[k]) for k in tree_ids], device=dev)
 nz = np.load(P / 'nodes.npz'); node_id = [int(i) for i in nz['ids']]; node_tree = [int(t) for t in nz['tree']]; node_type = [int(t) for t in nz['type']]; NA = torch.tensor(np.asarray(nz['emb'], np.float32), device=dev); NA = NA / NA.norm(dim=-1, keepdim=True)
@@ -45,7 +45,7 @@ def prf(pred, truth):
 heads = []; dump = Path(a.dump) if a.dump else None
 if dump: dump.mkdir(parents=True, exist_ok=True)
 for f in frames:
-    stem = f.replace('.png', ''); zs = np.load(P / 'maps_super' / f'{stem}.npz'); fs = torch.tensor(zs['features'], dtype=torch.float32, device=dev); H, W = fs.shape[:2]; fs = fs.reshape(-1, fs.shape[-1]); Px = H * W
+    stem = f.replace('.png', ''); zs = np.load(P / a.maps_dir / f'{stem}.npz'); fs = torch.tensor(zs['features'], dtype=torch.float32, device=dev); H, W = fs.shape[:2]; fs = fs.reshape(-1, fs.shape[-1]); Px = H * W
     pj = P / 'verdict' / f'{stem}.json'
     if not pj.exists(): continue
     recs = json.load(open(pj)); zp = np.load(P / 'verdict' / f'{stem}.npz'); Hf, Wf = zp['shape']; M = np.unpackbits(zp['masks'], axis=1)[:, :Hf * Wf].reshape(-1, Hf, Wf).astype(bool)

@@ -39,8 +39,10 @@ ap.add_argument('--out', default=''); ap.add_argument('--sup', default=''); ap.a
 ap.add_argument('--dump-pred', default='', help='write <dir>/<frame>.npz per frame: tree / fruit_level / fruit_mixed argmax ids per pixel (-1 = none) + live, for qualitative figures')
 ap.add_argument('--dump-cat', default='', help='category protocol: write <dir>/<frame>.npz with the relevancy map S [H, W, n_cat] (void = -1) and live, for qualitative figures')
 ap.add_argument('--check-oracle', action='store_true', help='compare the oracle sweep with the [<tag> frame] lines already in verdicts.log')
+ap.add_argument('--max-dist', type=float, default=None, help='radius of the latent for the containment walk (waypoints at k * max_dist / 4, k = 1..4; default 11.1 = production); the super hierarchy sets it to 4 x its row radius so the waypoints sit at the embedder\'s level radii')
 ap.add_argument('--clip-model', default='ViT-B-16'); ap.add_argument('--clip-pretrained', default='laion2b_s34b_b88k')
-a = ap.parse_args(); N = Path(a.identity); dev = 'cuda'; torch.set_grad_enabled(False); t0 = time.time()
+a = ap.parse_args()
+if a.max_dist is not None: MAX_DIST = a.max_dist; N = Path(a.identity); dev = 'cuda'; torch.set_grad_enabled(False); t0 = time.time()
 if a.void_ref is not None:
     def _med(b):
         j = json.load(open(b + '.json')); F_ = np.fromfile(b, dtype=np.float32).reshape(j['n'], j['dim']); nz_ = np.linalg.norm(F_, axis=1); return float(np.median(nz_[nz_ > 0]))

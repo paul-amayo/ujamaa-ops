@@ -14,7 +14,7 @@ from high_splat_hierarchy_accuracy import build_hyper_embedder
 from word_utils import get_word_for_id
 import lorentz as L
 ap = argparse.ArgumentParser(); ap.add_argument('--w-npz', required=True); ap.add_argument('--embedder', required=True); ap.add_argument('--nodes-npz', required=True); ap.add_argument('--out-features', required=True, type=Path)
-ap.add_argument('--tree-floor', type=float, default=1.0); ap.add_argument('--bg-competes', action='store_true'); ap.add_argument('--bg-ratio', type=float, default=2.0); ap.add_argument('--fruit-floor', type=float, default=0.01); ap.add_argument('--fruit-share-assign', type=float, default=0.1)
+ap.add_argument('--tree-floor', type=float, default=1.0); ap.add_argument('--bg-competes', action='store_true'); ap.add_argument('--bg-ratio', type=float, default=2.0); ap.add_argument('--fruit-floor', type=float, default=0.01); ap.add_argument('--fruit-share-assign', type=float, default=0.1); ap.add_argument('--part-share-assign', type=float, default=0.0, help='seed a gaussian with the part of its majority tree whose mass is >= this share of the tree subtree mass (tree + its parts); 0 = majority only. Pre-registered 10-20: 0.1, the production fruit constant')
 a = ap.parse_args(); dev = 'cuda'; torch.set_grad_enabled(False); FRUIT, PART, UNLAB = 10000, 20000, 65535
 z = np.load(a.w_npz); W, labels = z['W'], [int(u) for u in z['labels']]; nz = np.load(a.nodes_npz); nid = [int(i) for i in nz['ids']]; nemb = np.asarray(nz['emb'], np.float32)
 m, _, _ = open_clip.create_model_and_transforms('ViT-B-16', 'laion2b_s34b_b88k', device=dev); tok = open_clip.get_tokenizer('ViT-B-16'); hyper = build_hyper_embedder(a.embedder, dev); curv = hyper.curv.exp()
@@ -42,8 +42,19 @@ if a.bg_competes and bg_mass is not None:
 if a.fruit_share_assign > 0 and (kind == 1).any():
     Wf = W.copy(); Wf[kind != 1] = 0.0; fshare = np.zeros_like(tot); sup_ = tot > 0; fshare[sup_] = Wf.sum(0)[sup_] / tot[sup_]; fmaj = np.where(Wf.sum(0) > 0, Wf.argmax(0), maj); promote = sup_ & (fshare > a.fruit_share_assign); maj = np.where(promote, fmaj, maj); assign = assign | promote
     print(f'[super-seed] share-assign: {int(promote.sum())} gaussians seeded with their fruit')
+if a.part_share_assign > 0 and (kind == 2).any():   # the part level is finer than the tree: a gaussian rendering into a part of its tree with a share of the subtree mass >= tau carries the part
+    lab_arr = np.array(labels); tree_of_part = {u: (u - PART) // 4 for u in labels if u >= PART}; promoted = 0
+    for ti, t in enumerate(labels):
+        if kind[ti] != 0: continue
+        prow = [i for i, u in enumerate(labels) if u >= PART and tree_of_part[u] == t]
+        if not prow: continue
+        sel = np.where(assign & (lab_arr[maj] == t))[0]
+        if not len(sel): continue
+        sub = W[ti][sel] + W[prow][:, sel].sum(0); best = np.array(prow)[W[prow][:, sel].argmax(0)]; share = W[best, sel] / np.maximum(sub, 1e-9); go = share >= a.part_share_assign
+        maj[sel[go]] = best[go]; promoted += int(go.sum())
+    print(f'[super-seed] part share-assign (>= {a.part_share_assign:g} of the subtree mass): {promoted} gaussians seeded with a part of their tree')
 feats = np.zeros((W.shape[1], tl.shape[1]), np.float32); feats[assign] = tl[maj[assign]]; lab = np.where(assign, np.array(labels)[maj], -1).astype(np.int32)
 feats.tofile(a.out_features); np.save(str(a.out_features) + '.labels.npy', lab)
 cnt = {'tree': int(((kind == 0)[maj] & assign).sum()), 'fruit': int(((kind == 1)[maj] & assign).sum()), 'part': int(((kind == 2)[maj] & assign).sum()), 'void': int((~assign).sum())}
-json.dump({'n': int(W.shape[1]), 'dim': int(tl.shape[1]), 'w_npz': a.w_npz, 'embedder': a.embedder, 'nodes_npz': a.nodes_npz, 'assigned': cnt, 'labels': len(labels), 'tree_floor': a.tree_floor, 'bg_competes': a.bg_competes, 'bg_ratio': a.bg_ratio, 'fruit_floor': a.fruit_floor, 'fruit_share_assign': a.fruit_share_assign}, open(str(a.out_features) + '.json', 'w'), indent=1)
+json.dump({'n': int(W.shape[1]), 'dim': int(tl.shape[1]), 'w_npz': a.w_npz, 'embedder': a.embedder, 'nodes_npz': a.nodes_npz, 'assigned': cnt, 'labels': len(labels), 'tree_floor': a.tree_floor, 'bg_competes': a.bg_competes, 'bg_ratio': a.bg_ratio, 'fruit_floor': a.fruit_floor, 'fruit_share_assign': a.fruit_share_assign, 'part_share_assign': a.part_share_assign}, open(str(a.out_features) + '.json', 'w'), indent=1)
 print(f"[super-seed] {W.shape[1]} gaussians: assigned {cnt} over {len(labels)} labels -> {a.out_features}")
