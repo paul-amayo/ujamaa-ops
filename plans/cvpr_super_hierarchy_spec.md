@@ -86,3 +86,35 @@ The reference for parts is held-out SAM 3 masks, the same status as E1's referen
 5. Census, render, the decisive test with the three comparators and the identity guard.
 6. One figure: the held-out frame of Fig. 1 with "trunk of tree 36" under the three fields; one table: the composed IoU, the guard,
    the nesting.
+
+
+## Result (2026-10-20, citrus 05 cell 1_0) — goal missed, mechanism measured
+**Composed query "trunk of tree k", held-out, 13 heads with a trunk >= 0.2 % of the frame:** median IoU **0.071** (precision 0.17, recall
+0.23; instance recall 0.85) under the final design (v4: trunk-only part nodes, part-view census, fruit-recipe seeding, embedder
+`05_13D_super_v4`, waypoints at the embedder's level radii); best heads 0.47 / 0.40 / 0.34 / 0.27. Comparators on the same heads: HiGH as
+published 0.000 (no part level; "trunk" by relevancy lights nothing), LangSplat-style 0.000 ("trunk" at relevancy 0.5 lights nothing; "bark"
+lights everything at precision 0.00). Identity guard: held-out trees 0.736 / rows 0.827 / nesting 0.89 (published field on this cell
+0.757 / 0.872) — identity survives the extra level once the walk's waypoints follow the embedder's radii (with the production 11.1 the rows
+fell to 0.54-0.67).
+
+**What holds.** The super hierarchy embeds: 22 trunk nodes beyond their trees on their trees' rays (angle median 0.5 deg, part -> nearest
+tree 22/22, tree -> row 37/38), radii rows 1.96 / trees 3.91 / parts 6.76; the part level reads correctly wherever the splat carries it:
+Spearman 0.83 (p < 0.001) between the trunk-node share of the opacity at the trunk's depth and the composed IoU over the 17 heads; the six
+heads with share >= 0.5 score a median 0.30, the eleven below 0.03.
+
+**Why the median fails.** (1) Geometry: a trunk (0.1-1 % of the frame) is carried by 1-40 Gaussians (median 13, opacity sum median 5.8),
+with 300-9,000 other Gaussians projecting into its mask from other depths; the hero frame's trunk has 5. (2) Labels: those few primitives are
+withheld by the canopy-era seeding rules (mass floor, background competes) unless promoted (v4), and a canopy part label ("leaves") in the
+views without a trunk detection absorbs them (v1). (3) Anchors: part image embeddings are near-duplicates (trunk vs branch of one tree 0.96,
+trunks across trees 0.97, trunk vs the tree's own address 0.21), so the part decision is fine where the tree decision is coarse. (4) The word
+path (LERF relevancy at 0.5) is not a readout for parts this small on any field.
+
+**Readings for the CVPR idea.** "Explicit pins implicit" stands: identity never comes from appearance at any level (test 0: parts of
+neighbouring trees are 0.86 alike), the explicit graph supplies it and the hyperbolic structure holds with parts added. Composition fails on
+primitives, not on the hierarchy: a part needs its own primitives (the fruit finding again: level-of-detail at the part) or must be a part
+the splat already models (a canopy half, a sunny side, a row segment). Next step if pursued: the LoD split at the trunk masks (guided split,
+as for fruit) before re-seeding; or choose parts of >= 3 % of the frame for the decisive test.
+
+Artifacts: `<cell>/parts/{verdict,train,v2,v3,v4}` (masks, nodes, maps, protocol files, super_eval*.json, proj_heads.json, figures);
+scripts `automation/h3dgs/v3/{parts_masks,parts_test0,parts_nodes,parts_hierarchy,build_super_seed,super_eval,super_fig,
+super_retrieval_check,super_proj_diag,trunk_probe}.py`, chains under `automation/h3dgs/v3/chains/`; notebook 2026-10-20.
