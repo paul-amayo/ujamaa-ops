@@ -131,7 +131,7 @@ Every number in the abstract resolves to a provenance file (paper-latex number a
 
 ## 11. Decisions for Paul
 
-1. Lead author and team (Adam Mukuddem owns the robot layer and VT&R; Travi for SANA if in-row driving is used).
+1. Lead author and team (Adam Mukuddem owns the robot layer and VT&R; Travi for SANA if in-row driving is used). Deferred (Paul, 20 Oct): the review is anonymised; settle it before the submission form asks for authors.
 2. Field site: Klapmuts, or the ICRA farm.
 3. Whether the Stage 1 abstract carries the pilot numbers or hypotheses only.
 4. Title.
