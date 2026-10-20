@@ -48,7 +48,7 @@ src = f'{P}/camera_calibration/chunks/{CN}/sparse/0'; cam0 = list(read_cameras_b
 ims = {v.name: v for v in read_images_binary(f'{src}/images.bin').values()}; TEST = {l.strip() for l in open(f'{src}/test.txt') if l.strip()}
 EXPO = json.load(open(f'{P}/output/trained_chunks/{CN}/exposure.json'))
 Hj = json.load(open(f'{S}/prod/bateleur/scene_graph/marker_hierarchy.json')); row_of = {o['id']: o['row_id'] for o in Hj['objects']}
-N_TREES = sum(1 for o in Hj['objects'] if o.get('row_id', -1) >= 0)
+N_TREES = len(Hj['objects'])   # the registry's count (the cards say 290 / 100)
 script = json.load(open(R / 'demo_script.json'))
 _objs = json.load(open(f'{S}/prod/bateleur/scene_graph/marker_hierarchy.json'))['objects']; _z = {o['id']: o['xyz'][2] for o in _objs}
 LABEL = {}
@@ -227,9 +227,11 @@ for f in FRAMES:
         from scipy import ndimage as _nd
         edge = _nd.binary_dilation(FRUIT_EDGE, iterations=3) & ~FRUIT_EDGE; frame[edge] = (255, 255, 255)
     pim = Image.fromarray(frame.astype(np.uint8)); d = ImageDraw.Draw(pim)
-    if q:
-        d.rounded_rectangle([16, 16, 30 + d.textlength(q, font=F1), 60], 8, fill=(11, 11, 11)); d.text((24, 22), q, font=F1, fill=(255, 255, 255))
-    if answer: d.rounded_rectangle([16, 68, 30 + d.textlength(answer, font=F2), 102], 8, fill=(255, 122, 0)); d.text((24, 73), answer, font=F2, fill=(11, 11, 11))
+    qs = [x.strip() for x in q.split('/')] if q and d.textlength(q, font=F1) > W - 60 else ([q] if q else [])   # bilingual question: one line per language
+    for k, ql in enumerate(qs):
+        d.rounded_rectangle([16, 16 + 48 * k, 30 + d.textlength(ql, font=F1), 60 + 48 * k], 8, fill=(11, 11, 11)); d.text((24, 22 + 48 * k), ql, font=F1, fill=(255, 255, 255))
+    ya = 68 + 48 * max(0, len(qs) - 1)
+    if answer: d.rounded_rectangle([16, ya, 30 + d.textlength(answer, font=F2), ya + 34], 8, fill=(255, 122, 0)); d.text((24, ya + 5), answer, font=F2, fill=(11, 11, 11))
     mi = [x for x in ious if x is not None]; na = len(ious) - len(mi)
     foot = ('held-out view, mean exposure: ' if kf in TEST or kf not in EXPO else '') + f'render {psnr:.1f} dB vs the photo' + (f'  ·  IoU {min(mi):.2f}' + (f'-{max(mi):.2f}' if len(mi) > 1 else '') if mi else '') + (f'  ·  {na} not labelled by SAM3' if na else '')
     foot = '  ·  '.join(([f'IoU {min(mi):.2f}' + (f'-{max(mi):.2f}' if len(mi) > 1 else '')] if mi else []) + ([f'{na} not labelled by SAM3'] if na else []))
