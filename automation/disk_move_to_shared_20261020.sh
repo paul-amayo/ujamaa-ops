@@ -19,12 +19,17 @@ for rel in $ITEMS; do
   nl=$(find "$s" -type l | wc -l)
   mkdir -p "$d"; t0=$(date +%s)
   rsync -rlt --no-perms --no-owner --no-group "$s/" "$d/" 2>>$L; rc=$?
+  # Verify by FILE bytes and symlink counts only: directory entries are 4096 B on ext4 and differently sized on CIFS,
+  # so `du --apparent-size` never matched (the first run kept every directory local for that reason). Then an rsync
+  # dry run must report nothing left to transfer (size + mtime of every file, every symlink).
   ns=$(find "$s" -type f | wc -l); nd=$(find "$d" -type f | wc -l)
-  bs=$(du -sb --apparent-size "$s" | cut -f1); bd=$(du -sb --apparent-size "$d" | cut -f1)
-  if [ $rc -eq 0 ] && [ "$ns" = "$nd" ] && [ "$bs" = "$bd" ]; then
+  bs=$(find "$s" -type f -printf "%s\n" | awk '{t+=$1} END{print t+0}'); bd=$(find "$d" -type f -printf "%s\n" | awk '{t+=$1} END{print t+0}')
+  ls_=$(find "$s" -type l | wc -l); ld=$(find "$d" -type l | wc -l)
+  left=$(rsync -rlt --no-perms --no-owner --no-group --dry-run --itemize-changes "$s/" "$d/" 2>&1 | grep -v "^\.d" | wc -l)
+  if [ $rc -eq 0 ] && [ "$ns" = "$nd" ] && [ "$bs" = "$bd" ] && [ "$ls_" = "$ld" ] && [ "$left" = 0 ]; then
     rm -rf "$s" && ln -s "$d" "$s" && say "moved $rel: $ns files, $((bs/1073741824)) GB, symlinks inside $nl, $(( $(date +%s)-t0 )) s"
   else
-    say "KEPT LOCAL $rel: rsync rc=$rc files $ns/$nd bytes $bs/$bd (copy left on the share for inspection)"
+    say "KEPT LOCAL $rel: rsync rc=$rc files $ns/$nd bytes $bs/$bd symlinks $ls_/$ld left-to-sync $left"
   fi
 done
 say "=== done; root free $(df -h / | awk 'NR==2{print $4}'); share free $(df -h /mnt/shared | awk 'NR==2{print $4}')"; touch /home/paperspace/logs/disk_move_20261020.DONE
