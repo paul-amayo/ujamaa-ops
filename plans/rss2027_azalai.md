@@ -76,7 +76,7 @@ Working titles: "Go to the one that changed: sending field robots back to plants
 
 ## 6. Data and sites
 
-- **Klapmuts (primary):** December 2025 A300 survey = the twin; April 2026 ZED survey = the revisit; ledger v5
+- **Klapmuts (the site, Paul 20 Oct):** December 2025 A300 survey = the twin; April 2026 ZED survey = the revisit; ledger v5
   (911 / 912 bags, 825 pairs) gives "missing", "new" and "moved" targets with lidar-registered positions. Field runs
   Feb–Apr 2027 here (the A300 + ZED 2i rig; same farm as SANA, to confirm).
 - **Citrus 05 (offline only, public data):** identity and fruit-count instructions, H1 and the arrival check on logged
@@ -126,12 +126,12 @@ Every number in the abstract resolves to a provenance file (paper-latex number a
 - Three weeks after HiGH for a new paper: the pilots must be small; the abstract can stand on hypotheses.
 - The ICRA decisions (expected around late January, to check) land before Stage 2; if either is rejected the RSS
   paper still cites it as a preprint, and nothing from it is re-claimed.
-- Klapmuts twin quality and the stereo check (section 6) could move the field site.
+- Klapmuts twin quality and the stereo check (section 6) are now risks to the paper, not to the choice of site.
 - Field access Feb–Apr (berry season, farm operations) — to confirm with the farm.
 
 ## 11. Decisions for Paul
 
 1. Lead author and team (Adam Mukuddem owns the robot layer and VT&R; Travi for SANA if in-row driving is used). Deferred (Paul, 20 Oct): the review is anonymised; settle it before the submission form asks for authors.
-2. Field site: Klapmuts, or the ICRA farm.
+2. ~~Field site~~ **Klapmuts** (Paul, 20 Oct).
 3. Whether the Stage 1 abstract carries the pilot numbers or hypotheses only.
 4. Title.

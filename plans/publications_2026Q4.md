@@ -45,7 +45,7 @@ Each paper is the science behind one agent, which also sets the contribution bou
   render vs live frame, E1 IoU protocol) catches wrong-plant arrivals that teach/repeat path RMSE misses.
 - Before field time: offline on existing logs (Klapmuts Dec twin, Apr bags as the revisit; citrus).
 - Feb–Apr: field runs to carry out the Extension Charter.
-- Open: which farm (the ICRA paper's 14-row, ~60 m farm, or Klapmuts where the twin exists); first author (Adam
+- Site: Klapmuts (Paul, 20 Oct). Open: first author (Adam
   Mukuddem owns the robot layer and VT&R); the ICRA decisions land ~late Jan, before Stage 2.
 
 ## JIRS collection — facts read 19 Oct (link.springer.com/collections/cfacggejfe; journal 10846 guidelines)
@@ -92,4 +92,4 @@ Each paper is the science behind one agent, which also sets the contribution bou
 2. APC: who pays, or whether a transformative agreement covers it.
 3. arXiv timing for HiGH (with the RA-L submission, or after the first decision).
 4. LLM-use disclosure wording for both papers.
-5. RSS (Azalai): first author and team; test farm for the Feb–Apr field runs.
+5. RSS (Azalai): first author and team (site decided: Klapmuts).
