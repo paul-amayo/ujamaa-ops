@@ -70,13 +70,12 @@ zoom = lambda n, f: clip(n, G / f, start=1.5, secs=4.5, fade_in=0.2)
 segs = [
     titled_globe("t0", G / "earth_idle.mp4", 5, "UJAMAA", ["Ask the orchard.", "Farms that answer questions", "in the farmer's own language."],
                  "Western Cape  ·  Kenya  ·  a citrus orchard"),
-    card("c1", "Citrus farm A", ["290 trees · 36 rows · surveyed July 2023", "Identity by containment, IoU on screen"], 3,
+    card("c1", "Citrus farm A", ["289 trees · 36 rows · surveyed July 2023", "Identity by containment, IoU on screen"], 3,
          accent_line="Show me this row · which tree is this? · group them by row"),
-    clip("ca", src("citrus_a_bar_v4")),
+    clip("ca", B / "citrus_a_bar_v4" / "citrus_a_bar_v5_nocap.mp4"),   # v5 (20 Oct): whole orchard lit
     card("c2", "Citrus farm B", ["100 trees · 3 surveys · 154 oranges confirmed by hand"], 3,
          accent_line="Ni mti gani wenye machungwa mengi zaidi?  ·  Which tree has the most oranges?"),
-    # Paul: too fast to read — the peer's _nocap version is already re-timed (3 fps, 2 s holds); only the 8 fps original gets slowed
-    clip("cb", src("citrus_b_cut"), slow=1.0 if src("citrus_b_cut").name.endswith("_nocap.mp4") else 2.5),
+    clip("cb", B / "citrus_b_lane" / "citrus_b_lane.mp4"),   # lane re-cut (20 Oct): oranges, rows, whole orchard, row/tree/every tree
 ]
 if (B / "klapmuts_bar" / "klapmuts_bar.mp4").exists():
     segs += [zoom("g_kl", "klapmuts.mp4"),
