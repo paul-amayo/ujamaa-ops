@@ -3,7 +3,7 @@
 Paul, 19 Oct: "there's a special issue open … let's plan publications towards the end of the year."
 Skills: how-paul-writes (voice), paper-latex (build/checks/packaging), reviewer-response.
 
-## The three outputs
+## The outputs
 
 | # | Output | Venue | Content (contribution boundary) | Target | Status 19 Oct |
 |---|---|---|---|---|---|
