@@ -129,15 +129,20 @@ for kf in _lane:
     if p_ >= BAR_DB: _kept.append((kf, w2c_, c2w_))
 print(f'[lane] {len(_kept)} lane frames >= {BAR_DB} dB of {sum(1 for k in _lane if k in ims and k not in TEST and k in EXPO)} trained lane views', flush=True)
 _Q = {g['mode']: g['question'] for g in script['segments']}; _Q['fruit'] = FQ
-_near = [any(t == FTREE and d < 9.0 for d, t in front_trees(c, w)) for _, w, c in _kept]
-_f0 = _near.index(True) if True in _near else 0; _f1 = len(_near) - 1 - _near[::-1].index(True) if True in _near else -1
-_rest = list(range(_f1 + 1, len(_kept))); _modes = ['row', 'tree', 'all', 'rows', 'orchard']; _per = max(1, len(_rest) // len(_modes))
+# v2 (same day): the return pass leaves the rows into open ground, where "rows" / "whole orchard" lit nothing. Modes now follow
+# the drive and what each view sees: the outbound pass down the lane (trees both sides) carries plain -> oranges -> rows ->
+# whole orchard; the return pass carries this row / this tree / every tree, and drops views with fewer than 2 trees in front.
+_p1 = [k for k in _kept if int(k[0][3:9]) < 1000]; _p2 = [k for k in _kept if int(k[0][3:9]) >= 1000]
+_p2 = [k for k in _p2 if sum(1 for d, t in front_trees(k[2], k[1]) if d < 20) >= 2]
+n1 = len(_p1); a1 = max(1, n1 // 10); b1 = a1 + max(1, round(n1 * 0.5)); c1 = b1 + max(1, (n1 - b1) // 2)
 FRAMES = []
-for j, (kf, _, _) in enumerate(_kept):
-    if j < _f0: m = 'plain'
-    elif j <= _f1: m = 'fruit'
-    else: m = _modes[min(len(_modes) - 1, (j - _f1 - 1) // _per)]
-    FRAMES.append({'i': j, 'src': kf, 'mode': m, 'question': _Q.get(m, '')})
+for j, (kf, _, _) in enumerate(_p1):
+    m = 'plain' if j < a1 else 'fruit' if j < b1 else 'rows' if j < c1 else 'orchard'
+    FRAMES.append({'i': len(FRAMES), 'src': kf, 'mode': m, 'question': _Q.get(m, '')})
+_m2 = ['row', 'tree', 'all']; _per2 = max(1, -(-len(_p2) // len(_m2)))
+for j, (kf, _, _) in enumerate(_p2):
+    m = _m2[min(len(_m2) - 1, j // _per2)]
+    FRAMES.append({'i': len(FRAMES), 'src': kf, 'mode': m, 'question': _Q.get(m, '')})
 print('[lane] modes:', dict(Counter(f['mode'] for f in FRAMES)), flush=True)
 _seg = Counter()
 for f in FRAMES:

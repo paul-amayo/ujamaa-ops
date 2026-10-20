@@ -179,6 +179,7 @@ for f in path['frames']:
     if NOCAP: foot = '  ·  '.join(([f'IoU {min(mi):.2f}' + (f'-{max(mi):.2f}' if len(mi) > 1 else '')] if mi else []) + ([f'{na} not labelled by SAM3'] if na else []))
     if foot: d.rounded_rectangle([16, H - 50, 30 + d.textlength(foot, font=F2), H - 16], 8, fill=(11, 11, 11)); d.text((24, H - 45), foot, font=F2, fill=(255, 255, 255))
     pim.save(OUT / FR / f'{n:05d}.png'); n += 1
+    torch.cuda.empty_cache()   # v5: the allocator fragmented and the hierarchy expand OOM'd (as in the Citrus B cut)
     rows_out.append((f['i'], kf, mode, round(psnr, 2), len(ious), round(min(mi), 3) if mi else '', 'shown'))
     if n % 50 == 0: print(f'[bar] {n} frames written', flush=True)
 with open(OUT / ('metrics_nocap_v5.csv' if NOCAP else 'metrics_v5.csv'), 'w', newline='') as fh:

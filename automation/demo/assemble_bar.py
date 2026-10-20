@@ -19,11 +19,26 @@ def run(cmd):
     if subprocess.run(cmd).returncode: sys.exit("failed: " + " ".join(map(str, cmd)))
 def probe(p):
     return float(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(p)]).decode().strip())
-def draw_card(im, title, lines, accent_line, y=330):
-    d = ImageDraw.Draw(im)
+def _wrap(d, text, font, width):
+    """Greedy word wrap to `width` px; a ' · ' separator is a preferred break (20 Oct: the Citrus B question ran off the card)."""
+    out = []
+    for part in text.split("  ·  ") if d.textlength(text, font=font) > width else [text]:
+        cur = ""
+        for w in part.split(" "):
+            t = (cur + " " + w).strip()
+            if d.textlength(t, font=font) <= width or not cur: cur = t
+            else: out.append(cur); cur = w
+        out.append(cur)
+    return out
+def draw_card(im, title, lines, accent_line, y=330, width=None):
+    d = ImageDraw.Draw(im); width = width or (W - 135 - 120)
     d.text((135, y), title, font=ImageFont.truetype(FONT_B, 104), fill=FG); y += 160
-    for ln in lines: d.text((138, y), ln, font=ImageFont.truetype(FONT_R, 48), fill=DIM); y += 72
-    if accent_line: d.text((138, y + 30), accent_line, font=ImageFont.truetype(FONT_B, 48), fill=ACCENT)
+    fr, fa = ImageFont.truetype(FONT_R, 48), ImageFont.truetype(FONT_B, 48)
+    for ln in lines:
+        for wl in _wrap(d, ln, fr, width): d.text((138, y), wl, font=fr, fill=DIM); y += 72
+    if accent_line:
+        y += 30
+        for wl in _wrap(d, accent_line, fa, width): d.text((138, y), wl, font=fa, fill=ACCENT); y += 66
     d.text((135, H - 100), FOOT, font=ImageFont.truetype(FONT_R, 30), fill=DIM)
 def card(name, title, lines, secs, accent_line=None):
     im = Image.new("RGB", (W, H), BG); draw_card(im, title, lines, accent_line)
@@ -32,7 +47,7 @@ def card(name, title, lines, secs, accent_line=None):
          "-vf", f"fade=t=in:st=0:d=0.4,fade=t=out:st={secs-0.4}:d=0.4,format=yuv420p", "-c:v", "libx264", "-crf", "18", "-r", str(FPS), mp4])
     return mp4
 def titled_globe(name, src, secs, title, lines, accent_line):
-    im = Image.new("RGBA", (W, H), (0, 0, 0, 0)); draw_card(im, title, lines, accent_line, y=300)
+    im = Image.new("RGBA", (W, H), (0, 0, 0, 0)); draw_card(im, title, lines, accent_line, y=300, width=W - 420 - 135 - 560)   # left of the globe
     png = WORK / f"{name}_ovl.png"; im.save(png); mp4 = WORK / f"{name}.mp4"
     run(["ffmpeg", "-v", "error", "-y", "-t", str(secs), "-i", src, "-i", png, "-filter_complex",
          f"[0:v]crop={W-420}:{H}:0:0,pad={W}:{H}:420:0:color=0x0b0f0a[g];[g][1:v]overlay=0:0,fade=t=in:st=0:d=0.6,fade=t=out:st={secs-0.5:.2f}:d=0.5,format=yuv420p",
