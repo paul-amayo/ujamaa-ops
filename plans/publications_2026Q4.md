@@ -30,7 +30,7 @@ Each paper is the science behind one agent, which also sets the contribution bou
   change. Azalai may *use* a registry entry as a target but reports no farm-scale found-again rates (that is JIRS).
   Spoor (localisation) stays a later agent.
 
-### RSS Stage 1 sketch (to agree with Paul and the ICRA authors)
+### RSS Stage 1 sketch (superseded by the full plan: `plans/rss2027_azalai.md`)
 - Hypotheses: (H1) HiGH grounding matches the enumerated scene graph on numbered instructions and extends to attribute
   and count instructions it cannot express; (H2) a goal keyframe chosen as the target's best view (HiGH census
   weights = robot-layer edges) beats the first-observed keyframe on an arrival check; (H3) the arrival check (twin
