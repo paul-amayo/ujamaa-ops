@@ -11,13 +11,21 @@ read from the same point. If the composed IoU is below 0.50 while the parts are 
 story changes; if the parts of neighbouring trees are not separable (test 0 below), the paper is "explicit pins implicit" and the
 composition is not attempted.
 
+## Trunk visibility on the cell (measured 10-20, trunk_probe.py)
+SAM 3 "tree trunk" on the 15 verdict frames finds 108 masks; 38 lie inside a near tree (>= 3 % of the frame), with areas of 0.1-0.3 %
+of the frame (quartiles 965 / 1,362 / 2,940 px), 16 of them above the paper's 0.2 % head floor; every held-out frame has at least one,
+and tree 36's trunk on the hero frame is 2,993 px, wholly inside its mask. Trunks are therefore present but small, at the size where E1
+showed identity collapsing, so the goal is scored on the trunk masks >= 0.2 % of the frame (about one per held-out frame) and reported
+beside an instance-recall readout (any lit pixel inside the right trunk), as E4 did for fruit.
+
 ## The decisive test
 - Cell: citrus 05, chunk 1_0 (the hero cell: 8 rows, 38 trees, 7 fruit instances; splat, census W, maps, protocol files on disk).
 - Frames: the same 14 verdict frames as E1 (4 census, 10 held-out); the composed query is scored on the 10 held-out frames only.
 - Query: for every held-out tree head >= 3 % of the frame (E1's list), the composed query "trunk of tree k". Reference: the SAM 3 "tree
   trunk" mask of that frame intersected with tree k's supervision mask. Readout: the argmax rule over the part level inside the
   tree's containment (a pixel belongs to "trunk of tree k" when its tree-level argmax is k and its part-level argmax is a trunk node),
-  no threshold. Number reported: median IoU over those heads; the goal bar is 0.50.
+  no threshold. Number reported: median IoU over the heads whose trunk mask covers >= 0.2 % of the frame; the goal bar is 0.50,
+  with instance recall reported beside it.
 - Comparators on the same frames, same reference: (a) HiGH as published, "trunk" scored by the open-vocabulary cosine inside tree k
   (expected near 0, the field carries no appearance); (b) the LangSplat-style field, "trunk" at relevancy 0.5 without identity
   (expected to light all trunks: precision low); (c) the super hierarchy without pinned addresses (OpenHype-style, implicit only,
