@@ -14,7 +14,7 @@ from high_splat_hierarchy_accuracy import build_hyper_embedder
 from word_utils import get_word_for_id
 import lorentz as L
 ap = argparse.ArgumentParser(); ap.add_argument('--w-npz', required=True); ap.add_argument('--embedder', required=True); ap.add_argument('--nodes-npz', required=True); ap.add_argument('--out-features', required=True, type=Path)
-ap.add_argument('--tree-floor', type=float, default=1.0); ap.add_argument('--bg-competes', action='store_true'); ap.add_argument('--bg-ratio', type=float, default=2.0); ap.add_argument('--fruit-floor', type=float, default=0.01); ap.add_argument('--fruit-share-assign', type=float, default=0.1); ap.add_argument('--part-floor', type=float, default=None, help='mass floor for part-majority gaussians (default = tree floor; pre-registered 10-20 for the parts-as-fruit rule: 0.01, the fruit floor)'); ap.add_argument('--bg-vs-subtree', action='store_true', help='background competes against the mass of the majority node\'s tree subtree (tree + its parts) instead of the single best label (parts-as-fruit rule)'); ap.add_argument('--part-share-assign', type=float, default=0.0, help='seed a gaussian with the part of its majority tree whose mass is >= this share of the tree subtree mass (tree + its parts); 0 = majority only. Pre-registered 10-20: 0.1, the production fruit constant')
+ap.add_argument('--tree-floor', type=float, default=1.0); ap.add_argument('--bg-competes', action='store_true'); ap.add_argument('--bg-ratio', type=float, default=2.0); ap.add_argument('--fruit-floor', type=float, default=0.01); ap.add_argument('--fruit-share-assign', type=float, default=0.1); ap.add_argument('--part-floor', type=float, default=None, help='mass floor for part-majority gaussians (default = tree floor; pre-registered 10-20 for the parts-as-fruit rule: 0.01, the fruit floor)'); ap.add_argument('--bg-vs-subtree', action='store_true', help='background competes against the mass of the majority node\'s tree subtree (tree + its parts) instead of the single best label (parts-as-fruit rule)'); ap.add_argument('--w-part-npz', default='', help='a second census over the part-view maps (parts_nodes.py --partview): the part share for --part-share-assign is then taken from it, i.e. judged only in the views that observed the part (v3)'); ap.add_argument('--part-share-assign', type=float, default=0.0, help='seed a gaussian with the part of its majority tree whose mass is >= this share of the tree subtree mass (tree + its parts); 0 = majority only. Pre-registered 10-20: 0.1, the production fruit constant')
 a = ap.parse_args(); dev = 'cuda'; torch.set_grad_enabled(False); FRUIT, PART, UNLAB = 10000, 20000, 65535
 z = np.load(a.w_npz); W, labels = z['W'], [int(u) for u in z['labels']]; nz = np.load(a.nodes_npz); nid = [int(i) for i in nz['ids']]; nemb = np.asarray(nz['emb'], np.float32)
 m, _, _ = open_clip.create_model_and_transforms('ViT-B-16', 'laion2b_s34b_b88k', device=dev); tok = open_clip.get_tokenizer('ViT-B-16'); hyper = build_hyper_embedder(a.embedder, dev); curv = hyper.curv.exp()
@@ -52,14 +52,17 @@ if a.fruit_share_assign > 0 and (kind == 1).any():
     print(f'[super-seed] share-assign: {int(promote.sum())} gaussians seeded with their fruit')
 if a.part_share_assign > 0 and (kind == 2).any():   # the part level is finer than the tree: a gaussian rendering into a part of its tree with a share of the subtree mass >= tau carries the part
     lab_arr = np.array(labels); tree_of_part = {u: (u - PART) // 4 for u in labels if u >= PART}; promoted = 0
+    if a.w_part_npz:   # the part census: rows by label, zeros for labels it does not hold
+        zp = np.load(a.w_part_npz); Wp_, lp_ = zp['W'], [int(u) for u in zp['labels']]; rowp = lambda u: Wp_[lp_.index(u)] if u in lp_ else np.zeros(W.shape[1]); print(f'[super-seed] part share from the part-view census {a.w_part_npz} ({len(lp_)} labels)')
+    else: rowp = lambda u: W[labels.index(u)]
     for ti, t in enumerate(labels):
         if kind[ti] != 0: continue
-        prow = [i for i, u in enumerate(labels) if u >= PART and tree_of_part[u] == t]
-        if not prow: continue
+        pu = [u for u in labels if u >= PART and tree_of_part[u] == t]
+        if not pu: continue
         sel = np.where(assign & (lab_arr[maj] == t))[0]
         if not len(sel): continue
-        sub = W[ti][sel] + W[prow][:, sel].sum(0); best = np.array(prow)[W[prow][:, sel].argmax(0)]; share = W[best, sel] / np.maximum(sub, 1e-9); go = share >= a.part_share_assign
-        maj[sel[go]] = best[go]; promoted += int(go.sum())
+        Pm = np.stack([rowp(u)[sel] for u in pu]); sub = rowp(t)[sel] + Pm.sum(0); bi_ = Pm.argmax(0); share = Pm[bi_, np.arange(len(sel))] / np.maximum(sub, 1e-9); go = (share >= a.part_share_assign) & (sub > 0)
+        best = np.array([labels.index(u) for u in pu])[bi_]; maj[sel[go]] = best[go]; promoted += int(go.sum())
     print(f'[super-seed] part share-assign (>= {a.part_share_assign:g} of the subtree mass): {promoted} gaussians seeded with a part of their tree')
 feats = np.zeros((W.shape[1], tl.shape[1]), np.float32); feats[assign] = tl[maj[assign]]; lab = np.where(assign, np.array(labels)[maj], -1).astype(np.int32)
 feats.tofile(a.out_features); np.save(str(a.out_features) + '.labels.npy', lab)
