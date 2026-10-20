@@ -7,7 +7,7 @@ Skills: how-paul-writes (voice), paper-latex (build/checks/packaging), reviewer-
 
 - **No CVPR submission.** The super-hierarchy idea (parts below trees, text-pinned addresses + image-anchored part
   nodes; A100 spec `~/code/plans/cvpr_super_hierarchy_spec.md`) merges into the RSS paper as part-level targets.
-- **Three submissions by 31 Dec 2026:** HiGH (RA-L, 13 Nov), RSS Azalai (Stage 1, 4 Dec), JIRS 4D twin (pulled
+- **Three submissions by 31 Dec 2026:** HiGH (RA-L, brought forward to Fri 23 Oct; Paul is finishing the draft himself), RSS Azalai (Stage 1, 4 Dec), JIRS 4D twin (pulled
   forward from Feb to December; the schedule table below still shows Feb and needs re-planning).
 - **Then a full UJAMAA systems paper with all the agents** (venue to decide; it subsumes the release report).
 
