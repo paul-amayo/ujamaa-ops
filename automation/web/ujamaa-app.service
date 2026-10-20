@@ -1,0 +1,17 @@
+[Unit]
+Description=UJAMAA launch app + render broker (:8011, localhost; public via Caddy)
+After=network-online.target remote-fs.target ollama.service
+Wants=network-online.target
+[Service]
+User=paperspace
+WorkingDirectory=/home/paperspace/code/aru_sil_core
+Environment=HOME=/home/paperspace LANG=en_US.UTF-8 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+Environment=HIGH_SPLAT_CONFIG=lio_row100 HIGH_DATA_ROOT=/home/paperspace/data/citrus_all/01_13B_Jackal ADINKRA_URL=http://127.0.0.1:8013
+ExecStart=/usr/bin/python3 -m uvicorn src.interfaces.splat_viewer.server:app --host 127.0.0.1 --port 8011
+KillMode=mixed
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/home/paperspace/logs/ujamaa_8011.log
+StandardError=append:/home/paperspace/logs/ujamaa_8011.log
+[Install]
+WantedBy=multi-user.target
