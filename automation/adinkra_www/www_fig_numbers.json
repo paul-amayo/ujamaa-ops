@@ -1,0 +1,141 @@
+{
+ "r1": {
+  "dir": "/home/paperspace/data/experimental_adinkra_www_20260827",
+  "queries": 332,
+  "returned": 332,
+  "empty": 0,
+  "leaked": 94,
+  "no_answer": 0,
+  "items": 38,
+  "actions": {
+   "answer": 313,
+   "locate": 3,
+   "goto": 16
+  },
+  "per_lang": {
+   "en": {
+    "n": 69,
+    "leaked": 15,
+    "no_answer": 0,
+    "clean": 54,
+    "passA_median_s": 12.3,
+    "passA_n": 46
+   },
+   "af": {
+    "n": 66,
+    "leaked": 13,
+    "no_answer": 0,
+    "clean": 53,
+    "passA_median_s": 19.2,
+    "passA_n": 48
+   },
+   "xh": {
+    "n": 69,
+    "leaked": 23,
+    "no_answer": 0,
+    "clean": 46,
+    "passA_median_s": 51.8,
+    "passA_n": 48
+   },
+   "zu": {
+    "n": 64,
+    "leaked": 22,
+    "no_answer": 0,
+    "clean": 42,
+    "passA_median_s": 51.5,
+    "passA_n": 46
+   },
+   "sw": {
+    "n": 64,
+    "leaked": 21,
+    "no_answer": 0,
+    "clean": 43,
+    "passA_median_s": 29.4,
+    "passA_n": 46
+   }
+  }
+ },
+ "r3": {
+  "dir": "/home/paperspace/data/experimental_adinkra_www_20260827_r3",
+  "queries": 524,
+  "returned": 524,
+  "empty": 0,
+  "leaked": 0,
+  "no_answer": 24,
+  "items": 38,
+  "actions": {
+   "answer": 433,
+   "no_answer": 24,
+   "locate": 4,
+   "highlight": 14,
+   "goto": 46,
+   "explain": 3
+  },
+  "per_lang": {
+   "en": {
+    "n": 69,
+    "leaked": 0,
+    "no_answer": 1,
+    "clean": 68,
+    "passA_median_s": 11.3,
+    "passA_n": 46
+   },
+   "af": {
+    "n": 66,
+    "leaked": 0,
+    "no_answer": 3,
+    "clean": 63,
+    "passA_median_s": 18.1,
+    "passA_n": 48
+   },
+   "xh": {
+    "n": 69,
+    "leaked": 0,
+    "no_answer": 6,
+    "clean": 63,
+    "passA_median_s": 32.0,
+    "passA_n": 48
+   },
+   "zu": {
+    "n": 64,
+    "leaked": 0,
+    "no_answer": 6,
+    "clean": 58,
+    "passA_median_s": 26.9,
+    "passA_n": 46
+   },
+   "sw": {
+    "n": 64,
+    "leaked": 0,
+    "no_answer": 1,
+    "clean": 63,
+    "passA_median_s": 18.2,
+    "passA_n": 46
+   },
+   "ha": {
+    "n": 64,
+    "leaked": 0,
+    "no_answer": 4,
+    "clean": 60,
+    "passA_median_s": 19.5,
+    "passA_n": 46
+   },
+   "ar": {
+    "n": 64,
+    "leaked": 0,
+    "no_answer": 0,
+    "clean": 64,
+    "passA_median_s": 16.7,
+    "passA_n": 46
+   },
+   "am": {
+    "n": 64,
+    "leaked": 0,
+    "no_answer": 3,
+    "clean": 61,
+    "passA_median_s": 20.9,
+    "passA_n": 46
+   }
+  }
+ }
+}
