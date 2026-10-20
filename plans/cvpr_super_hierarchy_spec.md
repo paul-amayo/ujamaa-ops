@@ -122,7 +122,12 @@ spread 2.2 m, 2/22 within 0.5 m — the node's cloud is the canopy-majority Gaus
 
 **LoD route (launched 10-20 05:22, `chains/super_lod.sh`).** The guided-split trainer with trunk ∪ fruit as the small-object class read
 directly from masks (`parts/v4/fruitmask_trunk`), then the v5 pipeline on the new geometry. Pre-registered: composed median IoU 0.2–0.35,
-most trunk-node centroids within 0.5 m of the markers with spread well under 2.2 m, guard within 0.02 of v5. Result: pending.
+most trunk-node centroids within 0.5 m of the markers with spread well under 2.2 m, guard within 0.02 of v5. **Result (26 min, 787 k → 1.01 M Gaussians): composed median IoU 0.103 (v5 0.070; bar missed), guard
+trees 0.736 / rows 0.854 (holds); Gaussians at the trunk's depth ×10 (median 13 → 130 per head) and localisation 1.01 → 0.61 m centroid error,
+spread 2.21 → 0.89 m, 7/22 within 0.5 m (v5 2/22), 13/22 with spread ≤ 1 m (v5 0/22) — the LoD makes the primitives, the canopy-era
+seeding rules withhold a median 51 of the 130 (background-competes: thin primitives are background wherever the tree mask leaves the trunk
+out), so the share at the depth stays 0.26 and Spearman(share, IoU) 0.86. Next pre-registered step if pursued: part assignment from the
+part-view share alone (≥ 0.1) for the trunk-depth primitives, same heads, predicted 0.2–0.35.**
 
 Artifacts: `<cell>/parts/{verdict,train,v2,v3,v4,v5,lod}` (masks, nodes, maps, protocol files, super_eval*.json, proj_heads.json, figures);
 scripts `automation/h3dgs/v3/{parts_masks,parts_test0,parts_nodes,parts_hierarchy,build_super_seed,super_eval,super_fig,
