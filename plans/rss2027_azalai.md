@@ -84,7 +84,10 @@ Working titles: "Go to the one that changed: sending field robots back to plants
 - **The ICRA paper's farm** (14 rows, ~60 m, Husky A200): to confirm with Adam whether a twin can be built from its
   logs; it would give the baseline on its home ground.
 
-Checks before relying on Klapmuts (this week): stereo pairs present in the Klapmuts bags (VT&R3 needs them); the
+Stereo check DONE 20 Oct (notebook): left + right rectified colour at 15 Hz on every session, Dec 2025 and Apr 2026
+(both with lidar, complete files) and two Feb 2026 sessions (08:03 and 10:24 the same day, gray stereo too, no lidar;
+both files lack the MCAP footer and the 10:24 one is 1.42 GB, so a re-copy from the source drive is needed before use).
+Four sessions over four months: teach on December, repeat on Feb/Apr offline. Remaining check: the
 Klapmuts H3DGS held-out quality is 16.8–17.8 dB per chunk (09-23 notebook), below the demo bar; the arrival check
 uses masks, not photometric match, but the masks must be scored first.
 
