@@ -59,6 +59,13 @@ Working titles: "Go to the one that changed: sending field robots back to plants
 5. **Arrival check** (new): render the twin's target mask at the repeat pose, segment the live frame, score with the
    E1 IoU protocol; arrived = target's IoU is the argmax over the target and its row neighbours.
 
+6. **Part-level targets** (merged from the CVPR super-hierarchy idea, Paul 20 Oct): parts below the trees, anchored
+   by image embeddings of their masks while trees keep pinned addresses, so a target can be "the trunk of tree 36".
+   Status on the A100 (20 Oct): parts embed and identity holds, but the composed trunk query is at IoU 0.07–0.10
+   against a 0.50 bar (a trunk is carried by ~13 Gaussians); the pre-registered next step is part-share seeding.
+   In this paper parts are a goal level for navigation (go to and view the part), so the bar to meet is the arrival
+   check at part level, stated in Stage 1 as an extension, not a claim.
+
 ## 5. Hypotheses (pre-registered)
 
 | | Hypothesis | Metric | Baseline | Decision rule |
