@@ -115,6 +115,15 @@ primitives, not on the hierarchy: a part needs its own primitives (the fruit fin
 the splat already models (a canopy half, a sunny side, a row segment). Next step if pursued: the LoD split at the trunk masks (guided split,
 as for fruit) before re-seeding; or choose parts of >= 3 % of the frame for the decisive test.
 
-Artifacts: `<cell>/parts/{verdict,train,v2,v3,v4}` (masks, nodes, maps, protocol files, super_eval*.json, proj_heads.json, figures);
+**v5 (visibility-weighted part-view census) and the localisation criterion.** Counting a view's part mass through the Gaussian's
+transmittance changes nothing: composed median IoU 0.070 (v4 0.071), guard trees 0.742 / rows 0.832, Spearman(share, IoU) 0.80. The trunk
+nodes are not localisable under v4 or v5: 22 nodes of ~500 Gaussians each, centroid 1.0 m from the tree marker (quartiles 0.8–1.6), horizontal
+spread 2.2 m, 2/22 within 0.5 m — the node's cloud is the canopy-majority Gaussians the share rule promotes, so no census weighting can place it.
+
+**LoD route (launched 10-20 05:22, `chains/super_lod.sh`).** The guided-split trainer with trunk ∪ fruit as the small-object class read
+directly from masks (`parts/v4/fruitmask_trunk`), then the v5 pipeline on the new geometry. Pre-registered: composed median IoU 0.2–0.35,
+most trunk-node centroids within 0.5 m of the markers with spread well under 2.2 m, guard within 0.02 of v5. Result: pending.
+
+Artifacts: `<cell>/parts/{verdict,train,v2,v3,v4,v5,lod}` (masks, nodes, maps, protocol files, super_eval*.json, proj_heads.json, figures);
 scripts `automation/h3dgs/v3/{parts_masks,parts_test0,parts_nodes,parts_hierarchy,build_super_seed,super_eval,super_fig,
 super_retrieval_check,super_proj_diag,trunk_probe}.py`, chains under `automation/h3dgs/v3/chains/`; notebook 2026-10-20.

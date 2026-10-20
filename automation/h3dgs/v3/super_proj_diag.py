@@ -11,8 +11,8 @@ from nerfstudio.utils.eval_utils import eval_setup
 from nerfstudio.models.splatfacto import get_viewmat
 from nerfstudio.cameras.cameras import Cameras
 sys.path.insert(0, '/home/paperspace/code/hierarchical-3d-gaussians/preprocess')
-ap = argparse.ArgumentParser(); ap.add_argument('identity'); ap.add_argument('parts'); ap.add_argument('frame'); ap.add_argument('tree', type=int); ap.add_argument('labels'); ap.add_argument('--sparse', default=''); ap.add_argument('--all-heads', default='', help='a super_eval.json: run every (frame, tree) head and join the composed IoU; frame/tree arguments ignored'); ap.add_argument('--out', default=''); a = ap.parse_args()
-N, P = Path(a.identity), Path(a.parts); k = a.tree; f = a.frame; cfg = Path(json.load(open(N / 'W.json'))['config']); WS = N.parent
+ap = argparse.ArgumentParser(); ap.add_argument('identity'); ap.add_argument('parts'); ap.add_argument('frame'); ap.add_argument('tree', type=int); ap.add_argument('labels'); ap.add_argument('--sparse', default=''); ap.add_argument('--all-heads', default='', help='a super_eval.json: run every (frame, tree) head and join the composed IoU; frame/tree arguments ignored'); ap.add_argument('--out', default=''); ap.add_argument('--config', default='', help='splat config.yml to read the Gaussians from (default: the identity dir W.json config)'); a = ap.parse_args()
+N, P = Path(a.identity), Path(a.parts); k = a.tree; f = a.frame; cfg = Path(a.config) if a.config else Path(json.load(open(N / 'W.json'))['config']); WS = N.parent
 _, pipe, _, step = eval_setup(cfg, test_mode='test'); model = pipe.model; model.eval(); dev = model.device
 from read_write_model import read_images_binary, qvec2rotmat
 sp = a.sparse or str(WS / 'sparse/0'); dp = json.load(open(cfg.parent / 'dataparser_transforms.json')); T = np.eye(4); T[:3] = np.array(dp['transform']); ws = json.load(open(WS / 'transforms.json')); ims = {i.name: i for i in read_images_binary(os.path.join(sp, 'images.bin')).values()}

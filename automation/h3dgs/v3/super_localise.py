@@ -7,8 +7,8 @@ nerf_new pixi env:  super_localise.py <identity dir> <labels.npy> <nodes.npz> <o
 import argparse, json
 from pathlib import Path
 import numpy as np, torch
-ap = argparse.ArgumentParser(); ap.add_argument('identity'); ap.add_argument('labels'); ap.add_argument('nodes'); ap.add_argument('out'); ap.add_argument('--min', type=int, default=5); a = ap.parse_args()
-N = Path(a.identity); W = str(N).split('/experimental/')[0]; cfg = Path(json.load(open(N / 'W.json'))['config']); dp = json.load(open(cfg.parent / 'dataparser_transforms.json')); T = np.eye(4); T[:3] = np.array(dp['transform']); S = float(dp['scale'])
+ap = argparse.ArgumentParser(); ap.add_argument('identity'); ap.add_argument('labels'); ap.add_argument('nodes'); ap.add_argument('out'); ap.add_argument('--min', type=int, default=5); ap.add_argument('--config', default='', help='splat config.yml to read the Gaussians from (default: the identity dir W.json config)'); a = ap.parse_args()
+N = Path(a.identity); W = str(N).split('/experimental/')[0]; cfg = Path(a.config) if a.config else Path(json.load(open(N / 'W.json'))['config']); dp = json.load(open(cfg.parent / 'dataparser_transforms.json')); T = np.eye(4); T[:3] = np.array(dp['transform']); S = float(dp['scale'])
 meta = json.load(open(W + '/experimental/h3dgs_expo/export_meta.json')); R_W = np.array(meta.get('world_rotation_to_zup') or meta['world_rotation_lio_to_h3dgs'], dtype=np.float64)
 ck = sorted((cfg.parent / 'nerfstudio_models').glob('step-*.ckpt'))[-1]; sd = torch.load(ck, map_location='cpu', weights_only=False)['pipeline']; means = [v for k, v in sd.items() if k.endswith('gauss_params.means')][0].double().numpy()
 n = means.shape[0]; p_h = (np.linalg.inv(T) @ np.c_[means / S, np.ones(n)].T).T[:, :3]; xyz = (np.linalg.inv(R_W) @ np.c_[p_h, np.ones(n)].T).T[:, :3]
