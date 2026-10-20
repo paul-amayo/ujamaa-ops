@@ -113,9 +113,15 @@ from collections import Counter
 # LANE RE-CUT (Paul, 20 Oct: "re-cut citrus B"): only the lane passes between the tree rows (the walk root's lane filter:
 # kf 12-48 going +z, kf 3279-3318 coming back), trained views with their own exposure, kept if >= 25 dB; modes re-assigned along
 # the kept frames: plain until tree 5 is near, the oranges while it is, then row / tree / every tree / rows / whole orchard.
+LANE_FLOOR = float(os.environ.get('LANE_FLOOR', '16'))   # v3 (Paul, 20 Oct: "it looks like a glitch, reduce the bar in favour of consistency")
+_EK = sorted(int(k[3:9]) for k in EXPO)
+def _expo(kf):
+    """the view's own trained exposure, else the nearest trained view's (held-out views have none)"""
+    if kf in EXPO: return np.array(EXPO[kf], np.float32)
+    n = int(kf[3:9]); k = min(_EK, key=lambda x: abs(x - n)); return np.array(EXPO[f'kf_{k:06d}.png'], np.float32)
 def _psnr(kf):
     im = ims[kf]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec; c2w = np.linalg.inv(w2c)
-    cam = Cam(c2w, W, H, 2 * math.atan(H / (2 * fy)), cx / W, cy / H); E_ = np.array(EXPO[kf], np.float32)
+    cam = Cam(c2w, W, H, 2 * math.atan(H / (2 * fy)), cx / W, cy / H); E_ = _expo(kf)
     with torch.no_grad():
         img, _ = CH.render(cam, 3.0); img = torch.einsum('ji,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
         rgb = (img.clamp(0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy()
@@ -124,10 +130,10 @@ def _psnr(kf):
 _lane = [f'kf_{k:06d}.png' for k in list(range(12, 49)) + list(range(3279, 3319))]
 _kept = []
 for kf in _lane:
-    if kf not in ims or kf in TEST or kf not in EXPO: continue
+    if kf not in ims: continue
     p_, c2w_, w2c_ = _psnr(kf)
-    if p_ >= BAR_DB: _kept.append((kf, w2c_, c2w_))
-print(f'[lane] {len(_kept)} lane frames >= {BAR_DB} dB of {sum(1 for k in _lane if k in ims and k not in TEST and k in EXPO)} trained lane views', flush=True)
+    if p_ >= LANE_FLOOR: _kept.append((kf, w2c_, c2w_))
+print(f'[lane] {len(_kept)} lane frames >= {LANE_FLOOR} dB of {sum(1 for k in _lane if k in ims)} lane views (trained + held-out)', flush=True)
 _Q = {g['mode']: g['question'] for g in script['segments']}; _Q['fruit'] = FQ
 # v2 (same day): the return pass leaves the rows into open ground, where "rows" / "whole orchard" lit nothing. Modes now follow
 # the drive and what each view sees: the outbound pass down the lane (trees both sides) carries plain -> oranges -> rows ->
@@ -161,15 +167,15 @@ for f in FRAMES:
     if NOCAP:
         if SHOWN[(f['i'], kf, mode)] <= 0: continue
         SHOWN[(f['i'], kf, mode)] -= 1
-    if kf not in ims or (not FULL and (kf in TEST or kf not in EXPO)): continue      # untrained view: shown only in FULL
+    if kf not in ims: continue
     im = ims[kf]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec; c2w = np.linalg.inv(w2c)
-    cam = Cam(c2w, W, H, 2 * math.atan(H / (2 * fy)), cx / W, cy / H); E_ = np.array(EXPO[kf], np.float32) if kf in EXPO else MEAN_EXPO
+    cam = Cam(c2w, W, H, 2 * math.atan(H / (2 * fy)), cx / W, cy / H); E_ = _expo(kf)
     with torch.no_grad():
         img, _ = CH.render(cam, 3.0); img = torch.einsum('ji,jhw->ihw', torch.tensor(E_[:, :3]).cuda(), img) + torch.tensor(E_[:, 3]).cuda()[:, None, None]
         rgb = (img.clamp(0, 1).permute(1, 2, 0) * 255).byte().cpu().numpy()
     photo = np.asarray(Image.open(f'{S}/prod/scratch_sam3/{kf}').convert('RGB')).astype(np.float32)
     psnr = float(10 * np.log10(255 ** 2 / max(((rgb.astype(np.float32) - photo) ** 2).mean(), 1e-9)))
-    if psnr < BAR_DB and not FULL and not NOCAP: rows_out.append((f['i'], kf, mode, round(psnr, 2), '', '', 'dropped: render < 25 dB')); continue
+    if psnr < LANE_FLOOR and not FULL and not NOCAP: rows_out.append((f['i'], kf, mode, round(psnr, 2), '', '', 'dropped: render < 25 dB')); continue
     sup = np.array(Image.open(f'{NB}/supervision/trees_only/{kf}'), np.uint16)
     if sup.shape != (H, W): sup = np.array(Image.fromarray(sup).resize((W, H), Image.NEAREST))
     # trees in front of the camera, nearest first (scene-graph geometry, not the supervision)
@@ -251,7 +257,7 @@ for m in ('plain', 'fruit', 'row', 'tree', 'all', 'rows', 'orchard'):
 _shown = [r for r in rows_out if r[6] == 'shown']; lst = OUT / 'concat.txt'; prev = None
 with open(lst, 'w') as fh:
     for j, r in enumerate(_shown):
-        fh.write(f"file '{OUT / FR / f'{j:05d}.png'}'\nduration {2.0 if r[2] != prev else 1 / 3:.4f}\n"); prev = r[2]
+        fh.write(f"file '{OUT / FR / f'{j:05d}.png'}'\nduration {2.0 if r[2] != prev else 1 / 4:.4f}\n"); prev = r[2]
     fh.write(f"file '{OUT / FR / f'{len(_shown) - 1:05d}.png'}'\n")
 mp4 = OUT / 'citrus_b_lane.mp4'
 subprocess.run(['ffmpeg', '-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', str(lst), '-vf', 'fps=30,format=yuv420p', '-c:v', 'libx264', '-crf', '20', '-movflags', '+faststart', str(mp4)], check=True)
