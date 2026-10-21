@@ -4,6 +4,8 @@ Paul, 20 Oct: "there is much to be explored combining HiGH with something else";
 **Azalai** (navigation). Papers ↔ agents: HiGH = Tassili, JIRS 4D twin = Sankofa, RSS = Azalai; Spoor (the live
 in-field tracker) is a later agent. Programme plan: `plans/publications_2026Q4.md`.
 
+Paper repository: `~/Documents/UCT/SIL/Publications/Azalai_RSS` (GitHub `paul-amayo/Azalai_RSS`, Overleaf-synced; Paul, 21 Oct).
+
 ## 1. Venue (CfP read 20 Oct, roboticsconference.org/information/cfp)
 
 - RSS 2027, Athens, 6–11 July 2027. Two stages, both anonymised.
