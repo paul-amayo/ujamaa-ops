@@ -24,7 +24,7 @@ rule now; Stage 2 reports them whichever way they fall.
 | Work | Status | What Azalai takes from it | What Azalai must not re-claim |
 |---|---|---|---|
 | HiGH (Tassili) | RA-L, submit 13 Nov | open-vocabulary identity, containment, argmax query rule, census weights, fruit registry, E1 IoU protocol | the embedding or any new ablation of it |
-| Language-enabled scene graph + robot layer + VT&R3 (Mukuddem, Speed-Andrews, Amayo) | ICRA, under review | robot layer (keyframe ↔ object edges), LLM instruction decomposition, VT&R3 multi-experience repeat | enumerated addressing, the repeat results |
+| Language-enabled scene graph + robot layer + VT&R3 (Mukuddem, Speed-Andrews, Amayo) | **published, ICRA 2026** | robot layer (keyframe ↔ object edges), LLM instruction decomposition, VT&R3 multi-experience repeat | enumerated addressing, the repeat results |
 | SANA row following (Travi et al.) | ICRA, under review | optional in-row driving between keyframes | row following itself |
 | JIRS 4D twin (Sankofa) | JIRS, submit Feb 2027 | a registry entry (e.g. "missing since December") as a *target* | farm-scale found-again rates, the survey-to-survey ledger |
 | Spoor | later agent | — | continuous live tracking; Azalai checks position once, at the goal |
@@ -33,7 +33,7 @@ All prior ARU work is cited in the third person (anonymised).
 
 ## 3. The gap and the claim
 
-The ICRA system can be told "go to plant 4 in line 4" and repeat a taught route there. It cannot be told *which*
+The ICRA 2026 system can be told "go to plant 4 in line 4" and repeat a taught route there. It cannot be told *which*
 plant by what it is or what happened to it (rows are homogeneous, so addresses are numbers); its goal is the first
 keyframe that ever saw the plant; and nothing checks that the robot reached the right plant, only that it stayed on
 the taught path (RMSE). On a farm monitored over months the questions are of the other kind: "go to the bag that was
@@ -156,8 +156,8 @@ Every number in the abstract resolves to a provenance file (paper-latex number a
 ## 10. Risks
 
 - Three weeks after HiGH for a new paper: the pilots must be small; the abstract can stand on hypotheses.
-- The ICRA decisions (expected around late January, to check) land before Stage 2; if either is rejected the RSS
-  paper still cites it as a preprint, and nothing from it is re-claimed.
+- The scene-graph paper is published (ICRA 2026) and is cited as such; SANA's ICRA 2027 decision lands before Stage 2
+  and, if rejected, is cited as a preprint. Nothing from either is re-claimed.
 - Klapmuts twin quality and the stereo check (section 6) are now risks to the paper, not to the choice of site.
 - Field access Feb–Apr (berry season, farm operations) — to confirm with the farm.
 
