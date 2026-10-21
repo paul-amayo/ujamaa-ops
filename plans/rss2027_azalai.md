@@ -91,6 +91,16 @@ Four sessions over four months: teach on December, repeat on Feb/Apr offline. Re
 Klapmuts H3DGS held-out quality is 16.8–17.8 dB per chunk (09-23 notebook), below the demo bar; the arrival check
 uses masks, not photometric match, but the masks must be scored first.
 
+### VT&R3 implementation (Adam Speed-Andrews, cloned 21 Oct)
+`github.com/adamspeedy/vtr3` (ROS 2 Jazzy port of ASRL's VT&R3, no learned features; last push 26 Mar 2026), cloned to
+`~/code/vtr3` on the A100 (ignored by the outer `~/code` repo; not built — needs ROS 2 Jazzy, colcon, CycloneDDS).
+Farm configs `src/config/config_{ORB,SURF}_ZED_Farm*.yaml`: stereo from `/zed/zed_node/{left,right}_gray/image_rect_gray`,
+odometry from `/zed/zed_node/odom`, ORB (OpenCV) or ASRL GPU SURF features. Those gray topics exist only in the two
+Feb 2026 Klapmuts bags, which look like VT&R recordings; Dec and Apr carry colour stereo only (the configs list the
+colour topics as the commented alternative). The configs' GPS origin (−33.9577, 18.4612) is in Cape Town, not
+Klapmuts: a farm config to make for Klapmuts. Bag tools: `vtr_db_extractor` (edges, vertices, landmarks, odometry,
+localisation results from the pose-graph bags).
+
 ## 7. Stage 1 evidence (offline, from logs, by 27 Nov)
 
 Stage 1 does not need results; a small pilot makes the hypotheses credible.
