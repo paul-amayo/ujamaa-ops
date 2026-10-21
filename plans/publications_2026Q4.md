@@ -82,7 +82,9 @@ Each paper is the science behind one agent, which also sets the contribution bou
 | Feb 2027 | (revision if returned; reviewer-response skill) | **submit** (three months before the 31 May deadline, leaving room for a revision) | — |
 
 Paper repositories (Paul, 21 Oct): RSS `~/Documents/UCT/SIL/Publications/Azalai_RSS` (GitHub `paul-amayo/Azalai_RSS`), JIRS
-`~/Documents/UCT/SIL/Publications/Sankofa_JIRS` (GitHub `paul-amayo/Sankofa_JIRS`), both Overleaf-synced. Titles name what the
+`~/Documents/UCT/SIL/Publications/Sankofa_JIRS` (GitHub `paul-amayo/Sankofa_JIRS`), systems paper
+`~/Documents/UCT/SIL/Publications/Ujamaa_ScientificAfrican` (GitHub `paul-amayo/Ujamaa_ScientificAfrican`), DiMR
+`~/Documents/UCT/SIL/Publications/Distraction-Inclusive-Mesh-Reconstructions-of-Dynamic-Scenes`; all Overleaf-synced. Titles name what the
 system does; the agent names stay internal.
 
 ## JIRS method update from the STPG pilot (21 Oct)
