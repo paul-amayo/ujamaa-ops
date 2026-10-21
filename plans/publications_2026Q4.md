@@ -76,6 +76,10 @@ Each paper is the science behind one agent, which also sets the contribution bou
 | Jan 2027 | — | full draft, co-author pass, Paul's claim pass | — |
 | Feb 2027 | (revision if returned; reviewer-response skill) | **submit** (three months before the 31 May deadline, leaving room for a revision) | — |
 
+Paper repositories (Paul, 21 Oct): RSS `~/Documents/UCT/SIL/Publications/Azalai_RSS` (GitHub `paul-amayo/Azalai_RSS`), JIRS
+`~/Documents/UCT/SIL/Publications/Sankofa_JIRS` (GitHub `paul-amayo/Sankofa_JIRS`), both Overleaf-synced. Titles name what the
+system does; the agent names stay internal.
+
 ## JIRS method update from the STPG pilot (21 Oct)
 
 - The ledger's Dec→Apr link is one global yaw + translation; the 21 Oct trajectory-ICP alias (one lane off on a drifted
