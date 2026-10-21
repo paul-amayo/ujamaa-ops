@@ -51,7 +51,7 @@ def project(c2w, p):
 tiles = []
 for bid in [int(x) for x in sys.argv[1:]]:
     gzA = ground_z("apr", B[bid], -2.6)
-    pA = R @ np.array([B[bid, 0], B[bid, 1], gzA])
+    pA = (l2c @ np.array([B[bid, 0], B[bid, 1], gzA, 1.0]))[:3]   # full laser->camera extrinsic
     cands = []
     for k in np.flatnonzero(~np.isnan(apr[:, 0, 0])):
         u, v = project(apr[k], pA)
@@ -74,7 +74,7 @@ for bid in [int(x) for x in sys.argv[1:]]:
         imd = next(monos.iter_images(stD["kf"], [kfD[j]], gray=False))[2]; ud, vd = project(dec[j], p_dec)
         if ud is not None and 0 <= ud[0] < W and 0 <= ud[1] < H: cv2.circle(imd, ud, 40, (0, 220, 255), 3, cv2.LINE_AA)
         # the nearest December bag to the carried point
-        dn = np.linalg.norm(Adec - (np.linalg.inv(R) @ p_dec)[:2], axis=1); jn = int(dn.argmin())
+        dn = np.linalg.norm(Adec - (np.linalg.inv(l2c) @ np.array([*p_dec, 1.0]))[:2], axis=1); jn = int(dn.argmin())
         cv = np.hstack([imd, img]); cv2.rectangle(cv, (0, 0), (2 * W, 34), (0, 0, 0), -1)
         cv2.putText(cv, f"April bag {bid}: April kf {k} at {z:.1f} m (right; grow-bag masks: red = contains the projected position, orange = others, {len(ents)} in frame)  |  December kf {j} via edge of kf {kk} ({ni} inl.), nearest Dec bag {jn} at {dn[jn]:.2f} m", (10, 24), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 2, cv2.LINE_AA)
         tiles.append(cv)

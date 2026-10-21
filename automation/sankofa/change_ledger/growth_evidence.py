@@ -23,7 +23,7 @@ def proj(c2w,p):
 ext=json.load(open(O+"/growth_extremes.json")); tiles=[]
 for kind in ["shrunk","grown"]:
     for i,j,dh in ext[kind][:3]:
-        pD=R@np.array([Adec[i,0],Adec[i,1],float(hd["ground"][i])]); pA=R@np.array([B[j,0],B[j,1],float(ha["ground"][j])])
+        pD=(l2c@np.array([Adec[i,0],Adec[i,1],float(hd["ground"][i]),1.0]))[:3]; pA=(l2c@np.array([B[j,0],B[j,1],float(ha["ground"][j]),1.0]))[:3]   # full laser->camera extrinsic, rotation and translation
         kd=view(dec,pD); ka=view(apr,pA)
         if kd is None or ka is None: continue
         imd=next(monos.iter_images(stD["kf"],[kfD[kd]],gray=False))[2]; ima=next(monos.iter_images(stA["kf"],[kfA[ka]],gray=False))[2]
