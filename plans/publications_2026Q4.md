@@ -76,6 +76,21 @@ Each paper is the science behind one agent, which also sets the contribution bou
 | Jan 2027 | — | full draft, co-author pass, Paul's claim pass | — |
 | Feb 2027 | (revision if returned; reviewer-response skill) | **submit** (three months before the 31 May deadline, leaving room for a revision) | — |
 
+## JIRS method update from the STPG pilot (21 Oct)
+
+- The ledger's Dec→Apr link is one global yaw + translation; the 21 Oct trajectory-ICP alias (one lane off on a drifted
+  stream) shows how fragile that is. The offline STPG gives per-keyframe spatial edges between epochs (0.15 m on strong
+  edges, inlier count as the flag): re-associate the ledger through those edges, plant by plant, in locally registered
+  frames; keep the global transform only as the prior. This is the 4D-twin contribution: change measured where the
+  surveys are locally registered, with a declared site frame (`klapmuts/site_frame.json`, December FP_ENU0) and one
+  splat per epoch (fusing would average the change away).
+- Related work to sit between: per-plant temporal splats (GrowSplat, CASE 2025, arXiv:2505.10923; Grow with the Flow,
+  arXiv:2602.08958; Riemannian growth fields, arXiv:2608.13007; Chebrolu et al. non-rigid 4D plant registration,
+  PLOS ONE 2021, Pheno4D) and scene map updates (LT-Gaussian arXiv:2508.01704; GaussianUpdate arXiv:2508.08867; GaME
+  arXiv:2506.06909; SI-Update). None is farm-scale, robot-collected, months apart, with identity kept per plant.
+- Third epoch: Feb 2026 (two sessions) once the shared-drive transfer completes; April day one / day two as a same-week
+  pair. Hand-checked association pairs become cheap to label from the STPG's matched keyframe images.
+
 ## JIRS gap measurements (to confirm in the outline)
 
 - Ledger over time: found-again rates with their protocol (Klapmuts Dec→Apr 825 of 912 bags; citrus 79 trees two days

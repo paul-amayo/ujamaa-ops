@@ -101,6 +101,25 @@ colour topics as the commented alternative). The configs' GPS origin (−33.9577
 Klapmuts: a farm config to make for Klapmuts. Bag tools: `vtr_db_extractor` (edges, vertices, landmarks, odometry,
 localisation results from the pose-graph bags).
 
+## 6b. Pilot evidence in hand (21 Oct) and what it does to the plan
+
+- **The STPG exists** (`aru_sil_core/src/offline_vtr`, ROS-free): December teach 2,243 keyframes; self-localisation from
+  neighbours' landmarks 2–3 cm. The method section is built, not proposed.
+- **Cross-season repeat, April on December:** SuperPoint + LightGlue 1,438 / 2,019 (71 %), ORB 0, SIFT 0; strong edges
+  (≥ 40 inliers, n 579) agree with April's odometry to 0.15 m (84 % < 0.3 m). Inliers sit on the tunnel structure, not the
+  plants (qualitative pairs, 21 Oct). Consequence: the arrival check must be the twin render (H3), not plant features;
+  and the repeat needs learned features, which is a stated dependency, not a claim.
+- **Route and frame:** Dec and Apr run the same ten lanes in the same direction (INS/GNSS; 87 % of April keyframes within
+  1 m of a same-heading December keyframe). Site frame declared in `klapmuts/site_frame.json` (December FP_ENU0; April
+  offset yaw 0.05°, t (27.28, −14.30) m). December's prod odometry is now KISS-ICP (the ZED stream fanned the lanes).
+- **Novelty to manage:** learned features in VT&R are known (Gridseth & Barfoot, RA-L 2022: deep learned features for
+  long-term VT&R). The claim sits on the twin side: goal named by the hierarchy, arrival verified against the twin, the
+  STPG as substrate. Multi-experience bridging (Dec → Feb → Apr, plus April's two days) is the experiment, not the claim.
+- **Data ladder arriving** (1.1 TB to `/mnt/shared2/Klapmuts_2026`, ~2.5 days at 5–6 MB/s): Feb 08:03 / 10:24 (hours),
+  April day one / day two (a day), Dec → Apr (months). Stage 1 pilots run on that ladder.
+- **Caveat stated in the abstract:** one site, no hand truth yet; quality readouts are odometry consistency and GNSS
+  lateral agreement (0.12 m median), with the inlier count as the per-edge flag.
+
 ## 7. Stage 1 evidence (offline, from logs, by 27 Nov)
 
 Stage 1 does not need results; a small pilot makes the hypotheses credible.
