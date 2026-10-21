@@ -3,6 +3,12 @@
 Paul, 19 Oct: "there's a special issue open … let's plan publications towards the end of the year."
 Skills: how-paul-writes (voice), paper-latex (build/checks/packaging), reviewer-response.
 
+## Blocked on (21 Oct)
+
+HiGH: Paul's figures (out Fri 23 Oct). DiMR: the OMD data (Drive links down; Paul requesting). Sankofa/JIRS and
+Azalai/RSS: the Klapmuts transfer to /mnt/shared2 (~2.5 days from 21 Oct). Scientific African: nothing — outline in
+`Ujamaa_ScientificAfrican/outline.md`; F3 and T1 need the box after the transfer.
+
 ## Decisions, 20 Oct (Paul)
 
 - **No CVPR submission.** The super-hierarchy idea (parts below trees, text-pinned addresses + image-anchored part
