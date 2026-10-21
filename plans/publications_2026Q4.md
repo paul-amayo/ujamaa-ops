@@ -105,8 +105,9 @@ system does; the agent names stay internal.
   arXiv:2602.08958; Riemannian growth fields, arXiv:2608.13007; Chebrolu et al. non-rigid 4D plant registration,
   PLOS ONE 2021, Pheno4D) and scene map updates (LT-Gaussian arXiv:2508.01704; GaussianUpdate arXiv:2508.08867; GaME
   arXiv:2506.06909; SI-Update). None is farm-scale, robot-collected, months apart, with identity kept per plant.
-- Third epoch: Feb 2026 (two sessions) once the shared-drive transfer completes; April day one / day two as a same-week
-  pair. Hand-checked association pairs become cheap to label from the STPG's matched keyframe images.
+- Third epoch: Feb 2026 (two sessions, already on the box under `klapmuts/rosbag2_2026_02_02-*`); April day one is
+  **three passes of the ten rows** (10:54 SAST on the box; 11:39 landed on /mnt/shared2 on 21 Oct; 14:10 in flight) —
+  the same-day repeat for the growth noise floor and STPG repeatability; day two as the same-week pair. Hand-checked association pairs become cheap to label from the STPG's matched keyframe images.
 
 ## JIRS gap measurements (to confirm in the outline)
 
