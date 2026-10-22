@@ -1,0 +1,15 @@
+[Unit]
+Description=UJAMAA Adinkra panel agents (:8013, localhost)
+After=network-online.target ollama.service
+[Service]
+User=paperspace
+WorkingDirectory=/home/paperspace/code/ujamaa/adinkra
+Environment=HOME=/home/paperspace LANG=en_US.UTF-8 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+Environment=ADINKRA_LEDGER=/home/paperspace/data/sankofa_demo/ledger_demo_v1.json HIGH_LLM_URL=http://localhost:11434
+ExecStart=/usr/bin/python3 -m uvicorn server:app --host 127.0.0.1 --port 8013
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/home/paperspace/logs/adinkra_8013.log
+StandardError=append:/home/paperspace/logs/adinkra_8013.log
+[Install]
+WantedBy=multi-user.target

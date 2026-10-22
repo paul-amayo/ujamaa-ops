@@ -1,0 +1,16 @@
+# UJAMAA public site (Paul, 20 Oct 2026): ujamaa.ai -> the launch app on this A100, behind one shared password.
+# The app (:8011), the 3D stream (:8024, at /stream/*) and everything else stay bound to 127.0.0.1; only Caddy is public.
+# TLS: automatic (Let's Encrypt) once ujamaa.ai and www point here.
+ujamaa.ai, www.ujamaa.ai {
+	redir / /app/
+	basic_auth {
+		{$UJAMAA_AUTH_USER} {$UJAMAA_AUTH_HASH}
+	}
+	handle_path /stream/* {
+		reverse_proxy 127.0.0.1:8024
+	}
+	handle {
+		encode gzip
+		reverse_proxy 127.0.0.1:8011
+	}
+}
