@@ -122,6 +122,18 @@ localisation results from the pose-graph bags).
 - **Caveat stated in the abstract:** one site, no hand truth yet; quality readouts are odometry consistency and GNSS
   lateral agreement (0.12 m median), with the inlier count as the per-edge flag.
 
+## 6c. Stage 1 pilots run (29 Oct, on logs; `Azalai_RSS/numbers/pilots_20261029/`, scripts `automation/azalai/pilots/`)
+
+- **H2 holds on logs:** over 812 December bags the best-view keyframe (most lifted returns) is closer than the first-sighting
+  keyframe in 794 (1.70 vs 2.86 m median) and sees the bag's mask 3.7× larger (15,363 vs 4,121 px; 721 vs 76, sign test
+  p ≈ 1e-132); it is further off-axis (35° vs 21°), so the goal rule has a trade to state.
+- **H3, the positional stand-in fails as predicted:** with the twin render replaced by the bag's footprint at the goal pose,
+  the argmax check confirms 516/552 correct arrivals and also 493/552 wrong ones (one bag along, 1.1 m). Rows alias by one
+  bag; the check needs appearance (the twin render). Stage 1 states this as the reason for H3's design and the number.
+- **Instruction bank v0 frozen** (100; the ICRA paper's 7 linguistic categories from Adam's proposal Table 3 + identity,
+  count, change), target rules against ledger v5 / JIRS heights and vetting / HiGH fruit registry. **H1 harness** (LLM
+  decomposition + HiGH containment / registry lookup) is the next piece, on the A100.
+
 ## 7. Stage 1 evidence (offline, from logs, by 27 Nov)
 
 Stage 1 does not need results; a small pilot makes the hypotheses credible.
