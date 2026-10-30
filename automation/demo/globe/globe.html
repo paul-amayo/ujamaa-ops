@@ -6,8 +6,10 @@
   depends on wall-clock. Drive it with
       globe.html?stop=klapmuts&mode=in&frame=42        (renders that one frame on load)
       globe.html?stop=klapmuts&mode=in&play=1          (human preview: loops the clip)
+      globe.html?...&labels=0                          (clean: no label/tagline/caption text; pin stays)
   or from a headless driver (render_globe.py) via
       window.setClip(stop, mode); const dataUrl = window.renderFrame(i);   // PNG data URL
+      window.setLabels(false)   // same as labels=0 (default true)
   window.__ready becomes true once the texture is loaded and the first frame drawn.
 
   Stops: klapmuts | kendu_bay | gendia | citrus (continent only) | earth_idle.
@@ -162,6 +164,11 @@
   function shadowOn(ctx, blur) { ctx.shadowColor = 'rgba(0,0,0,0.65)'; ctx.shadowBlur = blur; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 1; }
   function shadowOff(ctx) { ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; }
 
+  // Text on/off. Default on; labels=0 (or window.setLabels(false)) gives clean footage:
+  // the amber pin is kept, every label, tagline and caption is suppressed.
+  let showLabels = new URLSearchParams(location.search).get('labels') !== '0';
+  window.setLabels = function (on) { showLabels = !!on; return showLabels; };
+
   function drawHud(stopName, st) {
     hctx.clearRect(0, 0, W, H);
     const stop = STOPS[stopName];
@@ -185,7 +192,7 @@
         hctx.beginPath(); hctx.arc(x, y, 14, 0, Math.PI * 2); hctx.stroke();
         hctx.restore();
 
-        if (st.labelA > 0) {
+        if (showLabels && st.labelA > 0) {
           const lx = x + 30, ly = y - 6;      // label to the right of the pin
           hctx.save();
           hctx.globalAlpha = st.labelA;
@@ -201,7 +208,7 @@
           hctx.restore();
         }
       }
-    } else if (!stop.pin && st.labelA > 0) {
+    } else if (!stop.pin && showLabels && st.labelA > 0) {
       // continent-only stop: a centred caption in the lower third, nothing locating it
       hctx.save();
       hctx.globalAlpha = st.labelA;
@@ -250,7 +257,7 @@
   window.showFrame = function (i) { return renderState(curStop, curMode, i); };
   window.clipInfo = function () {
     return { frames: N, fps: FPS, width: W, height: H, stops: Object.keys(STOPS),
-             webgl: renderer.getContext().getParameter(renderer.getContext().RENDERER) };
+             labels: showLabels, webgl: renderer.getContext().getParameter(renderer.getContext().RENDERER) };
   };
 
   function boot() {

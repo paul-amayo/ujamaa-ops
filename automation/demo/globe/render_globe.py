@@ -9,6 +9,7 @@ window.renderFrame(i) -> PNG data URL, so capture is exact and wall-clock free.
     python3 render_globe.py                      # all clips -> OUT_DIR
     python3 render_globe.py --clips klapmuts klapmuts_out --frames 180
     python3 render_globe.py --chrome /path/to/Chrome --keep-frames
+    python3 render_globe.py --no-labels --out DIR   # clean footage: pin only, no text
 
 Outputs (OUT_DIR): <clip>.mp4 per clip, checks/<clip>_f{090,179}.png, sheet.png, sheet.md.
 """
@@ -244,6 +245,8 @@ def main():
     ap.add_argument('--chrome', default=CHROME)
     ap.add_argument('--keep-frames', action='store_true', help='keep PNG frames under <out>/frames/<clip>/')
     ap.add_argument('--check-frames', default='0,60,90,120,179', help='frame indices copied to <out>/checks/')
+    ap.add_argument('--no-labels', action='store_true',
+                    help='clean footage: no label/tagline/caption text (pins stay); sets labels=0')
     ap.add_argument('--chrome-flag', action='append', default=[], help='extra Chrome flag (repeatable)')
     args = ap.parse_args()
 
@@ -251,7 +254,7 @@ def main():
     check_idx = {min(int(x), args.frames - 1) for x in args.check_frames.split(',') if x.strip()}
     srv, http_port = start_http(HERE)
     profile = tempfile.mkdtemp(prefix='globe_chrome_')
-    url = f'http://127.0.0.1:{http_port}/globe.html?stop=earth_idle&frame=0'
+    url = f'http://127.0.0.1:{http_port}/globe.html?stop=earth_idle&frame=0' + ('&labels=0' if args.no_labels else '')
     t0 = time.time()
     proc, ws_url = start_chrome(args.chrome, url, profile, args.chrome_flag)
     cdp = CDP(ws_url)
@@ -262,6 +265,8 @@ def main():
         if time.time() - t0 > 180:
             raise RuntimeError('page never became ready')
         time.sleep(0.25)
+    if args.no_labels:
+        cdp.eval('window.setLabels(false)')
     info = cdp.eval('JSON.stringify(window.clipInfo())')
     print(f'chrome ready in {time.time() - t0:.1f}s: {info}', flush=True)
 
