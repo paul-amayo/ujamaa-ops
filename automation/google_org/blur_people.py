@@ -32,13 +32,15 @@ model = build_sam3_image_model(); proc = Sam3Processor(model)
 
 def regions(frame_rgb):
     """-> uint8 mask [H, W] of pixels to blur in this frame"""
-    img = Image.fromarray(frame_rgb); state = proc.set_image(img); out = np.zeros((H, W), np.uint8)
-    for prompt in ("human face", "person"):
-        r = proc.set_text_prompt(state=state, prompt=prompt)
-        ms, sc = r.get("masks"), r.get("scores")
+    out = np.zeros((H, W), np.uint8); res = []
+    with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):   # as the other SAM3 scripts on the box run it
+        state = proc.set_image(Image.fromarray(frame_rgb))
+        for prompt in ("human face", "person"):
+            r = proc.set_text_prompt(state=state, prompt=prompt); res.append((prompt, r.get("masks"), r.get("scores")))
+    for prompt, ms, sc in res:
         if ms is None: continue
-        ms = ms.detach().cpu().numpy() if torch.is_tensor(ms) else np.asarray(ms)
-        sc = sc.detach().cpu().numpy() if torch.is_tensor(sc) else np.asarray(sc)
+        ms = ms.detach().float().cpu().numpy() if torch.is_tensor(ms) else np.asarray(ms)
+        sc = sc.detach().float().cpu().numpy() if torch.is_tensor(sc) else np.asarray(sc)
         for m, s in zip(ms.reshape(-1, *ms.shape[-2:]), sc.reshape(-1)):
             if s < CONF: continue
             m = (m > 0.5).astype(np.uint8)
