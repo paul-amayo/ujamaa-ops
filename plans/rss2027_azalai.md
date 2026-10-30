@@ -133,6 +133,11 @@ localisation results from the pose-graph bags).
 - **Instruction bank v0 frozen** (100; the ICRA paper's 7 linguistic categories from Adam's proposal Table 3 + identity,
   count, change), target rules against ledger v5 / JIRS heights and vetting / HiGH fruit registry. **H1 harness** (LLM
   decomposition + HiGH containment / registry lookup) is the next piece, on the A100.
+- **H1 pilot v0 run (30 Oct, Gemma 4 12B, registry as an 861-line table in the prompt):** twin 20 vs enumerated 18 of the 61
+  resolvable instructions. Numbered categories alike and poor in both arms (6 vs 7 of 32: the model reads id for order, mis-counts
+  rows) — the cost of in-context table reading, not of the representation. Identity 4 vs 1 of 5, count 2 vs 1, change 2 vs 2 (the
+  twin lists where one was asked); the enumerated arm rejects what it cannot express (change 7 of 9). **v1:** both arms get the
+  same lookup tools over their registry (the ICRA architecture: LLM decomposes, graph resolves), so only expressiveness differs.
 
 ## 7. Stage 1 evidence (offline, from logs, by 27 Nov)
 
