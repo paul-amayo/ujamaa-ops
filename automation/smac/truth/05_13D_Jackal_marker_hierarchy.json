@@ -1,0 +1,1909 @@
+{
+ "_provenance": {
+  "marker_monolithic": "/home/paperspace/data/citrus_all/05_13D_Jackal/prod/bateleur/scene_graph/markers_v2.monolithic",
+  "semantic_monolithic": "/home/paperspace/data/citrus_all/05_13D_Jackal/prod/monos/filtered_semantic_v2.monolithic",
+  "dominant_direction_xz": [
+   1.0,
+   0.0
+  ],
+  "dominant_direction_threshold": 0.7,
+  "num_sections": 3,
+  "site_pair_range_m": [
+   1.0,
+   8.0
+  ],
+  "n_objects": 100,
+  "n_rows": 8,
+  "n_super_rows": 4,
+  "n_sections": 3,
+  "row_solver": "census",
+  "census": {
+   "row_solver": "census",
+   "census_json": "/home/paperspace/data/citrus_all/05_13D_Jackal/prod/bateleur/sam3_v2/global_ids.json",
+   "n_census": 111,
+   "row_num_models": 40,
+   "row_band_m": 1.5,
+   "row_min_members": 3,
+   "n_small_models_bucketed": 1,
+   "dir_threshold": 0.7,
+   "dominant_direction_xz": [
+    1.0,
+    0.0
+   ],
+   "n_models_made": 9,
+   "n_rows": 8,
+   "n_bucket": 4,
+   "bucket_gids": [
+    39,
+    100,
+    101,
+    105
+   ],
+   "n_objects_without_census_gid": 0,
+   "census_rows": [
+    {
+     "id": 0,
+     "gids": [
+      78,
+      79,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      109,
+      110
+     ]
+    },
+    {
+     "id": 1,
+     "gids": [
+      64,
+      76,
+      77,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88
+     ]
+    },
+    {
+     "id": 2,
+     "gids": [
+      62,
+      63,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75
+     ]
+    },
+    {
+     "id": 3,
+     "gids": [
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      106,
+      107,
+      108
+     ]
+    },
+    {
+     "id": 4,
+     "gids": [
+      27,
+      36,
+      37,
+      38,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48
+     ]
+    },
+    {
+     "id": 5,
+     "gids": [
+      18,
+      25,
+      26,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      49,
+      103,
+      104
+     ]
+    },
+    {
+     "id": 6,
+     "gids": [
+      1,
+      3,
+      5,
+      6,
+      7,
+      9,
+      11,
+      13,
+      16,
+      20,
+      21,
+      24,
+      102
+     ]
+    },
+    {
+     "id": 7,
+     "gids": [
+      0,
+      2,
+      4,
+      8,
+      10,
+      12,
+      14,
+      15,
+      17,
+      19,
+      22,
+      23
+     ]
+    }
+   ]
+  },
+  "fruit_nodes": {
+   "ledger_glob": "/home/paperspace/data/citrus_all/05_13D_Jackal/prod/bateleur/sam3_fruit/clip_*/frame_entries.json",
+   "ledger_files": 43,
+   "detections": 1499,
+   "min_detections": 1
+  }
+ },
+ "objects": [
+  {
+   "id": 0,
+   "name": "Object Object(0)",
+   "row_id": 7,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    2.5886054039001465,
+    -0.8228639960289001,
+    3.549250364303589
+   ]
+  },
+  {
+   "id": 1,
+   "name": "Object Object(1)",
+   "row_id": 6,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    -2.3508708477020264,
+    -1.0042014122009277,
+    2.6646933555603027
+   ]
+  },
+  {
+   "id": 2,
+   "name": "Object Object(2)",
+   "row_id": 7,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    2.9373486042022705,
+    -0.8655985593795776,
+    8.818256378173828
+   ]
+  },
+  {
+   "id": 3,
+   "name": "Object Object(3)",
+   "row_id": 6,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    -2.297085762023926,
+    -0.8140381574630737,
+    5.888217449188232
+   ]
+  },
+  {
+   "id": 4,
+   "name": "Object Object(4)",
+   "row_id": 7,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    2.9996278285980225,
+    -0.740237295627594,
+    12.78842544555664
+   ]
+  },
+  {
+   "id": 5,
+   "name": "Object Object(5)",
+   "row_id": 6,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    -2.264575481414795,
+    -0.7185989618301392,
+    8.60768985748291
+   ]
+  },
+  {
+   "id": 6,
+   "name": "Object Object(6)",
+   "row_id": 6,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    -2.6555166244506836,
+    -0.6569613218307495,
+    13.01008415222168
+   ]
+  },
+  {
+   "id": 7,
+   "name": "Object Object(7)",
+   "row_id": 6,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    -2.463442325592041,
+    -0.6782162189483643,
+    17.728527069091797
+   ]
+  },
+  {
+   "id": 8,
+   "name": "Object Object(8)",
+   "row_id": 7,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    2.547079086303711,
+    -0.5237117409706116,
+    17.92998504638672
+   ]
+  },
+  {
+   "id": 9,
+   "name": "Object Object(9)",
+   "row_id": 6,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    -2.7489521503448486,
+    -0.5747287273406982,
+    22.26103973388672
+   ]
+  },
+  {
+   "id": 10,
+   "name": "Object Object(10)",
+   "row_id": 7,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    2.5869221687316895,
+    -0.42258042097091675,
+    22.412830352783203
+   ]
+  },
+  {
+   "id": 11,
+   "name": "Object Object(11)",
+   "row_id": 6,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    -2.7456440925598145,
+    -0.5993813276290894,
+    26.621896743774414
+   ]
+  },
+  {
+   "id": 12,
+   "name": "Object Object(12)",
+   "row_id": 7,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    2.771146297454834,
+    -0.4199967384338379,
+    26.722190856933594
+   ]
+  },
+  {
+   "id": 13,
+   "name": "Object Object(13)",
+   "row_id": 6,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    -3.136951446533203,
+    -0.4347466230392456,
+    31.372787475585938
+   ]
+  },
+  {
+   "id": 14,
+   "name": "Object Object(14)",
+   "row_id": 7,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    2.157404899597168,
+    -0.3062247931957245,
+    31.17089080810547
+   ]
+  },
+  {
+   "id": 15,
+   "name": "Object Object(15)",
+   "row_id": 7,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    1.6812872886657715,
+    -0.04883307218551636,
+    35.94475555419922
+   ]
+  },
+  {
+   "id": 16,
+   "name": "Object Object(16)",
+   "row_id": 6,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    -3.0646469593048096,
+    -0.24232834577560425,
+    40.28290557861328
+   ]
+  },
+  {
+   "id": 17,
+   "name": "Object Object(17)",
+   "row_id": 7,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    2.0599303245544434,
+    0.07030361890792847,
+    40.51175308227539
+   ]
+  },
+  {
+   "id": 18,
+   "name": "Object Object(18)",
+   "row_id": 5,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -9.295581817626953,
+    -0.0468582957983017,
+    40.25019073486328
+   ]
+  },
+  {
+   "id": 19,
+   "name": "Object Object(19)",
+   "row_id": 7,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    2.106513261795044,
+    0.1344306766986847,
+    45.1065673828125
+   ]
+  },
+  {
+   "id": 20,
+   "name": "Object Object(20)",
+   "row_id": 6,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    -3.271409034729004,
+    -0.009126275777816772,
+    44.88536834716797
+   ]
+  },
+  {
+   "id": 21,
+   "name": "Object Object(21)",
+   "row_id": 6,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    -3.5376036167144775,
+    0.24708402156829834,
+    49.468326568603516
+   ]
+  },
+  {
+   "id": 22,
+   "name": "Object Object(22)",
+   "row_id": 7,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    1.9898022413253784,
+    0.13493198156356812,
+    50.140647888183594
+   ]
+  },
+  {
+   "id": 23,
+   "name": "Object Object(23)",
+   "row_id": 7,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    0.15211772918701172,
+    0.17484241724014282,
+    61.55280303955078
+   ]
+  },
+  {
+   "id": 24,
+   "name": "Object Object(24)",
+   "row_id": 6,
+   "super_row_id": 3,
+   "section_id": 0,
+   "xyz": [
+    -5.059733867645264,
+    0.05726903676986694,
+    61.252586364746094
+   ]
+  },
+  {
+   "id": 25,
+   "name": "Object Object(25)",
+   "row_id": 5,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -9.736565589904785,
+    0.08393189311027527,
+    49.56389236450195
+   ]
+  },
+  {
+   "id": 26,
+   "name": "Object Object(26)",
+   "row_id": 5,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -9.434175491333008,
+    0.05175986886024475,
+    44.771995544433594
+   ]
+  },
+  {
+   "id": 27,
+   "name": "Object Object(27)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -16.177082061767578,
+    0.21184849739074707,
+    49.00239562988281
+   ]
+  },
+  {
+   "id": 28,
+   "name": "Object Object(28)",
+   "row_id": 5,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -9.16151237487793,
+    0.00047022104263305664,
+    35.6558837890625
+   ]
+  },
+  {
+   "id": 29,
+   "name": "Object Object(29)",
+   "row_id": 5,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -9.285074234008789,
+    -0.3760625720024109,
+    31.16106605529785
+   ]
+  },
+  {
+   "id": 30,
+   "name": "Object Object(30)",
+   "row_id": 5,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -9.36302375793457,
+    -0.49879616498947144,
+    26.38323974609375
+   ]
+  },
+  {
+   "id": 31,
+   "name": "Object Object(31)",
+   "row_id": 5,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -9.15626049041748,
+    -0.5693034529685974,
+    21.904870986938477
+   ]
+  },
+  {
+   "id": 32,
+   "name": "Object Object(32)",
+   "row_id": 5,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -8.788646697998047,
+    -0.7126300930976868,
+    17.29235076904297
+   ]
+  },
+  {
+   "id": 33,
+   "name": "Object Object(33)",
+   "row_id": 5,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -8.701902389526367,
+    -0.7518600225448608,
+    13.200885772705078
+   ]
+  },
+  {
+   "id": 34,
+   "name": "Object Object(34)",
+   "row_id": 5,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -7.126916885375977,
+    -0.7699346542358398,
+    8.193601608276367
+   ]
+  },
+  {
+   "id": 35,
+   "name": "Object Object(35)",
+   "row_id": 5,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -8.084890365600586,
+    -0.7747915983200073,
+    4.046746253967285
+   ]
+  },
+  {
+   "id": 36,
+   "name": "Object Object(36)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -15.017722129821777,
+    -1.0852010250091553,
+    3.347851276397705
+   ]
+  },
+  {
+   "id": 37,
+   "name": "Object Object(37)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -14.519685745239258,
+    -1.5298435688018799,
+    -7.201870441436768
+   ]
+  },
+  {
+   "id": 38,
+   "name": "Object Object(38)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -15.318428039550781,
+    -0.7756802439689636,
+    8.071260452270508
+   ]
+  },
+  {
+   "id": 39,
+   "name": "Object Object(39)",
+   "row_id": -1,
+   "super_row_id": -1,
+   "section_id": -1,
+   "xyz": [
+    -10.105779647827148,
+    -0.7140739560127258,
+    8.448875427246094
+   ]
+  },
+  {
+   "id": 40,
+   "name": "Object Object(40)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -15.349706649780273,
+    -0.7372989654541016,
+    12.946906089782715
+   ]
+  },
+  {
+   "id": 41,
+   "name": "Object Object(41)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -15.265499114990234,
+    -0.6876621246337891,
+    17.53506851196289
+   ]
+  },
+  {
+   "id": 42,
+   "name": "Object Object(42)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -15.562623977661133,
+    -0.5983246564865112,
+    21.907222747802734
+   ]
+  },
+  {
+   "id": 43,
+   "name": "Object Object(43)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -15.462254524230957,
+    -0.5621185302734375,
+    26.735469818115234
+   ]
+  },
+  {
+   "id": 44,
+   "name": "Object Object(44)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -15.55229377746582,
+    -0.3504100441932678,
+    31.01561737060547
+   ]
+  },
+  {
+   "id": 45,
+   "name": "Object Object(45)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -15.707270622253418,
+    -0.24508090317249298,
+    35.46503448486328
+   ]
+  },
+  {
+   "id": 46,
+   "name": "Object Object(46)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -15.875160217285156,
+    -0.20161616802215576,
+    40.108070373535156
+   ]
+  },
+  {
+   "id": 47,
+   "name": "Object Object(47)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -15.974681854248047,
+    0.10553079843521118,
+    44.33137512207031
+   ]
+  },
+  {
+   "id": 48,
+   "name": "Object Object(48)",
+   "row_id": 4,
+   "super_row_id": 2,
+   "section_id": 1,
+   "xyz": [
+    -16.03087043762207,
+    0.20892977714538574,
+    61.809181213378906
+   ]
+  },
+  {
+   "id": 50,
+   "name": "Object Object(50)",
+   "row_id": 3,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -22.72362518310547,
+    -0.03302121162414551,
+    49.41632080078125
+   ]
+  },
+  {
+   "id": 51,
+   "name": "Object Object(51)",
+   "row_id": 3,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -22.067440032958984,
+    -0.10670509934425354,
+    44.429420471191406
+   ]
+  },
+  {
+   "id": 52,
+   "name": "Object Object(52)",
+   "row_id": 3,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -22.552391052246094,
+    -0.16053542494773865,
+    39.79841613769531
+   ]
+  },
+  {
+   "id": 53,
+   "name": "Object Object(53)",
+   "row_id": 3,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -21.903564453125,
+    -0.22463646531105042,
+    35.1534423828125
+   ]
+  },
+  {
+   "id": 54,
+   "name": "Object Object(54)",
+   "row_id": 3,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -21.98371696472168,
+    -0.5236963033676147,
+    30.522415161132812
+   ]
+  },
+  {
+   "id": 55,
+   "name": "Object Object(55)",
+   "row_id": 3,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -22.009822845458984,
+    -0.6499204039573669,
+    26.269908905029297
+   ]
+  },
+  {
+   "id": 56,
+   "name": "Object Object(56)",
+   "row_id": 3,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -21.688812255859375,
+    -0.7045889496803284,
+    21.84548568725586
+   ]
+  },
+  {
+   "id": 57,
+   "name": "Object Object(57)",
+   "row_id": 3,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -21.664840698242188,
+    -0.8146666884422302,
+    17.162841796875
+   ]
+  },
+  {
+   "id": 58,
+   "name": "Object Object(58)",
+   "row_id": 3,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -21.695758819580078,
+    -0.8592744469642639,
+    12.570059776306152
+   ]
+  },
+  {
+   "id": 59,
+   "name": "Object Object(59)",
+   "row_id": 3,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -21.307912826538086,
+    -0.9922134876251221,
+    8.057842254638672
+   ]
+  },
+  {
+   "id": 60,
+   "name": "Object Object(60)",
+   "row_id": 3,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -21.45145606994629,
+    -0.7906076312065125,
+    3.4418561458587646
+   ]
+  },
+  {
+   "id": 62,
+   "name": "Object Object(62)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -27.971433639526367,
+    -0.9854397773742676,
+    3.2817046642303467
+   ]
+  },
+  {
+   "id": 63,
+   "name": "Object Object(63)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -26.871152877807617,
+    -1.0152618885040283,
+    -7.054418563842773
+   ]
+  },
+  {
+   "id": 64,
+   "name": "Object Object(64)",
+   "row_id": 1,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -34.57225036621094,
+    -0.8910371661186218,
+    3.2667689323425293
+   ]
+  },
+  {
+   "id": 65,
+   "name": "Object Object(65)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -27.830001831054688,
+    -0.8905074596405029,
+    8.742610931396484
+   ]
+  },
+  {
+   "id": 66,
+   "name": "Object Object(66)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -27.981908798217773,
+    -0.809638261795044,
+    12.39877986907959
+   ]
+  },
+  {
+   "id": 67,
+   "name": "Object Object(67)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -28.035066604614258,
+    -0.9348872900009155,
+    16.990764617919922
+   ]
+  },
+  {
+   "id": 68,
+   "name": "Object Object(68)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -28.126148223876953,
+    -0.7200307846069336,
+    21.71014404296875
+   ]
+  },
+  {
+   "id": 69,
+   "name": "Object Object(69)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -28.55605125427246,
+    -0.5582348108291626,
+    30.64716911315918
+   ]
+  },
+  {
+   "id": 70,
+   "name": "Object Object(70)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -28.402347564697266,
+    -0.7358160018920898,
+    25.914142608642578
+   ]
+  },
+  {
+   "id": 71,
+   "name": "Object Object(71)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -28.67974090576172,
+    -0.2956407964229584,
+    35.33417510986328
+   ]
+  },
+  {
+   "id": 72,
+   "name": "Object Object(72)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -28.548912048339844,
+    -0.25879037380218506,
+    39.89435577392578
+   ]
+  },
+  {
+   "id": 73,
+   "name": "Object Object(73)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -29.175209045410156,
+    -0.0793122947216034,
+    44.190704345703125
+   ]
+  },
+  {
+   "id": 74,
+   "name": "Object Object(74)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -28.853063583374023,
+    -0.05196291208267212,
+    48.552669525146484
+   ]
+  },
+  {
+   "id": 75,
+   "name": "Object Object(75)",
+   "row_id": 2,
+   "super_row_id": 1,
+   "section_id": 2,
+   "xyz": [
+    -27.445518493652344,
+    0.27020758390426636,
+    60.604278564453125
+   ]
+  },
+  {
+   "id": 76,
+   "name": "Object Object(76)",
+   "row_id": 1,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -33.128047943115234,
+    0.34772664308547974,
+    61.58326721191406
+   ]
+  },
+  {
+   "id": 77,
+   "name": "Object Object(77)",
+   "row_id": 1,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -35.15285110473633,
+    -0.31548550724983215,
+    44.59107208251953
+   ]
+  },
+  {
+   "id": 78,
+   "name": "Object Object(78)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -40.662330627441406,
+    -0.10046893358230591,
+    48.49267578125
+   ]
+  },
+  {
+   "id": 79,
+   "name": "Object Object(79)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -40.35409927368164,
+    -0.22862675786018372,
+    43.785362243652344
+   ]
+  },
+  {
+   "id": 80,
+   "name": "Object Object(80)",
+   "row_id": 1,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -34.94065856933594,
+    -0.18106701970100403,
+    40.43727111816406
+   ]
+  },
+  {
+   "id": 81,
+   "name": "Object Object(81)",
+   "row_id": 1,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -35.003753662109375,
+    -0.30782878398895264,
+    35.20702362060547
+   ]
+  },
+  {
+   "id": 82,
+   "name": "Object Object(82)",
+   "row_id": 1,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -34.96782684326172,
+    -0.47363391518592834,
+    30.717029571533203
+   ]
+  },
+  {
+   "id": 83,
+   "name": "Object Object(83)",
+   "row_id": 1,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -34.54205322265625,
+    -0.7023342847824097,
+    25.883403778076172
+   ]
+  },
+  {
+   "id": 84,
+   "name": "Object Object(84)",
+   "row_id": 1,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -34.53691101074219,
+    -0.6275042295455933,
+    21.254011154174805
+   ]
+  },
+  {
+   "id": 85,
+   "name": "Object Object(85)",
+   "row_id": 1,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -34.25157165527344,
+    -0.7552345991134644,
+    16.812002182006836
+   ]
+  },
+  {
+   "id": 86,
+   "name": "Object Object(86)",
+   "row_id": 1,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -34.04927444458008,
+    -0.9325708746910095,
+    11.99592399597168
+   ]
+  },
+  {
+   "id": 87,
+   "name": "Object Object(87)",
+   "row_id": 1,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -34.13031768798828,
+    -0.8377723693847656,
+    7.751105308532715
+   ]
+  },
+  {
+   "id": 88,
+   "name": "Object Object(88)",
+   "row_id": 1,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -33.88460922241211,
+    -0.8082901239395142,
+    -6.594281196594238
+   ]
+  },
+  {
+   "id": 89,
+   "name": "Object Object(89)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -39.270782470703125,
+    -1.3905446529388428,
+    -7.936648845672607
+   ]
+  },
+  {
+   "id": 90,
+   "name": "Object Object(90)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -39.10791015625,
+    -0.852960467338562,
+    2.5834712982177734
+   ]
+  },
+  {
+   "id": 91,
+   "name": "Object Object(91)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -39.330039978027344,
+    -1.1656368970870972,
+    -7.852490425109863
+   ]
+  },
+  {
+   "id": 92,
+   "name": "Object Object(92)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -39.53022003173828,
+    -0.7433854937553406,
+    7.552379131317139
+   ]
+  },
+  {
+   "id": 93,
+   "name": "Object Object(93)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -39.46388244628906,
+    -0.8859201669692993,
+    12.160913467407227
+   ]
+  },
+  {
+   "id": 94,
+   "name": "Object Object(94)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -39.46159362792969,
+    -0.8360414505004883,
+    17.028841018676758
+   ]
+  },
+  {
+   "id": 95,
+   "name": "Object Object(95)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -40.21984100341797,
+    -0.7031638622283936,
+    21.244121551513672
+   ]
+  },
+  {
+   "id": 96,
+   "name": "Object Object(96)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -40.07225036621094,
+    -0.7011219263076782,
+    25.68729019165039
+   ]
+  },
+  {
+   "id": 97,
+   "name": "Object Object(97)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -39.933509826660156,
+    -0.40717560052871704,
+    30.206924438476562
+   ]
+  },
+  {
+   "id": 98,
+   "name": "Object Object(98)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -40.16608428955078,
+    -0.4815845787525177,
+    34.772300720214844
+   ]
+  },
+  {
+   "id": 99,
+   "name": "Object Object(99)",
+   "row_id": 0,
+   "super_row_id": 0,
+   "section_id": 2,
+   "xyz": [
+    -40.61836242675781,
+    -0.25275325775146484,
+    39.307430267333984
+   ]
+  },
+  {
+   "id": 100,
+   "name": "Object Object(100)",
+   "row_id": -1,
+   "super_row_id": -1,
+   "section_id": -1,
+   "xyz": [
+    -38.681114196777344,
+    0.2529259920120239,
+    60.938323974609375
+   ]
+  },
+  {
+   "id": 101,
+   "name": "Object Object(101)",
+   "row_id": -1,
+   "super_row_id": -1,
+   "section_id": -1,
+   "xyz": [
+    -43.908790588378906,
+    0.4693685472011566,
+    61.817100524902344
+   ]
+  }
+ ],
+ "rows": [
+  {
+   "id": 0,
+   "object_ids": [
+    78,
+    79,
+    89,
+    90,
+    91,
+    92,
+    93,
+    94,
+    95,
+    96,
+    97,
+    98,
+    99
+   ]
+  },
+  {
+   "id": 1,
+   "object_ids": [
+    64,
+    76,
+    77,
+    80,
+    81,
+    82,
+    83,
+    84,
+    85,
+    86,
+    87,
+    88
+   ]
+  },
+  {
+   "id": 2,
+   "object_ids": [
+    62,
+    63,
+    65,
+    66,
+    67,
+    68,
+    69,
+    70,
+    71,
+    72,
+    73,
+    74,
+    75
+   ]
+  },
+  {
+   "id": 3,
+   "object_ids": [
+    50,
+    51,
+    52,
+    53,
+    54,
+    55,
+    56,
+    57,
+    58,
+    59,
+    60
+   ]
+  },
+  {
+   "id": 4,
+   "object_ids": [
+    27,
+    36,
+    37,
+    38,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48
+   ]
+  },
+  {
+   "id": 5,
+   "object_ids": [
+    18,
+    25,
+    26,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35
+   ]
+  },
+  {
+   "id": 6,
+   "object_ids": [
+    1,
+    3,
+    5,
+    6,
+    7,
+    9,
+    11,
+    13,
+    16,
+    20,
+    21,
+    24
+   ]
+  },
+  {
+   "id": 7,
+   "object_ids": [
+    0,
+    2,
+    4,
+    8,
+    10,
+    12,
+    14,
+    15,
+    17,
+    19,
+    22,
+    23
+   ]
+  }
+ ],
+ "super_rows": [
+  {
+   "id": 0,
+   "row_ids": [
+    0,
+    1
+   ]
+  },
+  {
+   "id": 1,
+   "row_ids": [
+    2,
+    3
+   ]
+  },
+  {
+   "id": 2,
+   "row_ids": [
+    4,
+    5
+   ]
+  },
+  {
+   "id": 3,
+   "row_ids": [
+    6,
+    7
+   ]
+  }
+ ],
+ "sections": [
+  {
+   "id": 0,
+   "super_row_ids": [
+    3
+   ]
+  },
+  {
+   "id": 1,
+   "super_row_ids": [
+    2
+   ]
+  },
+  {
+   "id": 2,
+   "super_row_ids": [
+    0,
+    1
+   ]
+  }
+ ],
+ "fruits": [
+  {
+   "id": 0,
+   "tree_id": 3,
+   "n_detections": 126,
+   "n_fruit3d": 14,
+   "n_clusters3d": 94
+  },
+  {
+   "id": 1,
+   "tree_id": 5,
+   "n_detections": 537,
+   "n_fruit3d": 61,
+   "n_clusters3d": 219
+  },
+  {
+   "id": 2,
+   "tree_id": 6,
+   "n_detections": 47,
+   "n_fruit3d": 6,
+   "n_clusters3d": 22
+  },
+  {
+   "id": 3,
+   "tree_id": 7,
+   "n_detections": 6,
+   "n_fruit3d": 1,
+   "n_clusters3d": 8
+  },
+  {
+   "id": 4,
+   "tree_id": 9,
+   "n_detections": 65,
+   "n_fruit3d": 7,
+   "n_clusters3d": 26
+  },
+  {
+   "id": 5,
+   "tree_id": 11,
+   "n_detections": 2,
+   "n_fruit3d": 0,
+   "n_clusters3d": 1
+  },
+  {
+   "id": 6,
+   "tree_id": 13,
+   "n_detections": 56,
+   "n_fruit3d": 2,
+   "n_clusters3d": 11
+  },
+  {
+   "id": 7,
+   "tree_id": 16,
+   "n_detections": 8,
+   "n_fruit3d": 0,
+   "n_clusters3d": 1
+  },
+  {
+   "id": 8,
+   "tree_id": 20,
+   "n_detections": 3,
+   "n_fruit3d": 0,
+   "n_clusters3d": 1
+  },
+  {
+   "id": 9,
+   "tree_id": 25,
+   "n_detections": 6,
+   "n_fruit3d": 1,
+   "n_clusters3d": 2
+  },
+  {
+   "id": 10,
+   "tree_id": 28,
+   "n_detections": 2,
+   "n_fruit3d": 0,
+   "n_clusters3d": 3
+  },
+  {
+   "id": 11,
+   "tree_id": 30,
+   "n_detections": 9,
+   "n_fruit3d": 0,
+   "n_clusters3d": 4
+  },
+  {
+   "id": 12,
+   "tree_id": 31,
+   "n_detections": 4,
+   "n_fruit3d": 0,
+   "n_clusters3d": 1
+  },
+  {
+   "id": 13,
+   "tree_id": 32,
+   "n_detections": 56,
+   "n_fruit3d": 0,
+   "n_clusters3d": 8
+  },
+  {
+   "id": 14,
+   "tree_id": 34,
+   "n_detections": 6,
+   "n_fruit3d": 3,
+   "n_clusters3d": 5
+  },
+  {
+   "id": 15,
+   "tree_id": 36,
+   "n_detections": 1,
+   "n_fruit3d": 0,
+   "n_clusters3d": 0
+  },
+  {
+   "id": 16,
+   "tree_id": 41,
+   "n_detections": 5,
+   "n_fruit3d": 0,
+   "n_clusters3d": 1
+  },
+  {
+   "id": 17,
+   "tree_id": 42,
+   "n_detections": 3,
+   "n_fruit3d": 0,
+   "n_clusters3d": 0
+  },
+  {
+   "id": 18,
+   "tree_id": 43,
+   "n_detections": 24,
+   "n_fruit3d": 1,
+   "n_clusters3d": 7
+  },
+  {
+   "id": 19,
+   "tree_id": 44,
+   "n_detections": 2,
+   "n_fruit3d": 0,
+   "n_clusters3d": 0
+  },
+  {
+   "id": 20,
+   "tree_id": 50,
+   "n_detections": 10,
+   "n_fruit3d": 4,
+   "n_clusters3d": 9
+  },
+  {
+   "id": 21,
+   "tree_id": 52,
+   "n_detections": 2,
+   "n_fruit3d": 0,
+   "n_clusters3d": 0
+  },
+  {
+   "id": 22,
+   "tree_id": 53,
+   "n_detections": 64,
+   "n_fruit3d": 7,
+   "n_clusters3d": 14
+  },
+  {
+   "id": 23,
+   "tree_id": 54,
+   "n_detections": 21,
+   "n_fruit3d": 4,
+   "n_clusters3d": 12
+  },
+  {
+   "id": 24,
+   "tree_id": 55,
+   "n_detections": 2,
+   "n_fruit3d": 0,
+   "n_clusters3d": 0
+  },
+  {
+   "id": 25,
+   "tree_id": 56,
+   "n_detections": 2,
+   "n_fruit3d": 0,
+   "n_clusters3d": 0
+  },
+  {
+   "id": 26,
+   "tree_id": 62,
+   "n_detections": 1,
+   "n_fruit3d": 0,
+   "n_clusters3d": 2
+  },
+  {
+   "id": 27,
+   "tree_id": 67,
+   "n_detections": 6,
+   "n_fruit3d": 0,
+   "n_clusters3d": 1
+  },
+  {
+   "id": 28,
+   "tree_id": 72,
+   "n_detections": 158,
+   "n_fruit3d": 18,
+   "n_clusters3d": 49
+  },
+  {
+   "id": 29,
+   "tree_id": 77,
+   "n_detections": 4,
+   "n_fruit3d": 2,
+   "n_clusters3d": 3
+  },
+  {
+   "id": 30,
+   "tree_id": 78,
+   "n_detections": 1,
+   "n_fruit3d": 0,
+   "n_clusters3d": 0
+  },
+  {
+   "id": 31,
+   "tree_id": 81,
+   "n_detections": 9,
+   "n_fruit3d": 0,
+   "n_clusters3d": 1
+  },
+  {
+   "id": 32,
+   "tree_id": 82,
+   "n_detections": 3,
+   "n_fruit3d": 1,
+   "n_clusters3d": 3
+  },
+  {
+   "id": 33,
+   "tree_id": 83,
+   "n_detections": 13,
+   "n_fruit3d": 3,
+   "n_clusters3d": 6
+  },
+  {
+   "id": 34,
+   "tree_id": 84,
+   "n_detections": 1,
+   "n_fruit3d": 0,
+   "n_clusters3d": 0
+  },
+  {
+   "id": 35,
+   "tree_id": 86,
+   "n_detections": 11,
+   "n_fruit3d": 0,
+   "n_clusters3d": 1
+  },
+  {
+   "id": 36,
+   "tree_id": 87,
+   "n_detections": 1,
+   "n_fruit3d": 0,
+   "n_clusters3d": 0
+  },
+  {
+   "id": 37,
+   "tree_id": 90,
+   "n_detections": 19,
+   "n_fruit3d": 8,
+   "n_clusters3d": 27
+  },
+  {
+   "id": 38,
+   "tree_id": 92,
+   "n_detections": 32,
+   "n_fruit3d": 2,
+   "n_clusters3d": 13
+  },
+  {
+   "id": 39,
+   "tree_id": 93,
+   "n_detections": 1,
+   "n_fruit3d": 0,
+   "n_clusters3d": 2
+  },
+  {
+   "id": 40,
+   "tree_id": 94,
+   "n_detections": 7,
+   "n_fruit3d": 2,
+   "n_clusters3d": 8
+  },
+  {
+   "id": 41,
+   "tree_id": 95,
+   "n_detections": 1,
+   "n_fruit3d": 0,
+   "n_clusters3d": 0
+  },
+  {
+   "id": 42,
+   "tree_id": 96,
+   "n_detections": 148,
+   "n_fruit3d": 7,
+   "n_clusters3d": 24
+  },
+  {
+   "id": 43,
+   "tree_id": 98,
+   "n_detections": 3,
+   "n_fruit3d": 0,
+   "n_clusters3d": 0
+  },
+  {
+   "id": 44,
+   "tree_id": 99,
+   "n_detections": 11,
+   "n_fruit3d": 0,
+   "n_clusters3d": 4
+  }
+ ]
+}

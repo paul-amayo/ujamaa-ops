@@ -1,0 +1,538 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 16e9388..95616b6 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.24)
+ project(segmap)
+ add_compile_definitions(BOOST_NO_CXX98_FUNCTION_BASE)
+ 
+-set(CMAKE_BUILD_TYPE Debug)
++set(CMAKE_BUILD_TYPE Release)
++# scratch-clone patch: GTSAM pulls in boost/range/algorithm/sort.hpp, whose using-declaration of boost::sort clashes with the
++# boost::sort namespace that PCL 1.13.0 includes for spreadsort; GTSAM does not use range sort, so its header is masked by its guard
++add_compile_definitions(BOOST_RANGE_ALGORITHM_SORT_HPP_INCLUDED)
+ set(Python3_EXECUTABLE /usr/bin/python3)
+ 
+ # Find the specified Python interpreter and its components
+@@ -89,17 +92,17 @@ include_directories(${OpenCV_INCLUDE_DIRS})
+ #set(USE_SYSTEM_EIGEN3 ON CACHE BOOL "use system eigen3")
+ #set(USE_SYSTEM_TBB ON CACHE BOOL "use system tbb")
+ #set(USE_SYSTEM_OPENCV ON CACHE BOOL "use system opencv")
+-include(FetchContent)
+-
+-set(FETCHCONTENT_SOURCE_DIR_MAP_CLOSURES /home/quad/code/MapClosures)
+-FetchContent_Declare(
+-        map_closures
+-        GIT_REPOSITORY https://github.com/PRBonn/MapClosures.git
+-        GIT_TAG main
+-        SOURCE_SUBDIR cpp
+-#        DOWNLOAD_EXTRACT_TIMESTAMP TRUE  # Set this option to TRUE to avoid the warning
+-)
+-FetchContent_MakeAvailable(map_closures)
++# MapClosures: the PRBonn code as vendored in aru_sil_core/src/segmap (same sources), built here as a static library
++set(map_closures_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/map_closures_vendored)
++add_library(map_closures STATIC
++        ${map_closures_SOURCE_DIR}/cpp/map_closures/MapClosures.cpp
++        ${map_closures_SOURCE_DIR}/cpp/map_closures/AlignRansac2D.cpp
++        ${map_closures_SOURCE_DIR}/cpp/map_closures/GroundAlign.cpp
++        ${map_closures_SOURCE_DIR}/cpp/map_closures/DensityMap.cpp)
++target_include_directories(map_closures PUBLIC ${map_closures_SOURCE_DIR}/cpp ${map_closures_SOURCE_DIR}/include ${EIGEN3_INCLUDE_DIR} ${OpenCV_INCLUDE_DIRS})
++target_link_libraries(map_closures PUBLIC ${OpenCV_LIBS})
++target_compile_definitions(map_closures PUBLIC SRRG_HBST_HAS_OPENCV)
++target_compile_options(map_closures PUBLIC -msse4.2 -mfpmath=sse -march=native -mavx2 -fPIC)   # scratch-clone patch: same vector flags as the app (PCL exports them), else Eigen::Matrix4d alignment differs and ClosureCandidate has two sizes   # scratch-clone patch: the cv::Mat descriptor constructor of srrg_hbst
+ 
+ #message(STATUS "map_closures source directory: ${MAP_CLOSURES_SOURCE_DIR}")
+ #include_directories(${MAP_CLOSURES_SOURCE_DIR}/cpp)
+@@ -242,11 +245,10 @@ target_include_directories(${PROJECT_NAME}
+         ${PROJECT_SOURCE_DIR}/include
+         ${map_closures_SOURCE_DIR}
+         ${map_closures_SOURCE_DIR}/cpp
++        ${map_closures_SOURCE_DIR}/include
+ )
+ 
+ add_executable(segmap_node apps/segmapper_node.cpp)
+-target_link_libraries(segmap_node PRIVATE ${PROJECT_NAME}  map_closures)
+-include_directories(${CMAKE_BINARY_DIR}/_deps/map_closures-src/cpp)
+-include_directories(${CMAKE_BINARY_DIR}/_deps/hbst-src)
++target_link_libraries(segmap_node PRIVATE ${PROJECT_NAME} map_closures gflags)
+ 
+ 
+diff --git a/apps/segmapper_node.cpp b/apps/segmapper_node.cpp
+index 271076e..29ee708 100644
+--- a/apps/segmapper_node.cpp
++++ b/apps/segmapper_node.cpp
+@@ -3,6 +3,7 @@
+ #include <boost/graph/adjacency_list.hpp>
+ 
+ #include "segmapper/segmapper.hpp"
++#include <pcl/filters/voxel_grid.h>
+ #include <map_closures/MapClosures.hpp>
+ #include <pcl/io/ply_io.h>
+ #include <pybind11/eigen/matrix.h>
+@@ -309,13 +310,37 @@ cv::Mat addPadding(const cv::Mat& input_image,
+   return padded_image;
+ }
+ 
++#include <algorithm>
++#include <gflags/gflags.h>
++#include <boost/filesystem.hpp>
++DEFINE_string(config_dir, "", "directory with icp_dynamic_outdoor.yaml and input_filters_outdoor.yaml");
++DEFINE_string(python_dir, "", "directory with SegMapView.py (only used with --viz)");
++DEFINE_string(teach_dir, "", "teach split: <dir>/laser/laser_<i>.ply, <dir>/transforms/transform_<i>.txt");
++DEFINE_string(repeat_dir, "", "repeat split, same layout");
++DEFINE_string(out_dir, "", "results directory");
++DEFINE_int32(n_teach, 899, "number of teach scans to read");
++DEFINE_int32(n_repeat, 900, "number of repeat scans to read");
++DEFINE_string(arm, "segments", "what MapClosures sees: segments (SegMatch segments of the keyframe) or raw (the whole keyframe cloud)");
++DEFINE_bool(viz, false, "embed the python viewer");
++DEFINE_double(density_res, 0.5, "MapClosures density-map resolution in m (the branch value 0.5 gives an 80x60 px image of a 40x30 m keyframe and zero ORB features)");
++DEFINE_double(voxel, 0.5, "keyframe voxel size in m (branch value 0.5)");
++DEFINE_double(min_z, -1e9, "drop keyframe points below this height in the keyframe (sensor) frame, a plain ground cut so that the Euclidean segmenter does not merge the whole keyframe through the ground");
++
++// scratch-clone patch: the SegMatch input is the keyframe above a ground cut; MapClosures (raw arm, ground alignment) keeps the whole keyframe
++static pcl::PointCloud<pcl::PointXYZ>::Ptr aboveGround(const pcl::PointCloud<pcl::PointXYZ>::Ptr &in) {
++  pcl::PointCloud<pcl::PointXYZ>::Ptr out(new pcl::PointCloud<pcl::PointXYZ>);
++  for (const auto &p : in->points) if (p.z >= FLAGS_min_z) out->points.push_back(p);
++  out->width = out->points.size(); out->height = 1; out->is_dense = false;
++  return out;
++}
+ int main(int argc, char **argv) {
++  gflags::ParseCommandLineFlags(&argc, &argv, true);
++  google::InstallFailureSignalHandler();   // scratch-clone diagnostic: stack trace on a crash
++  boost::filesystem::create_directories(FLAGS_out_dir + "/density_maps");
+ 
+-  std::string icp_configuration_file = "/home/quad/code/aru_segmap/src/"
+-                                       "config/kitti/icp_dynamic_outdoor.yaml";
++  std::string icp_configuration_file = FLAGS_config_dir + "/icp_dynamic_outdoor.yaml";
+   std::string icp_input_filters_file =
+-      "/home/quad/code/aru_segmap/src/config/kitti/"
+-      "input_filters_outdoor.yaml";
++      FLAGS_config_dir + "/input_filters_outdoor.yaml";
+ 
+   SegMapper mapper(icp_configuration_file, icp_input_filters_file);
+   SegMapper repeat_mapper(icp_configuration_file, icp_input_filters_file);
+@@ -327,21 +352,20 @@ int main(int argc, char **argv) {
+   //  // TODO: Add this as argument
+   sys.attr("path").attr("insert")(
+       0,
+-      "/home/quad/code/aru_segmap/src/python"); // insert current
++      FLAGS_python_dir); // insert current
+   // directory to python
+   // path
+   //
+   LOG(INFO) << "Python version: " << version.cast<std::string>();
+-  py::object viewer =
+-      py::module_::import("SegMapView").attr("SegMapViewer")("path",
+-      "path");
++  py::object viewer;
++  if (FLAGS_viz) viewer = py::module_::import("SegMapView").attr("SegMapViewer")("path", "path");
+   // view segmented target cloud
+   std::vector<pcl::PointCloud<pcl::PointXYZ>> segment_points;
+   std::vector<pcl::PointCloud<pcl::PointXYZ>> repeat_segment_points;
+ 
+   // Initialise Mapclosures
+   map_closures::Config map_closures_config_;
+-  map_closures_config_.density_map_resolution = 0.5f;
++  map_closures_config_.density_map_resolution = static_cast<float>(FLAGS_density_res);
+   map_closures_config_.density_threshold = 0.05f;
+   map_closures_config_.hamming_distance_threshold = 50;
+   std::unique_ptr<map_closures::MapClosures> map_closures_;
+@@ -369,14 +393,14 @@ int main(int argc, char **argv) {
+ 
+   int candidate_first_idx_teach = -1;
+ 
+-  for (int i = 1; i <= 899; i += 1) {
++  for (int i = 1; i <= FLAGS_n_teach; i += 1) {
+     // Read the ply files in
+     // TODO: Replace file paths
+     // std::string ply_file =
+     // "/home/quad/data/farm_monos/source_clouds/source_laser_" +
+     //                        std::to_string(source_index) + ".ply";
+     std::string ply_file =
+-        "/home/quad/data/laser_splits/split_1/laser/laser_" +
++        FLAGS_teach_dir + "/laser/laser_" +
+         std::to_string(i) + ".ply";
+ 
+     pcl::PLYReader reader;
+@@ -384,7 +408,7 @@ int main(int argc, char **argv) {
+         new pcl::PointCloud<pcl::PointXYZ>);
+     reader.read(ply_file, *cloud);
+     std::string pose_file =
+-        "/home/quad/data/laser_splits/split_1/transforms/transform_" +
++        FLAGS_teach_dir + "/transforms/transform_" +
+         std::to_string(i) + ".txt";
+ 
+     // take into segmap
+@@ -414,11 +438,14 @@ int main(int argc, char **argv) {
+       // keyframe_clouds_by_id[map_idx] = keyframe_cloud;
+       keyframe_clouds_by_id[map_idx] = keyframe_cloud;
+       map_idx_to_id[map_idx] = map_id;
++      { std::ofstream kf(FLAGS_out_dir + "/keyframes.csv", std::ios::app); kf << map_idx << ",teach," << candidate_first_idx_teach << "," << i << "\n"; }   // scratch-clone patch
+ 
+       //Take into SegMap
+       //UNCOMMENT TO USE SEGMENTED CLOUD
+ 
+-      const auto segments = mapper.matchThread(keyframe_cloud,transform,map_idx);
++      segmatch::SegmentedCloud segments;
++      try { segments = mapper.matchThread(aboveGround(keyframe_cloud),transform,static_cast<int64_t>(map_idx) * 1000000000LL); }   // scratch-clone patch: seconds-scale timestamps (the laser track works in ns)
++      catch (const std::exception &e) { LOG(WARNING) << "teach keyframe " << map_idx << ": matchThread failed (" << e.what() << "), keyframe skipped"; }
+       LOG(INFO) << "Number of segments is: " << segments.size();
+       for (const auto &segment : segments) {
+         pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud(
+@@ -435,18 +462,21 @@ int main(int argc, char **argv) {
+ 
+       }
+ 
+-      std::string filename_keyframe = "/home/quad/results/mapclosures/split_maps_seg_xy/keyframe_"+ std::to_string(map_idx)+ ".ply";
++      std::string filename_keyframe = FLAGS_out_dir + "/keyframe_"+ std::to_string(map_idx)+ ".ply";
+       pcl::PLYWriter writer;
+       writer.write(filename_keyframe,*keyframe_cloud,true);
+ 
+       // Map closures logic
+       // Prepare local map points for MapClosures
+       std::vector<Eigen::Vector3d> eigen_local_map_points;
++      if (FLAGS_arm == "raw") {
++        for (const auto &point : keyframe_cloud->points) eigen_local_map_points.emplace_back(point.x, point.y, point.z);
++      } else {
+       for (const auto& pcloud : segment_points){
+         for (const auto &point : pcloud.points) {
+           eigen_local_map_points.emplace_back(point.x, point.y, point.z);
+         }
+-      } //Uncomment to this point
++      } }
+ 
+       // for (const auto &point : keyframe_cloud->points) {
+       //   eigen_local_map_points.emplace_back(point.x, point.y, point.z);
+@@ -458,9 +488,7 @@ int main(int argc, char **argv) {
+       if (!closures.empty()) {
+         LOG(INFO) << "Closure Candidates found: " << closures.size()
+                   << std::endl;
+-        const auto &best_closure =
+-            map_closures_->GetBestClosure(map_idx, eigen_local_map_points);
+-      }
++      }   // scratch-clone patch: the unused GetBestClosure call (a second insertion of the keyframe) removed
+       keyframe_cloud->clear();
+       keyframe_idx++;
+       map_idx++;
+@@ -484,7 +512,7 @@ int main(int argc, char **argv) {
+       }
+       pcl::VoxelGrid<pcl::PointXYZ> voxel;
+       voxel.setInputCloud(keyframe_cloud);
+-      voxel.setLeafSize(0.5f, 0.5f, 0.5f);  // adjust based on your resolution needs
++      voxel.setLeafSize(FLAGS_voxel, FLAGS_voxel, FLAGS_voxel);  // adjust based on your resolution needs
+       // Apply the filter
+       voxel.filter(*keyframe_cloud);
+     }
+@@ -492,7 +520,7 @@ int main(int argc, char **argv) {
+   int match_id=0;
+   Eigen::Affine3d init_match_transform;
+   std::string init_pose_file =
+-      "/home/quad/data/laser_splits/split_1/transforms/transform_" +
++      FLAGS_repeat_dir + "/transforms/transform_" +
+       std::to_string(2) + ".txt";
+ 
+   // take into segmap
+@@ -507,14 +535,14 @@ int main(int argc, char **argv) {
+ 
+   int candidate_first_idx = -1;
+ 
+-  for (int i = 1; i <= 900; i += 1) {
++  for (int i = 1; i <= FLAGS_n_repeat; i += 1) {
+     // Read the ply files in
+     // TODO: Replace file paths
+     // std::string ply_file =
+     // "/home/quad/data/farm_monos/source_clouds/source_laser_" +
+     //                        std::to_string(source_index) + ".ply";
+     std::string ply_file =
+-        "/home/quad/data/laser_splits/split_1/laser/laser_" +
++        FLAGS_repeat_dir + "/laser/laser_" +
+         std::to_string(i) + ".ply";
+ 
+     pcl::PLYReader reader;
+@@ -522,7 +550,7 @@ int main(int argc, char **argv) {
+         new pcl::PointCloud<pcl::PointXYZ>);
+     reader.read(ply_file, *cloud);
+     std::string pose_file =
+-        "/home/quad/data/laser_splits/split_1/transforms/transform_" +
++        FLAGS_repeat_dir + "/transforms/transform_" +
+         std::to_string(i) + ".txt";
+ 
+     auto transform = readMatrixFromFile(pose_file);
+@@ -546,7 +574,7 @@ int main(int argc, char **argv) {
+       LOG(INFO) << "Transform repeat matrix is: \n"
+                 << transform_affine.matrix();
+       LOG(INFO) << "Number of points in repeat keyframe cloud is: "
+-                << keyframe_cloud->points.size();
++                << keyframe_match_cloud->points.size();
+ 
+ 
+       // init_match_transform = transform_affine;
+@@ -555,10 +583,13 @@ int main(int argc, char **argv) {
+       // keyframe_clouds_by_id[map_idx] = keyframe_match_cloud;
+       keyframe_clouds_by_id[map_idx] = keyframe_match_cloud;
+       map_idx_to_id[map_idx] = map_id;
++      { std::ofstream kf(FLAGS_out_dir + "/keyframes.csv", std::ios::app); kf << map_idx << ",repeat," << candidate_first_idx << "," << i << "\n"; }   // scratch-clone patch
+ 
+       //Take into SegMap
+       //Uncomment to use segemneted cloud
+-      const auto repeat_segments = repeat_mapper.matchThread(keyframe_match_cloud,transform,map_idx);
++      segmatch::SegmentedCloud repeat_segments;
++      try { repeat_segments = repeat_mapper.matchThread(aboveGround(keyframe_match_cloud),transform,static_cast<int64_t>(map_idx) * 1000000000LL); }
++      catch (const std::exception &e) { LOG(WARNING) << "repeat keyframe " << map_idx << ": matchThread failed (" << e.what() << "), keyframe skipped"; }
+       LOG(INFO) << "Number of segments is: " << repeat_segments.size();
+       for (const auto &segment : repeat_segments) {
+         pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud(
+@@ -574,18 +605,21 @@ int main(int argc, char **argv) {
+         repeat_segment_points.push_back(*transformed_cloud);
+       }
+ 
+-      std::string keyframe_filename_repeat= "/home/quad/results/mapclosures/split_maps_seg_xy/keyframe_"+ std::to_string(map_idx)+ ".ply";
++      std::string keyframe_filename_repeat= FLAGS_out_dir + "/keyframe_"+ std::to_string(map_idx)+ ".ply";
+       pcl::PLYWriter writer;
+       writer.write(keyframe_filename_repeat,*keyframe_match_cloud,true);
+ 
+       // Map closures logic
+       // Prepare local map points for MapClosures
+       std::vector<Eigen::Vector3d> eigen_local_map_points;
++      if (FLAGS_arm == "raw") {
++        for (const auto &point : keyframe_match_cloud->points) eigen_local_map_points.emplace_back(point.x, point.y, point.z);
++      } else {
+       for (const auto& pcloud : repeat_segment_points){
+         for (const auto &point : pcloud.points) {
+           eigen_local_map_points.emplace_back(point.x, point.y, point.z);
+         }
+-      } //Uncomment to this point
++      } }
+ 
+         // for (const auto &point : keyframe_match_cloud->points) {
+         //   eigen_local_map_points.emplace_back(point.x, point.y, point.z);
+@@ -594,6 +628,16 @@ int main(int argc, char **argv) {
+ 
+         auto closures =
+             map_closures_->GetClosures(map_idx, eigen_local_map_points);
++        // scratch-clone patch: a repeat keyframe is localised against the teach only (the database also holds the repeat keyframes, whose
++        // self-closures the branch would otherwise log as the best closure), and the best candidate comes from this same query
++        const size_t n_all = closures.size();
++        for (const auto &c : closures) {
++          LOG(INFO) << "[diag]   cand source " << c.source_id << " target " << c.target_id << " inliers " << c.number_of_inliers << " known " << map_idx_to_id.count(c.source_id);
++          if (map_idx_to_id.count(c.source_id)) { const MapID &m = map_idx_to_id.at(c.source_id); LOG(INFO) << "[diag]     index " << m.index << " first_scan " << m.first_scan_idx << " session.size " << m.session.size(); }
++        }
++        closures.erase(std::remove_if(closures.begin(), closures.end(), [&](const map_closures::ClosureCandidate &c) {
++          return !(map_idx_to_id.count(c.source_id) && map_idx_to_id.at(c.source_id).session == "teach"); }), closures.end());
++        LOG(INFO) << "[diag] repeat keyframe " << map_idx << ": " << n_all << " candidates, " << closures.size() << " teach-referenced";
+         const map_closures::DensityMap& density_map = map_closures_->getDensityMapFromId(map_idx);
+         cv::Mat image = 255-density_map.grid;
+         // cv::imwrite("/home/ubuntu/results/density_maps/density_map_"+std::to_string(keyframe_match_idx) + ".png", addPadding(image));
+@@ -602,8 +646,8 @@ int main(int argc, char **argv) {
+           match_id++;
+           LOG(INFO) << "Closure Candidates found: " << closures.size()
+                     << std::endl;
+-          const auto &best_closure =
+-              map_closures_->GetBestClosure(map_idx, eigen_local_map_points);
++          const auto &best_closure = *std::max_element(closures.begin(), closures.end(),
++              [](const map_closures::ClosureCandidate &a, const map_closures::ClosureCandidate &b) { return a.number_of_inliers < b.number_of_inliers; });
+ 
+ 
+           LOG(INFO) << "Best closure source id: " << best_closure.source_id
+@@ -647,7 +691,7 @@ int main(int argc, char **argv) {
+             const Eigen::Matrix4d ref_init_transform =  map_idx_to_id.at(best_closure.source_id).init_transform.matrix();
+             const Eigen::Matrix4d ref_keyframe_transform = map_idx_to_id.at(best_closure.source_id).keyframe_transform.matrix();
+             std::string pose_file_ref =
+-            "/home/quad/data/laser_splits/split_1/transforms/transform_" +
++            FLAGS_teach_dir + "/transforms/transform_" +
+             std::to_string(ref_scan_index) + ".txt";
+             // Eigen::Matrix4d T_W_ref = ref_init_transform.inverse()*readMatrixFromFile(pose_file_ref);
+             Eigen::Matrix4d T_W_ref = ref_keyframe_transform;
+@@ -678,7 +722,7 @@ int main(int argc, char **argv) {
+             double y_init = init_match_transform(1, 3);
+             double z_init = init_match_transform(2, 3);
+ 
+-            std::ofstream pose_log("/home/quad/results/mapclosures/split_maps_seg_xy/estimated_transform_1.txt", std::ios::app);
++            std::ofstream pose_log(FLAGS_out_dir + "/estimated_transform_1.txt", std::ios::app);
+             // Write header if file is empty
+             pose_log.seekp(0, std::ios::end);
+             if (pose_log.tellp() == 0) {
+@@ -710,16 +754,16 @@ int main(int argc, char **argv) {
+             //Accumulate into global map
+             // *global_map_cloud += *aligned_cloud;
+               // *global_map_cloud = *aligned_cloud;
+-            std::string filename_global_cloud = "/home/quad/results/mapclosures/split_maps_seg_xy/transformed_keyframe_"+ std::to_string(map_idx)+ ".ply";
++            std::string filename_global_cloud = FLAGS_out_dir + "/transformed_keyframe_"+ std::to_string(map_idx)+ ".ply";
+             writer.write(filename_global_cloud,*global_map_cloud,true);
+ 
+             const map_closures::DensityMap& density_map_query = map_closures_->getDensityMapFromId(best_closure.source_id);
+             cv::Mat image_query = 255 - density_map_query.grid;
+-            cv::imwrite("/home/quad/results/density_maps/density_map_query_"+std::to_string(keyframe_match_idx) +".png", addPadding(image_query));
++            cv::imwrite(FLAGS_out_dir + "/density_maps/density_map_query_"+std::to_string(keyframe_match_idx) +".png", addPadding(image_query));
+ 
+             const map_closures::DensityMap& density_map_ref = map_closures_->getDensityMapFromId(best_closure.target_id);
+             cv::Mat image_ref = 255 - density_map_ref.grid;
+-            cv::imwrite("/home/quad/results/density_maps/density_map_ref_"+std::to_string(keyframe_match_idx) + ".png", addPadding(image_ref));
++            cv::imwrite(FLAGS_out_dir + "/density_maps/density_map_ref_"+std::to_string(keyframe_match_idx) + ".png", addPadding(image_ref));
+           }
+ 
+           init_match_transform = transform_affine;
+@@ -727,7 +771,7 @@ int main(int argc, char **argv) {
+ 
+ 
+         //Save pose estimate
+-        std::ofstream pose_log("/home/quad/results/mapclosures/split_maps_seg_xy/estimated_trajectory_1.txt", std::ios::app);
++        std::ofstream pose_log(FLAGS_out_dir + "/estimated_trajectory_1.txt", std::ios::app);
+ 
+         // Extract XYZ
+         double x = best_closure.pose(0, 3);
+@@ -785,6 +829,7 @@ int main(int argc, char **argv) {
+       }
+       aligned_cloud->clear();
+       keyframe_match_cloud->clear();
++      init_match_transform = transform_affine;   // scratch-clone patch: the repeat keyframe origin advances whether or not a closure was found (the branch only reset it on a closure, so every scan after a closure-less keyframe became an empty keyframe)
+       map_idx++;
+       candidate_first_idx = -1;
+ 
+@@ -804,12 +849,12 @@ int main(int argc, char **argv) {
+       }
+       pcl::VoxelGrid<pcl::PointXYZ> voxel;
+       voxel.setInputCloud(keyframe_match_cloud);
+-      voxel.setLeafSize(0.5f, 0.5f, 0.5f);  // adjust based on your resolution needs
++      voxel.setLeafSize(FLAGS_voxel, FLAGS_voxel, FLAGS_voxel);  // adjust based on your resolution needs
+       // Apply the filter
+       voxel.filter(*keyframe_match_cloud);
+ 
+       // pcl::PLYWriter writer;
+-      // std::string filename_source = "/home/quad/results/mapclosures/split_maps_seg_xy/keyframe_"+std::to_string(keyframe_match_idx)+".ply";
++      // std::string filename_source = FLAGS_out_dir + "/keyframe_"+std::to_string(keyframe_match_idx)+".ply";
+       // writer.write(filename_source,*keyframe_match_cloud,true);
+     }
+   }
+@@ -937,7 +982,7 @@ int main(int argc, char **argv) {
+   //        std::to_string(i) + ".ply";
+   //    //   ply_file= "/home/thabisa/data/farm_monos/source_laser_10.ply";
+   //    std::string pose_file =
+-  //        "/home/quad/data/laser_splits/split_1/transforms/transform_" +
++  //        FLAGS_teach_dir + "/transforms/transform_" +
+   //        std::to_string(i) + ".txt";
+   //
+   //    // Read the ply file
+diff --git a/include/segmatch/recognizers/graph_utilities.hpp b/include/segmatch/recognizers/graph_utilities.hpp
+index 7194f72..b0efd83 100644
+--- a/include/segmatch/recognizers/graph_utilities.hpp
++++ b/include/segmatch/recognizers/graph_utilities.hpp
+@@ -206,6 +206,7 @@ class GraphUtilities {
+       vertex_positions[*v_it] = bin_offsets[vertex_degrees[*v_it]]++;
+       sorted_vertices[vertex_positions[*v_it]] = *v_it;
+     }
++    return maximum_degree;   // scratch-clone patch: upstream fell off the end of a size_t function (UB; garbage maximum degree -> bad_alloc in the k-core search under GCC 11 -O2)
+   }
+ 
+   // Helper recursive function for the findMaximumClique() function.
+diff --git a/src/segmapper.cpp b/src/segmapper.cpp
+index 9c55245..3cae83a 100644
+--- a/src/segmapper.cpp
++++ b/src/segmapper.cpp
+@@ -1,3 +1,4 @@
++#include <cstdlib>
+ #include "segmapper/segmapper.hpp"
+ #include "laser_slam/common.hpp"
+ 
+@@ -19,6 +20,10 @@ namespace py = pybind11;
+ 
+ SegMapper::SegMapper(std::string icp_config_file,
+                      std::string icp_filters_file) {
++  // scratch-clone patch: segmenter parameters from the environment (the app voxel-filters keyframes at 0.5 m, so the branch default growing radius of 0.12 m finds no neighbours)
++  if (const char *r = std::getenv("SMAC_GROW_RADIUS")) segmatch_worker_params_.segmatch_params.segmenter_params.radius_for_growing = std::atof(r);
++  if (const char *c = std::getenv("SMAC_MIN_CLUSTER")) segmatch_worker_params_.segmatch_params.segmenter_params.min_cluster_size = std::atoi(c);
++  LOG(INFO) << "segmenter radius_for_growing " << segmatch_worker_params_.segmatch_params.segmenter_params.radius_for_growing << " min_cluster_size " << segmatch_worker_params_.segmatch_params.segmenter_params.min_cluster_size;
+   // Load ROS parameters from server.
+   getParameters();
+ 
+@@ -202,6 +207,7 @@ SegMapper::matchThread(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+   unsigned int track_id = laser_slam_workers_.size() - 1u;
+   // Number of tracks skipped because waiting for new voxels to activate.
+   unsigned int skipped_tracks_count = 0u;
++  const double given_tx = transform(0,3), given_ty = transform(1,3), given_tz = transform(2,3);
+   laser_slam_workers_[track_id]->processScan(cloud, std::move(transform),
+                                              timestamp_ns);
+   // auto local_map =
+@@ -215,6 +221,7 @@ SegMapper::matchThread(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+   // Update the local map with the new points and the new pose.
+   Pose current_pose = incremental_estimator_->getCurrentPose(track_id);
+   { local_maps_[track_id].updatePoseAndAddPoints(new_points, current_pose); }
++  LOG(INFO) << "[diag] matchThread: cloud " << cloud->size() << " pts, given t=(" << given_tx << "," << given_ty << "," << given_tz << "), estimator t=(" << current_pose.T_w.getPosition().x() << "," << current_pose.T_w.getPosition().y() << "," << current_pose.T_w.getPosition().z() << ") local map " << local_maps_[track_id].getFilteredPoints().size() << " pts";
+   // Store this position for visualisation
+   Eigen::Vector3f pose_position(current_pose.T_w.getPosition().x(),
+                                 current_pose.T_w.getPosition().y(),
+@@ -223,9 +230,9 @@ SegMapper::matchThread(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,
+   trajectory_points_.push_back(pose_position);
+ 
+   // Process the source cloud.
+-  RelativePose loop_closure;
+-  segmatch_worker_.matchLocalMap(local_maps_[track_id], current_pose, track_id,
+-                                 &loop_closure);
++  // scratch-clone patch: localisation mode, no loop-closure pose estimate (the target cloud has no segmentation poses, so SegMatch::recognize
++  // overran its trajectory windows and threw bad_alloc on every keyframe with a filtered match); the recognised matches still reach matching_results.csv
++  segmatch_worker_.matchLocalMap(local_maps_[track_id], current_pose, track_id, nullptr);
+ 
+   for (const auto &worker : laser_slam_workers_) {
+     worker->publishTrajectories();
+diff --git a/src/segmatch_worker.cpp b/src/segmatch_worker.cpp
+index 2b3b384..6039e98 100644
+--- a/src/segmatch_worker.cpp
++++ b/src/segmatch_worker.cpp
+@@ -1,3 +1,4 @@
++#include <cstdlib>
+ #include "segmatch/segmatch_worker.hpp"
+ 
+ #include "include/laser_slam/benchmarker.hpp"
+@@ -48,7 +49,10 @@ void SegMatchWorker::init(const SegMatchWorkerParams &params,
+ 
+ void SegMatchWorker::loadTargetCloud() {
+   segmatch::MapCloud target_cloud;
+-  segmatch::loadCloud(params_.target_cloud_filename, &target_cloud);
++  const char *env_target = std::getenv("SMAC_TARGET_CLOUD");   // scratch-clone patch: the seed target cloud from the environment
++  const std::string target_file = env_target ? std::string(env_target) : params_.target_cloud_filename;
++  LOG(INFO) << "SegMatch target cloud: " << target_file;
++  segmatch::loadCloud(target_file, &target_cloud);
+   segmatch_.processAndSetAsTargetCloud(target_cloud);
+   target_cloud_loaded_ = true;
+ }
+@@ -100,8 +104,7 @@ void SegMatchWorker::loadTargetCloud() {
+       }
+     }
+ 
+-    if (!robot_drove_enough)
+-      return false;
++    if (!robot_drove_enough) { LOG(INFO) << "[diag] matchLocalMap: robot did not drive enough"; return false; }
+ 
+     // Process the source cloud.
+     segmatch_.processAndSetAsSourceCloud(local_map, latest_pose, track_id);
+@@ -109,6 +112,7 @@ void SegMatchWorker::loadTargetCloud() {
+  //   segments_database_ += segmatch_.getSourceAsSegmentedCloud(track_id);
+     // add this line when testing loop closure
+     curr_segments_ = segmatch_.getSourceAsSegmentedCloud(track_id);
++    LOG(INFO) << "[diag] matchLocalMap: " << curr_segments_.getNumberOfValidSegments() << " segments from the local map";
+ 
+     segments_database_+= curr_segments_;
+ 
+@@ -141,9 +145,22 @@ void SegMatchWorker::loadTargetCloud() {
+       latest_pose.time_ns,
+       filtered_matches);
+ 
++    LOG(INFO) << "[diag] matchLocalMap: exports done, recognising";
+     const PairwiseMatches &recognized_matches = segmatch_.recognize(
+         filtered_matches, track_id, latest_pose.time_ns, loop_closure);
+ 
++    LOG(INFO) << "[diag] matchLocalMap: recognised " << recognized_matches.size();
++    {   // scratch-clone patch: recognised matches with both centroids, for the descriptor-arm score
++      std::ofstream cc("matching_centroids.csv", std::ios::app);
++      const segmatch::SegmentedCloud target_segments = segmatch_.getTargetAsSegmentedCloud();
++      for (const auto &m : recognized_matches) {
++        segmatch::Segment a, b;
++        if (curr_segments_.findValidSegmentById(m.ids_.first, &a) && target_segments.findValidSegmentById(m.ids_.second, &b)) {
++          const auto &ca = a.getLastView().centroid; const auto &cb = b.getLastView().centroid;
++          cc << latest_pose.time_ns << "," << m.ids_.first << "," << m.ids_.second << "," << ca.x << "," << ca.y << "," << ca.z << "," << cb.x << "," << cb.y << "," << cb.z << "\n";
++        }
++      }
++    }
+     exportMatchingResults("recognised",
+       latest_pose.time_ns,
+       recognized_matches);
