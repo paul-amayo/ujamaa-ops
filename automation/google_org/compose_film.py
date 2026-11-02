@@ -62,6 +62,27 @@ for k, sh in enumerate(sorted(S["shots"], key=lambda s: s["t_start"])):
 lst = W / "video.txt"; lst.write_text("".join(f"file '{p}'\n" for p in pieces)); video = W / "video.mp4"
 run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(video)])
 TOTAL = dur(video)
+# timeline overlays (independent of the cuts): a small "2023" mark held across several shots; the end card
+def mark_png(text, name):
+    im = Image.new("RGBA", (SW, SH), (0, 0, 0, 0)); d = ImageDraw.Draw(im); f = ImageFont.truetype(FB, 38)
+    w = d.textlength(text, font=f) + 44; x, y = 100, SH - 100 - 64
+    d.rectangle([x, y, x + w, y + 64], fill=(11, 15, 10, 190)); d.rectangle([x, y, x + 7, y + 64], fill=(233, 150, 55, 255))
+    d.text((x + 24, y + 11), text, font=f, fill=(240, 236, 226)); p = W / f"{name}.png"; im.save(p); return p
+def end_png(text, sub, name):
+    im = Image.new("RGBA", (SW, SH), (11, 15, 10, 215)); d = ImageDraw.Draw(im); f1, f2 = ImageFont.truetype(FB, 88), ImageFont.truetype(FR, 40)
+    d.text(((SW - d.textlength(text, font=f1)) / 2, SH / 2 - 90), text, font=f1, fill=(240, 236, 226))
+    d.text(((SW - d.textlength(sub, font=f2)) / 2, SH / 2 + 30), sub, font=f2, fill=(233, 150, 55)); p = W / f"{name}.png"; im.save(p); return p
+ovs = S.get("overlays") or []
+if ovs:
+    ins = ["-i", str(video)]; chain = "[0:v]"; fc = []
+    for j, o in enumerate(ovs):
+        png = end_png(o["text"], o.get("sub", ""), f"ov{j}") if o.get("style") == "end" else mark_png(o["text"], f"ov{j}")
+        ins += ["-loop", "1", "-i", str(png)]; fi, fo = 0.4, 0.4
+        fc.append(f"[{j + 1}:v]format=rgba,fade=t=in:st={o['t_start']:.2f}:d={fi}:alpha=1,fade=t=out:st={max(o['t_start'], o['t_end'] - fo):.2f}:d={fo}:alpha=1,setpts=PTS-STARTPTS[o{j}]")
+        fc.append(f"{chain}[o{j}]overlay=0:0:enable='between(t,{o['t_start']:.2f},{o['t_end']:.2f})'[v{j}]"); chain = f"[v{j}]"
+    v2 = W / "video_ov.mp4"
+    run(["ffmpeg", "-nostdin", "-v", "error", "-y", *ins, "-filter_complex", ";".join(fc), "-map", chain, "-t", str(TOTAL), "-an", "-c:v", "libx264", "-crf", "17", "-preset", "medium", "-pix_fmt", "yuv420p", str(v2)])
+    video = v2
 
 # ---------------------------------------------------------------- sound
 report = []; tracks = []   # (path, start_s)
