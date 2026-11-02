@@ -1,0 +1,390 @@
+{
+ "title": "One Question",
+ "logline": "A question typed in Kiswahili, which tree has the most oranges, is followed through UJAMAA (Unified Joint Agricultural Modelling with Artificial intelligence Agents) while the assistant reads the farm record: the robot survey that began the record, the 3D orchard in which every point is labelled with its row and its tree, the blueberry bags matched again four months later, and the answer in the language of the question, tree 5 with 61 oranges, circled. Then the turn: all of this needed a robot, and in Paul's own May 2023 voice the problem (data for those who can afford drones and expertise) and the direction (lightweight techniques on mobile phones), cut on the word phones to Kenya in May 2026, where the same pipeline built farm models from an ordinary phone walk alone and the same kind of question lights one cabbage.",
+ "unique_claim": "UJAMAA's 3D farm model carries identity inside the model itself, so that every point is labelled with the plant and the row it belongs to; this is what lets a question asked in any of eight languages light exactly one tree, lets the same bags be matched again four months later, and lets the pipeline built for a camera-and-LiDAR robot run from an ordinary phone walk on a Kenyan smallholding.",
+ "structure": "1. The question (0-18 s): a Kiswahili question is typed into the live app, the assistant starts reading the farm record, and we say who we are: UJAMAA at the University of Cape Town, built to answer it.\n2. The record (18-55 s): that takes a system which knows the farm as the farmer does, down to the row, the tree and what is growing on it; the farm's record begins with a robot survey (2023 citrus lane; 2025 and 2026 tunnels; robot shot pending clearance, substituted); the 3D model carries not only colour but also meaning: one row lights, every tree, then exactly one tree.\n3. The memory (55-70 s): once a plant has a name it can be found again; Klapmuts tunnels surveyed four months apart, 825 of 912 bags matched from one survey to the next, shown as the registry map taking its row colours.\n4. The answer (70-92 s): the same name lets a question reach the plant; the Kiswahili answer lands as the timer ends, tree five with 61 oranges, the render circles them; eight languages, on our own machine; when the record holds no answer it says so.\n5. The turn (92-121 s): all of this needed a robot, and in May 2023, before the first survey, we said this: Paul's 2023 voice on who can afford such data, then on lightweight techniques for mobile phones, over the robot-built orchard and the globe travelling to Kenya; the picture cuts on the word phones.\n6. The reveal (121-164.5 s): May 2026, two Kenyan smallholdings, an ordinary phone, without a robot or LiDAR; the same pipeline built the farm models from the phone alone (29 cabbages in two rows, each with a name; the ripe chillies lit; a ground crop from one short walk); the same kind of question lights one cabbage; robotics opened the path, the phone walks it; end card in silence over the walk.",
+ "duration_s": 164.5,
+ "vo": [
+  {
+   "t_start": 0.0,
+   "t_end": 1.0,
+   "text": "[natural silence; the Kiswahili question is being typed on screen]",
+   "source": "silence"
+  },
+  {
+   "t_start": 1.0,
+   "t_end": 4.3,
+   "text": "Which tree has the most oranges? Show me.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 5.0,
+   "t_end": 17.5,
+   "text": "It is the question a farmer would ask. At the University of Cape Town we built UJAMAA, Unified Joint Agricultural Modelling with Artificial intelligence Agents, to answer it.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 18.3,
+   "t_end": 27.5,
+   "text": "That takes a system which knows the farm as the farmer does: which row, which tree, and what is growing on it.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 28.0,
+   "t_end": 39.7,
+   "text": "The farm's record begins with a survey, which in 2023, and again in 2025 and 2026, meant a ground robot with a camera and LiDAR driving the lanes.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 40.0,
+   "t_end": 55.0,
+   "text": "From the survey we build a three-dimensional model that carries not only colour but also meaning: every point is labelled with the row and the tree it belongs to, so that a question lights exactly that tree.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 56.0,
+   "t_end": 69.5,
+   "text": "Once a plant has a name it can be found again. In blueberry tunnels in the Western Cape, surveyed four months apart, 825 of 912 bags were matched from one survey to the next.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 70.4,
+   "t_end": 82.2,
+   "text": "The same name lets a question reach the plant, and the answer returns in the language it was asked in: tree five carries 61 oranges, and the model circles them.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 82.9,
+   "t_end": 91.2,
+   "text": "It answers in eight languages, on our own machine, and when the record holds no answer, it says so.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 92.2,
+   "t_end": 99.2,
+   "text": "All of this needed a robot, and in May 2023, before the first survey, we said this.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 99.9,
+   "t_end": 111.3,
+   "text": "Current access to this data and the associated insights is, however, limited to those who can afford both the sophisticated equipment, such as drones, and the expertise required to operate them safely and process the data outputs.",
+   "source": "paul_2023_audio",
+   "talk_in_s": 156.2,
+   "talk_out_s": 167.6,
+   "audio_note": "In-point 0.17 s inside the measured pause 154.76-156.37 (speech rises at 156.36); out-point after the tail of 'outputs' has reached the room floor (silence from 167.37, floor by 167.60). Fade 0.2 s at each end, inside the margins. Sync: talk 156.37 = film 100.07."
+  },
+  {
+   "t_start": 112.0,
+   "t_end": 121.35,
+   "text": "using the most advanced techniques in computer vision and machine learning, but retaining the possibility to deploy these on cheaper and low-cost devices such as mobile phones.",
+   "source": "paul_2023_audio",
+   "talk_in_s": 195.3,
+   "talk_out_s": 204.65,
+   "audio_note": "In-point 0.17 s inside the measured pause 194.76-195.48 (speech rises at 195.47); out-point where the sibilant tail of 'phones' reaches the room floor (below -35 dB at 204.38, floor at 204.65). Fade 0.2 s at each end, inside the margins. Sync: talk 195.48 = film 112.18. The picture cuts at 120.9; the last 0.45 s of 'phones' rides over the first frames of the Kenya field (a J-cut). The 2023 mark goes out at 121.35 with the voice."
+  },
+  {
+   "t_start": 122.4,
+   "t_end": 134.9,
+   "text": "In May 2026 we walked two smallholdings in Kenya with an ordinary phone, without a robot or LiDAR, and the same pipeline built the farm models from the phone alone.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 135.6,
+   "t_end": 149.2,
+   "text": "At Gwakungu one walk gave 29 cabbages in two rows, each with a name, and a second lit the ripe chillies; at Gendia one short walk built the model of a ground crop.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 149.5,
+   "t_end": 156.2,
+   "text": "And the same kind of question works: which cabbage is in front of me? Show me.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 158.6,
+   "t_end": 162.2,
+   "text": "Robotics opened the path. The phone walks it.",
+   "source": "paul_2026_recorded"
+  },
+  {
+   "t_start": 162.2,
+   "t_end": 164.5,
+   "text": "[natural silence; end card over the walk]",
+   "source": "silence"
+  }
+ ],
+ "shots": [
+  {
+   "t_start": 0.0,
+   "t_end": 5.0,
+   "asset": "04_app/02_citrus_b_oranges.mp4",
+   "in_s": 13.0,
+   "out_s": 18.0,
+   "sees": "The live app on Citrus B, a 3D orchard lane filling the frame, the Adinkra panel bottom right. The Kiswahili question is already being typed (typing starts at about 11.8 s in the asset; at 13.0 s the box reads 'Ni mti gani w'); the last words land by 16.5 s ('Ni mti gani wenye machungwa mengi zaidi? Nionyeshe.') and it is sent at 17.6 s, so the sent bubble is on screen for the last 0.4 s of the shot. Push in on the panel so the typing is legible.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 5.0,
+   "t_end": 9.5,
+   "asset": "04_app/02_citrus_b_oranges.mp4",
+   "in_s": 18.0,
+   "out_s": 22.5,
+   "sees": "The sent question in its dark bubble; beneath it 'Tassili is reading the farm record' with the timer running 0:00 to 0:04 and the line 'the model runs on UJAMAA's own machine, not the cloud'. Push in on the panel so the timer is seen: the wait is the film's device.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 9.5,
+   "t_end": 15.5,
+   "asset": "05_globe/earth_idle.mp4",
+   "in_s": 0.0,
+   "out_s": 6.0,
+   "sees": "The Earth turning slowly, Africa centred, no text, as the University of Cape Town and UJAMAA are named.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 15.5,
+   "t_end": 23.0,
+   "asset": "03_3d_renders/03_klapmuts_tunnel_walk.mp4",
+   "in_s": 2.0,
+   "out_s": 9.5,
+   "sees": "Clean render, no UI: a smooth walk into the blueberry shade tunnel at Klapmuts, grow bags on both sides, white arches overhead, the best-looking model. Under 'to answer it. That takes a system which knows the farm as the farmer does'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 23.0,
+   "t_end": 27.5,
+   "asset": "04_app/04_bateleur_map.mp4",
+   "in_s": 0.0,
+   "out_s": 4.5,
+   "sees": "The Bateleur registry of the Klapmuts lane before colouring: a grey dot for every bag, laid out in rows. Push in on the dot field so that the page header ('Shade-tunnel lane · Dec 2025') and the stats card (PLANTS 911) stay out of frame; the row list on the left may stay. Lands under 'which row, which tree, and what is growing on it'. Ends 0.13 s before the colour arrives at 4.63 s.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 27.5,
+   "t_end": 33.1,
+   "asset": "03_3d_renders/01_citrus_a_orchard_query.mp4",
+   "in_s": 0.0,
+   "out_s": 5.6,
+   "sees": "A plain drive down a citrus lane in the robot-built 3D model at robot height, trees both sides, nothing lit: the orchard before the system knows anything about it. Under 'The farm's record begins with a survey, which in 2023'.",
+   "substitute_note": "ROBOT SHOT PENDING (slot a). Intended: the ground robot with camera and LiDAR driving this lane, from the ICRA video once Paul clears it, or a robot's-eye export from the July 2023 bags (about 1 h). Until then this plain lane drive, rendered from the robot's own survey, stands in.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 33.1,
+   "t_end": 40.0,
+   "asset": "03_3d_renders/03_klapmuts_tunnel_walk.mp4",
+   "in_s": 9.5,
+   "out_s": 16.4,
+   "sees": "The tunnel walk resumes deeper in, bags both sides, following the robot's own survey path. Under 'and again in 2025 and 2026, meant a ground robot with a camera and LiDAR driving the lanes'.",
+   "substitute_note": "ROBOT SHOT PENDING (slot b): the facts-file substitute (Klapmuts 3D render) for the robot itself. Swap in the robot entering the tunnel or driving the citrus lane when cleared.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 40.0,
+   "t_end": 48.5,
+   "asset": "03_3d_renders/01_citrus_a_orchard_query.mp4",
+   "in_s": 5.6,
+   "out_s": 14.1,
+   "sees": "The same citrus lane, and one whole ROW of trees lights blue on the right and stays lit as the drive continues. Under 'a model that carries not only colour but also meaning: every point is labelled with the row'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 48.5,
+   "t_end": 52.7,
+   "asset": "03_3d_renders/01_citrus_a_orchard_query.mp4",
+   "in_s": 15.0,
+   "out_s": 19.2,
+   "sees": "EVERY tree in the lane lit in its own colour (orange, red, blue, purple, green), each tree a separate identity, the drive continuing. Under 'and the tree it belongs to'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 52.7,
+   "t_end": 55.5,
+   "asset": "03_3d_renders/02_citrus_b_oranges_lane.mp4",
+   "in_s": 19.0,
+   "out_s": 21.8,
+   "sees": "One tree lit orange, alone, everything else in natural colour (measured: the single-tree picture runs from 18.8 s to beyond 22.5 s in this file). Lands under 'so that a question lights exactly that tree'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 55.5,
+   "t_end": 61.5,
+   "asset": "05_globe/klapmuts.mp4",
+   "in_s": 0.0,
+   "out_s": 6.0,
+   "sees": "The globe zooms from Africa to a pin at Klapmuts in the Western Cape, landing on the pin as 'Western Cape' is said.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 61.5,
+   "t_end": 65.5,
+   "asset": "03_3d_renders/03_klapmuts_tunnel_walk.mp4",
+   "in_s": 16.4,
+   "out_s": 20.4,
+   "sees": "The tunnel walk, bags both sides, the cleanest stretch of the model. Under 'surveyed four months apart'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 65.5,
+   "t_end": 70.8,
+   "asset": "04_app/04_bateleur_map.mp4",
+   "in_s": 4.5,
+   "out_s": 9.8,
+   "sees": "The Bateleur map opens grey for 0.13 s, then every bag takes its row colour (asset 4.63 s, film 65.63), 14 rows each in its own colour. Same push-in as the 23.0 shot: the dot field fills the frame and the header and the stats card (PLANTS 911, the December count) stay out of frame, so the narration's 912 (the April count) has nothing on screen to disagree with. Lands under '825 of 912 bags were matched from one survey to the next'. Cut before the bush record opens between 10.3 and 10.5 s (its SEEN IN and FIRST SEEN fields are blank and would contradict the line).",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 70.8,
+   "t_end": 78.0,
+   "asset": "04_app/02_citrus_b_oranges.mp4",
+   "in_s": 44.0,
+   "out_s": 51.2,
+   "sees": "Back in the app: the timer at 0:26 to 0:28, then at asset 46.65 s (film 73.45) the answer lands in Kiswahili, 'Mti wenye machungwa mengi zaidi ni mti 5, wenye machungwa 61.', with 'showing the fruit on tree 5 (61 confirmed)' beneath; the tree 5 record opens on the left at the same moment and the 3D begins to move. Push in on the panel for the answer. Under 'The same name lets a question reach the plant, and the answer returns in the language it was asked in: tree five carries 61 oranges'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 78.0,
+   "t_end": 83.3,
+   "asset": "03_3d_renders/02_citrus_b_oranges_lane.mp4",
+   "in_s": 2.4,
+   "out_s": 7.7,
+   "sees": "Hero shot, clean render: the Citrus B lane, plain for the first frames, then magenta rings appear on the oranges of tree 5 (faint from 2.5 s, clear by 2.7 s, film 78.3) and grow as the lane approaches (rings run to 8.0 s in this file). Under 'and the model circles them'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 83.3,
+   "t_end": 89.0,
+   "asset": "04_app/01_picker.mp4",
+   "in_s": 31.0,
+   "out_s": 36.7,
+   "sees": "The app's farm page scrolled to the Adinkra card, 'Language, in every workspace', with its row of eight language chips: English, Afrikaans, isiXhosa, isiZulu, Kiswahili, Hausa, Arabic, Amharic. Push in on the Adinkra card (bottom left of the page) so the chips fill the frame and the greyed Sankofa card above it is out of frame. Measured: the card and all eight chips are fully in frame from 30.0 s until the page scrolls to the top at about 37.3 s, so this window is the stable one. Under 'It answers in eight languages, on our own machine'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 89.0,
+   "t_end": 94.7,
+   "asset": "03_3d_renders/01_citrus_a_orchard_query.mp4",
+   "in_s": 41.8,
+   "out_s": 47.5,
+   "sees": "The whole citrus orchard lit green as one, the drive continuing: the system complete. Under 'when the record holds no answer, it says so' and 'All of this needed a robot'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 94.7,
+   "t_end": 100.7,
+   "asset": "05_globe/earth_idle.mp4",
+   "in_s": 0.0,
+   "out_s": 6.0,
+   "sees": "The Earth turning slowly, Africa centred, no pin, under 'and in May 2023, before the first survey, we said this'. (A pull-out from the Klapmuts pin was here before; between two citrus orchards it placed the citrus farm at that pin, so the plain globe replaces it.) The small 2023 mark appears at 99.6 s, just before the archive voice begins at 99.9, and is held through 121.35 s.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 100.7,
+   "t_end": 110.7,
+   "asset": "03_3d_renders/01_citrus_a_orchard_query.mp4",
+   "in_s": 19.9,
+   "out_s": 29.9,
+   "sees": "The robot-built orchard, every tree lit in its own colour, the drive continuing as a single held take under Paul's 2023 voice on who can afford drones and the expertise to use them: the expensive version, seen while he describes its cost. The 2023 mark stays on.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 110.7,
+   "t_end": 114.9,
+   "asset": "05_globe/earth_idle.mp4",
+   "in_s": 1.8,
+   "out_s": 6.0,
+   "sees": "The Earth turning slowly, Africa centred (the later part of the spin, so it differs from the 94.7 shot), under the end of the first 2023 passage and the start of the second ('using the most advanced techniques in computer vision and machine learning'). The 2023 mark stays on. The join to the next shot carries the usual small jump in globe pose; a short dissolve hides it.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 114.9,
+   "t_end": 120.9,
+   "asset": "05_globe/gendia.mp4",
+   "in_s": 0.0,
+   "out_s": 6.0,
+   "sees": "The globe zooms from Africa down to the pin at Gwakungu, Nyahururu, the lake to the west, landing on the pin as the 2023 voice reaches 'mobile phones'. The picture cuts at 120.9; the tail of 'phones' runs 0.45 s over the next shot and the 2023 mark goes out with the voice at 121.35.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 120.9,
+   "t_end": 126.9,
+   "asset": "01_field/06_gwakungu_open_field.mp4",
+   "in_s": 0.0,
+   "out_s": 6.0,
+   "sees": "Cut on the word 'phones' to phone footage (vertical on a blurred fill, faces blurred; no one in frame at 0-6 s): an open red-soil field at Gwakungu, drip lines running away from the camera, big sky with cumulus, trees on the horizon. Under 'In May 2026 we walked two smallholdings in Kenya with an ordinary phone'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 126.9,
+   "t_end": 133.4,
+   "asset": "01_field/08_gwakungu_cabbages.mp4",
+   "in_s": 0.0,
+   "out_s": 6.5,
+   "sees": "Walking along the cabbage bed at Gwakungu (vertical, blurred fill; no one in frame): heads either side of the drip pipes, grass between, the walk steady. The survey itself, as the phone saw it. Under 'without a robot or LiDAR, and the same pipeline built the farm models'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 133.4,
+   "t_end": 140.4,
+   "asset": "03_3d_renders/05_gwakungu_cabbages_query.mp4",
+   "in_s": 0.0,
+   "out_s": 7.0,
+   "sees": "The same cabbage bed as a phone-built 3D model (vertical, blurred fill), plain for two seconds, then individual heads light blue, purple and pink as the view moves down the bed. Under 'from the phone alone. At Gwakungu one walk gave 29 cabbages in two rows, each with a name'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 140.4,
+   "t_end": 145.2,
+   "asset": "03_3d_renders/06_gwakungu_red_chillies.mp4",
+   "in_s": 2.0,
+   "out_s": 6.8,
+   "sees": "The chilli bed as a phone-built 3D model (narrow vertical centre crop on a blurred fill): ripe red chillies ringed magenta along both sides of the path. Under 'and a second lit the ripe chillies'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 145.2,
+   "t_end": 149.5,
+   "asset": "03_3d_renders/04_gendia_ground_crop_walk.mp4",
+   "in_s": 0.0,
+   "out_s": 4.3,
+   "sees": "The Gendia ground crop as a phone-built 3D model (vertical, blurred fill): dense green foliage, a short walk along the bed, no highlights. Under 'at Gendia one short walk built the model of a ground crop'.",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 149.5,
+   "t_end": 158.5,
+   "asset": "04_app/03_cabbage_query.mp4",
+   "in_s": 46.0,
+   "out_s": 55.0,
+   "sees": "The cabbage bed in the app, portrait pane in the centre; in the panel the earlier exchange ('How many cabbages are there?' answered 29) and 'Which cabbage is in front of me? Show me.' with 'reading the farm record'. At asset 49.85 s (film 153.35) the answer lands ('HIGHLIGHTED CABBAGE 12') and the 'cabbage 12' record opens on the left; at 51.9 s (film 155.4) one head at the bottom left of the pane lights orange and holds to the cut. Under 'And the same kind of question works: which cabbage is in front of me? Show me.'",
+   "on_screen_text": ""
+  },
+  {
+   "t_start": 158.5,
+   "t_end": 164.5,
+   "asset": "01_field/07_gwakungu_chillies.mp4",
+   "in_s": 2.0,
+   "out_s": 8.0,
+   "sees": "Phone footage (vertical, blurred fill): walking down the chilli bed at Gwakungu, red pods in the green, a line of tall trees on the skyline, no one in frame. Under 'Robotics opened the path. The phone walks it.' The end card sits on the blurred fill beside the vertical frame from 162.6 s; the film ends in silence.",
+   "on_screen_text": "",
+   "substitute_note": "Catalogue marks this file 'BLURRED (arriving)'; the file on disk already carries blur boxes (two blurred figures at 27-31 s), so it appears to be the blurred version, and 2.0-8.0 s has no one in frame. If it is not cleared, use 01_field/08_gwakungu_cabbages.mp4 8.0-14.0 instead (checked: no one in frame)."
+  }
+ ],
+ "missing": "1. The robot itself: the ground robot driving a citrus lane or entering the tunnel (ICRA video under anonymous review; a robot's-eye export from the July 2023 bags would take about 1 h). Shots 27.5-33.1 and 33.1-40.0 are the slots, substituted with the plain citrus lane render and the Klapmuts render; swap in when Paul clears it. 2. A farmer's own voice, or anyone using the system: no such footage exists, so the film says 'the question a farmer would ask' and never that farmers are using it; the typed question is one of the app's own preset example prompts. 3. A picture of the honest refusal: no recording of a refusal exists, so 'when the record holds no answer, it says so' sits over the green orchard; a ten-second screen recording of a refused question (soil moisture, for example) would let it be shown. 4. The Sankofa found-again page is empty in the app; the memory beat is carried by the tunnel render and the Bateleur map colouring by row, pushed in on the dot field and cut before the bush record opens between 10.3 and 10.5 s (its SEEN IN and FIRST SEEN fields are blank and would contradict the line). 5. Any 2023 field footage: the 2023 voice runs over the orchard model built from the 2023 survey and over the globe, with the 2023 mark held for the whole passage. 6. A spoken Kiswahili answer: the answer is text on screen and Paul's narration gives it in English; if Paul wants to voice the typed question in Kiswahili, record it for 1.0-4.3 s and move the English line to 4.6-7.9 s (the film then runs 3.6 s longer, still under 2:50). 7. Field files: 01_field/02_kendu_beds_landscape.mp4 has no moov atom and will not play; 03_kendu_bean_rows, 04_gendia_ground_crop and 05_kendu_seedling_rows are blur pending and are not used; 01_kendu_towers is not used; 07_gwakungu_chillies is used only at 2.0-8.0 s where no one is in frame, with 08_gwakungu_cabbages 8.0-14.0 named as the fallback; 06_gwakungu_open_field 0-6 and 08_gwakungu_cabbages 0-14 were checked frame by frame and show no one. 8. On-screen naming: the app panel is headed 'Adinkra' while the wait line reads 'Tassili is reading the farm record'; the narration names no agent, so there is no conflict, and the panel's own line 'The model runs on UJAMAA's own machine, not the cloud' supports the narration. The Bateleur page shows the December count (911) while the narration gives the April count (912, the denominator the facts file uses for the 825); the push-in keeps the stats card out of frame. 9. Catalogue corrections written back into FACTS_AND_ASSETS.md on 2 Nov 2026, all measured from the files: 02_citrus_b_oranges_lane runs 26.57 s with plain 0-2.5, rings faint from 2.5 and clear by 2.7, rings to 8.0, rows grouped 8.0-12.0, whole orchard green 12-15, one row 15-18.8, one tree orange 18.8 to beyond 22.5, every tree by 23.0-26.57; in 01_citrus_a_orchard_query the segment 37.4-41.8 is two colours (purple left, green right), not one tree (one row 5.6-14.6, every tree 14.6 to at least 33, whole orchard green from 41.8), so the only single-tree picture is in Citrus B; in 02_citrus_b_oranges.mp4 typing starts at about 11.8 s (box empty at 11.5, 'N' at 12.0), the question is complete by 16.5 s, sent at 17.6 s and answered at 46.65 s with the tree 5 record opening at the same moment; in 03_cabbage_query.mp4 the answer lands at 49.85 s, the record that opens is cabbage 12 (not 13) and the head lights at 51.9 s; in 04_bateleur_map.mp4 colour arrives at 4.63 s and the bush 3 record opens between 10.3 and 10.5 s; in 04_app/01_picker.mp4 the Adinkra card with all eight chips is fully in frame from 30.0 s until the page scrolls to the top at about 37.3 s; 03_klapmuts_tunnel_walk is 27.75 s (clean 1-21.5 s, exit artefacts after 22 s) and 04_gendia_ground_crop_walk is 6.375 s; 05_globe/citrus.mp4 zooms from Africa to North America and must never be used. 10. The 2023 audio: silences measured with ffmpeg (silencedetect -35 dB, 0.25 s) at 154.76-156.37, 167.37-168.88, 189.37-190.59, 194.76-195.48 and 204.38-206.04, with the sibilant tail of 'phones' reaching the room floor at 204.65 at 50 ms resolution; these were appended to the transcript header. Both passages now start 0.17 s inside their pauses (156.20, 195.30) and end at the room floor (167.60, 204.65), with 0.2 s fades inside those margins and the sync unchanged (passage 1 at film 99.9-111.3, passage 2 at 112.0-121.35, a 0.7 s gap between them); a light EQ to sit under the 2026 recording. The second passage begins mid-sentence ('using the most advanced techniques'), which reads as an excerpt under the 2023 mark; starting it at the clause head, 190.59 ('my lab primarily focuses on what are known as lightweight techniques for this robotics problem'), would add 4.7 s and take the film to about 2:49, over the 2:45 ceiling, so it is not taken. 11. No footage of the 6 October summit showing, so that moment is left out rather than claimed without a picture. 12. Paul's 2026 narration: 310 words over about 129 s of speech, roughly 145 words per minute at the timings above (no line above 153); the short sentences ('Robotics opened the path. The phone walks it.') want a breath either side. With the two 2023 passages (64 words) the whole voice track is 374 words.",
+ "overlays": [
+  {
+   "style": "mark",
+   "text": "2023",
+   "t_start": 99.6,
+   "t_end": 121.35
+  },
+  {
+   "style": "end",
+   "text": "UJAMAA",
+   "sub": "African Robotics Unit, University of Cape Town",
+   "t_start": 162.6,
+   "t_end": 164.5
+  }
+ ]
+}

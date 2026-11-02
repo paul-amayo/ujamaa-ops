@@ -1,0 +1,137 @@
+{
+ "out": "/Users/paulamayo/data/for_a100/google_org_2026-11/_film/one_question_scratchVO.mp4",
+ "duration_s": 164.47,
+ "shots": 28,
+ "voice": "Daniel",
+ "lines": [
+  {
+   "line": 1,
+   "source": "scratch_say",
+   "words": 8,
+   "slot_s": 3.3,
+   "audio_s": 2.86,
+   "rate_wpm": 165,
+   "fits": true
+  },
+  {
+   "line": 2,
+   "source": "scratch_say",
+   "words": 28,
+   "slot_s": 12.5,
+   "audio_s": 10.95,
+   "rate_wpm": 165,
+   "fits": true
+  },
+  {
+   "line": 3,
+   "source": "scratch_say",
+   "words": 22,
+   "slot_s": 9.2,
+   "audio_s": 6.55,
+   "rate_wpm": 165,
+   "fits": true
+  },
+  {
+   "line": 4,
+   "source": "scratch_say",
+   "words": 28,
+   "slot_s": 11.7,
+   "audio_s": 11.31,
+   "rate_wpm": 192,
+   "fits": true
+  },
+  {
+   "line": 5,
+   "source": "scratch_say",
+   "words": 37,
+   "slot_s": 15.0,
+   "audio_s": 11.07,
+   "rate_wpm": 165,
+   "fits": true
+  },
+  {
+   "line": 6,
+   "source": "scratch_say",
+   "words": 34,
+   "slot_s": 13.5,
+   "audio_s": 12.0,
+   "rate_wpm": 165,
+   "fits": true
+  },
+  {
+   "line": 7,
+   "source": "scratch_say",
+   "words": 30,
+   "slot_s": 11.8,
+   "audio_s": 9.91,
+   "rate_wpm": 165,
+   "fits": true
+  },
+  {
+   "line": 8,
+   "source": "scratch_say",
+   "words": 19,
+   "slot_s": 8.3,
+   "audio_s": 6.3,
+   "rate_wpm": 165,
+   "fits": true
+  },
+  {
+   "line": 9,
+   "source": "scratch_say",
+   "words": 17,
+   "slot_s": 7.0,
+   "audio_s": 6.59,
+   "rate_wpm": 165,
+   "fits": true
+  },
+  {
+   "line": 10,
+   "source": "paul_2023_audio",
+   "slot_s": 11.4,
+   "audio_s": 11.4
+  },
+  {
+   "line": 11,
+   "source": "paul_2023_audio",
+   "slot_s": 9.35,
+   "audio_s": 9.35
+  },
+  {
+   "line": 12,
+   "source": "scratch_say",
+   "words": 30,
+   "slot_s": 12.5,
+   "audio_s": 10.59,
+   "rate_wpm": 165,
+   "fits": true
+  },
+  {
+   "line": 13,
+   "source": "scratch_say",
+   "words": 33,
+   "slot_s": 13.6,
+   "audio_s": 10.56,
+   "rate_wpm": 165,
+   "fits": true
+  },
+  {
+   "line": 14,
+   "source": "scratch_say",
+   "words": 16,
+   "slot_s": 6.7,
+   "audio_s": 5.22,
+   "rate_wpm": 165,
+   "fits": true
+  },
+  {
+   "line": 15,
+   "source": "scratch_say",
+   "words": 8,
+   "slot_s": 3.6,
+   "audio_s": 2.86,
+   "rate_wpm": 165,
+   "fits": true
+  }
+ ]
+}
