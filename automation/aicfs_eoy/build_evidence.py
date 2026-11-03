@@ -8,11 +8,12 @@ Runs on the A100 (stdlib only). Copies the raw evaluation records the form cites
 them (latency and outcomes per language from the Adinkra r3 run; the demo-bank grounding score), writes an index.html
 that maps each form row to its files, then scans the whole bundle for the citrus orchards' location (never published)
 and refuses to finish if it finds it. Nothing with per-tree WGS84 coordinates of the citrus surveys is copied."""
-import csv, html, json, re, shutil, statistics, subprocess, sys
+import csv, html, json, os, re, shutil, statistics, subprocess, sys
 from pathlib import Path
 
 OUT = Path(sys.argv[sys.argv.index("--out") + 1]) if "--out" in sys.argv else Path("/home/paperspace/code/ujamaa/app/evidence")
 H = Path("/home/paperspace"); OPS = H / "code"
+FORM = Path(os.environ.get("AICFS_FORM_DIR", OPS / "automation/aicfs_eoy"))   # the filled form; staged outside the checkout when the box's ops clone lags origin
 R3 = H / "data/experimental_adinkra_www_20260827_r3"
 SRC = {
     "adinkra_r3": [R3 / f for f in ["passA_citrus.jsonl", "passA_klap.jsonl", "passB_citrus.jsonl", "passB_klap.jsonl",
@@ -22,13 +23,12 @@ SRC = {
     "multilingual": [H / "data/experimental_multiling_m1/summary.txt", OPS / "plans/g0_negative_result.md",
                      OPS / "automation/adinkra_www/questions.json", OPS / "automation/adinkra_www/www_fig_numbers.json"],
     "identity": [H / "logs/e1_protocol_table_v3.md", H / "code/aru_sil_core/src/docs/paper/numbers/e1_v3.json"],
-    "reconstruction": [H / "logs/v3_fleet_results.jsonl", OPS / "plans/run_of_show_aicfs_2026-10-06.md"],
+    "reconstruction": [H / "logs/v3_fleet_results.jsonl"],   # the run-of-show plan names the citrus location: never copied; its PSNR table is re-typed below
     "sankofa": [H / "data/klapmuts/dec_2025_ten_rows/experimental/sankofa/klapmuts_ledger_v5.json"],
     "data": [OPS / "DATASETS.md"],
-    "form": [OPS / "automation/aicfs_eoy/AICFS_EOY_2026_UJAMAA_interim.md", OPS / "automation/aicfs_eoy/AICFS_EOY_2026_UJAMAA.md",
-             OPS / "automation/aicfs_eoy/AICFS_EOY_2026_UJAMAA.csv"],
+    "form": [FORM / "AICFS_EOY_2026_UJAMAA_interim.md", FORM / "AICFS_EOY_2026_UJAMAA.md", FORM / "AICFS_EOY_2026_UJAMAA.csv"],
 }
-LOCATION = re.compile(r"riverside|california|\b-117\.\d|\b33\.9\d\d", re.I)   # the citrus orchards' location: never published
+LOCATION = re.compile(r"riverside|california|\b-117\.\d", re.I)   # the citrus orchards' location: never published (latitude alone collides with Klapmuts local-frame metres)
 
 if OUT.exists(): shutil.rmtree(OUT)
 OUT.mkdir(parents=True)
@@ -74,6 +74,19 @@ bank_summary = {"run": "demo bank, 2026-10-01 (demo_bank_run_20261001.csv)", "qu
                 "note": "Expected answers are in demo_bank_20260930.json; correctness of the 87 completed answers was checked by the team against the farms' records on 1 Oct 2026 (lab notebook)."}
 json.dump(bank_summary, open(OUT / "demo_bank_20261001/summary.json", "w"), indent=1, ensure_ascii=False)
 
+# ---- reconstruction: the summit quality table (H3DGS, measured 29 Sep to 1 Oct 2026), re-typed from the notebook of record
+with open(OUT / "reconstruction/psnr_table_summit_2026-10.csv", "w", newline="") as fh:
+    w = csv.writer(fh); w.writerow(["farm", "survey_or_model", "psnr_median_training_views_in_cell_dB", "psnr_held_out_dB", "shown_at_summit", "source"])
+    w.writerows([
+        ["Citrus farm A", "01, chunk 3_1, improved H3DGS recipe", 28.23, "", "yes", "lab notebook 2026-09-30/10-01 (sky-masked 27.56)"],
+        ["Citrus farm B", "05, chunk 1_0, improved H3DGS recipe", 26.28, "", "yes", "lab notebook 2026-10-01 (203 in-cell training views; sky-masked 26.55; chunk 0_0 27.54)"],
+        ["Klapmuts", "Dec 2025 lane 2, h3dgs_e2", 29.72, 19.82, "yes", "lab notebook 2026-09-27"],
+        ["Kendu Bay (phone)", "IMG_7975_s0 ground crop, lane-style H3DGS 8 M", 26.06, 18.74, "yes", "lab notebook 2026-10-01"],
+        ["Gwakungu cabbages (phone)", "IMG_7993_s0, H3DGS 8 M", 23.43, 18.16, "yes, below the 25 dB bar by decision", "lab notebook 2026-10-01"],
+        ["Gwakungu chillies (phone)", "IMG_7990_s1, H3DGS 8 M", 21.92, 15.19, "no", "lab notebook 2026-10-01"],
+    ])
+    w.writerow(["note", "'in cell' = training views whose cameras lie inside the 30 m chunk; v3_fleet_results.jsonl holds the later production-recipe runs with their held-out scores per chunk", "", "", "", ""])
+
 # ---- Sankofa: Klapmuts ledger v5 counts (the file itself is copied; positions are in the April survey frame)
 L = json.load(open(OUT / "sankofa/klapmuts_ledger_v5.json"))
 def count(k):
@@ -90,7 +103,7 @@ json.dump(cat, open(OUT / "data/farm_catalogue.json", "w"), indent=1, ensure_asc
 # ---- index
 ROWS = [
  ("1.1 Model inputs / data quality", "data/DATASETS.md, data/farm_catalogue.json", "surveys held, by farm and platform"),
- ("1.2 Model functionality", "reconstruction/run_of_show_aicfs_2026-10-06.md, sankofa/, multilingual/g0_negative_result.md", "what was built, with dates"),
+ ("1.2 Model functionality", "reconstruction/psnr_table_summit_2026-10.csv, sankofa/, multilingual/g0_negative_result.md", "what was built, with dates"),
  ("1.3 Model coverage, 2.2 Product coverage", "data/farm_catalogue.json, multilingual/questions.json", "farms, surveys, languages"),
  ("1.4 Model accuracy and precision", "reconstruction/ (PSNR), identity/ (held-out IoU, E1 protocol), sankofa/ (825 of 912), adinkra_r3/summary.json, multilingual/summary.txt", "measured runs"),
  ("2.1 Product performance", "adinkra_r3/latency_by_language.csv, demo_bank_20261001/summary.json", "latency per language; 87 of 89 grounded"),
