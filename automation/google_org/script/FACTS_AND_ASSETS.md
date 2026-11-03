@@ -10,13 +10,13 @@ Everything below is from the project record (lab notebook, catalogue, measured r
 - How identity works (safe public phrasing): the 3D model carries meaning, not just colour — each point knows which plant and which row it belongs to, so a question lights exactly that plant. Technical name: identity by containment in a hierarchical 3D Gaussian model (HiGH / H3DGS). No per-object thresholds are tuned.
 
 ## Farms and numbers (all measured)
-- Citrus farm A: ground-robot survey (camera + LiDAR), July 2023; 289 trees in 36 rows in the registry; 3D model of one section (the demo chunk) at 26.9 dB median reconstruction quality; identity IoU median 0.87 against hand-checked masks. Location: a citrus orchard — DO NOT name the place or country.
-- Citrus farm B: ground-robot surveys, July 2023, 3 surveys; 100 trees; 154 oranges confirmed by hand across the farm; the tree with the most oranges has 61 (tree 5, "tree 3 of row 6/7" by position). The 3D model rings its oranges when asked. Location withheld as above.
+- Citrus farm A: ground-robot survey (camera + LiDAR), July 2023; 289 trees in 36 rows in the registry; 3D model of one section (the demo chunk) at 26.9 dB median reconstruction quality; identity IoU median 0.87 against SAM3-derived masks (bar video v4, 4 Oct 2026, training views; not hand labels). Location: a citrus orchard — DO NOT name the place or country.
+- Citrus farm B: ground-robot surveys, July 2023, 3 surveys; 100 trees; 154 oranges corroborated in 3D across views (SAM3 detections seen twice or more; not a hand count); the tree with the most oranges has 61 (tree 5, "tree 3 of row 6/7" by position). The 3D model rings its oranges when asked. Location withheld as above.
 - Klapmuts, Western Cape, South Africa: blueberry shade tunnels, ground-robot surveys (camera + LiDAR for both surveys, as the app's farm cards read; added 2 Nov 2026). December 2025: 911 grow bags; April 2026: 912 bags; 825 bags found again four months later, bag by bag. 3D model quality 29.0 dB median (the best-looking model).
 - Kenya, May 2026 — PHONE surveys only (an ordinary smartphone, a walk down the bed; no robot, no LiDAR):
   - Gwakungu, Nyahururu (16 May 2026): a cabbage bed — 29 cabbages counted in two rows; a red-chilli bed — ripe red chillies detected and lit; an open field being prepared.
   - Gendia, Kendu Bay, Homa Bay County (13–22 May 2026): a ground crop in 61 frames (3D model from one short walk); tower planters; bean rows; seedling rows; raised beds with drip irrigation.
-- Shown live: AIC Food Systems Summit 2026 gallery walk, 6 October 2026 (Pillar 3 poster); live 3D app driven over SSH from a laptop to the UCT GPU machine.
+- Shown live: AIC:FS (AI Collaborative: Food Security) Summit 2026 gallery walk, 6 October 2026 (Pillar 3 poster); live 3D app driven over SSH from a laptop to the UCT GPU machine.
 - A question bank of 89 question/language pairs was answered correctly from the farms' own data (87 of 89 completed; the two failures were output-length, not wrong answers). Example answers: "tree 5 has the most oranges, 61"; "825 of 912 bushes were found again"; honest refusals when the data does not exist (soil moisture, yield forecasts).
 
 ## 2023 → 2026 (vision vs execution)

@@ -58,8 +58,8 @@ language). Read that page before trusting it with decisions.
 ## Status
 
 Research software, launched December 2026 from an active programme. The
-pipeline has run end-to-end on two farms (a Western Cape citrus orchard
-and a berry farm); expect sharp edges beyond the documented paths, and
+pipeline has run end-to-end on three farms (two citrus orchards and a
+Western Cape berry farm); expect sharp edges beyond the documented paths, and
 [open an issue](../../issues) when you hit one.
 
 ## Citing
