@@ -11,6 +11,9 @@ set -uo pipefail
 B=/home/paperspace/logs/voidfree/bin; LG=/home/paperspace/logs/voidfree; mkdir -p $B $LG
 V3=/home/paperspace/code/automation/h3dgs/v3; NS=/home/paperspace/code/nerf_new; PX=/home/paperspace/.pixi/bin/pixi; VF=0.5
 INV=/home/paperspace/logs/identity_inventory_v2.jsonl
+TMP=/mnt/shared/voidfree_tmp   # 11-10 18:4x: the maps filled the root disk (shared with other sessions); maps now go here and are removed once scored
+diskwait(){ while [ $(df --output=avail -k / | tail -1) -lt 5000000 ]; do say "root disk under 5 GB free: waiting"; sleep 300; done; }
+cid(){ echo $1 | sed "s#/home/paperspace/data/##; s#/#__#g"; }
 say(){ echo "[$(date '+%m-%d %H:%M:%S')] $*" | tee -a $LG/chain.log; }
 run(){ (cd $NS && env PYTHONPATH=$V3 nice -n 10 $PX run python "$@" 2>&1) | grep -aE '^\[(render|protocol)\]|Error|Traceback' | grep -av '^\[render\] kf\|^\[render\] f_\|^\[render\] image' | tail -3 | tee -a $LG/chain.log; }
 CELLS=$(python3 -c "
@@ -27,23 +30,24 @@ render(){   # $1 features  $2 out dir  $3 identity
 score(){ local N=$1 TAG=$2; shift 2; [ -s $N/protocol_$TAG.jsonl ] || run $B/argmax_eval.py --identity $N --tag $TAG --out $N/protocol_$TAG.jsonl "$@"; }
 say "chain start: $(echo "$CELLS" | wc -l) cells, void-free share $VF"
 for N in $CELLS; do   # phase 1
-  render $N/features_B.bin $N/maps_v3vf $N
-  score $N v3vf --space hyper --maps $N/maps_v3vf/%s.npz
-  score $N hyper_own_vf --space hyper_own --maps $N/maps_v3vf/%s.npz
+  diskwait; M=$TMP/$(cid $N)/v3vf
+  if [ ! -s $N/protocol_v3vf.jsonl ] || [ ! -s $N/protocol_hyper_own_vf.jsonl ]; then render $N/features_B.bin $M $N
+  score $N v3vf --space hyper --maps $M/%s.npz
+  score $N hyper_own_vf --space hyper_own --maps $M/%s.npz; fi; rm -rf $M
   say "E1 $(echo $N | awk -F/ '{print $6"/"$8}')"
 done
 for N in $CELLS; do   # phase 2
   [ -s $N/protocol_euclid.jsonl ] || continue; A=$N/arms; SV=$(echo $N | awk -F/ '{print $6}')
   EMB=/home/paperspace/data/citrus_all/$SV/experimental/identity/embedder/${SV}_euclid_v1/ckpts/model_best.pth
-  if [ -e $A/features_euclid.bin ] && [ -e $EMB ]; then render $A/features_euclid.bin $A/maps_euclidvf $N; score $N euclid_vf --space euclid --emb $EMB --maps $A/maps_euclidvf/%s.npz; fi
-  if [ -e $A/features_flat96.bin ]; then render $A/features_flat96.bin $A/maps_flat96vf $N; score $N flat96_vf --space flat --basis $A/features_flat96.bin.basis.npz --maps $A/maps_flat96vf/%s.npz; fi
-  if [ -e $A/features_flat30.bin ]; then render $A/features_flat30.bin $A/maps_flat30vf $N; score $N flat30_vf --space flat --basis $A/features_flat30.bin.basis.npz --maps $A/maps_flat30vf/%s.npz; fi
+  if [ -e $A/features_euclid.bin ] && [ -e $EMB ]; then diskwait; M=$TMP/$(cid $N)/euclid; [ -s $N/protocol_euclid_vf.jsonl ] || { render $A/features_euclid.bin $M $N; score $N euclid_vf --space euclid --emb $EMB --maps $M/%s.npz; }; rm -rf $M; fi
+  if [ -e $A/features_flat96.bin ]; then diskwait; M=$TMP/$(cid $N)/flat96; [ -s $N/protocol_flat96_vf.jsonl ] || { render $A/features_flat96.bin $M $N; score $N flat96_vf --space flat --basis $A/features_flat96.bin.basis.npz --maps $M/%s.npz; }; rm -rf $M; fi
+  if [ -e $A/features_flat30.bin ]; then diskwait; M=$TMP/$(cid $N)/flat30; [ -s $N/protocol_flat30_vf.jsonl ] || { render $A/features_flat30.bin $M $N; score $N flat30_vf --space flat --basis $A/features_flat30.bin.basis.npz --maps $M/%s.npz; }; rm -rf $M; fi
   say "E2 $(echo $N | awk -F/ '{print $6"/"$8}')"
 done
 for N in $CELLS; do   # phase 3
   [ -s $N/protocol_zero3000.jsonl ] || continue; A=$N/arms
   for arm in zero3000 refine3000 projvote; do
-    [ -e $A/features_$arm.bin ] || continue; render $A/features_$arm.bin $A/maps_${arm}vf $N; score $N ${arm}_vf --space hyper --maps $A/maps_${arm}vf/%s.npz
+    [ -e $A/features_$arm.bin ] || continue; diskwait; M=$TMP/$(cid $N)/$arm; [ -s $N/protocol_${arm}_vf.jsonl ] || { render $A/features_$arm.bin $M $N; score $N ${arm}_vf --space hyper --maps $M/%s.npz; }; rm -rf $M
   done
   say "E2b $(echo $N | awk -F/ '{print $6"/"$8}')"
 done
