@@ -7,7 +7,9 @@
 set -uo pipefail
 SURVEY=$1; CHUNK=$2; METHOD=${3:-lerf}
 B=/home/paperspace/logs/ovbench; BIN=$B/bin; SRC=$B/src/lerf_kerrj_db08d57; CELL=${SURVEY}_${CHUNK#chunk_}
-W=$B/$METHOD/$CELL; mkdir -p $W /mnt/shared/ovbench/$METHOD/$CELL/outputs; [ -e $W/outputs ] || ln -s /mnt/shared/ovbench/$METHOD/$CELL/outputs $W/outputs
+# the whole cell dir lives on /mnt/shared (root fs is ~100 % full; a 1.8 GB checkpoint copy onto root on 11-10 filled it and killed
+# this run and three voidfree cells): $B/$METHOD/$CELL is a symlink
+W=$B/$METHOD/$CELL; mkdir -p /mnt/shared/ovbench/$METHOD/$CELL/outputs $B/$METHOD; [ -e $W ] || ln -s /mnt/shared/ovbench/$METHOD/$CELL $W
 cd $W || exit 1
 PIXI="/home/paperspace/.pixi/bin/pixi run --manifest-path /home/paperspace/code/nerf_new/pixi.toml"
 PIX() { $PIXI bash -c "cd $W && export PYTHONPATH=$SRC PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True && $*"; }   # pixi env, but in the cell dir (LERF caches are cwd-relative)
