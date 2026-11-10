@@ -34,7 +34,16 @@ cam = None
 for ds in (pipe.datamanager.eval_dataset, pipe.datamanager.train_dataset):
     names = [Path(p).name for p in ds.image_filenames]
     if a.frame in names: cam = ds.cameras[names.index(a.frame):names.index(a.frame) + 1].to(dev); break
-assert cam is not None, 'frame not found in the eval or train cameras'
+if cam is None:   # a held-out frame outside the workspace: its chunk COLMAP pose through the run's dataparser transform (as splat_feature_render.py)
+    import sys; sys.path.insert(0, '/home/paperspace/code/automation/h3dgs/v3')
+    from read_write_model import read_images_binary, qvec2rotmat
+    from nerfstudio.cameras.cameras import Cameras, CameraType
+    dp = json.load(open(Path(cfg).parent / 'dataparser_transforms.json')); T = np.eye(4); T[:3] = np.array(dp['transform'])
+    ims = {im.name: im for im in read_images_binary(str(N_.parent / 'sparse/0/images.bin')).values()}; ws = json.load(open(Path(pipe.datamanager.train_dataset.image_filenames[0]).parent.parent / 'transforms.json'))
+    im = ims[a.frame]; w2c = np.eye(4); w2c[:3, :3] = qvec2rotmat(im.qvec); w2c[:3, 3] = im.tvec
+    c2w = T @ (np.linalg.inv(w2c) @ np.diag([1.0, -1.0, -1.0, 1.0])); c2w[:3, 3] *= float(dp['scale'])
+    cam = Cameras(camera_to_worlds=torch.tensor(c2w[:3], dtype=torch.float32)[None], fx=float(ws['fl_x']), fy=float(ws['fl_y']), cx=float(ws['cx']), cy=float(ws['cy']), width=int(ws['w']), height=int(ws['h']), camera_type=CameraType.PERSPECTIVE).to(dev)
+    print('[probe] camera from COLMAP', a.frame)
 g = model.gauss_params; N = g['means'].shape[0]; means = g['means'].detach(); quats = g['quats'].detach(); scales = torch.exp(g['scales'].detach()); opac = torch.sigmoid(g['opacities'].detach()).squeeze(-1)
 viewmat = get_viewmat(cam.camera_to_worlds); K = cam.get_intrinsics_matrices().to(dev).clone(); W0, H0 = int(cam.width.item()), int(cam.height.item()); s = w / W0; K[:, :2] *= s
 onehot = torch.from_numpy(np.stack([groups[k] for k in groups], -1).astype(np.float32)).to(dev)
