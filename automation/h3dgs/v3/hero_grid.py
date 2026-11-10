@@ -152,7 +152,7 @@ for i, (q, li, hi, fr, lq, hq) in enumerate(rows):
     for j, (img, lab, v) in enumerate(((li, lq, R[keys[i]][LK]), (hi, hq, R[keys[i]]['high']))):
         ax = axes[i, j]; ax.imshow(np.clip(crop(img, fr, ZM[fr][j]), 0, 1)); ax.set_xticks([]); ax.set_yticks([]); [s.set_visible(False) for s in ax.spines.values()]
         ax.text(0.02, 0.96, lab, fontsize=7.5, color='white', va='top', ha='left', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.6, pad=1.2, lw=0))
-        ax.text(0.98, 0.04, (f'{R[keys[i]]["clip_selected"]} of {R[keys[i]]["clip_masks"]} masks selected' if (j == 0 and LK == 'clip') else f'IoU {v:.2f}'), fontsize=7.5, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.6, pad=1.2, lw=0))
+        ax.text(0.98, 0.04, (f'{R[keys[i]]["clip_selected"]} of {R[keys[i]]["clip_masks"]} selected' if (j == 0 and LK == 'clip') else f'IoU {v:.2f}'), fontsize=7.5, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.6, pad=1.2, lw=0))
 # CLIP's IoU is circular (the supervision comes from the same masks): its panels print the count, the IoU stays in the json
-fig.text(0.245, 0.99, {'euclid': 'Euclidean twin of HiGH', 'lite': 'lifted CLIP field', 'clip': 'CLIP on SAM 3 masks'}[a.left], ha='center', va='top', fontsize=8); fig.text(0.755, 0.99, 'hyperbolic embedding (HiGH)', ha='center', va='top', fontsize=8)
+fig.text(0.245, 0.99, {'euclid': 'Euclidean twin of HiGH', 'lite': 'lifted CLIP field', 'clip': 'CLIP image embeddings'}[a.left], ha='center', va='top', fontsize=8); fig.text(0.755, 0.99, 'hyperbolic embedding (HiGH)', ha='center', va='top', fontsize=8)
 (P / 'figures').mkdir(exist_ok=True); fig.savefig(P / 'figures' / 'fig_hero.pdf', dpi=300); fig.savefig(P / 'figures' / 'fig_hero.png', dpi=300); print('[grid] wrote', P / 'figures' / 'fig_hero.pdf')
