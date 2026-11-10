@@ -38,13 +38,19 @@ def decode_steps(ft, steps):   # decoded, normalised features along the geodesic
 def lerf(cp, cn):   # cp [..], cn [.., 4] -> min over negatives of softmax(10*[pos, neg])[pos]
     return torch.softmax(torch.stack([cp[..., None].expand_as(cn), cn], -1) * 10.0, -1)[..., 0].min(-1).values
 def openhype_mask(ft, q, Hh, Ww, void):
-    d, ext, _ = decode_steps(ft, 50); rel = lerf(d @ q, d @ NEG.T)                       # [P, 50]
-    rel = rel.masked_fill(ext, float('-inf')); w_ = torch.softmax(rel, 1); rel = rel.masked_fill(ext, 0.0); agg = (w_ * rel).sum(1)
+    aggs = []
+    for c0 in range(0, ft.shape[0], 8192):   # chunked: 50 decoded steps per pixel do not fit at once on a shared GPU
+        d, ext, _ = decode_steps(ft[c0:c0 + 8192], 50); rel = lerf(d @ q, d @ NEG.T)    # [p, 50]
+        rel = rel.masked_fill(ext, float('-inf')); w_ = torch.softmax(rel, 1); w_ = torch.nan_to_num(w_, nan=0.0); rel = rel.masked_fill(ext, 0.0); aggs.append((w_ * rel).sum(1)); del d
+    agg = torch.cat(aggs)
     agg[void] = 0.0; m = agg.view(Hh, Ww).cpu().numpy().astype(np.float32)
     m = 0.5 * (cv2.filter2D(m, -1, np.ones((30, 30), np.float32) / 900.0) + m)
     o = (m - m.min()) / (m.max() - m.min() + 1e-9) * 2.0 - 1.0; o = np.clip(o, 0, 1); return o > 0.4, m
-def containment(ft, qs):   # [P, len(qs)] containment scores (own feature + inner waypoints of the 4-step walk)
-    d, ext, d0 = decode_steps(ft, 4); sm = (d @ qs.T).masked_fill(ext[..., None], -1.0).max(1).values; return torch.maximum(sm, d0 @ qs.T)
+def containment(ft, qs):   # [P, len(qs)] containment scores (own feature + inner waypoints of the 4-step walk), chunked
+    out = []
+    for c0 in range(0, ft.shape[0], 32768):
+        d, ext, d0 = decode_steps(ft[c0:c0 + 32768], 4); sm = (d @ qs.T).masked_fill(ext[..., None], -1.0).max(1).values; out.append(torch.maximum(sm, d0 @ qs.T))
+    return torch.cat(out)
 def iou(p, t): u = (p | t).sum(); return float((p & t).sum() / u) if u else 0.0
 res = {}; panels = []
 for fr in ('kf_002411', 'kf_000024'):
@@ -55,8 +61,7 @@ for fr in ('kf_002411', 'kf_000024'):
             tw = [t for t in sorted(wt) if t < 10000 and wt[t] in words]; Qt = emb[[words.index(wt[t]) for t in tw]]; rws = [r for r in sorted(rw) if rw[r] in words]; Qr = emb[[words.index(rw[r]) for r in rws]]
             st = containment(ft, Qt); sr = containment(ft, Qr); amt = np.array(tw)[st.argmax(1).cpu().numpy()]; amr = np.array(rws)[sr.argmax(1).cpu().numpy()]; vv = void.cpu().numpy()
             # category "tree": containment score of the word, LERF relevancy >= 0.5
-            d, ext, d0 = decode_steps(ft, 4); ctree = torch.maximum((d @ e_tree).masked_fill(ext, -1).max(1).values, d0 @ e_tree)
-            cneg = torch.maximum((d @ NEG.T).masked_fill(ext[..., None], -1).max(1).values, d0 @ NEG.T); crel = lerf(ctree, cneg); crel[void] = 0
+            ctree = containment(ft, e_tree[None])[:, 0]; cneg = containment(ft, NEG); crel = lerf(ctree, cneg); crel[void] = 0
             queries = [('"tree"', e_tree, I < 10000, (crel >= 0.5).view(Hh, Ww).cpu().numpy()),
                        ('tree 36', emb[words.index(wt[36])], I == 36, ((amt == 36) & ~vv).reshape(Hh, Ww)),
                        ('row 4', emb[words.index(rw[4])], np.isin(I, [t for t, r in row_of.items() if r == 4]), ((amr == 4) & ~vv).reshape(Hh, Ww))]
