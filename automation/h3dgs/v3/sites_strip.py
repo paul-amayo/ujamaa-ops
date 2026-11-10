@@ -113,9 +113,10 @@ if a.layout == 'zoom' and a.fuji:   # the fruit level: our apples of one tree vs
     inc = (u >= x0) & (u < x1) & (v >= y0) & (v < y1); shown = [int((cls[inc] == c).sum()) for c in range(3)]   # a panel-aspect crop of a 3:2 photo can trim the top / bottom
     for o in np.argsort(-rp):   # far (small) discs last so they are not hidden under near ones
         ax.add_patch(Circle((u[o], v[o]), rp[o], facecolor=(*(TP, FP, FN)[cls[o]], 0.8), edgecolor='white', lw=0.35))
-    ax.set_xlim(x0 - 0.5, x1 - 0.5); ax.set_ylim(y1 - 0.5, y0 - 0.5); tn = int(str(fz['tree']).replace('Tree', ''))
+    ax.set_xlim(x0 - 0.5, x1 - 0.5); ax.set_ylim(y1 - 0.5, y0 - 0.5)   # F1 bottom-left: the tree's apples sit centre-right, bottom-right would cover them
+    tn = int(str(fz['tree']).replace('Tree', ''))
     ax.text(0.0, 1.0 + 0.25 * tb / ph, f'Fuji-SfM: apples of tree {tn}', fontsize=a.fs, va='bottom', ha='left', transform=ax.transAxes)
-    ax.text(0.985, 0.035, f"F1 {float(fz['f1']):.2f}", fontsize=a.fs, color='white', weight='bold', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.65, pad=1.5, lw=0))
+    ax.text(0.015, 0.035, f"F1 {float(fz['f1']):.2f}", fontsize=a.fs, color='white', weight='bold', va='bottom', ha='left', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.65, pad=1.5, lw=0))
     print(f"[sites] Fuji-SfM {fz['tree']} on {fz['side']}/{fz['image']} ({fz['source']}): per-tree F1 {float(fz['f1']):.3f} from {fz['counts']} (P {float(fz['p']):.3f}, R {float(fz['r']):.3f}); "
           f"drawn TP/FP/FN {fz['drawn'].tolist()} of {fz['total'].tolist()} (the rest hidden from this view or out of frame), {shown} inside the panel's crop; crop {[y0, y1, x0, x1]}")
 if a.layout == 'zoom':
