@@ -106,7 +106,26 @@ for ax, pk in zip(axes, picks):
           + (f"; zoom crop {pk['zoom_box']} keeps {100 * pk['zoom_scored_kept']:.0f} % of scored pixels" if a.layout == 'zoom' else ''))
 if a.layout == 'zoom' and a.fuji:   # the fruit level: our apples of one tree vs the GT apples, on the dataset's photograph (fuji_tree_panel.py)
     from matplotlib.patches import Circle
-    fz = np.load(a.fuji, allow_pickle=True); ax = axes[NP - 1]; ph_ = fz['photo']; H, W = ph_.shape[:2]; u, v, cls, rp = fz['u'], fz['v'], fz['cls'], fz['rpx']
+    fz = np.load(a.fuji, allow_pickle=True); ax = axes[NP - 1]
+if a.layout == 'zoom' and a.fuji and 'rgb' in fz.files:   # v3 (fuji_render_panel.py): our splat's render, the tree's registry apples lit by their blend weight, misses as rings
+    rgb = fz['rgb']; H, W = rgb.shape[:2]; wt_ = [np.clip(fz['w_tp'].astype(float), 0, 1), np.clip(fz['w_fp'].astype(float), 0, 1)]; mu, mv, mr = fz['miss_u'], fz['miss_v'], fz['miss_r']
+    img = background(rgb)
+    for w_, c_ in zip(wt_, (TP, FP)): al = 0.75 * w_[..., None]; img = img * (1 - al) + al * c_   # as the IoU panels (0.25 image + 0.75 colour) where the blend weight is 1
+    ys, xs = np.where((wt_[0] >= 0.5) | (wt_[1] >= 0.5))
+    box = (int(min(ys.min(), (mv - mr).min())), int(max(ys.max() + 1, (mv + mr).max())), int(min(xs.min(), (mu - mr).min())), int(max(xs.max() + 1, (mu + mr).max())))
+    y0, y1, x0, x1 = zoom_box(None, H, W, a.aspect, box=box)
+    ax.imshow(np.clip(img[y0:y1, x0:x1], 0, 1), interpolation='lanczos', aspect='auto', extent=(x0 - 0.5, x1 - 0.5, y1 - 0.5, y0 - 0.5)); ax.set_xticks([]); ax.set_yticks([])
+    for s in ax.spines.values(): s.set_linewidth(0.4); s.set_color('0.3')
+    for uu, vv_, r_ in zip(mu, mv, mr):   # a miss has no Gaussians: a thin red ring (white halo) at the GT centre, 4 cm radius at its depth
+        ax.add_patch(Circle((uu, vv_), r_, facecolor='none', edgecolor='white', lw=1.5)); ax.add_patch(Circle((uu, vv_), r_, facecolor='none', edgecolor=FN, lw=0.8))
+    ax.set_xlim(x0 - 0.5, x1 - 0.5); ax.set_ylim(y1 - 0.5, y0 - 0.5); tn = int(str(fz['tree']).replace('Tree', ''))
+    ax.text(0.0, 1.0 + 0.25 * tb / ph, f'Fuji-SfM: apples of tree {tn}', fontsize=a.fs, va='bottom', ha='left', transform=ax.transAxes)
+    ax.text(0.015, 0.035, f"F1 {float(fz['f1']):.2f}", fontsize=a.fs, color='white', weight='bold', va='bottom', ha='left', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.65, pad=1.5, lw=0))
+    inc = (mu >= x0) & (mu < x1) & (mv >= y0) & (mv < y1)
+    print(f"[sites] Fuji-SfM {fz['tree']} render of the {fz['side']} splat from {fz['image']}: per-tree F1 {float(fz['f1']):.3f} from {fz['counts']}; lit TP {int(fz['lit_tp'])} / {int(fz['n_tp'])}, FP {int(fz['lit_fp'])} / {int(fz['n_fp'])} "
+          f"({int(fz['gauss_tp'])} + {int(fz['gauss_fp'])} Gaussians); miss rings {int(fz['miss_drawn'])} of {int(fz['n_fn'])} ({int(inc.sum())} inside the crop); crop {[y0, y1, x0, x1]}")
+elif a.layout == 'zoom' and a.fuji:   # v2 (fuji_tree_panel.py): discs on the dataset's photograph
+    ph_ = fz['photo']; H, W = ph_.shape[:2]; u, v, cls, rp = fz['u'], fz['v'], fz['cls'], fz['rpx']
     y0, y1, x0, x1 = zoom_box(None, H, W, a.aspect, box=(int(np.floor((v - rp).min())), int(np.ceil((v + rp).max())), int(np.floor((u - rp).min())), int(np.ceil((u + rp).max()))))
     ax.imshow(np.clip(background(ph_)[y0:y1, x0:x1], 0, 1), interpolation='lanczos', aspect='auto', extent=(x0 - 0.5, x1 - 0.5, y1 - 0.5, y0 - 0.5)); ax.set_xticks([]); ax.set_yticks([])
     for s in ax.spines.values(): s.set_linewidth(0.4); s.set_color('0.3')
