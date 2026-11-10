@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """paper_scope_numbers.py (2026-11-10) — the HiGH letter's evaluation scope from numbers/e1_v3.json without the two phone walks
 (Paul, draft 36: "we dont use phone walks in this paper"): cells, frames, tree and row heads (census + held-out) and held-out heads
-over the seven robot surveys (CitrusFarm 01-05, Klapmuts December and April, Lindendhof), written to numbers/e1_scope.json.
+over the eight robot surveys (CitrusFarm 01-05, Klapmuts December and April, Lindendhof), written to numbers/e1_scope.json.
 system python3:  paper_scope_numbers.py <paper dir>"""
 import json, sys
 from pathlib import Path
