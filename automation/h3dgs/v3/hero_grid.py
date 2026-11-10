@@ -19,7 +19,7 @@ from pathlib import Path
 import numpy as np
 ap = argparse.ArgumentParser(); ap.add_argument('paper'); ap.add_argument('--work', default='/tmp/d36hero'); ap.add_argument('--stage', default='both', choices=['both', '1', '2'])
 ap.add_argument('--figdir', default='/home/paperspace/code/aru_sil_core/src/docs/paper/figures')
-ap.add_argument('--left', default='euclid', choices=['euclid', 'lite'], help='left column: the Euclidean twin of the embedder (geometry ablation arm, argmax dumps in <work>/dump_euclid from euclid.sh) or the lifted CLIP field'); a = ap.parse_args()
+ap.add_argument('--left', default='clip', choices=['clip', 'euclid', 'lite'], help='left column: CLIP on the frame\'s SAM 3 masks (mask_clip_relevancy.py; default), the Euclidean twin of the embedder (argmax dumps from euclid.sh) or the lifted CLIP field'); a = ap.parse_args()
 P = Path(a.paper); W = Path(a.work); W.mkdir(parents=True, exist_ok=True); FD = Path(a.figdir)
 N = Path('/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/v3/chunk_1_0/identity'); A = N / 'arms'; V3 = Path('/home/paperspace/code/automation/h3dgs/v3'); NS = '/home/paperspace/code/nerf_new'
 SUP = Path('/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/h3dgs_native/chunk_1_0_sam3/supervision/trees_only')
@@ -43,6 +43,16 @@ if a.stage in ('both', '1'):
         out = W / f"lite_{fr.replace('.png', '')}.npz"
         r = subprocess.run(f'cd {NS} && /home/paperspace/.pixi/bin/pixi run python {W}/lite_relevancy_work.py --identity {N} --frame {fr} --prompts "{";".join(pr)}" --out {out}', shell=True, capture_output=True, text=True)
         print('[grid] lite', fr, 'rc', r.returncode, '\n  ' + '\n  '.join((r.stdout + r.stderr).strip().splitlines()[-4:]))
+SAMD = Path('/home/paperspace/data/citrus_all/05_13D_Jackal/prod/bateleur'); PHOTO = Path('/home/paperspace/data/citrus_all/05_13D_Jackal/prod/scratch_sam3')
+MC_RUNS = [('mc_kf002411_tree', F_T, 2411, SAMD / 'sam3_v2/clip_012/frame_entries.json', 'tree;the tree on the right;row 4'),
+           ('mc_kf000024_tree', F_F, 24, SAMD / 'sam3_v2/clip_000/frame_entries.json', 'fruit on tree 5'),
+           ('mc_kf000024_fruit', F_F, 24, SAMD / 'sam3_fruit/clip_000/frame_entries.json', 'fruit on tree 5')]
+if a.stage in ('both', '1') and a.left == 'clip':
+    for tag, fr, kf, ent, pr in MC_RUNS:
+        out = W / f'{tag}.npz'
+        if out.exists(): continue
+        r = subprocess.run(f'cd {NS} && /home/paperspace/.pixi/bin/pixi run python {V3}/mask_clip_relevancy.py --image {PHOTO / fr} --entries {ent} --kf {kf} --prompts "{pr}" --out {out}', shell=True, capture_output=True, text=True)
+        print('[grid] clip', tag, 'rc', r.returncode, '\n  ' + '\n  '.join(l for l in (r.stdout + r.stderr).splitlines() if l.startswith('[masks]')))
 if a.stage == '1': raise SystemExit
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 from PIL import Image
@@ -73,9 +83,25 @@ if a.left == 'euclid':
     ID_TE = idmap(F_T, et['tree'].shape); ID_FE = idmap(F_F, ef['tree'].shape)
     e1 = et['tree'] >= 0; e2 = et['tree'] == 36; e3 = et['row'] == 4; e4 = np.isin(ef['fruit_mixed'], F5_IDS)
     R['tree']['euclid'] = iou(e1, TREES(ID_TE)); R['tree 36']['euclid'] = iou(e2, ID_TE == 36); R['row 4']['euclid'] = iou(e3, ROW4(ID_TE)); R['fruit of tree 5']['euclid'] = iou(e4, F5(ID_FE))
+if a.left == 'clip':
+    mc = {t: np.load(W / f'{t}.npz', allow_pickle=True) for t, *_ in MC_RUNS}
+    def mc_sel(tags, prompt):
+        ms, rs = [], []
+        for t in tags:
+            z = mc[t]; j = list(z['prompts']).index(prompt); ms += list(z['masks']); rs += list(z['relevancy'][:, j])
+        sel = np.zeros(ms[0].shape, bool)
+        for m, r in zip(ms, rs):
+            if r >= 0.5: sel |= m
+        return sel, ms, rs
+    ID_TP = idmap(F_T, mc['mc_kf002411_tree']['photo'].shape[:2]); ID_FP = idmap(F_F, mc['mc_kf000024_tree']['photo'].shape[:2])
+    C = {'tree': mc_sel(['mc_kf002411_tree'], 'tree'), 'tree 36': mc_sel(['mc_kf002411_tree'], 'the tree on the right'), 'row 4': mc_sel(['mc_kf002411_tree'], 'row 4'),
+         'fruit of tree 5': mc_sel(['mc_kf000024_tree', 'mc_kf000024_fruit'], 'fruit on tree 5')}
+    for k, tr in (('tree', TREES(ID_TP)), ('tree 36', ID_TP == 36), ('row 4', ROW4(ID_TP)), ('fruit of tree 5', F5(ID_FP))):
+        sel, ms, rs = C[k]; R[k]['clip'] = iou(sel, tr); R[k]['clip_selected'] = int(sum(r >= 0.5 for r in rs)); R[k]['clip_masks'] = len(ms)
+for k, v in R.items(): print('[grid] clip', k, round(v.get('clip', float('nan')), 3), v.get('clip_selected'), 'of', v.get('clip_masks'))
 for k, v in R.items(): print('[grid] euclid', k, round(v.get('euclid', float('nan')), 3))
 for k, v in R.items(): print(f'[grid] {k:16s} lifted CLIP IoU {v["lite"]:.3f}   HiGH IoU {v["high"]:.3f}')
-json.dump(dict(cell='05_13D_Jackal chunk_1_0', frames=[F_T, F_F], rule='HiGH and the Euclidean twin: argmax of the protocol (fruit: over every address); lifted CLIP: LERF relevancy >= 0.5', left=a.left,
+json.dump(dict(cell='05_13D_Jackal chunk_1_0', frames=[F_T, F_F], rule='HiGH and the Euclidean twin: argmax of the protocol (fruit: over every address); CLIP: a SAM 3 mask is selected when its LERF relevancy is >= 0.5 (IoU of the selected masks against the supervision, whose geometry comes from the same masks); lifted CLIP: LERF relevancy >= 0.5', left=a.left,
                prompts_lifted={'tree': 'tree', 'tree 36': 'the tree on the right', 'row 4': 'row 4', 'fruit of tree 5': 'fruit on tree 5'}, iou=R), open(P / 'numbers' / 'hero_grid.json', 'w'), indent=1)
 # compose: 4 rows x 2 columns at column width
 CM = plt.get_cmap('inferno'); LIT = np.array([1.0, 0.78, 0.1]); PAL = plt.get_cmap('tab10')(np.arange(10))[:, :3]
@@ -108,11 +134,24 @@ if a.left == 'euclid':
             ('"row 4"', high_img(zte, e3), rows[2][2], F_T, 'row 4', 'row 4'),
             ('"fruit of tree 5"', high_img(zfe, e4), rows[3][2], F_F, 'fruit of tree 5 (zoom)', 'fruit of tree 5 (zoom)')]
     ZM = {F_T: (None, None), F_F: (F5(ID_FE), F5(ID_F))}; LK = 'euclid'
+if a.left == 'clip':
+    def clip_img(t_photo, sel_ms_rs, shape, label_rel=True):
+        sel, ms, rs = sel_ms_rs; img = np.array(Image.fromarray(t_photo).resize((shape[1], shape[0]), Image.BILINEAR)).astype(float) / 255; out = img * 0.45
+        small = lambda m: np.array(Image.fromarray(m.astype(np.uint8)).resize((shape[1], shape[0]), Image.NEAREST)).astype(bool)
+        for m, r in zip(ms, rs):
+            if r >= 0.5: mm = small(m); out[mm] = 0.25 * img[mm] + 0.75 * LIT
+        return out
+    shp = zt['rgb'].shape[:2]; shf = zf['rgb'].shape[:2]
+    rows = [('"tree"', clip_img(mc['mc_kf002411_tree']['photo'], C['tree'], shp), rows[0][2], F_T, '"tree"', 'tree level'),
+            ('"tree 36"', clip_img(mc['mc_kf002411_tree']['photo'], C['tree 36'], shp), rows[1][2], F_T, '"the tree on the right"', 'tree 36'),
+            ('"row 4"', clip_img(mc['mc_kf002411_tree']['photo'], C['row 4'], shp), rows[2][2], F_T, '"row 4"', 'row 4'),
+            ('"fruit on tree 5"', clip_img(mc['mc_kf000024_tree']['photo'], C['fruit of tree 5'], shf), rows[3][2], F_F, '"fruit on tree 5" (zoom)', 'fruit of tree 5 (zoom)')]
+    ZM = {F_T: (None, None), F_F: (F5(ID_F), F5(ID_F))}; LK = 'clip'
 plt.rcParams.update({'font.size': 8}); fig, axes = plt.subplots(4, 2, figsize=(3.5, 3.55)); fig.subplots_adjust(0.0, 0.0, 1.0, 0.94, 0.02, 0.06)
 for i, (q, li, hi, fr, lq, hq) in enumerate(rows):
     for j, (img, lab, v) in enumerate(((li, lq, R[keys[i]][LK]), (hi, hq, R[keys[i]]['high']))):
         ax = axes[i, j]; ax.imshow(np.clip(crop(img, fr, ZM[fr][j]), 0, 1)); ax.set_xticks([]); ax.set_yticks([]); [s.set_visible(False) for s in ax.spines.values()]
         ax.text(0.02, 0.96, lab, fontsize=7.5, color='white', va='top', ha='left', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.6, pad=1.2, lw=0))
-        ax.text(0.98, 0.04, f'IoU {v:.2f}', fontsize=7.5, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.6, pad=1.2, lw=0))
-fig.text(0.245, 0.99, 'Euclidean embedding' if a.left == 'euclid' else 'Euclidean (lifted CLIP)', ha='center', va='top', fontsize=8); fig.text(0.755, 0.99, 'hyperbolic embedding (HiGH)', ha='center', va='top', fontsize=8)
+        ax.text(0.98, 0.04, (f'{R[keys[i]]["clip_selected"]} of {R[keys[i]]["clip_masks"]} masks, IoU {v:.2f}' if (j == 0 and LK == 'clip') else f'IoU {v:.2f}'), fontsize=7.5, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.6, pad=1.2, lw=0))
+fig.text(0.245, 0.99, {'euclid': 'Euclidean twin of HiGH', 'lite': 'lifted CLIP field', 'clip': 'CLIP on SAM 3 masks'}[a.left], ha='center', va='top', fontsize=8); fig.text(0.755, 0.99, 'hyperbolic embedding (HiGH)', ha='center', va='top', fontsize=8)
 (P / 'figures').mkdir(exist_ok=True); fig.savefig(P / 'figures' / 'fig_hero.pdf', dpi=300); fig.savefig(P / 'figures' / 'fig_hero.png', dpi=300); print('[grid] wrote', P / 'figures' / 'fig_hero.pdf')
