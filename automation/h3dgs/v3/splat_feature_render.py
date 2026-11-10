@@ -16,7 +16,7 @@ from nerfstudio.cameras.cameras import Cameras, CameraType
 sys.path.insert(0, '/home/paperspace/code/hierarchical-3d-gaussians/preprocess')
 ap = argparse.ArgumentParser()
 ap.add_argument('--config', required=True); ap.add_argument('--features', required=True); ap.add_argument('--frames', nargs='+', required=True)
-ap.add_argument('--render-scale', type=float, default=0.5); ap.add_argument('--out-dir', required=True); ap.add_argument('--colmap-sparse', default='')
+ap.add_argument('--void-free', type=float, default=0.0, help='2026-11-10 (Paul): never blend void Gaussians. Renders the blend weight a(p) of the seeded (non-zero) Gaussians as an extra channel and writes f(p)/a(p), the blend over seeded Gaussians only; a pixel with a(p) below this share of its seeded weight is void (features 0). 0 = the original readout'); ap.add_argument('--render-scale', type=float, default=0.5); ap.add_argument('--out-dir', required=True); ap.add_argument('--colmap-sparse', default='')
 args = ap.parse_args()
 _, pipe, _, step = eval_setup(Path(args.config), test_mode='test'); model = pipe.model; model.eval(); model.step = step; dev = model.device
 dm = pipe.datamanager; cams = {}
@@ -66,7 +66,11 @@ for name in args.frames:
     viewmat = get_viewmat(cam.camera_to_worlds); K = cam.get_intrinsics_matrices().to(dev); w, h = int(cam.width.item()), int(cam.height.item())
     kw = dict(means=means, quats=quats, scales=scales, opacities=opac, viewmats=viewmat, Ks=K, width=w, height=h, packed=False, near_plane=0.01, far_plane=1e10,
               render_mode='RGB', rasterize_mode=model.config.rasterize_mode)
-    feat, alpha, _ = rasterization(colors=F, sh_degree=None, **kw)
+    if args.void_free > 0:   # blend only the seeded Gaussians: render [F, 1(seeded)] and divide by the seeded weight
+        seeded = (F.norm(dim=1, keepdim=True) > 0).float(); fa, alpha, _ = rasterization(colors=torch.cat([F, seeded], 1), sh_degree=None, **kw)
+        a_ = fa[..., -1:]; feat = torch.where(a_ >= args.void_free, fa[..., :-1] / a_.clamp(min=1e-6), torch.zeros_like(fa[..., :-1]))
+    else:
+        feat, alpha, _ = rasterization(colors=F, sh_degree=None, **kw)
     rgb = model.get_outputs(cam)['rgb']
     out = os.path.join(args.out_dir, f'{name[:-4]}.npz')
     np.savez_compressed(out, features=feat[0].float().cpu().numpy(), alpha=alpha[0, ..., 0].float().cpu().numpy(), rgb=(rgb.clamp(0, 1) * 255).byte().cpu().numpy(), nodes=int(N))
