@@ -8,7 +8,9 @@ survey's median over those heads (protocol_v3.jsonl of every cell), so each pane
 (phone) frames are cropped to the strip's aspect around the head's centroid.  system python3:  sites_strip.py <paper dir> [--surveys a,b,c]
 --layout zoom (draft 37, column-width Fig. 3): each panel is cropped to the bounding box of every scored pixel (prediction | supervision) plus a
 margin, so nothing that enters the IoU leaves the view; the IoU printed is still the full-frame argmax IoU. Background levelled and desaturated,
-site + query as a title above the panel, true positive / false positive / miss legend below."""
+site + query as a title above the panel, true positive / false positive / miss legend below. --bg natural (v2, default) keeps the photograph's
+colour with a mild gamma lift; --bg grey is v1. --fuji <npz> (automation/fruitnerf/fuji_tree_panel.py) appends the fruit level: the apples our
+registry assigns to the median-F1 Fuji-SfM tree, on the dataset's photograph, coloured against the GT apples, with that tree's F1."""
 import argparse, json, subprocess
 from pathlib import Path
 import numpy as np
@@ -16,7 +18,9 @@ ap = argparse.ArgumentParser(); ap.add_argument('paper'); ap.add_argument('--sur
 ap.add_argument('--out', default='fig_sites.png'); ap.add_argument('--cols', type=int, default=0, help='panels per row (0: one strip); draft 36 uses 2 at column width'); ap.add_argument('--width', type=float, default=7.2); ap.add_argument('--fs', type=float, default=6.5); ap.add_argument('--stage', default='both', choices=['both', '1', '2'])
 ap.add_argument('--layout', default='frame', choices=['frame', 'zoom'], help="frame: full frames dimmed to 50 %% (drafts <= 36); zoom: each panel cropped to the bounding box of every scored pixel "
                 "(prediction | supervision, so nothing that enters the IoU is cut off), background desaturated and brightened, title above, colour legend below")
-ap.add_argument('--aspect', type=float, default=1.7, help='zoom layout: panel width / height'); ap.add_argument('--dpi', type=int, default=220); a = ap.parse_args()
+ap.add_argument('--aspect', type=float, default=1.7, help='zoom layout: panel width / height'); ap.add_argument('--dpi', type=int, default=220)
+ap.add_argument('--bg', default='natural', choices=['natural', 'grey'], help='zoom layout background: natural colour with a mild gamma lift (draft 37 v2), or levelled + 70 %% desaturated (draft 37 v1)')
+ap.add_argument('--fuji', default=None, help='zoom layout: npz from automation/fruitnerf/fuji_tree_panel.py, appended as the last panel (the fruit level: apples of one tree vs the GT apples, F1 printed)'); a = ap.parse_args()
 P = Path(a.paper); FIG = P / 'figures'; (FIG / 'sites').mkdir(exist_ok=True)
 KIND = {'dec_2025_ten_rows': 'plant', 'IMG_7990_s1': 'plant', 'IMG_7993_s0': 'plant', 'apr_2026_zed': 'plant'}
 SHORT = {'01_13B_Jackal': 'citrus 01', '02_13B_Jackal': 'citrus 02', '03_13B_Jackal': 'citrus 03', '04_13D_Jackal': 'citrus 04', '05_13D_Jackal': 'citrus 05', 'apr_2026_zed': 'Klapmuts Apr', 'dec_2025_ten_rows': 'Klapmuts Dec', 'nov_2025_a300': 'Lindendhof', 'IMG_7993_s0': 'cabbage', 'IMG_7990_s1': 'pepper'}
@@ -49,15 +53,21 @@ def argmax_mask(z, words, target_word):
     """pixels whose argmax over `words` (containment heats of one level) is target_word; void excluded"""
     heats = np.stack([z[w] for w in words]); best = heats.argmax(0); return (best == words.index(target_word)) & ~z['void'].astype(bool)
 TP, FP, FN = np.array([0.1, 0.8, 0.2]), np.array([1.0, 0.55, 0.0]), np.array([0.9, 0.1, 0.1])
-def zoom_box(u, H, W, asp, pad=0.12):
-    """crop (y0, y1, x0, x1) of aspect asp that contains EVERY pixel of u (the scored pixels) plus a margin, clamped to the frame"""
-    ys, xs = np.where(u); y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1; m = pad * max(y1 - y0, x1 - x0) + 8
+def background(rgb):
+    """natural: the photograph with a mild gamma lift (0.85); grey: levelled (1-99 %), gamma 0.8, 70 % desaturated"""
+    f = rgb.astype(float) / 255
+    if a.bg == 'natural': return f ** 0.85
+    LW = np.array([0.299, 0.587, 0.114]); lo, hi = np.percentile(f @ LW, [1, 99]); fl = np.clip((f - lo) / max(hi - lo, 1e-3), 0, 1) ** 0.8; ll = (fl @ LW)[..., None]; return 0.12 + 0.8 * (ll + 0.3 * (fl - ll))
+def zoom_box(u, H, W, asp, pad=0.12, box=None):
+    """crop (y0, y1, x0, x1) of aspect asp that contains EVERY pixel of u (the scored pixels; or the given box) plus a margin, clamped to the frame"""
+    if box is None: ys, xs = np.where(u); box = (ys.min(), ys.max() + 1, xs.min(), xs.max() + 1)
+    y0, y1, x0, x1 = box; m = pad * max(y1 - y0, x1 - x0) + 8
     h = max(y1 - y0 + 2 * m, (x1 - x0 + 2 * m) / asp); w = h * asp
     if w > W: w = W; h = W / asp
     if h > H: h = H; w = min(W, H * asp)
     cy, cx = (y0 + y1) / 2, (x0 + x1) / 2; Y0 = int(round(np.clip(cy - h / 2, 0, H - h))); X0 = int(round(np.clip(cx - w / 2, 0, W - w)))
     return Y0, Y0 + int(round(h)), X0, X0 + int(round(w))
-nc = a.cols or len(picks); nr = -(-len(picks) // nc)
+NP = len(picks) + (1 if a.fuji and a.layout == 'zoom' else 0); nc = a.cols or NP; nr = -(-NP // nc)
 if a.layout == 'zoom':   # explicit inch layout: title band above each panel, legend band at the bottom
     gx, gy, tb, lb = 0.05, 0.03, a.fs / 72 * 1.45, a.fs / 72 * 2.2; pw = (a.width - gx * (nc - 1)) / nc; ph = pw / a.aspect; FH = lb + nr * (tb + ph) + gy * (nr - 1)
     fig = plt.figure(figsize=(a.width, FH)); axes = []
@@ -68,7 +78,7 @@ else:
     pw = a.width / nc; ph = pw / ASPECT * 1.0
     fig, axes = plt.subplots(nr, nc, figsize=(a.width, nr * ph * 1.02)); fig.subplots_adjust(0.003, 0.003, 0.997, 0.997, 0.015, 0.03)
 axes = list(np.atleast_1d(axes).ravel())
-for ax in axes[len(picks):]: ax.axis('off')
+for ax in axes[NP:]: ax.axis('off')
 for ax, pk in zip(axes, picks):
     z = np.load(FIG / 'sites' / f"{pk['survey']}_all.npz", allow_pickle=True); meta = json.loads(str(z['meta'])); wt = {int(k): w for k, w in meta['word_table'].items()}
     tree_words = [w for k, w in sorted(wt.items()) if k < 10000 and w in z.files]; rgb = z['rgb']; H, W = rgb.shape[:2]
@@ -77,9 +87,7 @@ for ax, pk in zip(axes, picks):
     pred = argmax_mask(z, tree_words, pk['word']); u = (pred | truth).sum(); iou = float((pred & truth).sum() / u) if u else 0.0; pk['iou_argmax_fig'] = iou   # full frame, never the crop
     label = f"{SHORT[pk['survey']]}: {KIND.get(pk['survey'], 'tree')} {pk['id']}"
     if a.layout == 'zoom':
-        # background: auto-levelled luminance (1-99 %), lifted (gamma 0.8) and mostly desaturated, so the class colours read on green foliage
-        LW = np.array([0.299, 0.587, 0.114]); f = rgb.astype(float) / 255; lo, hi = np.percentile(f @ LW, [1, 99])
-        fl = np.clip((f - lo) / max(hi - lo, 1e-3), 0, 1) ** 0.8; ll = (fl @ LW)[..., None]; img = 0.12 + 0.8 * (ll + 0.3 * (fl - ll))
+        img = background(rgb)
         for m, col in ((pred & truth, TP), (pred & ~truth, FP), (~pred & truth, FN)): img[m] = 0.25 * img[m] + 0.75 * col
         y0, y1, x0, x1 = zoom_box(pred | truth, H, W, a.aspect); kept = (pred | truth)[y0:y1, x0:x1].sum() / max(u, 1); pk['zoom_box'] = [int(y0), int(y1), int(x0), int(x1)]; pk['zoom_scored_kept'] = float(kept)
         assert kept == 1.0, f"zoom crop drops scored pixels ({kept:.4f})"
@@ -97,6 +105,19 @@ for ax, pk in zip(axes, picks):
         ax.text(0.985, 0.05, f'IoU {iou:.2f}', fontsize=a.fs, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.55, pad=1.5, lw=0))
     print(f"[sites] {pk['survey']} {pk['frame']} id {pk['id']}: argmax IoU in the figure {iou:.3f} (protocol {pk['argmax_iou']:.3f}, survey median {pk['median']:.3f}); {'portrait' if H > W else 'landscape'}"
           + (f"; zoom crop {pk['zoom_box']} keeps {100 * pk['zoom_scored_kept']:.0f} % of scored pixels" if a.layout == 'zoom' else ''))
+if a.layout == 'zoom' and a.fuji:   # the fruit level: our apples of one tree vs the GT apples, on the dataset's photograph (fuji_tree_panel.py)
+    from matplotlib.patches import Circle
+    fz = np.load(a.fuji, allow_pickle=True); ax = axes[NP - 1]; ph_ = fz['photo']; H, W = ph_.shape[:2]; u, v, cls, rp = fz['u'], fz['v'], fz['cls'], fz['rpx']
+    y0, y1, x0, x1 = zoom_box(None, H, W, a.aspect, box=(int(np.floor((v - rp).min())), int(np.ceil((v + rp).max())), int(np.floor((u - rp).min())), int(np.ceil((u + rp).max()))))
+    ax.imshow(np.clip(background(ph_)[y0:y1, x0:x1], 0, 1), interpolation='lanczos', aspect='auto', extent=(x0 - 0.5, x1 - 0.5, y1 - 0.5, y0 - 0.5)); ax.set_xticks([]); ax.set_yticks([])
+    for s in ax.spines.values(): s.set_linewidth(0.4); s.set_color('0.3')
+    for o in np.argsort(-rp):   # far (small) discs last so they are not hidden under near ones
+        ax.add_patch(Circle((u[o], v[o]), rp[o], facecolor=(*(TP, FP, FN)[cls[o]], 0.8), edgecolor='white', lw=0.35))
+    ax.set_xlim(x0 - 0.5, x1 - 0.5); ax.set_ylim(y1 - 0.5, y0 - 0.5); tn = int(str(fz['tree']).replace('Tree', ''))
+    ax.text(0.0, 1.0 + 0.25 * tb / ph, f'Fuji-SfM: apples of tree {tn}', fontsize=a.fs, va='bottom', ha='left', transform=ax.transAxes)
+    ax.text(0.985, 0.035, f"F1 {float(fz['f1']):.2f}", fontsize=a.fs, color='white', weight='bold', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.65, pad=1.5, lw=0))
+    print(f"[sites] Fuji-SfM {fz['tree']} on {fz['side']}/{fz['image']} ({fz['source']}): per-tree F1 {float(fz['f1']):.3f} from {fz['counts']} (P {float(fz['p']):.3f}, R {float(fz['r']):.3f}); "
+          f"drawn TP/FP/FN {fz['drawn'].tolist()} of {fz['total'].tolist()} (the rest hidden from this view or out of frame); crop {[y0, y1, x0, x1]}")
 if a.layout == 'zoom':
     from matplotlib.patches import Patch
     fig.legend([Patch(facecolor=c, edgecolor='none') for c in (TP, FP, FN)], ['true positive', 'false positive', 'miss'], loc='lower center', bbox_to_anchor=(0.5, 0.0), ncol=3,
