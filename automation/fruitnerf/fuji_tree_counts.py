@@ -65,7 +65,7 @@ try:
     ax[0].scatter(Prf[:, 0], Prf[:, 2], s=1.2, c=cols[assign], linewidths=0); [ax[0].axvline(p, color='k', lw=0.6) for p in TR]; ax[0].set_ylabel('height [m]', fontsize=9)
     ax[0].set_title('ours: apples by trunk anchor (lines)', fontsize=9, loc='left', pad=3)
     ax[1].scatter(GTrf[:, 0], GTrf[:, 2], s=1.2, c=[plt.cm.tab20(trees.index(t_) % 20) for t_ in GT_tree], linewidths=0); [ax[1].axvline(m_, color='0.5', lw=0.6, ls='--') for m_ in gmed]; ax[1].set_ylabel('height [m]', fontsize=9); ax[1].set_xlabel('along the row [m]', fontsize=9)
-    ax[1].set_title('ground truth: apples by tree (dashed: medians)', fontsize=9, loc='left', pad=3)
+    ax[1].set_title('ground truth: apples by tree', fontsize=9, loc='left', pad=3)
     for a_ in ax: a_.tick_params(labelsize=8); a_.spines['top'].set_visible(False); a_.spines['right'].set_visible(False)
     fig.tight_layout(h_pad=0.6); fig.savefig(FIG, dpi=220); print('[trees] figure', FIG)
 except Exception as ex: print('[trees] figure skipped:', ex)
