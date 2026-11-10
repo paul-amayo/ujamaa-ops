@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 P = Path(sys.argv[1]); N = P / 'numbers'; F = P / 'figures'
 e1 = json.load(open(N / 'e1_v3.json')); e2 = json.load(open(N / 'e2_arms.json')); e2b = json.load(open(N / 'e2b_seed.json'))
-SV = ['01_13B_Jackal', '02_13B_Jackal', '03_13B_Jackal', '04_13D_Jackal', '05_13D_Jackal', 'apr_2026_zed', 'dec_2025_ten_rows', 'nov_2025_a300', 'IMG_7993_s0', 'IMG_7990_s1']
+SV = ['01_13B_Jackal', '02_13B_Jackal', '03_13B_Jackal', '04_13D_Jackal', '05_13D_Jackal', 'apr_2026_zed', 'dec_2025_ten_rows', 'nov_2025_a300']   # the phone walks are not part of the letter (draft 36)
 SHORT = {'01_13B_Jackal': 'citrus 01', '02_13B_Jackal': 'citrus 02', '03_13B_Jackal': 'citrus 03', '04_13D_Jackal': 'citrus 04', '05_13D_Jackal': 'citrus 05', 'apr_2026_zed': 'Klapmuts Apr',
          'dec_2025_ten_rows': 'Klapmuts Dec', 'nov_2025_a300': 'Lindendhof', 'IMG_7993_s0': 'cabbage', 'IMG_7990_s1': 'pepper'}
 plt.rcParams.update({'font.size': 9, 'axes.spines.top': False, 'axes.spines.right': False})
