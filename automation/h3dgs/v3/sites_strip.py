@@ -10,7 +10,7 @@ import argparse, json, subprocess
 from pathlib import Path
 import numpy as np
 ap = argparse.ArgumentParser(); ap.add_argument('paper'); ap.add_argument('--surveys', default='01_13B_Jackal,dec_2025_ten_rows,nov_2025_a300,apr_2026_zed,IMG_7993_s0,IMG_7990_s1')
-ap.add_argument('--out', default='fig_sites.png'); ap.add_argument('--stage', default='both', choices=['both', '1', '2']); a = ap.parse_args()
+ap.add_argument('--out', default='fig_sites.png'); ap.add_argument('--cols', type=int, default=0, help='panels per row (0: one strip); draft 36 uses 2 at column width'); ap.add_argument('--width', type=float, default=7.2); ap.add_argument('--fs', type=float, default=6.5); ap.add_argument('--stage', default='both', choices=['both', '1', '2']); a = ap.parse_args()
 P = Path(a.paper); FIG = P / 'figures'; (FIG / 'sites').mkdir(exist_ok=True)
 KIND = {'dec_2025_ten_rows': 'plant', 'IMG_7990_s1': 'plant', 'IMG_7993_s0': 'plant', 'apr_2026_zed': 'plant'}
 SHORT = {'01_13B_Jackal': 'citrus 01', '02_13B_Jackal': 'citrus 02', '03_13B_Jackal': 'citrus 03', '04_13D_Jackal': 'citrus 04', '05_13D_Jackal': 'citrus 05', 'apr_2026_zed': 'Klapmuts Apr', 'dec_2025_ten_rows': 'Klapmuts Dec', 'nov_2025_a300': 'Lindendhof', 'IMG_7993_s0': 'cabbage', 'IMG_7990_s1': 'pepper'}
@@ -42,8 +42,10 @@ ASPECT = 640 / 300
 def argmax_mask(z, words, target_word):
     """pixels whose argmax over `words` (containment heats of one level) is target_word; void excluded"""
     heats = np.stack([z[w] for w in words]); best = heats.argmax(0); return (best == words.index(target_word)) & ~z['void'].astype(bool)
-fig, axes = plt.subplots(1, len(picks), figsize=(7.2, 1.3)); fig.subplots_adjust(0.003, 0.02, 0.997, 0.98, 0.01, 0)
-for ax, pk in zip(np.atleast_1d(axes), picks):
+nc = a.cols or len(picks); nr = -(-len(picks) // nc); pw = a.width / nc; ph = pw / ASPECT * 1.0
+fig, axes = plt.subplots(nr, nc, figsize=(a.width, nr * ph * 1.02)); fig.subplots_adjust(0.003, 0.003, 0.997, 0.997, 0.015, 0.03)
+for ax in np.atleast_1d(axes).ravel()[len(picks):]: ax.axis('off')
+for ax, pk in zip(np.atleast_1d(axes).ravel(), picks):
     z = np.load(FIG / 'sites' / f"{pk['survey']}_all.npz", allow_pickle=True); meta = json.loads(str(z['meta'])); wt = {int(k): w for k, w in meta['word_table'].items()}
     tree_words = [w for k, w in sorted(wt.items()) if k < 10000 and w in z.files]; rgb = z['rgb']; H, W = rgb.shape[:2]
     sup = Path(next(c['sup'] for c in inv if c['identity'] == pk['identity']))   # the inventory's supervision dir (text-bank manifests of the phone cells point at retired shims)
@@ -54,7 +56,7 @@ for ax, pk in zip(np.atleast_1d(axes), picks):
         ys = np.where(truth.any(1))[0]; cy = int(ys.mean()) if len(ys) else H // 2; bh = int(W / ASPECT); y0 = int(np.clip(cy - bh // 2, 0, H - bh)); crop = img[y0:y0 + bh]
     else: crop = img[:int(H * 0.83)]
     ax.imshow(np.clip(crop, 0, 1)); ax.axis('off')
-    ax.text(0.015, 0.95, f"{SHORT[pk['survey']]}: \"{KIND.get(pk['survey'], 'tree')} {pk['id']}\"", fontsize=6.5, color='white', va='top', ha='left', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.55, pad=1.5, lw=0))
-    ax.text(0.985, 0.05, f'IoU {iou:.2f}', fontsize=6.5, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.55, pad=1.5, lw=0))
+    ax.text(0.015, 0.95, f"{SHORT[pk['survey']]}: \"{KIND.get(pk['survey'], 'tree')} {pk['id']}\"", fontsize=a.fs, color='white', va='top', ha='left', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.55, pad=1.5, lw=0))
+    ax.text(0.985, 0.05, f'IoU {iou:.2f}', fontsize=a.fs, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.55, pad=1.5, lw=0))
     print(f"[sites] {pk['survey']} {pk['frame']} id {pk['id']}: argmax IoU in the figure {iou:.3f} (protocol {pk['argmax_iou']:.3f}, survey median {pk['median']:.3f}); {'portrait' if H > W else 'landscape'}")
 json.dump(picks, open(FIG / 'sites' / 'picks.json', 'w'), indent=1); fig.savefig(FIG / a.out, dpi=220); print('[sites] wrote', FIG / a.out)

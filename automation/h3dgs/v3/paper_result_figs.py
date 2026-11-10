@@ -22,14 +22,15 @@ for i, sv in enumerate(SV):
 ax.axvspan(-0.5, 0.5, color='0.92', zorder=0); ax.text(0, 0.45, 'not counted', fontsize=7, ha='center', va='center', color='0.35', rotation=90)
 ax.set_xticks(x); ax.set_xticklabels(['< 0.2 %', '0.2–1 %', '1–3 %', '≥ 3 %']); ax.set_xlabel('object size, fraction of the frame'); ax.set_ylabel('held-out tree IoU (median)'); ax.set_ylim(0, 1); ax.set_xlim(-0.5, 3.3)
 ax.legend(fontsize=7, ncol=2, frameon=False, loc='upper left', bbox_to_anchor=(0.12, 1.0)); fig.tight_layout(); fig.savefig(F / 'fig_iou_by_size.pdf'); print('fig_iou_by_size')
-# E2: the geometry arms
-fig, axes = plt.subplots(1, 3, figsize=(7.2, 2.7), sharey=True); arms = ['v3', 'hyper_own', 'flat96', 'euclid']; names = ['HiGH 32-d, containment', 'own point only', 'flat 3×32-d', 'Euclidean 32-d']
+# E2: the geometry arms (column width, three stacked panels, 8 pt text at print size; draft 36)
+fig, axes = plt.subplots(3, 1, figsize=(3.5, 3.9), sharex=True); arms = ['v3', 'hyper_own', 'flat96', 'euclid']; names = ['HiGH, containment', 'own point only', 'flat 3×32-d', 'Euclidean 32-d']
 rows = {(r['survey'], r['level']): r for r in e2['arms']['rows']}
-for ax, lvl, title in zip(axes, ['TREE', 'ROW', 'nesting'], ['trees, held-out IoU', 'rows asked by their address', 'nesting consistency']):
+for ax, lvl, title in zip(axes, ['TREE', 'ROW', 'nesting'], ['trees', 'rows by address', 'nesting consistency']):
     for i, a_ in enumerate(arms): ax.bar(np.arange(5) + (i - 1.5) * 0.2, [rows[(sv, lvl)]['values'].get(a_, np.nan) for sv in CIT], 0.2, color=COLS[i], label=names[i])
-    ax.set_xticks(np.arange(5)); ax.set_xticklabels(XT); ax.set_title(title, fontsize=9); ax.set_ylim(0, 1); ax.set_xlabel('citrus survey', fontsize=8)
-axes[0].set_ylabel('median'); fig.legend(*axes[0].get_legend_handles_labels(), fontsize=8, ncol=4, frameon=False, loc='lower center', bbox_to_anchor=(0.5, 0.0))
-fig.tight_layout(rect=(0, 0.09, 1, 1)); fig.savefig(F / 'fig_arms.pdf'); print('fig_arms')
+    ax.set_ylim(0, 1); ax.set_yticks([0, 0.5, 1]); ax.tick_params(labelsize=8); ax.text(0.01, 1.0, title, fontsize=9, transform=ax.transAxes, va='bottom', ha='left')
+axes[-1].set_xticks(np.arange(5)); axes[-1].set_xticklabels(XT); axes[-1].set_xlabel('citrus survey', fontsize=9); axes[1].set_ylabel('held-out median', fontsize=9)
+fig.legend(*axes[0].get_legend_handles_labels(), fontsize=8, ncol=2, frameon=False, loc='upper center', bbox_to_anchor=(0.5, 1.0), columnspacing=1.0, handlelength=1.2)
+fig.tight_layout(h_pad=0.9, rect=(0, 0, 1, 0.9)); fig.savefig(F / 'fig_arms.pdf'); print('fig_arms')
 # E2b: the seeding arms
 fig, axes = plt.subplots(1, 2, figsize=(3.5, 2.7), sharey=True); arms = ['v3', 'zero3000', 'refine3000', 'projvote']; names = ['census seed', 'learned from zero', 'seed + refine', 'projection vote']
 rows = {(r['survey'], r['level']): r for r in e2b['arms']['rows']}; SV7 = CIT + ['apr_2026_zed', 'nov_2025_a300']; XT7 = ['01', '02', '03', '04', '05', 'K.Apr', 'Lind.']
@@ -39,13 +40,15 @@ for ax, lvl, title in zip(axes, ['TREE', 'ROW'], ['trees', 'rows by address']):
 axes[0].set_ylabel('held-out IoU (median)', fontsize=8); fig.legend(*axes[0].get_legend_handles_labels(), fontsize=7, ncol=2, frameon=False, loc='lower center', bbox_to_anchor=(0.5, 0.0))
 fig.tight_layout(rect=(0, 0.15, 1, 1)); fig.savefig(F / 'fig_seeding.pdf'); print('fig_seeding')
 
-# E1 per survey: held-out tree and row IoU, argmax as bars, oracle and fixed thresholds as markers
-fig, axes = plt.subplots(1, 2, figsize=(3.5, 2.4), sharey=True); SV2 = [sv for sv in SV if sv in e1['surveys']]
+# E1 per survey: held-out tree and row IoU, argmax as bars, oracle and fixed thresholds as markers (column width, two stacked panels, 8 pt; draft 36)
+fig, axes = plt.subplots(2, 1, figsize=(3.5, 3.5), sharex=True); SV2 = [sv for sv in SV if sv in e1['surveys']]
 for ax, lvl, title in zip(axes, ['TREE', 'ROW'], ['trees', 'rows']):
     x = np.arange(len(SV2)); g = lambda k: [e1['surveys'][sv].get(lvl, {}).get('eval', {}).get(k, np.nan) for sv in SV2]
-    ax.bar(x, g('argmax_med'), 0.62, color=COLS[0], label='argmax'); ax.plot(x, g('oracle_med'), 'v', color=COLS[2], ms=4, label='oracle'); ax.plot(x, g('fixed_cell_med'), '_', color='k', ms=9, mew=1.2, label='fixed')
-    ax.set_xticks(x); ax.set_xticklabels([SHORT[sv].replace('citrus ', 'c').replace('Klapmuts ', 'K.').replace('Lindendhof', 'Lind.') for sv in SV2], fontsize=6, rotation=60, ha='right'); ax.set_title(title, fontsize=9); ax.set_ylim(0, 1)
-axes[0].set_ylabel('held-out IoU (median)', fontsize=8); fig.legend(*axes[0].get_legend_handles_labels(), fontsize=6.5, ncol=3, frameon=False, loc='upper center', bbox_to_anchor=(0.55, 1.0)); fig.tight_layout(w_pad=0.4, rect=(0, 0, 1, 0.93)); fig.savefig(F / 'fig_e1_survey.pdf'); print('fig_e1_survey')
+    ax.bar(x, g('argmax_med'), 0.62, color=COLS[0], label='argmax'); ax.plot(x, g('oracle_med'), 'v', color=COLS[2], ms=5, label='oracle'); ax.plot(x, g('fixed_cell_med'), '_', color='k', ms=10, mew=1.4, label='fixed')
+    ax.set_ylim(0, 1); ax.set_yticks([0, 0.5, 1]); ax.tick_params(labelsize=8); ax.text(0.01, 1.0, title, fontsize=9, transform=ax.transAxes, va='bottom', ha='left')
+axes[-1].set_xticks(x); axes[-1].set_xticklabels([SHORT[sv] for sv in SV2], fontsize=8, rotation=40, ha='right', rotation_mode='anchor')
+fig.supylabel('held-out IoU (median)', fontsize=9, x=0.02); fig.legend(*axes[0].get_legend_handles_labels(), fontsize=8, ncol=3, frameon=False, loc='upper center', bbox_to_anchor=(0.55, 1.0))
+fig.tight_layout(h_pad=0.9, rect=(0.02, 0, 1, 0.93)); fig.savefig(F / 'fig_e1_survey.pdf'); print('fig_e1_survey')
 # E3: held-out "tree" IoU at relevancy >= 0.5 (bars) and at the oracle threshold (markers), three fields
 e3 = json.load(open(N / 'e3_category.json')); rows = {(r['survey'], r['level']): r for r in e3['arms']['rows']}; tags = ['cat_v3', 'cat_flat96', 'cat_lite']; names = ['HiGH', 'flat 3×32', 'LangSplat-style']
 fig, ax = plt.subplots(figsize=(3.5, 2.1))
@@ -56,18 +59,19 @@ ax.set_xticks(np.arange(5)); ax.set_xticklabels(XT); ax.set_xlabel('citrus surve
 ax.set_ylim(0, 1.18); ax.legend(fontsize=6.5, frameon=False, loc='upper center', ncol=3, title='bars: relevancy ≥ 0.5; markers: oracle threshold', title_fontsize=6); fig.tight_layout(); fig.savefig(F / 'fig_e3.pdf'); print('fig_e3')
 # fruit: FruitNeRF counts per tree and Fuji per-apple scores against the references
 fr = json.load(open(N / 'fruit_registry.json')); fn = fr['fruitnerf']; fj = fr['fuji_sfm']
-fig, axes = plt.subplots(1, 2, figsize=(3.5, 2.1), gridspec_kw={'width_ratios': [1.25, 1]})
-ax = axes[0]; trees = ['tree_01', 'tree_02', 'tree_03']; series = [('hand', [fn['hand_counts'][t] for t in trees], '0.3'), ('ours', [fn['ours_record'][t] for t in trees], COLS[0]), ('FLGS', [fn['literature']['FruitLangGS'][t] for t in trees], COLS[2]), ('FNeRF', [fn['literature']['FruitNeRF_best_per_tree'][t] for t in trees], COLS[3])]
+fig, axes = plt.subplots(1, 2, figsize=(3.5, 2.7), gridspec_kw={'width_ratios': [1.15, 1]})   # 8 pt text at print size (draft 36)
+ax = axes[0]; trees = ['tree_01', 'tree_02', 'tree_03']; series = [('hand', [fn['hand_counts'][t] for t in trees], '0.3'), ('ours', [fn['ours_record'][t] for t in trees], COLS[0]), ('FruitLangGS', [fn['literature']['FruitLangGS'][t] for t in trees], COLS[2]), ('FruitNeRF', [fn['literature']['FruitNeRF_best_per_tree'][t] for t in trees], COLS[3])]
 for i, (nm, v, c) in enumerate(series): ax.bar(np.arange(3) + (i - 1.5) * 0.2, v, 0.2, color=c, label=nm)
-ax.set_xticks(np.arange(3)); ax.set_xticklabels(['01', '02', '03'], fontsize=7); ax.set_xlabel('FruitNeRF tree', fontsize=7); ax.set_ylabel('apples counted', fontsize=8); ax.set_ylim(0, 380); ax.legend(fontsize=5.5, frameon=False, loc='upper left', ncol=2, columnspacing=0.8, handlelength=1.2); ax.set_title('counts per tree', fontsize=8)
+ax.set_xticks(np.arange(3)); ax.set_xticklabels(['01', '02', '03']); ax.set_xlabel('FruitNeRF tree', fontsize=9); ax.set_ylabel('apples counted', fontsize=9); ax.set_ylim(0, 380)
+ax.legend(fontsize=8, frameon=False, loc='lower left', bbox_to_anchor=(-0.25, 1.02), ncol=2, columnspacing=0.8, handlelength=1.0, borderaxespad=0)
 ax = axes[1]; r10 = fj['merged_10cm_merge']['r10']; r15 = fj['merged_15cm_merge']['r15']
-for i, (nm, d) in enumerate((('10 cm', r10), ('15 cm', r15))): ax.bar(np.arange(3) + (i - 0.5) * 0.36, [d['P'], d['R'], d['F1']], 0.36, color=[COLS[0], COLS[1]][i], label=nm)
+for i, (nm, d) in enumerate((('ours, 10 cm', r10), ('ours, 15 cm', r15))): ax.bar(np.arange(3) + (i - 0.5) * 0.36, [d['P'], d['R'], d['F1']], 0.36, color=[COLS[0], COLS[1]][i], label=nm)
 f1a, f1b = fj['literature']['FruitNeRF++']['F1'], fj['literature']['Gene-Mola_2020_CEA']['F1']
-ax.axhline(f1a, color=COLS[3], lw=1, ls='--'); ax.text(2.4, f1a - 0.02, f'FruitNeRF++ {f1a:.2f}', fontsize=5.5, ha='left', va='top', color=COLS[3])
-ax.axhline(f1b, color='0.3', lw=1, ls=':'); ax.text(2.4, f1b + 0.02, f'in-cloud {f1b:.2f}', fontsize=5.5, ha='left', va='bottom', color='0.3')
-ax.set_xticks(np.arange(3)); ax.set_xticklabels(['P', 'R', 'F1'], fontsize=7); ax.set_xlim(-0.6, 3.9); ax.set_ylim(0, 1.2); ax.set_title('Fuji-SfM per apple', fontsize=8); ax.legend(fontsize=5.5, frameon=False, loc='upper left', ncol=2, title='ours, match radius', title_fontsize=5.5, columnspacing=0.8, handlelength=1.2)
-for a_ in axes: a_.tick_params(labelsize=6.5)
-fig.tight_layout(w_pad=0.6); fig.savefig(F / 'fig_fruit.pdf'); print('fig_fruit')
+ax.axhline(f1a, color=COLS[3], lw=1.2, ls='--', label=f'FruitNeRF++ F1'); ax.axhline(f1b, color='0.3', lw=1.2, ls=':', label=f'in-cloud F1')
+ax.set_xticks(np.arange(3)); ax.set_xticklabels(['P', 'R', 'F1']); ax.set_xlabel('Fuji-SfM, per apple', fontsize=9); ax.set_ylim(0, 1); ax.set_yticks([0, 0.5, 1])
+ax.legend(fontsize=8, frameon=False, loc='lower left', bbox_to_anchor=(-0.05, 1.02), ncol=1, handlelength=1.4, borderaxespad=0, labelspacing=0.2)
+for a_ in axes: a_.tick_params(labelsize=8)
+fig.tight_layout(w_pad=0.8); fig.savefig(F / 'fig_fruit.pdf'); print('fig_fruit')
 
 # cost: storage per cell of the identity designs, serving rate and query latency (numbers/e5_cost.json)
 c = json.load(open(N / 'e5_cost.json')); st = c['storage_mb']
