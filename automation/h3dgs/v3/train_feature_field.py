@@ -20,7 +20,7 @@ import open_clip
 FRUIT_ID_BASE, UNLAB = 10000, 65535
 ap = argparse.ArgumentParser(); ap.add_argument('--identity', required=True); ap.add_argument('--init', required=True, help="'zero' or a features bin to refine")
 ap.add_argument('--out', required=True, type=Path); ap.add_argument('--steps', type=int, default=3000); ap.add_argument('--lr', type=float, default=0.01); ap.add_argument('--render-scale', type=float, default=0.5)
-ap.add_argument('--seed', type=int, default=0); ap.add_argument('--log-every', type=int, default=500); a = ap.parse_args(); N = Path(a.identity); dev = 'cuda'; random.seed(a.seed); torch.manual_seed(a.seed)
+ap.add_argument('--render-norm', action='store_true', help='2026-11-10: train on the blend normalised by the pixel\'s total weight, f(p)/sum_i w_i(p), so transparency does not shrink the feature (the void mixing of the plain blend)'); ap.add_argument('--void-weight', type=float, default=0.0, help='weight of a void term: the mean geodesic distance from the origin of the rendered feature on UNLABELLED pixels (pulls Gaussians seen against nothing labelled to void)'); ap.add_argument('--norm-reg', type=float, default=0.0, help='OpenHype lifting regulariser weight: (d(f,O) - d(t,O))^2 on labelled pixels'); ap.add_argument('--seed', type=int, default=0); ap.add_argument('--log-every', type=int, default=500); a = ap.parse_args(); N = Path(a.identity); dev = 'cuda'; random.seed(a.seed); torch.manual_seed(a.seed)
 meta = json.loads(str(np.load(N / 'text_bank.npz', allow_pickle=True)['meta'])); SUP = Path(meta['manifest']).parent; fb = json.load(open(N / 'features_B.bin.json'))
 cfg = Path(json.load(open(N / 'W.json'))['config']); split = json.load(open(N / 'split_names.json'))
 _, pipe, _, step = eval_setup(cfg, test_mode='test'); model = pipe.model; model.eval(); g = model.gauss_params
@@ -48,13 +48,19 @@ for it in range(1, a.steps + 1):
                                    width=W_, height=H_, packed=False, near_plane=0.01, far_plane=1e10, render_mode='RGB', sh_degree=None, rasterize_mode=model.config.rasterize_mode)
     li = lut[maps[f]]; sel = li >= 0
     if sel.sum() == 0: continue
-    pred = feat[0][sel].clamp(-12, 12); tgt = T[li[sel]].clamp(-12, 12)
+    fr_ = feat[0] / alpha[0].clamp(min=1e-3) if a.render_norm else feat[0]   # --render-norm: the blend normalised by the pixel's total weight
+    pred = fr_[sel].clamp(-12, 12); tgt = T[li[sel]].clamp(-12, 12)
     x = L.exp_map0(pred, curv=1.0); y = L.exp_map0(tgt, curv=1.0); dist = torch.acosh((-L.rowwise_inner(x, y)).clamp(min=1 + 1e-7))   # stage 2's safe_geodesic_loss, labelled px only
-    loss = dist.mean(); opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); run = 0.98 * run + 0.02 * loss.item() if it > 1 else loss.item()
+    loss = dist.mean()
+    if a.norm_reg > 0: loss = loss + a.norm_reg * ((pred.norm(dim=-1) - tgt.norm(dim=-1)) ** 2).mean()   # OpenHype: d(h,O) = ||tangent||
+    if a.void_weight > 0:
+        un = (maps[f] == UNLAB) & (alpha[0, ..., 0] > 0.05)
+        if un.any(): loss = loss + a.void_weight * fr_[un].clamp(-12, 12).norm(dim=-1).mean()   # distance from the origin of unlabelled pixels
+    opt.zero_grad(set_to_none=True); loss.backward(); opt.step(); run = 0.98 * run + 0.02 * loss.item() if it > 1 else loss.item()
     if it % a.log_every == 0 or it == a.steps:
         with torch.no_grad(): nz = (F.norm(dim=1) > 0.5).float().mean().item(); mv = (F - F0).norm(dim=1).mean().item()
         print(f'[train] step {it}: geodesic {run:.3f} | ||f||>0.5 on {100 * nz:.1f}% of gaussians, mean move from init {mv:.3f} | {time.time() - t0:.0f}s', flush=True)
 a.out.parent.mkdir(parents=True, exist_ok=True); F.detach().cpu().numpy().astype(np.float32).tofile(a.out)
-json.dump({'n': NG, 'dim': int(T.shape[1]), 'init': a.init, 'steps': a.steps, 'lr': a.lr, 'frames': len(frames), 'labels': len(ids), 'embedder': fb['embedder'], 'final_geodesic_ema': run,
+json.dump({'n': NG, 'dim': int(T.shape[1]), 'init': a.init, 'render_norm': a.render_norm, 'void_weight': a.void_weight, 'norm_reg': a.norm_reg, 'steps': a.steps, 'lr': a.lr, 'frames': len(frames), 'labels': len(ids), 'embedder': fb['embedder'], 'final_geodesic_ema': run,
            'seconds': time.time() - t0}, open(str(a.out) + '.json', 'w'), indent=1)
 print(f'[train] done -> {a.out} ({time.time() - t0:.0f}s)', flush=True)
