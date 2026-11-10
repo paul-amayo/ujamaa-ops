@@ -47,7 +47,7 @@ if [ ! -f $W/TRAIN_DONE ]; then
   waitdisk
   T0=$(date +%s)
   PIX ns-train $METHOD --data $DATA --output-dir $W/outputs --experiment-name ovbench_$CELL --timestamp run --vis tensorboard \
-      --pipeline.model.eval-num-rays-per-chunk 8192 > $W/train.log 2>&1
+      --pipeline.model.eval-num-rays-per-chunk 8192 --steps-per-eval-image 1000000 --steps-per-eval-all-images 1000000 > $W/train.log 2>&1
   RC=$?; T1=$(date +%s); echo "{\"rc\": $RC, \"seconds\": $((T1-T0)), \"start\": $T0}" > $W/train_time.json
   [ $RC -eq 0 ] && ls $RUN/nerfstudio_models/*.ckpt >/dev/null 2>&1 && touch $W/TRAIN_DONE || { echo "[train] failed rc=$RC"; tail -30 $W/train.log; exit 1; }
 fi
