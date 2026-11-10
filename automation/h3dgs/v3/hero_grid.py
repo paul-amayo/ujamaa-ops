@@ -18,7 +18,8 @@ import argparse, json, subprocess
 from pathlib import Path
 import numpy as np
 ap = argparse.ArgumentParser(); ap.add_argument('paper'); ap.add_argument('--work', default='/tmp/d36hero'); ap.add_argument('--stage', default='both', choices=['both', '1', '2'])
-ap.add_argument('--figdir', default='/home/paperspace/code/aru_sil_core/src/docs/paper/figures'); a = ap.parse_args()
+ap.add_argument('--figdir', default='/home/paperspace/code/aru_sil_core/src/docs/paper/figures')
+ap.add_argument('--left', default='euclid', choices=['euclid', 'lite'], help='left column: the Euclidean twin of the embedder (geometry ablation arm, argmax dumps in <work>/dump_euclid from euclid.sh) or the lifted CLIP field'); a = ap.parse_args()
 P = Path(a.paper); W = Path(a.work); W.mkdir(parents=True, exist_ok=True); FD = Path(a.figdir)
 N = Path('/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/v3/chunk_1_0/identity'); A = N / 'arms'; V3 = Path('/home/paperspace/code/automation/h3dgs/v3'); NS = '/home/paperspace/code/nerf_new'
 SUP = Path('/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/h3dgs_native/chunk_1_0_sam3/supervision/trees_only')
@@ -67,8 +68,14 @@ R = {'tree': dict(lite=iou(lt['tree'] >= 0.5, TREES(ID_TL)), high=iou(p1, TREES(
      'tree 36': dict(lite=iou(lt['the tree on the right'] >= 0.5, ID_TL == 36), high=iou(p2, ID_T == 36)),
      'row 4': dict(lite=iou(lt['row 4'] >= 0.5, ROW4(ID_TL)), high=iou(p3, ROW4(ID_T))),
      'fruit of tree 5': dict(lite=iou(lf['fruit on tree 5'] >= 0.5, F5(ID_FL)), high=iou(p4, F5(ID_F)), fruit_ids=F5_IDS, fruit_addressed=f5w)}
+if a.left == 'euclid':
+    de = {fr: np.load(W / 'dump_euclid' / fr.replace('.png', '.npz')) for fr in (F_T, F_F)}; et, ef = de[F_T], de[F_F]
+    ID_TE = idmap(F_T, et['tree'].shape); ID_FE = idmap(F_F, ef['tree'].shape)
+    e1 = et['tree'] >= 0; e2 = et['tree'] == 36; e3 = et['row'] == 4; e4 = np.isin(ef['fruit_mixed'], F5_IDS)
+    R['tree']['euclid'] = iou(e1, TREES(ID_TE)); R['tree 36']['euclid'] = iou(e2, ID_TE == 36); R['row 4']['euclid'] = iou(e3, ROW4(ID_TE)); R['fruit of tree 5']['euclid'] = iou(e4, F5(ID_FE))
+for k, v in R.items(): print('[grid] euclid', k, round(v.get('euclid', float('nan')), 3))
 for k, v in R.items(): print(f'[grid] {k:16s} lifted CLIP IoU {v["lite"]:.3f}   HiGH IoU {v["high"]:.3f}')
-json.dump(dict(cell='05_13D_Jackal chunk_1_0', frames=[F_T, F_F], rule='HiGH: argmax of the protocol (fruit: over every address); lifted CLIP: LERF relevancy >= 0.5',
+json.dump(dict(cell='05_13D_Jackal chunk_1_0', frames=[F_T, F_F], rule='HiGH and the Euclidean twin: argmax of the protocol (fruit: over every address); lifted CLIP: LERF relevancy >= 0.5', left=a.left,
                prompts_lifted={'tree': 'tree', 'tree 36': 'the tree on the right', 'row 4': 'row 4', 'fruit of tree 5': 'fruit on tree 5'}, iou=R), open(P / 'numbers' / 'hero_grid.json', 'w'), indent=1)
 # compose: 4 rows x 2 columns at column width
 CM = plt.get_cmap('inferno'); LIT = np.array([1.0, 0.78, 0.1]); PAL = plt.get_cmap('tab10')(np.arange(10))[:, :3]
@@ -83,19 +90,29 @@ def high_img(z, m, per_id=None):
     img = z['rgb'].astype(float) / 255; out = img * 0.45
     if per_id is None: out[m] = 0.25 * img[m] + 0.75 * LIT
     else:
-        for j, k in enumerate(np.unique(per_id[m])): mm = m & (per_id == k); out[mm] = 0.25 * img[mm] + 0.75 * PAL[j % 10]
+        for k in np.unique(per_id[m]): mm = m & (per_id == k); out[mm] = 0.25 * img[mm] + 0.75 * PAL[int(k) % 10]   # colour keyed by node id: the same tree has the same colour in both columns
     return out
-rows = [('"tree"', lite_img(lt, 'tree'), high_img(zt, p1, am1), F_T, '"tree"', 'tree level'),
+TREE_IDS = np.array([t for t in sorted(wt) if t < 10000 and wt[t] in zt.files]); node1 = TREE_IDS[am1]
+rows = [('"tree"', lite_img(lt, 'tree'), high_img(zt, p1, node1), F_T, '"tree"', 'tree level'),
         ('"tree 36"', lite_img(lt, 'the tree on the right'), high_img(zt, p2), F_T, '"the tree on the right"', 'tree 36'),
         ('"row 4"', lite_img(lt, 'row 4'), high_img(zt, p3), F_T, '"row 4"', 'row 4'),
         ('"fruit on tree 5"', lite_img(lf, 'fruit on tree 5'), high_img(zf, p4), F_F, '"fruit on tree 5" (zoom)', 'fruit of tree 5 (zoom)')]
 ZM = {F_T: (None, None), F_F: (F5(ID_FL), F5(ID_F))}   # the fruit row is shown 2.5x around the fruit of tree 5 in both columns; IoU stays full-frame
 keys = ['tree', 'tree 36', 'row 4', 'fruit of tree 5']
+LK = 'lite'
+if a.left == 'euclid':
+    def rgb_at(z, shape): return np.array(Image.fromarray(z['rgb']).resize((shape[1], shape[0]), Image.BILINEAR))
+    zte = {'rgb': rgb_at(zt, et['tree'].shape)}; zfe = {'rgb': rgb_at(zf, ef['tree'].shape)}
+    rows = [('"tree"', high_img(zte, e1, et['tree']), rows[0][2], F_T, 'tree level', 'tree level'),
+            ('"tree 36"', high_img(zte, e2), rows[1][2], F_T, 'tree 36', 'tree 36'),
+            ('"row 4"', high_img(zte, e3), rows[2][2], F_T, 'row 4', 'row 4'),
+            ('"fruit of tree 5"', high_img(zfe, e4), rows[3][2], F_F, 'fruit of tree 5 (zoom)', 'fruit of tree 5 (zoom)')]
+    ZM = {F_T: (None, None), F_F: (F5(ID_FE), F5(ID_F))}; LK = 'euclid'
 plt.rcParams.update({'font.size': 8}); fig, axes = plt.subplots(4, 2, figsize=(3.5, 3.55)); fig.subplots_adjust(0.0, 0.0, 1.0, 0.94, 0.02, 0.06)
 for i, (q, li, hi, fr, lq, hq) in enumerate(rows):
-    for j, (img, lab, v) in enumerate(((li, lq, R[keys[i]]['lite']), (hi, hq, R[keys[i]]['high']))):
+    for j, (img, lab, v) in enumerate(((li, lq, R[keys[i]][LK]), (hi, hq, R[keys[i]]['high']))):
         ax = axes[i, j]; ax.imshow(np.clip(crop(img, fr, ZM[fr][j]), 0, 1)); ax.set_xticks([]); ax.set_yticks([]); [s.set_visible(False) for s in ax.spines.values()]
         ax.text(0.02, 0.96, lab, fontsize=7.5, color='white', va='top', ha='left', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.6, pad=1.2, lw=0))
         ax.text(0.98, 0.04, f'IoU {v:.2f}', fontsize=7.5, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.6, pad=1.2, lw=0))
-fig.text(0.245, 0.99, 'Euclidean (lifted CLIP)', ha='center', va='top', fontsize=8); fig.text(0.755, 0.99, 'hyperbolic (HiGH)', ha='center', va='top', fontsize=8)
+fig.text(0.245, 0.99, 'Euclidean embedding' if a.left == 'euclid' else 'Euclidean (lifted CLIP)', ha='center', va='top', fontsize=8); fig.text(0.755, 0.99, 'hyperbolic embedding (HiGH)', ha='center', va='top', fontsize=8)
 (P / 'figures').mkdir(exist_ok=True); fig.savefig(P / 'figures' / 'fig_hero.pdf', dpi=300); fig.savefig(P / 'figures' / 'fig_hero.png', dpi=300); print('[grid] wrote', P / 'figures' / 'fig_hero.pdf')
