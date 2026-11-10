@@ -20,7 +20,9 @@ ap.add_argument('--layout', default='frame', choices=['frame', 'zoom'], help="fr
                 "(prediction | supervision, so nothing that enters the IoU is cut off), background desaturated and brightened, title above, colour legend below")
 ap.add_argument('--aspect', type=float, default=1.7, help='zoom layout: panel width / height'); ap.add_argument('--dpi', type=int, default=220)
 ap.add_argument('--bg', default='natural', choices=['natural', 'grey'], help='zoom layout background: natural colour with a mild gamma lift (draft 37 v2), or levelled + 70 %% desaturated (draft 37 v1)')
-ap.add_argument('--fuji', default=None, help='zoom layout: npz from automation/fruitnerf/fuji_tree_panel.py, appended as the last panel (the fruit level: apples of one tree vs the GT apples, F1 printed)'); a = ap.parse_args()
+ap.add_argument('--fuji', default=None, help='zoom layout: npz from automation/fruitnerf/fuji_tree_panel.py, appended as the last panel (the fruit level: apples of one tree vs the GT apples, F1 printed)')
+ap.add_argument('--fruitnerf', default=None, help='zoom layout: npz from automation/fruitnerf/fruitnerf_render_panel.py, a panel before the Fuji one: our render of the median-error FruitNeRF tree, '
+                'the registry\'s counted apples lit in one colour, ours / hand printed (hand counts only: no TP / FP / miss)'); a = ap.parse_args()
 P = Path(a.paper); FIG = P / 'figures'; (FIG / 'sites').mkdir(exist_ok=True)
 KIND = {'dec_2025_ten_rows': 'plant', 'IMG_7990_s1': 'plant', 'IMG_7993_s0': 'plant', 'apr_2026_zed': 'plant'}
 SHORT = {'01_13B_Jackal': 'citrus 01', '02_13B_Jackal': 'citrus 02', '03_13B_Jackal': 'citrus 03', '04_13D_Jackal': 'citrus 04', '05_13D_Jackal': 'citrus 05', 'apr_2026_zed': 'Klapmuts Apr', 'dec_2025_ten_rows': 'Klapmuts Dec', 'nov_2025_a300': 'Lindendhof', 'IMG_7993_s0': 'cabbage', 'IMG_7990_s1': 'pepper'}
@@ -52,7 +54,7 @@ ASPECT = 640 / 300
 def argmax_mask(z, words, target_word):
     """pixels whose argmax over `words` (containment heats of one level) is target_word; void excluded"""
     heats = np.stack([z[w] for w in words]); best = heats.argmax(0); return (best == words.index(target_word)) & ~z['void'].astype(bool)
-TP, FP, FN = np.array([0.1, 0.8, 0.2]), np.array([1.0, 0.55, 0.0]), np.array([0.9, 0.1, 0.1])
+TP, FP, FN = np.array([0.1, 0.8, 0.2]), np.array([1.0, 0.55, 0.0]), np.array([0.9, 0.1, 0.1]); CNT = np.array([0.15, 0.5, 1.0])   # CNT: an apple the registry counted (FruitNeRF, hand count only)
 def background(rgb):
     """natural: the photograph with a mild gamma lift (0.85); grey: levelled (1-99 %), gamma 0.8, 70 % desaturated"""
     f = rgb.astype(float) / 255
@@ -66,9 +68,10 @@ def zoom_box(u, H, W, asp, pad=0.12, box=None):
     k = min(1.0, W / w, H / h); w, h = w * k, h * k   # keep the aspect: shrink to the frame (an IoU panel then asserts nothing scored was cut)
     cy, cx = (y0 + y1) / 2, (x0 + x1) / 2; Y0 = int(round(np.clip(cy - h / 2, 0, H - h))); X0 = int(round(np.clip(cx - w / 2, 0, W - w)))
     return Y0, Y0 + int(round(h)), X0, X0 + int(round(w))
-NP = len(picks) + (1 if a.fuji and a.layout == 'zoom' else 0); nc = a.cols or NP; nr = -(-NP // nc)
+NP = len(picks) + (int(bool(a.fuji)) + int(bool(a.fruitnerf)) if a.layout == 'zoom' else 0); nc = a.cols or NP; nr = -(-NP // nc)
+LEG_CELL = a.layout == 'zoom' and NP < nr * nc   # an empty grid cell holds the legend (no legend band)
 if a.layout == 'zoom':   # explicit inch layout: title band above each panel, legend band at the bottom
-    gx, gy, tb, lb = 0.05, 0.03, a.fs / 72 * 1.45, a.fs / 72 * 2.2; pw = (a.width - gx * (nc - 1)) / nc; ph = pw / a.aspect; FH = lb + nr * (tb + ph) + gy * (nr - 1)
+    gx, gy, tb, lb = 0.05, 0.03, a.fs / 72 * 1.45, 0.0 if LEG_CELL else a.fs / 72 * 2.2; pw = (a.width - gx * (nc - 1)) / nc; ph = pw / a.aspect; FH = lb + nr * (tb + ph) + gy * (nr - 1)
     fig = plt.figure(figsize=(a.width, FH)); axes = []
     for i in range(nr * nc):
         r, c = divmod(i, nc); top = FH - r * (tb + ph + gy) - tb; axes.append(fig.add_axes([c * (pw + gx) / a.width, (top - ph) / FH, pw / a.width, ph / FH]))
@@ -104,8 +107,18 @@ for ax, pk in zip(axes, picks):
         ax.text(0.985, 0.05, f'IoU {iou:.2f}', fontsize=a.fs, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.55, pad=1.5, lw=0))
     print(f"[sites] {pk['survey']} {pk['frame']} id {pk['id']}: argmax IoU in the figure {iou:.3f} (protocol {pk['argmax_iou']:.3f}, survey median {pk['median']:.3f}); {'portrait' if H > W else 'landscape'}"
           + (f"; zoom crop {pk['zoom_box']} keeps {100 * pk['zoom_scored_kept']:.0f} % of scored pixels" if a.layout == 'zoom' else ''))
-if a.layout == 'zoom' and a.fuji:   # the fruit level: our apples of one tree vs the GT apples, on the dataset's photograph (fuji_tree_panel.py)
-    from matplotlib.patches import Circle
+from matplotlib.patches import Circle, Patch
+if a.layout == 'zoom' and a.fruitnerf:   # FruitNeRF (fruitnerf_render_panel.py): our render, the registry's counted apples lit by their blend weight
+    fn_ = np.load(a.fruitnerf, allow_pickle=True); ax = axes[len(picks)]; rgb = fn_['rgb']; H, W = rgb.shape[:2]; wc = np.clip(fn_['w_count'].astype(float), 0, 1)
+    al = 0.75 * wc[..., None]; img = background(rgb) * (1 - al) + al * CNT; ys, xs = np.where(wc >= 0.5)
+    y0, y1, x0, x1 = zoom_box(None, H, W, a.aspect, box=(int(ys.min()), int(ys.max()) + 1, int(xs.min()), int(xs.max()) + 1))
+    ax.imshow(np.clip(img[y0:y1, x0:x1], 0, 1), interpolation='lanczos', aspect='auto'); ax.set_xticks([]); ax.set_yticks([])
+    for s in ax.spines.values(): s.set_linewidth(0.4); s.set_color('0.3')
+    tn = int(str(fn_['tree']).split('_')[-1]); ax.text(0.0, 1.0 + 0.25 * tb / ph, f'FruitNeRF: apples of tree {tn}', fontsize=a.fs, va='bottom', ha='left', transform=ax.transAxes)
+    ax.text(0.985, 0.035, f"ours {int(fn_['ours'])} / hand {int(fn_['hand'])}", fontsize=a.fs, color='white', weight='bold', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.65, pad=1.5, lw=0))
+    print(f"[sites] FruitNeRF {fn_['tree']} render from {fn_['image']}: ours {int(fn_['ours'])} / hand {int(fn_['hand'])} from {fn_['numbers']} (relative error {100 * float(fn_['rel_err']):.1f} %, the median of the three); "
+          f"{int(fn_['in_view'])} counted apples in view, {int(fn_['gauss'])} Gaussians lit; crop {[y0, y1, x0, x1]}")
+if a.layout == 'zoom' and a.fuji:   # the fruit level: our apples of one tree vs the GT apples (fuji_render_panel.py v3, fuji_tree_panel.py v2)
     fz = np.load(a.fuji, allow_pickle=True); ax = axes[NP - 1]
 if a.layout == 'zoom' and a.fuji and 'rgb' in fz.files:   # v3 (fuji_render_panel.py): our splat's render, the tree's registry apples lit by their blend weight, misses as rings
     rgb = fz['rgb']; H, W = rgb.shape[:2]; wt_ = [np.clip(fz['w_tp'].astype(float), 0, 1), np.clip(fz['w_fp'].astype(float), 0, 1)]; mu, mv, mr = fz['miss_u'], fz['miss_v'], fz['miss_r']
@@ -139,7 +152,7 @@ elif a.layout == 'zoom' and a.fuji:   # v2 (fuji_tree_panel.py): discs on the da
     print(f"[sites] Fuji-SfM {fz['tree']} on {fz['side']}/{fz['image']} ({fz['source']}): per-tree F1 {float(fz['f1']):.3f} from {fz['counts']} (P {float(fz['p']):.3f}, R {float(fz['r']):.3f}); "
           f"drawn TP/FP/FN {fz['drawn'].tolist()} of {fz['total'].tolist()} (the rest hidden from this view or out of frame), {shown} inside the panel's crop; crop {[y0, y1, x0, x1]}")
 if a.layout == 'zoom':
-    from matplotlib.patches import Patch
-    fig.legend([Patch(facecolor=c, edgecolor='none') for c in (TP, FP, FN)], ['true positive', 'false positive', 'miss'], loc='lower center', bbox_to_anchor=(0.5, 0.0), ncol=3,
-               fontsize=a.fs, frameon=False, handlelength=1.1, handleheight=0.9, handletextpad=0.4, columnspacing=1.4, borderaxespad=0.15)
+    hl = [(TP, 'true positive'), (FP, 'false positive'), (FN, 'miss')] + ([(CNT, 'counted apple')] if a.fruitnerf else []); hh = [Patch(facecolor=c, edgecolor='none') for c, _ in hl]; ll = [l for _, l in hl]
+    if LEG_CELL: axes[NP].legend(hh, ll, loc='center left', ncol=1, fontsize=a.fs, frameon=False, handlelength=1.1, handleheight=0.9, handletextpad=0.5, labelspacing=0.55, borderaxespad=0.2)
+    else: fig.legend(hh, ll, loc='lower center', bbox_to_anchor=(0.5, 0.0), ncol=len(hl), fontsize=a.fs, frameon=False, handlelength=1.1, handleheight=0.9, handletextpad=0.4, columnspacing=1.4, borderaxespad=0.15)
 json.dump(picks, open(FIG / 'sites' / 'picks.json', 'w'), indent=1); fig.savefig(FIG / a.out, dpi=a.dpi); print('[sites] wrote', FIG / a.out)
