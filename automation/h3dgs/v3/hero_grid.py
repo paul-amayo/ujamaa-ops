@@ -33,14 +33,14 @@ if a.stage in ('both', '1'):
         src = A / 'maps_lite' / fr.replace('.png', '.npz'); dst = W / 'maps_lite' / src.name
         if src.exists() and not dst.exists(): dst.symlink_to(src)
         if not dst.exists():
-            r = subprocess.run(f'cd {NS} && pixi run python {V3}/splat_feature_render.py --config {cfg} --features {A}/features_lite.bin --frames {fr} --out-dir {W}/maps_lite --colmap-sparse {sparse}', shell=True, capture_output=True, text=True)
+            r = subprocess.run(f'cd {NS} && /home/paperspace/.pixi/bin/pixi run python {V3}/splat_feature_render.py --config {cfg} --features {A}/features_lite.bin --frames {fr} --out-dir {W}/maps_lite --colmap-sparse {sparse}', shell=True, capture_output=True, text=True)
             print('[grid] render', fr, 'rc', r.returncode, (r.stdout + r.stderr).strip().splitlines()[-1:])
     # lite_relevancy.py reads <identity>/arms/maps_lite; run a copy whose map directory is the work directory
     src = (V3 / 'lite_relevancy.py').read_text().replace("z = np.load(N / 'arms/maps_lite' / a.frame.replace('.png', '.npz'))", f"z = np.load(Path('{W}/maps_lite') / a.frame.replace('.png', '.npz'))")
     assert f"Path('{W}/maps_lite')" in src; (W / 'lite_relevancy_work.py').write_text(src)
     for fr, pr in PROMPTS.items():
         out = W / f"lite_{fr.replace('.png', '')}.npz"
-        r = subprocess.run(f'cd {NS} && pixi run python {W}/lite_relevancy_work.py --identity {N} --frame {fr} --prompts "{";".join(pr)}" --out {out}', shell=True, capture_output=True, text=True)
+        r = subprocess.run(f'cd {NS} && /home/paperspace/.pixi/bin/pixi run python {W}/lite_relevancy_work.py --identity {N} --frame {fr} --prompts "{";".join(pr)}" --out {out}', shell=True, capture_output=True, text=True)
         print('[grid] lite', fr, 'rc', r.returncode, '\n  ' + '\n  '.join((r.stdout + r.stderr).strip().splitlines()[-4:]))
 if a.stage == '1': raise SystemExit
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
