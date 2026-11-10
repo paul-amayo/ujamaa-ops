@@ -35,7 +35,7 @@ CELL_DEV = {
                           '1280 x 720 through the torch backend, eval only) and resumed from the step-24000 checkpoint (model, optimisers, schedulers) '
                           'to 30000 with that evaluation disabled (2,086 s). Steps 24000-25000 were therefore trained twice from the same state; '
                           'the final weights are step 29999.',
-                          'The CLIP pyramid / DINO caches were built once (attempt 1, ~6 min for 294 views) and reused by the final run.',
+                          'The CLIP pyramid / DINO caches were built once (attempt 1, 17:37:57 to about 17:42 for 294 views) and reused by the final run.',
                           'Four earlier attempts failed or were stopped (tyro annotations; nerfstudio 1.1 datamanager.to; tiny-cuda-nn missing; '
                           'memory (eval chunk 32768 grew the trainer to 27 GB on the shared card); root disk filled at step 2030 by this session\'s '
                           'own checkpoint copy) — logs in attempt_logs/.'],
@@ -67,7 +67,7 @@ for m in ('lerf',):
         if cfg.exists():
             mm = re.search(r'^max_num_iterations: (\d+)', open(cfg).read(), re.M); steps = int(mm.group(1)) if mm else None
         ck = sorted(glob.glob(str(cfg.parent / 'nerfstudio_models' / '*.ckpt')))
-        cells[W.name] = {'train_time': tt, 'cell_deviations': CELL_DEV.get(W.name, CELL_DEV['_default']), 'max_num_iterations': steps, 'final_checkpoint': os.path.basename(ck[-1]) if ck else None,
+        cells[W.name] = {'train_time': tt, 'cell_deviations': CELL_DEV.get(W.name, CELL_DEV['_default']), 'max_num_iterations': steps, 'final_checkpoint': os.path.basename(ck[-1]) if ck else ('step-000029999.ckpt (deleted after scoring: disk rule)' if (W / 'ALL_DONE').exists() else None),
                          'train_views': None, 'frames_scored': s['frames'], 'gt_check': s['gt_check'], 'method_medians': s['method_medians'], 'high_medians': s['high_medians']}
         q = W / 'queries.json'
         if q.exists(): cells[W.name]['n_queries'] = len(json.load(open(q))['queries'])
