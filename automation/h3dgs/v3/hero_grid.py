@@ -143,7 +143,7 @@ if a.left == 'clip':
         return out
     shp = zt['rgb'].shape[:2]; shf = zf['rgb'].shape[:2]
     rows = [('"tree"', clip_img(mc['mc_kf002411_tree']['photo'], C['tree'], shp), rows[0][2], F_T, '"tree"', 'tree level'),
-            ('"tree 36"', clip_img(mc['mc_kf002411_tree']['photo'], C['tree 36'], shp), rows[1][2], F_T, '"the tree on the right"', 'tree 36'),
+            ('"tree 36"', clip_img(mc['mc_kf002411_tree']['photo'], C['tree 36'], shp), rows[1][2], F_T, '"the tree on the right"', 'tree on the right (#36)'),
             ('"row 4"', clip_img(mc['mc_kf002411_tree']['photo'], C['row 4'], shp), rows[2][2], F_T, '"row 4"', 'row 4'),
             ('"fruit on tree 5"', clip_img(mc['mc_kf000024_tree']['photo'], C['fruit of tree 5'], shf), rows[3][2], F_F, '"fruit on tree 5" (zoom)', 'fruit of tree 5 (zoom)')]
     ZM = {F_T: (None, None), F_F: (F5(ID_F), F5(ID_F))}; LK = 'clip'
