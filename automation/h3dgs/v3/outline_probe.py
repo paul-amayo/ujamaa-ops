@@ -35,7 +35,7 @@ for ds in (pipe.datamanager.eval_dataset, pipe.datamanager.train_dataset):
     names = [Path(p).name for p in ds.image_filenames]
     if a.frame in names: cam = ds.cameras[names.index(a.frame):names.index(a.frame) + 1].to(dev); break
 if cam is None:   # a held-out frame outside the workspace: its chunk COLMAP pose through the run's dataparser transform (as splat_feature_render.py)
-    import sys; sys.path.insert(0, '/home/paperspace/code/automation/h3dgs/v3')
+    import sys; sys.path.insert(0, '/home/paperspace/code/hierarchical-3d-gaussians/preprocess')
     from read_write_model import read_images_binary, qvec2rotmat
     from nerfstudio.cameras.cameras import Cameras, CameraType
     dp = json.load(open(Path(cfg).parent / 'dataparser_transforms.json')); T = np.eye(4); T[:3] = np.array(dp['transform'])
