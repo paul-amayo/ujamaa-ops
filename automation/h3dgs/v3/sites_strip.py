@@ -10,7 +10,10 @@ import argparse, json, subprocess
 from pathlib import Path
 import numpy as np
 ap = argparse.ArgumentParser(); ap.add_argument('paper'); ap.add_argument('--surveys', default='01_13B_Jackal,dec_2025_ten_rows,nov_2025_a300,apr_2026_zed,IMG_7993_s0,IMG_7990_s1')
-ap.add_argument('--out', default='fig_sites.png'); ap.add_argument('--cols', type=int, default=0, help='panels per row (0: one strip); draft 36 uses 2 at column width'); ap.add_argument('--width', type=float, default=7.2); ap.add_argument('--fs', type=float, default=6.5); ap.add_argument('--stage', default='both', choices=['both', '1', '2']); a = ap.parse_args()
+ap.add_argument('--out', default='fig_sites.png'); ap.add_argument('--cols', type=int, default=0, help='panels per row (0: one strip); draft 36 uses 2 at column width'); ap.add_argument('--width', type=float, default=7.2); ap.add_argument('--fs', type=float, default=6.5); ap.add_argument('--stage', default='both', choices=['both', '1', '2'])
+ap.add_argument('--layout', default='frame', choices=['frame', 'zoom'], help="frame: full frames dimmed to 50 %% (drafts <= 36); zoom: each panel cropped to the bounding box of every scored pixel "
+                "(prediction | supervision, so nothing that enters the IoU is cut off), background desaturated and brightened, title above, colour legend below")
+ap.add_argument('--aspect', type=float, default=1.7, help='zoom layout: panel width / height'); ap.add_argument('--dpi', type=int, default=220); a = ap.parse_args()
 P = Path(a.paper); FIG = P / 'figures'; (FIG / 'sites').mkdir(exist_ok=True)
 KIND = {'dec_2025_ten_rows': 'plant', 'IMG_7990_s1': 'plant', 'IMG_7993_s0': 'plant', 'apr_2026_zed': 'plant'}
 SHORT = {'01_13B_Jackal': 'citrus 01', '02_13B_Jackal': 'citrus 02', '03_13B_Jackal': 'citrus 03', '04_13D_Jackal': 'citrus 04', '05_13D_Jackal': 'citrus 05', 'apr_2026_zed': 'Klapmuts Apr', 'dec_2025_ten_rows': 'Klapmuts Dec', 'nov_2025_a300': 'Lindendhof', 'IMG_7993_s0': 'cabbage', 'IMG_7990_s1': 'pepper'}

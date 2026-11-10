@@ -72,7 +72,11 @@ json.dump(dict(cell='05_13D_Jackal chunk_1_0', frames=[F_T, F_F], rule='HiGH: ar
                prompts_lifted={'tree': 'tree', 'tree 36': 'the tree on the right', 'row 4': 'row 4', 'fruit of tree 5': 'fruit on tree 5'}, iou=R), open(P / 'numbers' / 'hero_grid.json', 'w'), indent=1)
 # compose: 4 rows x 2 columns at column width
 CM = plt.get_cmap('inferno'); LIT = np.array([1.0, 0.78, 0.1]); PAL = plt.get_cmap('tab10')(np.arange(10))[:, :3]
-def crop(img, fr): return img[: int(img.shape[0] * (0.83 if fr == F_T else 0.83))]
+def crop(img, fr, zoom_mask=None, zoom=2.5):
+    h0 = int(img.shape[0] * 0.83)
+    if zoom_mask is None: return img[:h0]
+    ys, xs = np.where(zoom_mask); cy, cx = int(np.median(ys)), int(np.median(xs)); wh, ww = int(h0 / zoom), int(img.shape[1] / zoom)   # same aspect as the other panels
+    y0 = int(np.clip(cy - wh // 2, 0, img.shape[0] - wh)); x0 = int(np.clip(cx - ww // 2, 0, img.shape[1] - ww)); return img[y0:y0 + wh, x0:x0 + ww]
 def lite_img(z, key):
     img = z['rgb'].astype(float) / 255; h = z[key]; m = h >= 0.5; out = img * 0.45; hh = np.clip((h - 0.5) / 0.5, 0, 1); col = CM(0.45 + 0.55 * hh)[..., :3]; out[m] = 0.25 * img[m] + 0.75 * col[m]; return out
 def high_img(z, m, per_id=None):
@@ -84,13 +88,14 @@ def high_img(z, m, per_id=None):
 rows = [('"tree"', lite_img(lt, 'tree'), high_img(zt, p1, am1), F_T, '"tree"', 'tree level'),
         ('"tree 36"', lite_img(lt, 'the tree on the right'), high_img(zt, p2), F_T, '"the tree on the right"', 'tree 36'),
         ('"row 4"', lite_img(lt, 'row 4'), high_img(zt, p3), F_T, '"row 4"', 'row 4'),
-        ('"fruit on tree 5"', lite_img(lf, 'fruit on tree 5'), high_img(zf, p4), F_F, '"fruit on tree 5"', 'fruit of tree 5')]
+        ('"fruit on tree 5"', lite_img(lf, 'fruit on tree 5'), high_img(zf, p4), F_F, '"fruit on tree 5" (zoom)', 'fruit of tree 5 (zoom)')]
+ZM = {F_T: (None, None), F_F: (F5(ID_FL), F5(ID_F))}   # the fruit row is shown 2.5x around the fruit of tree 5 in both columns; IoU stays full-frame
 keys = ['tree', 'tree 36', 'row 4', 'fruit of tree 5']
 plt.rcParams.update({'font.size': 8}); fig, axes = plt.subplots(4, 2, figsize=(3.5, 3.55)); fig.subplots_adjust(0.0, 0.0, 1.0, 0.94, 0.02, 0.06)
 for i, (q, li, hi, fr, lq, hq) in enumerate(rows):
     for j, (img, lab, v) in enumerate(((li, lq, R[keys[i]]['lite']), (hi, hq, R[keys[i]]['high']))):
-        ax = axes[i, j]; ax.imshow(np.clip(crop(img, fr), 0, 1)); ax.set_xticks([]); ax.set_yticks([]); [s.set_visible(False) for s in ax.spines.values()]
+        ax = axes[i, j]; ax.imshow(np.clip(crop(img, fr, ZM[fr][j]), 0, 1)); ax.set_xticks([]); ax.set_yticks([]); [s.set_visible(False) for s in ax.spines.values()]
         ax.text(0.02, 0.96, lab, fontsize=7.5, color='white', va='top', ha='left', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.6, pad=1.2, lw=0))
         ax.text(0.98, 0.04, f'IoU {v:.2f}', fontsize=7.5, color='white', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.6, pad=1.2, lw=0))
-fig.text(0.25, 0.985, 'Euclidean: lifted CLIP field', ha='center', va='top', fontsize=8.5, weight='bold'); fig.text(0.75, 0.985, 'hyperbolic: HiGH', ha='center', va='top', fontsize=8.5, weight='bold')
+fig.text(0.245, 0.99, 'Euclidean (lifted CLIP)', ha='center', va='top', fontsize=8); fig.text(0.755, 0.99, 'hyperbolic (HiGH)', ha='center', va='top', fontsize=8)
 (P / 'figures').mkdir(exist_ok=True); fig.savefig(P / 'figures' / 'fig_hero.pdf', dpi=300); fig.savefig(P / 'figures' / 'fig_hero.png', dpi=300); print('[grid] wrote', P / 'figures' / 'fig_hero.pdf')
