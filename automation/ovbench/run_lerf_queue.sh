@@ -6,7 +6,8 @@ WAIT=$1; shift; B=/home/paperspace/logs/ovbench
 until [ -f $WAIT ]; do sleep 60; done
 for sc in "$@"; do
   S=${sc%%:*}; C=${sc##*:}
-  until [ $(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1) -ge 16000 ]; do sleep 60; done
+  until [ $(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits | head -1) -ge 16000 ] && [ $(df -BG --output=avail / | tail -1 | tr -dc 0-9) -ge 5 ] \
+        && [ $(df -BG --output=avail /mnt/shared2 | tail -1 | tr -dc 0-9) -ge 10 ]; do sleep 60; done   # GPU + disk gates (coordinator 11-10)
   echo "[queue] $S $C start $(date -Is)"
   bash $B/bin/run_lerf_cell.sh $S $C > $B/lerf/${S}_${C#chunk_}.chain.log 2>&1
   echo "[queue] $S $C rc=$? $(date -Is)"
