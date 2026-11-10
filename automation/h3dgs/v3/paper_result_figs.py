@@ -50,7 +50,7 @@ axes[-1].set_xticks(x); axes[-1].set_xticklabels([SHORT[sv] for sv in SV2], font
 fig.supylabel('held-out IoU (median)', fontsize=9, x=0.02); fig.legend(*axes[0].get_legend_handles_labels(), fontsize=8, ncol=3, frameon=False, loc='upper center', bbox_to_anchor=(0.55, 1.0))
 fig.tight_layout(h_pad=0.9, rect=(0.02, 0, 1, 0.93)); fig.savefig(F / 'fig_e1_survey.pdf'); print('fig_e1_survey')
 # E3: held-out "tree" IoU at relevancy >= 0.5 (bars) and at the oracle threshold (markers), three fields
-e3 = json.load(open(N / 'e3_category.json')); rows = {(r['survey'], r['level']): r for r in e3['arms']['rows']}; tags = ['cat_v3', 'cat_flat96', 'cat_lite']; names = ['HiGH', 'flat 3×32', 'LangSplat-style']
+e3 = json.load(open(N / 'e3_category.json')); rows = {(r['survey'], r['level']): r for r in e3['arms']['rows']}; tags = ['cat_v3', 'cat_flat96', 'cat_lite']; names = ['HiGH', 'flat 3×32', 'lifted CLIP']
 fig, ax = plt.subplots(figsize=(3.5, 2.1))
 for i, t in enumerate(tags):
     ax.bar(np.arange(5) + (i - 1) * 0.27, [rows[(sv, 'CAT:tree')]['rel05_values'][t] for sv in CIT], 0.27, color=[COLS[0], COLS[2], COLS[3]][i], label=names[i])
@@ -76,7 +76,7 @@ fig.tight_layout(w_pad=0.8); fig.savefig(F / 'fig_fruit.pdf'); print('fig_fruit'
 # cost: storage per cell of the identity designs, serving rate and query latency (numbers/e5_cost.json)
 c = json.load(open(N / 'e5_cost.json')); st = c['storage_mb']
 fig, axes = plt.subplots(1, 2, figsize=(3.5, 1.8), gridspec_kw={'width_ratios': [1.3, 1]})
-ax = axes[0]; names = ['HiGH\n32-d', 'flat\n3×10', 'flat\n3×32', 'LangSplat-\nstyle']; vals = [st['features_B'], st['flat_equal_storage'], st['flat_3x32'], st['langsplat_lite']]
+ax = axes[0]; names = ['HiGH\n32-d', 'flat\n3×10', 'flat\n3×32', 'lifted\nCLIP']; vals = [st['features_B'], st['flat_equal_storage'], st['flat_3x32'], st['langsplat_lite']]
 bars = ax.bar(np.arange(4), vals, 0.62, color=[COLS[0], COLS[1], COLS[2], COLS[3]]); ax.set_xticks(np.arange(4)); ax.set_xticklabels(names, fontsize=5.5); ax.set_ylabel('MB per cell', fontsize=7); ax.set_title(f"identity features, {c['gaussians'] / 1e6:.2f} M Gaussians", fontsize=7)
 for b, v in zip(bars, vals): ax.text(b.get_x() + b.get_width() / 2, v + 4, f'{v:.0f}', ha='center', fontsize=6)
 ax.set_ylim(0, max(vals) * 1.18); ax.tick_params(labelsize=6)
