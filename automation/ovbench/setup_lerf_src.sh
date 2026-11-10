@@ -6,6 +6,9 @@
 # One change, forced by the box: dino_extractor.create_model gets DINO ViT-S/8 from dino_timm.DinoViTS8 (same official weights via
 # timm, see dino_timm.py) instead of torch.hub.load('facebookresearch/dino:main', ...), which fetches GitHub. PYTHONPATH=$DST makes
 # this copy shadow the fork for ns-train's `lerf` entry point (checked: lerf.__file__).
+# Second change, annotation only: LERFDataManagerConfig.patch_tile_size_range is typed Tuple[int, int] with the float default
+# (0.05, 0.5); tyro in nerf_new refuses that at CLI build. The field is never read (the pyramid uses a literal [0.05, 0.5]), so the
+# annotation becomes Tuple[float, float] — no behaviour change.
 set -euo pipefail
 DST=/home/paperspace/logs/ovbench/src/lerf_kerrj_db08d57; BIN=/home/paperspace/logs/ovbench/bin
 rm -rf $DST; mkdir -p $DST
@@ -19,5 +22,13 @@ new = ("        if 'dino' in model_type:\n            # ovbench: torch.hub fetch
        "            assert model_type == 'dino_vits8', model_type\n            from lerf.data.utils.dino_timm import DinoViTS8\n            model = DinoViTS8()\n")
 assert s.count(old) == 1, 'patch anchor not found'; open(p, 'w').write(s.replace(old, new)); print('[setup] dino_extractor.create_model patched')
 EOF
-diff -u <(git -C /home/paperspace/code/lerf-scene-graph show db08d57:lerf/data/utils/dino_extractor.py) $DST/lerf/data/utils/dino_extractor.py > $DST/OVBENCH_PATCH.diff || true
+python3 - $DST/lerf/data/lerf_datamanager.py <<'EOF'
+import sys
+p = sys.argv[1]; s = open(p).read(); old = '    patch_tile_size_range: Tuple[int, int] = (0.05, 0.5)'
+assert s.count(old) == 1, 'patch anchor not found'; open(p, 'w').write(s.replace(old, '    patch_tile_size_range: Tuple[float, float] = (0.05, 0.5)  # ovbench: annotation fixed for tyro (field unused)')); print('[setup] lerf_datamanager annotation patched')
+EOF
+: > $DST/OVBENCH_PATCH.diff
+for f in lerf/data/utils/dino_extractor.py lerf/data/lerf_datamanager.py; do
+  diff -u --strip-trailing-cr <(git -C /home/paperspace/code/lerf-scene-graph show db08d57:$f) $DST/$f >> $DST/OVBENCH_PATCH.diff || true
+done
 echo "[setup] $DST ready; patch recorded in $DST/OVBENCH_PATCH.diff"
