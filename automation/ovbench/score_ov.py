@@ -80,12 +80,12 @@ def med(v): return float(np.median(v)) if len(v) else None
 def summ(L, key):
     return {'n': len(L), 'median_rel05' if key == 'rel05' else 'median_' + key: med([l[key]['iou'] for l in L])} if L else {'n': 0}
 S_ = {}
-for kind, q in (('CAT', 'tree'), ('CAT', 'orange'), ('TREE', None), ('RIGHT', None), ('ROW', None)):
+for kind, q, name in (('CAT', 'tree', 'cat_tree'), ('CAT', 'orange', 'cat_orange'), ('TREE', None, 'tree_address'), ('RIGHT', None, 'tree_on_the_right'), ('ROW', None, 'row_address')):
     for split in ('eval', 'train'):
-        L = [l for l in lines if l['kind'] == kind and l['split'] == split and l['gt_frac'] >= MIN_FRAC and (q is None or l['query'] == q)]
-        k = (q or kind.lower()) + '/' + split
-        S_[k] = {'n_heads': len(L), 'median_iou_rel05': med([l['rel05']['iou'] for l in L]), 'median_iou_oracle': med([l['oracle']['iou'] for l in L]),
-                 'median_iou_argmax05': med([l['argmax05']['iou'] for l in L if 'argmax05' in l]) if kind in ('TREE', 'ROW', 'RIGHT') else None}
+        L0 = [l for l in lines if l['kind'] == kind and l['split'] == split and (q is None or l['query'] == q)]; L = [l for l in L0 if l['gt_frac'] >= MIN_FRAC]
+        S_[name + '/' + split] = {'n_heads': len(L), 'median_iou_rel05': med([l['rel05']['iou'] for l in L]), 'median_iou_oracle': med([l['oracle']['iou'] for l in L]),
+                 'median_iou_argmax05': med([l['argmax05']['iou'] for l in L if 'argmax05' in l]) if kind in ('TREE', 'ROW', 'RIGHT') else None,
+                 'n_heads_unfiltered': len(L0), 'median_iou_rel05_unfiltered': med([l['rel05']['iou'] for l in L0]), 'median_iou_oracle_unfiltered': med([l['oracle']['iou'] for l in L0])}
 high = {}; checks = []
 for tag, fn in (('v3', 'protocol_v3.jsonl'), ('v3vf', 'protocol_v3vf.jsonl'), ('cat_v3', 'protocol_cat_v3.jsonl'), ('cat_v3vf', 'protocol_cat_v3vf.jsonl')):
     if not (N / fn).exists(): continue
@@ -97,15 +97,16 @@ for tag, fn in (('v3', 'protocol_v3.jsonl'), ('v3vf', 'protocol_v3vf.jsonl'), ('
     for split in ('eval', 'train'):
         if tag.startswith('cat'):
             for w in ('tree', 'orange'):
-                L = [l for l in HL if l['split'] == split and l.get('word') == w and l['gt_frac'] >= MIN_FRAC]
-                high[f'{tag}:{w}/{split}'] = {'n_heads': len(L), 'median_iou_rel05': med([l['rel05']['iou'] for l in L]), 'median_iou_oracle': med([l['oracle']['iou'] for l in L]), 'median_iou_argmax': med([l['argmax']['iou'] for l in L])}
+                L0 = [l for l in HL if l['split'] == split and l.get('word') == w]; L = [l for l in L0 if l['gt_frac'] >= MIN_FRAC]
+                high[f'{tag}:cat_{w}/{split}'] = {'n_heads': len(L), 'median_iou_rel05': med([l['rel05']['iou'] for l in L]), 'median_iou_oracle': med([l['oracle']['iou'] for l in L]), 'median_iou_argmax': med([l['argmax']['iou'] for l in L]),
+                                                  'n_heads_unfiltered': len(L0), 'median_iou_rel05_unfiltered': med([l['rel05']['iou'] for l in L0]), 'median_iou_oracle_unfiltered': med([l['oracle']['iou'] for l in L0])}
         else:
             for kind in ('TREE', 'ROW'):
                 L = [l for l in HL if l['split'] == split and l['kind'] == kind and l['gt_frac'] >= MIN_FRAC]
-                high[f'{tag}:{kind.lower()}/{split}'] = {'n_heads': len(L), 'median_iou_oracle': med([l['oracle']['iou'] for l in L]), 'median_iou_argmax': med([l['argmax']['iou'] for l in L])}
+                high[f'{tag}:{kind.lower()}_address/{split}'] = {'n_heads': len(L), 'median_iou_oracle': med([l['oracle']['iou'] for l in L]), 'median_iou_argmax': med([l['argmax']['iou'] for l in L])}
             R = [l for l in lines if l['kind'] == 'RIGHT' and l['split'] == split and l['gt_frac'] >= MIN_FRAC]; hk = {(l['frame'], l['id']): l for l in HL if l['kind'] == 'TREE'}
             Lr = [hk[(l['frame'], l['id'])] for l in R if (l['frame'], l['id']) in hk]
-            high[f'{tag}:right_tree_by_address/{split}'] = {'n_heads': len(Lr), 'median_iou_oracle': med([l['oracle']['iou'] for l in Lr]), 'median_iou_argmax': med([l['argmax']['iou'] for l in Lr])}
+            high[f'{tag}:tree_on_the_right_by_address/{split}'] = {'n_heads': len(Lr), 'median_iou_oracle': med([l['oracle']['iou'] for l in Lr]), 'median_iou_argmax': med([l['argmax']['iou'] for l in Lr])}
 out = {'method': a.method, 'cell': a.cell, 'identity': str(N), 'frames': len({l['frame'] for l in lines}), 'min_frac': MIN_FRAC, 'thr_grid': '57 values (protocol_table.THR)',
        'gt_check': {'heads_compared': len(checks), 'equal': int(sum(checks))}, 'method_medians': S_, 'high_medians': high}
 json.dump(out, open(a.summary, 'w'), indent=1)
