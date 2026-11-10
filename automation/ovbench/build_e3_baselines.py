@@ -26,7 +26,21 @@ LERF_DEV = [
     'Rendered at HiGH\'s 640 x 360 (render_scale 0.5) through the run\'s dataparser transform; held-out cameras from the chunk COLMAP model '
     '(self-checked against a workspace camera).',
     'Relevancy: LERF\'s own (30 scales 0-1.5, best scale per query per image, min over the canonical negatives object/things/stuff/texture). '
-    'No void: every pixel is scored (HiGH marks void pixels).']
+    'No void: every pixel is scored (HiGH marks void pixels).',
+    'Query list per cell = "tree", "orange", "the tree on the right", "tree <id>" for the cell\'s 38-ish scene-graph trees and "row <id>" for their rows '
+    '(includes "row -1", the scene graph\'s unassigned row); every query is rendered in one pass, LERF picks each one\'s scale separately.']
+CELL_DEV = {
+    '05_13D_Jackal_1_0': ['Trained in two segments of one run: steps 0-25000 (8,867 s wall, including the CLIP/DINO cache load and nerfstudio\'s '
+                          'periodic full-resolution eval images), then stopped at nerfstudio\'s step-25000 all-image evaluation (71 val images at '
+                          '1280 x 720 through the torch backend, eval only) and resumed from the step-24000 checkpoint (model, optimisers, schedulers) '
+                          'to 30000 with that evaluation disabled (2,086 s). Steps 24000-25000 were therefore trained twice from the same state; '
+                          'the final weights are step 29999.',
+                          'The CLIP pyramid / DINO caches were built once (attempt 1, ~6 min for 294 views) and reused by the final run.',
+                          'Four earlier attempts failed or were stopped (tyro annotations; nerfstudio 1.1 datamanager.to; tiny-cuda-nn missing; '
+                          'memory (eval chunk 32768 grew the trainer to 27 GB on the shared card); root disk filled at step 2030 by this session\'s '
+                          'own checkpoint copy) — logs in attempt_logs/.'],
+    '_default': ['Eval-only schedule: --steps-per-eval-image and --steps-per-eval-all-images set beyond the run (no periodic full-resolution '
+                 'eval renders); the trained weights do not depend on them.']}
 SKIPPED = {
     'openhype': {'ran': False, 'reason': 'OpenHype extracts its mask hierarchy only with Semantic-SAM (openhype_preprocess/img_seg_model.py supports '
                  'model_type "semantic_sam" alone). Semantic-SAM, its detectron2-xyz dependency and the SwinL checkpoint swinl_only_sam_many2many.pth '
@@ -53,7 +67,7 @@ for m in ('lerf',):
         if cfg.exists():
             mm = re.search(r'^max_num_iterations: (\d+)', open(cfg).read(), re.M); steps = int(mm.group(1)) if mm else None
         ck = sorted(glob.glob(str(cfg.parent / 'nerfstudio_models' / '*.ckpt')))
-        cells[W.name] = {'train_seconds': tt.get('seconds'), 'train_rc': tt.get('rc'), 'max_num_iterations': steps, 'final_checkpoint': os.path.basename(ck[-1]) if ck else None,
+        cells[W.name] = {'train_time': tt, 'cell_deviations': CELL_DEV.get(W.name, CELL_DEV['_default']), 'max_num_iterations': steps, 'final_checkpoint': os.path.basename(ck[-1]) if ck else None,
                          'train_views': None, 'frames_scored': s['frames'], 'gt_check': s['gt_check'], 'method_medians': s['method_medians'], 'high_medians': s['high_medians']}
         q = W / 'queries.json'
         if q.exists(): cells[W.name]['n_queries'] = len(json.load(open(q))['queries'])
