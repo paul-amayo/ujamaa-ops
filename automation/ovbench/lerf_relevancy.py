@@ -20,12 +20,15 @@ ap = argparse.ArgumentParser()
 ap.add_argument('--config', required=True); ap.add_argument('--identity', required=True); ap.add_argument('--out-dir', required=True)
 ap.add_argument('--queries-json', required=True, help='{"queries": [...]} — the same list for every frame (cell vocabulary)')
 ap.add_argument('--frames', nargs='*', default=None, help='default: <identity>/frames.json'); ap.add_argument('--render-scale', type=float, default=0.5)
+ap.add_argument('--chunk', type=int, default=4096, help='rays per forward pass (memory only: LERF takes the best scale per query as the max over ALL chunks, so the maps do not depend on it)')
 ap.add_argument('--colmap-sparse', default='', help="default: parsed from <identity>/split_names.json 'source'")
 a = ap.parse_args()
 N = Path(a.identity); frames = a.frames or json.load(open(N / 'frames.json'))['frames']
 Q = json.load(open(a.queries_json))['queries']
 sparse = a.colmap_sparse or json.load(open(N / 'split_names.json'))['source'].split(' ')[0]
-_, pipe, _, step = eval_setup(Path(a.config), test_mode='test'); model = pipe.model; model.eval(); dev = model.device
+def _cb(cfg):   # memory only: the datamanager's image cache (unused by a render) held as uint8 instead of float32
+    cfg.pipeline.datamanager.cache_images_type = 'uint8'; return cfg
+_, pipe, _, step = eval_setup(Path(a.config), eval_num_rays_per_chunk=a.chunk, test_mode='test', update_config_callback=_cb); model = pipe.model; model.eval(); dev = model.device
 dm = pipe.datamanager; cams = {}
 for ds in (dm.train_dataset, dm.eval_dataset):
     for i, p in enumerate(ds.image_filenames):

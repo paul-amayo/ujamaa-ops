@@ -10,7 +10,7 @@ B=/home/paperspace/logs/ovbench; BIN=$B/bin; SRC=$B/src/lerf_kerrj_db08d57; CELL
 W=$B/$METHOD/$CELL; mkdir -p $W /mnt/shared/ovbench/$METHOD/$CELL/outputs; [ -e $W/outputs ] || ln -s /mnt/shared/ovbench/$METHOD/$CELL/outputs $W/outputs
 cd $W || exit 1
 PIXI="/home/paperspace/.pixi/bin/pixi run --manifest-path /home/paperspace/code/nerf_new/pixi.toml"
-PIX() { $PIXI bash -c "cd $W && export PYTHONPATH=$SRC && $*"; }   # pixi env, but in the cell dir (LERF caches are cwd-relative)
+PIX() { $PIXI bash -c "cd $W && export PYTHONPATH=$SRC PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True && $*"; }   # pixi env, but in the cell dir (LERF caches are cwd-relative)
 export PYTHONPATH=$SRC
 INV=$(grep "\"survey\": \"$SURVEY\"" /home/paperspace/logs/identity_inventory_v2.jsonl | grep "\"chunk\": \"$CHUNK\"" | head -1)
 ID=$(echo "$INV" | python3 -c 'import json,sys;print(json.load(sys.stdin)["identity"])'); SUP=$(echo "$INV" | python3 -c 'import json,sys;print(json.load(sys.stdin)["sup"])')
@@ -36,7 +36,8 @@ EOF
 RUN=$W/outputs/ovbench_$CELL/$METHOD/run
 if [ ! -f $W/TRAIN_DONE ]; then
   T0=$(date +%s)
-  PIX ns-train $METHOD --data $DATA --output-dir $W/outputs --experiment-name ovbench_$CELL --timestamp run --vis tensorboard > $W/train.log 2>&1
+  PIX ns-train $METHOD --data $DATA --output-dir $W/outputs --experiment-name ovbench_$CELL --timestamp run --vis tensorboard \
+      --pipeline.model.eval-num-rays-per-chunk 8192 > $W/train.log 2>&1
   RC=$?; T1=$(date +%s); echo "{\"rc\": $RC, \"seconds\": $((T1-T0)), \"start\": $T0}" > $W/train_time.json
   [ $RC -eq 0 ] && ls $RUN/nerfstudio_models/*.ckpt >/dev/null 2>&1 && touch $W/TRAIN_DONE || { echo "[train] failed rc=$RC"; tail -30 $W/train.log; exit 1; }
 fi
