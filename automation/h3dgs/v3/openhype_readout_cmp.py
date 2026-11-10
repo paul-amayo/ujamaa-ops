@@ -23,7 +23,7 @@ from PIL import Image
 ap = argparse.ArgumentParser(); ap.add_argument('--out', required=True); ap.add_argument('--json', default=''); ap.add_argument('--maps', default='/tmp/d36void/maps'); a = ap.parse_args()
 N = Path('/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/v3/chunk_1_0/identity'); dev = 'cuda'
 SUP = Path('/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/h3dgs_native/chunk_1_0_sam3/supervision/trees_only')
-H = json.load(open('/home/paperspace/data/citrus_all/05_13D_Jackal/prod/bateleur/scene_graph/marker_hierarchy.json')); row_of = {int(o['id']): int(o['row_id']) for o in H['objects']}; ft = {int(f['id']): int(f['tree_id']) for f in H['fruits']}
+H = json.load(open('/home/paperspace/data/citrus_all/05_13D_Jackal/prod/bateleur/scene_graph/marker_hierarchy.json')); row_of = {int(o['id']): int(o['row_id']) for o in H['objects']}; fruit_tree = {int(f['id']): int(f['tree_id']) for f in H['fruits']}
 hyper = build_hyper_embedder(json.load(open(N / 'features_B.bin.json'))['embedder'], dev); curv = hyper.curv.exp()
 bank = np.load(N / 'text_bank.npz', allow_pickle=True); words = list(bank['words']); emb = torch.tensor(bank['emb'], dtype=torch.float32, device=dev); emb = emb / emb.norm(dim=-1, keepdim=True)
 meta = json.loads(str(bank['meta'])); wt = {int(k): w for k, w in meta['word_table'].items()}; rw = {int(k): w for k, w in meta['row_words'].items()}
@@ -67,7 +67,7 @@ for fr in ('kf_002411', 'kf_000024'):
                        ('row 4', emb[words.index(rw[4])], np.isin(I, [t for t, r in row_of.items() if r == 4]), ((amr == 4) & ~vv).reshape(Hh, Ww))]
         else:
             fw = [k for k in sorted(wt) if wt[k] in words]; Qa = emb[[words.index(wt[k]) for k in fw]]; sa = containment(ft, Qa); ama = np.array(fw)[sa.argmax(1).cpu().numpy()]; vv = void.cpu().numpy()
-            f5 = [10000 + f for f, t in ft.items() if t == 5 and 10000 + f in wt]; q5 = emb[[words.index(wt[k]) for k in f5]].mean(0); q5 = q5 / q5.norm()
+            f5 = [10000 + f for f, t in fruit_tree.items() if t == 5 and 10000 + f in wt]; q5 = emb[[words.index(wt[k]) for k in f5]].mean(0); q5 = q5 / q5.norm()
             queries = [('fruit of tree 5', q5, np.isin(I, f5), (np.isin(ama, f5) & ~vv).reshape(Hh, Ww))]
         for name, q, truth, cmask in queries:
             om, oheat = openhype_mask(ft, q, Hh, Ww, void); res[name] = dict(openhype_iou=iou(om, truth), containment_iou=iou(cmask, truth), frame=fr)
