@@ -18,7 +18,7 @@ import argparse, json, subprocess
 from pathlib import Path
 import numpy as np
 ap = argparse.ArgumentParser(); ap.add_argument('paper'); ap.add_argument('--work', default='/tmp/d36hero'); ap.add_argument('--stage', default='both', choices=['both', '1', '2'])
-ap.add_argument('--figdir', default='/home/paperspace/code/aru_sil_core/src/docs/paper/figures')
+ap.add_argument('--figdir', default='/home/paperspace/code/aru_sil_core/src/docs/paper/figures'); ap.add_argument('--heat-t', default='', help='HiGH heat npz for kf_002411 (default <figdir>/hero_heat_05_1_0_kf002411.npz; draft 36.6: the void-free render)'); ap.add_argument('--heat-f', default='', help='HiGH heat npz for kf_000024')
 ap.add_argument('--left', default='clip', choices=['clip', 'euclid', 'lite'], help='left column: CLIP on the frame\'s SAM 3 masks (mask_clip_relevancy.py; default), the Euclidean twin of the embedder (argmax dumps from euclid.sh) or the lifted CLIP field'); a = ap.parse_args()
 P = Path(a.paper); W = Path(a.work); W.mkdir(parents=True, exist_ok=True); FD = Path(a.figdir)
 N = Path('/home/paperspace/data/citrus_all/05_13D_Jackal/experimental/v3/chunk_1_0/identity'); A = N / 'arms'; V3 = Path('/home/paperspace/code/automation/h3dgs/v3'); NS = '/home/paperspace/code/nerf_new'
@@ -61,7 +61,7 @@ def idmap(frame, shape): return np.array(Image.fromarray(np.array(Image.open(SUP
 def iou(p, t): p = p.astype(bool); t = t.astype(bool); u = (p | t).sum(); return float((p & t).sum() / u) if u else 0.0
 def argmax_mask(z, words, targets):
     heats = np.stack([z[w] for w in words]); am = heats.argmax(0); return np.isin(am, [words.index(t) for t in targets]) & ~z['void'].astype(bool), am
-zt = np.load(FD / 'hero_heat_05_1_0_kf002411.npz', allow_pickle=True); zf = np.load(FD / 'hero_fruit_05_1_0_kf_000024.npz', allow_pickle=True)
+zt = np.load(a.heat_t or FD / 'hero_heat_05_1_0_kf002411.npz', allow_pickle=True); zf = np.load(a.heat_f or FD / 'hero_fruit_05_1_0_kf_000024.npz', allow_pickle=True)
 wt = {int(k): w for k, w in json.loads(str(zt['meta']))['word_table'].items()}; rw = {int(k): w for k, w in json.loads(str(zt['meta']))['row_words'].items()}
 lt = np.load(W / 'lite_kf_002411.npz', allow_pickle=True); lf = np.load(W / 'lite_kf_000024.npz', allow_pickle=True)
 TREE_WORDS = [wt[t] for t in sorted(wt) if t < 10000 and wt[t] in zt.files]; ROW_WORDS = [rw[r] for r in sorted(rw) if rw[r] in zt.files]
