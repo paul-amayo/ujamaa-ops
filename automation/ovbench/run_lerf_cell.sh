@@ -11,6 +11,7 @@ B=/home/paperspace/logs/ovbench; BIN=$B/bin; SRC=$B/src/lerf_kerrj_db08d57; CELL
 # this run and three voidfree cells): $B/$METHOD/$CELL is a symlink
 W=$B/$METHOD/$CELL; mkdir -p /mnt/shared/ovbench/$METHOD/$CELL/outputs $B/$METHOD; [ -e $W ] || ln -s /mnt/shared/ovbench/$METHOD/$CELL $W
 cd $W || exit 1
+export TMPDIR=/mnt/shared/ovbench/tmp; mkdir -p $TMPDIR   # pixi activation / python temp files off the full root fs
 PIXI="/home/paperspace/.pixi/bin/pixi run --manifest-path /home/paperspace/code/nerf_new/pixi.toml"
 PIX() { $PIXI bash -c "cd $W && export PYTHONPATH=$SRC PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True && $*"; }   # pixi env, but in the cell dir (LERF caches are cwd-relative)
 export PYTHONPATH=$SRC
