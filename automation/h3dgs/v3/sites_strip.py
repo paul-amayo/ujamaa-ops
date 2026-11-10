@@ -63,8 +63,7 @@ def zoom_box(u, H, W, asp, pad=0.12, box=None):
     if box is None: ys, xs = np.where(u); box = (ys.min(), ys.max() + 1, xs.min(), xs.max() + 1)
     y0, y1, x0, x1 = box; m = pad * max(y1 - y0, x1 - x0) + 8
     h = max(y1 - y0 + 2 * m, (x1 - x0 + 2 * m) / asp); w = h * asp
-    if w > W: w = W; h = W / asp
-    if h > H: h = H; w = min(W, H * asp)
+    k = min(1.0, W / w, H / h); w, h = w * k, h * k   # keep the aspect: shrink to the frame (an IoU panel then asserts nothing scored was cut)
     cy, cx = (y0 + y1) / 2, (x0 + x1) / 2; Y0 = int(round(np.clip(cy - h / 2, 0, H - h))); X0 = int(round(np.clip(cx - w / 2, 0, W - w)))
     return Y0, Y0 + int(round(h)), X0, X0 + int(round(w))
 NP = len(picks) + (1 if a.fuji and a.layout == 'zoom' else 0); nc = a.cols or NP; nr = -(-NP // nc)
@@ -111,13 +110,14 @@ if a.layout == 'zoom' and a.fuji:   # the fruit level: our apples of one tree vs
     y0, y1, x0, x1 = zoom_box(None, H, W, a.aspect, box=(int(np.floor((v - rp).min())), int(np.ceil((v + rp).max())), int(np.floor((u - rp).min())), int(np.ceil((u + rp).max()))))
     ax.imshow(np.clip(background(ph_)[y0:y1, x0:x1], 0, 1), interpolation='lanczos', aspect='auto', extent=(x0 - 0.5, x1 - 0.5, y1 - 0.5, y0 - 0.5)); ax.set_xticks([]); ax.set_yticks([])
     for s in ax.spines.values(): s.set_linewidth(0.4); s.set_color('0.3')
+    inc = (u >= x0) & (u < x1) & (v >= y0) & (v < y1); shown = [int((cls[inc] == c).sum()) for c in range(3)]   # a panel-aspect crop of a 3:2 photo can trim the top / bottom
     for o in np.argsort(-rp):   # far (small) discs last so they are not hidden under near ones
         ax.add_patch(Circle((u[o], v[o]), rp[o], facecolor=(*(TP, FP, FN)[cls[o]], 0.8), edgecolor='white', lw=0.35))
     ax.set_xlim(x0 - 0.5, x1 - 0.5); ax.set_ylim(y1 - 0.5, y0 - 0.5); tn = int(str(fz['tree']).replace('Tree', ''))
     ax.text(0.0, 1.0 + 0.25 * tb / ph, f'Fuji-SfM: apples of tree {tn}', fontsize=a.fs, va='bottom', ha='left', transform=ax.transAxes)
     ax.text(0.985, 0.035, f"F1 {float(fz['f1']):.2f}", fontsize=a.fs, color='white', weight='bold', va='bottom', ha='right', transform=ax.transAxes, bbox=dict(facecolor='black', alpha=0.65, pad=1.5, lw=0))
     print(f"[sites] Fuji-SfM {fz['tree']} on {fz['side']}/{fz['image']} ({fz['source']}): per-tree F1 {float(fz['f1']):.3f} from {fz['counts']} (P {float(fz['p']):.3f}, R {float(fz['r']):.3f}); "
-          f"drawn TP/FP/FN {fz['drawn'].tolist()} of {fz['total'].tolist()} (the rest hidden from this view or out of frame); crop {[y0, y1, x0, x1]}")
+          f"drawn TP/FP/FN {fz['drawn'].tolist()} of {fz['total'].tolist()} (the rest hidden from this view or out of frame), {shown} inside the panel's crop; crop {[y0, y1, x0, x1]}")
 if a.layout == 'zoom':
     from matplotlib.patches import Patch
     fig.legend([Patch(facecolor=c, edgecolor='none') for c in (TP, FP, FN)], ['true positive', 'false positive', 'miss'], loc='lower center', bbox_to_anchor=(0.5, 0.0), ncol=3,
