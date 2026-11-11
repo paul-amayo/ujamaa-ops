@@ -13,6 +13,7 @@ from PIL import Image
 sys.path.insert(0, '/home/paperspace/code/aru_sil_core/src/scripts')
 from high_splat_hierarchy_accuracy import build_hyper_embedder
 ap = argparse.ArgumentParser(); ap.add_argument('fig'); ap.add_argument('--surveys', required=True); ap.add_argument('--tol', type=float, default=0.03)
+ap.add_argument('--chosen', default='', help="survey=cell/frame/id,... : the head chosen by eye from sites_contact_sheet.py (11-11, Paul: Klapmuts Dec #8, Lindendhof #1)")
 ap.add_argument('--render', default='/home/paperspace/logs/sec4/bin/splat_feature_render.py'); ap.add_argument('--tmp', default='/mnt/shared/voidfree_tmp/sites'); a = ap.parse_args()
 FIG = Path(a.fig) / 'sites'; FIG.mkdir(parents=True, exist_ok=True); dev = 'cuda'
 inv = [json.loads(l) for l in open('/home/paperspace/logs/identity_inventory_v2.jsonl')]; SUP = {c['identity']: Path(c['sup']) for c in inv}
@@ -35,6 +36,10 @@ for sv in a.surveys.split(','):
             h = json.loads(l)
             if h.get('split') == 'eval' and h.get('kind') == 'TREE' and h.get('gt_frac', 0) >= 0.03: h['identity'] = c['identity']; heads.append(h)
     med = float(np.median([h['argmax']['iou'] for h in heads])); cands = [h for h in heads if abs(h['argmax']['iou'] - med) <= a.tol]
+    CH = dict(kv.split('=') for kv in a.chosen.split(',') if kv)
+    if sv in CH:
+        cell, fr, hid = CH[sv].split('/'); cands = [h for h in heads if Path(h['identity']).parent.name == cell and h['frame'] == fr and int(h['id']) == int(hid)]
+        assert len(cands) == 1, f'{sv}: chosen head {CH[sv]} not among the held-out heads >= 3 %'
     by = defaultdict(set)
     for h in cands: by[h['identity']].add(h['frame'])
     scored = []
@@ -58,5 +63,5 @@ for sv in a.surveys.split(','):
     void = (f.norm(dim=-1) < 0.5).view(Hh, Ww).cpu().numpy()
     np.savez_compressed(FIG / f'{sv}_all.npz', rgb=z['rgb'], void=void, meta=json.dumps(meta), **{w: S[:, i].view(Hh, Ww).cpu().numpy().astype(np.float16) for i, w in enumerate(tw)})
     picks.append({'survey': sv, 'identity': h['identity'], 'frame': h['frame'], 'word': h['word'], 'id': int(h['id']), 'argmax_iou': h['argmax']['iou'], 'median': med, 'n': len(heads),
-                  'gt_frac': h['gt_frac'], 'readout': 'tangent_vf', 'rule': f'within {a.tol} of the median, sharpest render (Laplacian variance in the head box)', 'sharpness': sh, 'n_candidates': len(cands)})
+                  'gt_frac': h['gt_frac'], 'readout': 'tangent_vf', 'rule': (f'chosen by eye from the typical candidates (contact sheet): {CH[sv]}' if sv in CH else f'within {a.tol} of the median, sharpest render (Laplacian variance in the head box)'), 'sharpness': sh, 'n_candidates': len(cands)})
 json.dump(picks, open(FIG / 'picks.json', 'w'), indent=1); print('[pick] wrote', FIG / 'picks.json')
