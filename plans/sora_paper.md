@@ -21,72 +21,52 @@ productivity, data, safety and access, not to substitute labour** (low wages, hi
 monthly earnings < US$500), which is why drones in agriculture and environmental monitoring lead rather than manipulators
 in manufacturing.
 
-## 2. Why a paper cannot be the report re-typeset
+## 2. Decision (Paul, 11 Nov): RA-M, the report as an 8-page survey, no new analysis
 
-- The report is published with a DOI. Both venues require original content; a paper that repeats it is redundant
-  publication. The paper must cite it, say what is new, and add **peer-reviewable method and new analysis**.
-- Most counts rest on a desk-research coding with no stated codebook, inclusion rule or inter-coder agreement, and two
-  bibliometric venues. Reviewers will ask for exactly these.
-- Several numbers are dated or thin for a journal (drone rules from 2017; ~80 cases with uneven country coverage that
-  the report itself calls a finding).
+"Go with RA-M, I don't think we need to find new stuff; RA-M is the 8-pager of this, it's within the interest, and the report
+isn't peer reviewed." The paper is the peer-reviewed, condensed form of SORA 2026 for the RAS readership. What this requires:
+- **Disclosure, not novelty:** the proposal, the manuscript and the cover letter cite the report (doi above) as the source
+  and say it was not peer reviewed; IEEE accepts prior non-peer-reviewed reports when disclosed.
+- **Rights:** the report is CC BY-SA; AfROB as licensor can grant IEEE the rights only if AfROB/Ken are authors. Third-party
+  photographs (Zipline, Spot, da Vinci, company images) need fresh permission or replacement; charts redrawn from the report's
+  data are the authors' own.
+- **Method stated as the report's**: mixed methods, ~80 use cases from desk research, 15 interviews in seven countries,
+  ICRA/IROS 2014–2025 bibliometrics; limits stated as the report states them (uneven coverage is itself a finding).
 
-## 3. The claim
+## 3. The message
 
-**Robotics in Africa is adopted where it fills gaps rather than replaces labour, and the research system that should serve
-that adoption is linked outward, not inward.** Two measured halves:
-1. *Adoption:* coded on an explicit motivation scheme (labour substitution / productivity gap / data gap / safety / access
-   and logistics), the African use cases are dominated by gap-filling, with drones as the platform that makes it affordable;
-   contrasted with the global picture (IFR industrial stock, drone use-mix in the US).
-2. *Research:* African robotics output at the field's main venues is small, concentrated in three institutions, and
-   collaborates mostly outside the continent (one intra-African co-authorship in a decade), so the knowledge base is not
-   organised around the adoption pattern in half 1.
-The consequence the paper argues: the research agenda and the collaboration structure should follow the gap-filling pattern
-(field robotics, drones, agricultural and environmental autonomy, teleoperation services) and be built regionally.
+Robotics in Africa is already here, but it does not look like robotics elsewhere: it is adopted to fill gaps in productivity,
+data, safety and access rather than to replace labour, which is why drones in agriculture and environmental monitoring lead;
+the people, research and policy that should sustain it exist but are fragmented and linked outward more than across the
+continent. For the RAS community this sets an agenda: field and aerial robotics, agricultural and environmental autonomy,
+teleoperation services, and regional collaboration.
 
-## 4. Venue (one, with a cheap check of the other)
+## 4. Venue: IEEE Robotics and Automation Magazine (decided)
 
-| | Science Robotics | IEEE Robotics and Automation Magazine |
+Survey/review feature. RA-M welcomes surveys with a critical or subjective viewpoint; submit a **proposal first** (topic's
+timeliness and relevance, authors' qualifications). Feature limits: ≤ 9 magazine pages, ~4,500 words, ≤ 10 figures, ≤ 10
+equations; the 20-reference cap does not apply to surveys; US$250 per page beyond 9. At least one high-quality colour photo.
+
+## 5. Outline (~4,500 words)
+
+| Section | Content from the report | Words |
 |---|---|---|
-| Form that fits | Review (editor-commissioned in practice) or a short Viewpoint/Focus on the thesis | Survey/review feature (RA-M "welcomes" these; a critical or subjective viewpoint is allowed) |
-| Length | to confirm on the AAAS author page (403 to our fetch) | ≤ 9 magazine pages, ~4,500 words, ≤ 10 figures; survey exempt from the 20-reference cap; US$250/page beyond 9 |
-| Entry | presubmission inquiry / editor interest | proposal first: timeliness, relevance, authors' qualifications |
-| Audience | broad science; wants one claim of general interest | IEEE RAS, which already backs the Robotics in Africa forums (ICAR 2023, IROS 2024, ICRA 2025) and ICRA@40 Africa |
-| Risk | high: an ecosystem survey is unusual; commissioned Reviews are by invitation | moderate: good fit, data-rich figures, community support |
+| Introduction | why robotics, why now; the polarised debate (leapfrog vs ill-suited); the gap-filling observation; the four-pillar lens | 600 |
+| How the evidence was gathered | mixed methods, sources, interview pool (15, seven countries), bibliometric window; limits | 350 |
+| Where robots meet the field | ~80 use cases: platform mix (aerial 41.8 %), sector mix (agriculture, environmental monitoring), regional signatures, private-led (71 %), integrator-led (> 60 %); why: wages vs capital cost, robot density ~10 per 10,000; agriculture, health logistics, mining in brief | 1,100 |
+| The people | programmes (~60 universities, > 85 % mechatronics, mostly undergraduate), competitions (> 95 % of countries), educator and vocational gaps, low-cost kits | 700 |
+| The knowledge base | ~60 labs (70 % universities); ICRA/IROS 2014–2025: 71 papers, three institutions dominate, ~two-thirds with external co-authors, one intra-African co-authorship; R&D spend; community initiatives (Robotics in Africa forums, ICRA@40 Africa, Deep Learning Indaba) | 900 |
+| Policy and regulation | 13 AI frameworks, robotics under the AI umbrella, drones as the entry point (Malawi corridor), data protection 65 %; lessons from emerging adopters | 450 |
+| What the robotics community can do | the report's recommendations narrowed to what RAS members, labs and companies can act on: regional collaboration, field-robotics research agendas, teleoperation, kits and competitions, venues in Africa | 400 |
 
-**Recommendation: RA-M survey feature as the paper, with a one-paragraph Science Robotics inquiry sent first.** The inquiry
-costs a day; if the editors want a Review, the same analysis serves it and RA-M waits; if not (the likely outcome), the RA-M
-proposal goes the same week. Do not split the content into two papers: one dataset, one claim, one venue.
+## 6. Figures (RA-M, ≤ 10; redrawn from the report's data unless noted)
 
-## 5. What has to be added (the paper's own contribution)
-
-1. **Use-case dataset v2 with a codebook.** Inclusion rule (deployed or piloted in an African country, 2015–2026, robot by
-   the ISO definition the report uses), fields as the report's plus *motivation* (section 3), deployment status, local vs
-   imported hardware, scale. Two coders on a 30 % overlap, Cohen's kappa reported; update the ~80 cases to 2026 and add the
-   under-covered regions (Central Africa) by a stated search. Release on Zenodo (CC BY-SA, as the report).
-2. **Bibliometrics over the field, not two conferences.** ICRA, IROS, RSS, CoRL, RA-L, T-RO, IJRR, Science Robotics, plus
-   field venues (JFR, Computers and Electronics in Agriculture for agricultural robotics) and the regional ones (RobMech,
-   AFRICON), 2014–2025, from OpenAlex/DBLP with affiliation-country matching; per-country and per-institution output,
-   co-authorship network (intra-African vs external), topic mix of African papers against the adoption mix of half 1.
-   **Comparators:** Latin America and South/South-East Asia, so "small and outward-linked" is measured against peers, not
-   only against the global total.
-3. **The two halves joined.** The figure the paper exists for: the sector/platform mix of adoption (left) beside the topic
-   mix of African research (right), with the mismatch (or match) read off.
-4. **Talent and policy compressed** to what bears on the claim (programme levels, competition reach, AI-policy coverage);
-   update the 2017 drone-regulation figure to 2026 (ICAO/national CAA registers).
-5. **Interviews**: 15 already done; cite them as the report's and use them only for interpretation, unless ethics clearance
-   covers re-use (check with AfROB / Olin).
-
-## 6. Figures (RA-M, ≤ 10)
-
-1. Map: use cases by country with platform glyphs (from report Fig 2.1, rebuilt from dataset v2).
-2. Adoption motivation × sector (the gap-filling result).
-3. Platform mix in Africa vs global references (IFR, drone use-mix).
-4. Research output over time by country and institution concentration (Lorenz curve).
-5. Co-authorship network: African institutions, their external partners, intra-African links.
-6. Adoption mix vs research topic mix (the joined figure).
-7. Talent pipeline: programme levels and competition reach.
-8. Policy coverage map (AI frameworks, drone rules 2026, data protection).
-9. One photograph of a deployed system (RA-M asks for a high-quality colour photo), with permission.
+1. Map of use cases by country (report Fig 2.1). 2. Platform mix and sector mix (Figs 2.2–2.3). 3. Sector × region signatures
+(Fig 2.5). 4. Robot density by region (Fig 2.8, IFR). 5. Educational attainment and programme levels (Figs 3.2, 3.6).
+6. Competition reach (Fig 3.3). 7. Research labs map and organisation type (Figs 4.1–4.2). 8. ICRA/IROS institutional
+output and the collaboration matrix (Figs 4.5, 4.7). 9. R&D spend vs labs (Fig 4.6). 10. One colour photograph of an
+African-built system in the field, with permission (e.g. a local agricultural drone or ground robot from the report's
+spotlights).
 
 ## 7. Authorship and permissions (decide before writing)
 
@@ -97,21 +77,16 @@ proposal goes the same week. Do not split the content into two papers: one datas
 - No conflict with the UJAMAA papers; UCT's ARU appears in the report's lab spotlight, so the paper must describe its own
   authors' institutions in the same neutral tone as any other.
 
-## 8. Schedule (fits around Azalai 3 Dec and JIRS)
+## 8. Schedule (fits around Azalai 3 Dec and JIRS Feb 2027)
 
-| When | Work | Who |
-|---|---|---|
-| by 20 Nov | Paul + Ken: authorship, venue, go; Science Robotics inquiry sent | Paul, Ken |
-| 20 Nov–18 Dec | codebook written and frozen; bibliometric pipeline (OpenAlex) built and run; dataset v2 search | agents + research contributors |
-| Dec | RA-M proposal (1–2 pages) if Science Robotics declines | Paul |
-| Jan 2027 | double coding, kappa; comparators; the joined figure | contributors + agents |
-| Feb 2027 | draft (how-paul-writes; RA-M house style), figures | Paul, Ken |
-| Mar 2027 | submit; dataset v2 on Zenodo | |
-JIRS (Feb 2027) and Azalai Stage 2 (Feb–Apr 2027) take priority; this paper uses contributors' time, not the A100.
+| When | Work |
+|---|---|
+| by 20 Nov | Paul + Ken: authorship and go; proposal sent to RA-M (`plans/sora_ram_proposal.md`) |
+| on acceptance of the proposal | data tables for the redrawn figures from AfROB; photograph permissions |
+| Dec–Jan | draft in Paul's voice from the report, figures redrawn |
+| Jan–Feb 2027 | Ken's pass, AfROB contributors' check, submission |
 
 ## 9. Decisions for Paul
 
-1. Venue: RA-M survey, with a Science Robotics inquiry first (recommended), or Science Robotics only.
-2. Authorship with Ken Mbanisi and AfROB, and who builds dataset v2.
-3. Whether the paper carries the claim of section 3 (recommended) or stays a descriptive survey.
-4. Interview re-use: needs the ethics position of the original study.
+1. Authorship with Ken Mbanisi (AfROB): who leads and corresponds; which research contributors are authors.
+2. Whether RA-M's US$250/page beyond 9 is acceptable if the figures need a tenth page.
