@@ -37,7 +37,7 @@ fig.tight_layout(h_pad=0.9, rect=(0, 0, 1, 0.9)); fig.savefig(F / 'fig_arms.pdf'
 fig, axes = plt.subplots(1, 2, figsize=(3.5, 2.7), sharey=True); arms = [T_HIGH, 'zero3000_tvf', 'refine3000_tvf', 'projvote_tvf']; names = ['census seed', 'learned from zero', 'seed + refine', 'projection vote']
 rows = {(r['survey'], r['level']): r for r in e2b['arms']['rows']}; SV7 = CIT + ['apr_2026_zed', 'nov_2025_a300']; XT7 = ['01', '02', '03', '04', '05', 'K.Apr', 'Lind.']
 for ax, lvl, title in zip(axes, ['TREE', 'ROW'], ['trees', 'rows by address']):
-    for i, a_ in enumerate(arms): ax.bar(np.arange(len(SV7)) + (i - 1.5) * 0.2, [rows[(sv, lvl)]['values'].get(a_, np.nan) for sv in SV7], 0.2, color=COLS[i], label=names[i])
+    for i, a_ in enumerate(arms): ax.bar(np.arange(len(SV7)) + (i - 1.5) * 0.2, [rows.get((sv, lvl), {'values': {}})['values'].get(a_, np.nan) for sv in SV7], 0.2, color=COLS[i], label=names[i])
     ax.set_xticks(np.arange(len(SV7))); ax.set_xticklabels(XT7, fontsize=6.5, rotation=45, ha='right'); ax.set_title(title, fontsize=9); ax.set_ylim(0, 1); ax.set_xlabel('survey', fontsize=8)
 axes[0].set_ylabel('held-out IoU (median)', fontsize=8); fig.legend(*axes[0].get_legend_handles_labels(), fontsize=7, ncol=2, frameon=False, loc='lower center', bbox_to_anchor=(0.5, 0.0))
 fig.tight_layout(rect=(0, 0.15, 1, 1)); fig.savefig(F / 'fig_seeding.pdf'); print('fig_seeding')
