@@ -21,6 +21,14 @@ with torch.no_grad():
     z = np.load(a.maps); f = torch.tensor(z['features'], dtype=torch.float32, device=dev); H, W, D = f.shape; f = f.reshape(-1, D)
     S = (f / f.norm(dim=-1, keepdim=True).clamp(min=1e-6)) @ g.T
 void = (f.norm(dim=-1) < 0.5).view(H, W).cpu().numpy()
+# the letter's argmax at the queried level for fruit: presence where the pixel sits at fruit depth (radius >= midpoint of the tree and fruit
+# address radii), as argmax_eval --fruit-rule level
+wt = {int(k): w for k, w in json.loads(str(old['meta']))['word_table'].items()}; rad = g.new_tensor(0)
+with torch.no_grad():
+    gr = hyper.encode_features(raw, project=False).norm(dim=-1)
+tr = [gr[i].item() for i, w in enumerate(words) if any(wt.get(k) == w for k in wt if k < 10000)]; fr_ = [gr[i].item() for i, w in enumerate(words) if any(wt.get(k) == w for k in wt if k >= 10000)]
+R_MID = 0.5 * (float(np.median(tr)) + float(np.median(fr_))) if tr and fr_ else float('inf')
+deep = (f.norm(dim=-1) >= R_MID).view(H, W).cpu().numpy()
 out = {w: S[:, i].view(H, W).cpu().numpy().astype(np.float32) for i, w in enumerate(words)}
-np.savez_compressed(a.out, rgb=z['rgb'] if 'rgb' in z.files else old['rgb'], alpha=old['alpha'], void=void, meta=old['meta'], **out)
-print(f'[hero-tangent] {len(words)} words, {H}x{W}, void {100 * void.mean():.1f} % -> {a.out}')
+np.savez_compressed(a.out, rgb=z['rgb'] if 'rgb' in z.files else old['rgb'], alpha=old['alpha'], void=void, deep=deep, r_mid=R_MID, meta=old['meta'], **out)
+print(f'[hero-tangent] {len(words)} words, {H}x{W}, void {100 * void.mean():.1f} %, fruit depth >= {R_MID:.2f} on {100 * deep.mean():.2f} % -> {a.out}')

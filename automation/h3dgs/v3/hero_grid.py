@@ -73,7 +73,9 @@ F5_IDS = [10000 + f for f, t in fruit_tree.items() if t == 5]; F5 = lambda I: np
 p1, am1 = argmax_mask(zt, TREE_WORDS, TREE_WORDS)                                   # the tree level: every non-void pixel to its tree
 p2, _ = argmax_mask(zt, TREE_WORDS, [wt[36]]); p3, _ = argmax_mask(zt, ROW_WORDS, [rw[4]])
 FW = [w for k, w in sorted(wt.items()) if w in zf.files]; f5w = [wt[k] for k in F5_IDS if k in wt and wt[k] in zf.files]
-p4, _ = argmax_mask(zf, FW, f5w)                                                    # the mixed rule of the letter's fruit panel: argmax over every address
+if 'deep' in zf.files:   # v39: the letter's argmax at the queried level (fruit words only, presence at fruit depth; hero_heat_tangent.py)
+    FW = [w for k, w in sorted(wt.items()) if k >= 10000 and w in zf.files]; p4, _ = argmax_mask(zf, FW, f5w); p4 &= zf['deep'].astype(bool)
+else: p4, _ = argmax_mask(zf, FW, f5w)                                                    # the mixed rule of the letter's fruit panel: argmax over every address
 R = {'tree': dict(lite=iou(lt['tree'] >= 0.5, TREES(ID_TL)), high=iou(p1, TREES(ID_T))),
      'tree 36': dict(lite=iou(lt['the tree on the right'] >= 0.5, ID_TL == 36), high=iou(p2, ID_T == 36)),
      'row 4': dict(lite=iou(lt['row 4'] >= 0.5, ROW4(ID_TL)), high=iou(p3, ROW4(ID_T))),
