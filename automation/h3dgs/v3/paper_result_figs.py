@@ -7,7 +7,9 @@ from pathlib import Path
 import numpy as np
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 P = Path(sys.argv[1]); N = P / 'numbers'; F = P / 'figures'
-e1 = json.load(open(N / 'e1_v3.json')); e2 = json.load(open(N / 'e2_arms.json')); e2b = json.load(open(N / 'e2b_seed.json'))
+# v39 (2026-11-11): the void-free encoder-path readout (tag tangent_vf) and its arms; pre-v39 files kept as e1_v3 / e2_arms / e2b_seed / e3_category
+e1 = json.load(open(N / 'e1_tangent.json')); e2 = json.load(open(N / 'e2_arms_vf.json')); e2b = json.load(open(N / 'e2b_seed_vf.json'))
+T_HIGH = 'tangent_vf'
 SV = ['01_13B_Jackal', '02_13B_Jackal', '03_13B_Jackal', '04_13D_Jackal', '05_13D_Jackal', 'apr_2026_zed', 'dec_2025_ten_rows', 'nov_2025_a300']   # the phone walks are not part of the letter (draft 36)
 SHORT = {'01_13B_Jackal': 'citrus 01', '02_13B_Jackal': 'citrus 02', '03_13B_Jackal': 'citrus 03', '04_13D_Jackal': 'citrus 04', '05_13D_Jackal': 'citrus 05', 'apr_2026_zed': 'Klapmuts Apr',
          'dec_2025_ten_rows': 'Klapmuts Dec', 'nov_2025_a300': 'Lindendhof', 'IMG_7993_s0': 'cabbage', 'IMG_7990_s1': 'pepper'}
@@ -23,7 +25,7 @@ ax.axvspan(-0.5, 0.5, color='0.92', zorder=0); ax.text(0, 0.45, 'not counted', f
 ax.set_xticks(x); ax.set_xticklabels(['< 0.2 %', '0.2–1 %', '1–3 %', '≥ 3 %']); ax.set_xlabel('object size, fraction of the frame'); ax.set_ylabel('held-out tree IoU (median)'); ax.set_ylim(0, 1); ax.set_xlim(-0.5, 3.3)
 ax.legend(fontsize=7, ncol=2, frameon=False, loc='upper left', bbox_to_anchor=(0.12, 1.0)); fig.tight_layout(); fig.savefig(F / 'fig_iou_by_size.pdf'); print('fig_iou_by_size')
 # E2: the geometry arms (column width, three stacked panels, 8 pt text at print size; draft 36)
-fig, axes = plt.subplots(3, 1, figsize=(3.5, 3.9), sharex=True); arms = ['v3', 'hyper_own', 'flat96', 'euclid']; names = ['HiGH, containment', 'own point only', 'flat 3×32-d', 'Euclidean 32-d']
+fig, axes = plt.subplots(3, 1, figsize=(3.5, 3.9), sharex=True); arms = [T_HIGH, 'hyper_own_vf', 'flat96_vf', 'euclid_vf']; names = ['HiGH, containment', 'own point only', 'flat 3×32-d', 'Euclidean 32-d']
 rows = {(r['survey'], r['level']): r for r in e2['arms']['rows']}
 for ax, lvl, title in zip(axes, ['TREE', 'ROW', 'nesting'], ['trees', 'rows by address', 'nesting consistency']):
     for i, a_ in enumerate(arms): ax.bar(np.arange(5) + (i - 1.5) * 0.2, [rows[(sv, lvl)]['values'].get(a_, np.nan) for sv in CIT], 0.2, color=COLS[i], label=names[i])
@@ -32,7 +34,7 @@ axes[-1].set_xticks(np.arange(5)); axes[-1].set_xticklabels(XT); axes[-1].set_xl
 fig.legend(*axes[0].get_legend_handles_labels(), fontsize=8, ncol=2, frameon=False, loc='upper center', bbox_to_anchor=(0.5, 1.0), columnspacing=1.0, handlelength=1.2)
 fig.tight_layout(h_pad=0.9, rect=(0, 0, 1, 0.9)); fig.savefig(F / 'fig_arms.pdf'); print('fig_arms')
 # E2b: the seeding arms
-fig, axes = plt.subplots(1, 2, figsize=(3.5, 2.7), sharey=True); arms = ['v3', 'zero3000', 'refine3000', 'projvote']; names = ['census seed', 'learned from zero', 'seed + refine', 'projection vote']
+fig, axes = plt.subplots(1, 2, figsize=(3.5, 2.7), sharey=True); arms = [T_HIGH, 'zero3000_tvf', 'refine3000_tvf', 'projvote_tvf']; names = ['census seed', 'learned from zero', 'seed + refine', 'projection vote']
 rows = {(r['survey'], r['level']): r for r in e2b['arms']['rows']}; SV7 = CIT + ['apr_2026_zed', 'nov_2025_a300']; XT7 = ['01', '02', '03', '04', '05', 'K.Apr', 'Lind.']
 for ax, lvl, title in zip(axes, ['TREE', 'ROW'], ['trees', 'rows by address']):
     for i, a_ in enumerate(arms): ax.bar(np.arange(len(SV7)) + (i - 1.5) * 0.2, [rows[(sv, lvl)]['values'].get(a_, np.nan) for sv in SV7], 0.2, color=COLS[i], label=names[i])
@@ -50,7 +52,7 @@ axes[-1].set_xticks(x); axes[-1].set_xticklabels([SHORT[sv] for sv in SV2], font
 fig.supylabel('held-out IoU (median)', fontsize=9, x=0.02); fig.legend(*axes[0].get_legend_handles_labels(), fontsize=8, ncol=3, frameon=False, loc='upper center', bbox_to_anchor=(0.55, 1.0))
 fig.tight_layout(h_pad=0.9, rect=(0.02, 0, 1, 0.93)); fig.savefig(F / 'fig_e1_survey.pdf'); print('fig_e1_survey')
 # E3: held-out "tree" IoU at relevancy >= 0.5 (bars) and at the oracle threshold (markers), three fields
-e3 = json.load(open(N / 'e3_category.json')); rows = {(r['survey'], r['level']): r for r in e3['arms']['rows']}; tags = ['cat_v3', 'cat_flat96', 'cat_lite']; names = ['HiGH', 'flat 3×32', 'lifted CLIP']
+e3 = json.load(open(N / 'e3_category_vf.json')); rows = {(r['survey'], r['level']): r for r in e3['arms']['rows']}; tags = ['cat_walk_vf', 'cat_lite']; names = ['HiGH', 'lifted CLIP']
 fig, ax = plt.subplots(figsize=(3.5, 2.1))
 for i, t in enumerate(tags):
     ax.bar(np.arange(5) + (i - 1) * 0.27, [rows[(sv, 'CAT:tree')]['rel05_values'][t] for sv in CIT], 0.27, color=[COLS[0], COLS[2], COLS[3]][i], label=names[i])
