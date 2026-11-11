@@ -42,14 +42,14 @@ for ax, lvl, title in zip(axes, ['TREE', 'ROW'], ['trees', 'rows by address']):
 axes[0].set_ylabel('held-out IoU (median)', fontsize=8); fig.legend(*axes[0].get_legend_handles_labels(), fontsize=7, ncol=2, frameon=False, loc='lower center', bbox_to_anchor=(0.5, 0.0))
 fig.tight_layout(rect=(0, 0.15, 1, 1)); fig.savefig(F / 'fig_seeding.pdf'); print('fig_seeding')
 
-# E1 per survey: held-out tree and row IoU, argmax as bars, oracle and fixed thresholds as markers (column width, two stacked panels, 8 pt; draft 36)
+# E1 per survey: held-out tree and row IoU, argmax as bars, fixed threshold as markers (v39: the oracle dropped from the letter) (column width, two stacked panels, 8 pt; draft 36)
 fig, axes = plt.subplots(2, 1, figsize=(3.5, 3.5), sharex=True); SV2 = [sv for sv in SV if sv in e1['surveys']]
 for ax, lvl, title in zip(axes, ['TREE', 'ROW'], ['trees', 'rows']):
     x = np.arange(len(SV2)); g = lambda k: [e1['surveys'][sv].get(lvl, {}).get('eval', {}).get(k, np.nan) for sv in SV2]
-    ax.bar(x, g('argmax_med'), 0.62, color=COLS[0], label='argmax'); ax.plot(x, g('oracle_med'), 'v', color=COLS[2], ms=5, label='oracle'); ax.plot(x, g('fixed_cell_med'), '_', color='k', ms=10, mew=1.4, label='fixed')
+    ax.bar(x, g('argmax_med'), 0.62, color=COLS[0], label='argmax'); ax.plot(x, g('fixed_cell_med'), '_', color='k', ms=10, mew=1.4, label='fixed')
     ax.set_ylim(0, 1); ax.set_yticks([0, 0.5, 1]); ax.tick_params(labelsize=8); ax.text(0.01, 1.0, title, fontsize=9, transform=ax.transAxes, va='bottom', ha='left')
 axes[-1].set_xticks(x); axes[-1].set_xticklabels([SHORT[sv] for sv in SV2], fontsize=8, rotation=40, ha='right', rotation_mode='anchor')
-fig.supylabel('held-out IoU (median)', fontsize=9, x=0.02); fig.legend(*axes[0].get_legend_handles_labels(), fontsize=8, ncol=3, frameon=False, loc='upper center', bbox_to_anchor=(0.55, 1.0))
+fig.supylabel('held-out IoU (median)', fontsize=9, x=0.02); fig.legend(*axes[0].get_legend_handles_labels(), fontsize=8, ncol=2, frameon=False, loc='upper center', bbox_to_anchor=(0.55, 1.0))
 fig.tight_layout(h_pad=0.9, rect=(0.02, 0, 1, 0.93)); fig.savefig(F / 'fig_e1_survey.pdf'); print('fig_e1_survey')
 # E3: held-out "tree" IoU at relevancy >= 0.5 (bars) and at the oracle threshold (markers), three fields
 e3 = json.load(open(N / 'e3_category_vf.json')); rows = {(r['survey'], r['level']): r for r in e3['arms']['rows']}; tags = ['cat_walk_vf', 'cat_lite']; names = ['HiGH', 'lifted CLIP']

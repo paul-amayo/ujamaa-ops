@@ -13,7 +13,7 @@ sys.path.insert(0, '/home/paperspace/code/aru_sil_core/src/scripts')
 from high_splat_hierarchy_accuracy import build_hyper_embedder
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
 ap = argparse.ArgumentParser(); ap.add_argument('--survey', required=True); ap.add_argument('--out', required=True); ap.add_argument('--tol', type=float, default=0.03)
-ap.add_argument('--max', type=int, default=24); ap.add_argument('--tmp', default='/mnt/shared/voidfree_tmp/sites'); ap.add_argument('--render', default='/home/paperspace/logs/sec4/bin/splat_feature_render.py'); a = ap.parse_args()
+ap.add_argument('--max', type=int, default=24); ap.add_argument('--edges', default='lr', help='frame edges the plant may not touch: l r t b (tall trees leave the top or bottom)'); ap.add_argument('--tmp', default='/mnt/shared/voidfree_tmp/sites'); ap.add_argument('--render', default='/home/paperspace/logs/sec4/bin/splat_feature_render.py'); a = ap.parse_args()
 dev = 'cuda'; inv = [json.loads(l) for l in open('/home/paperspace/logs/identity_inventory_v2.jsonl')]; SUP = {c['identity']: Path(c['sup']) for c in inv}
 heads = []
 for c in [c for c in inv if c['survey'] == a.survey]:
@@ -33,7 +33,8 @@ for h in cands:
     z = np.load(f_npz); rgb = z['rgb']; H, W = rgb.shape[:2]
     t = np.array(Image.fromarray(np.array(Image.open(SUP[str(N)] / h['frame']))).resize((W, H), Image.NEAREST)) == int(h['id'])
     ys, xs = np.where(t)
-    if ys.min() <= 1 or xs.min() <= 1 or ys.max() >= H - 2 or xs.max() >= W - 2: continue   # plant cut by the frame
+    cut = {'l': xs.min() <= 1, 'r': xs.max() >= W - 2, 't': ys.min() <= 1, 'b': ys.max() >= H - 2}
+    if any(cut[e] for e in a.edges): continue   # plant cut by a forbidden frame edge
     if str(N) not in emb:
         hyper = build_hyper_embedder(json.load(open(N / 'features_B.bin.json'))['embedder'], dev); bank = np.load(N / 'text_bank.npz', allow_pickle=True); words = list(bank['words'])
         wt = {int(k): w for k, w in json.loads(str(bank['meta']))['word_table'].items()}; ids = [k for k in sorted(wt) if k < 10000 and wt[k] in words]
@@ -50,5 +51,5 @@ for h in cands:
 nc = 4; nr = max(1, -(-len(tiles) // nc)); fig, axes = plt.subplots(nr, nc, figsize=(16, 3.2 * nr)); axes = np.atleast_1d(axes).ravel()
 for ax in axes: ax.axis('off')
 for ax, (im, lab) in zip(axes, tiles): ax.imshow(np.clip(im, 0, 1)); ax.set_title(lab, fontsize=9, loc='left')
-fig.suptitle(f'{a.survey}: {len(cands)} held-out heads within {a.tol} of the median IoU {med:.3f} ({len(heads)} heads >= 3 %); {len(tiles)} shown with the plant wholly in frame', fontsize=11)
+fig.suptitle(f'{a.survey}: {len(cands)} held-out heads within {a.tol} of the median IoU {med:.3f} ({len(heads)} heads >= 3 %); {len(tiles)} shown, plant not cut at edges {a.edges}', fontsize=11)
 fig.tight_layout(rect=(0, 0, 1, 0.97)); fig.savefig(a.out, dpi=70); print(f'[sheet] {a.survey}: median {med:.3f}, {len(cands)} candidates, {len(tiles)} tiles -> {a.out}')
