@@ -25,7 +25,7 @@ ax.axvspan(-0.5, 0.5, color='0.92', zorder=0); ax.text(0, 0.45, 'not counted', f
 ax.set_xticks(x); ax.set_xticklabels(['< 0.2 %', '0.2–1 %', '1–3 %', '≥ 3 %']); ax.set_xlabel('object size, fraction of the frame'); ax.set_ylabel('held-out tree IoU (median)'); ax.set_ylim(0, 1); ax.set_xlim(-0.5, 3.3)
 ax.legend(fontsize=7, ncol=2, frameon=False, loc='upper left', bbox_to_anchor=(0.12, 1.0)); fig.tight_layout(); fig.savefig(F / 'fig_iou_by_size.pdf'); print('fig_iou_by_size')
 # E2: the geometry arms (column width, three stacked panels, 8 pt text at print size; draft 36)
-fig, axes = plt.subplots(3, 1, figsize=(3.5, 3.9), sharex=True); arms = [T_HIGH, 'hyper_own_vf', 'flat96_vf', 'euclid_vf']; names = ['HiGH, containment', 'own point only', 'flat 3×32-d', 'Euclidean 32-d']
+fig, axes = plt.subplots(3, 1, figsize=(3.5, 3.9), sharex=True); arms = [T_HIGH, 'hyper_own_vf', 'flat96_vf', 'euclid_vf']; names = ['HiGH, containment', 'own feature only', 'flat 3×32-d', 'Euclidean 32-d']
 rows = {(r['survey'], r['level']): r for r in e2['arms']['rows']}
 for ax, lvl, title in zip(axes, ['TREE', 'ROW', 'nesting'], ['trees', 'rows by address', 'nesting consistency']):
     for i, a_ in enumerate(arms): ax.bar(np.arange(5) + (i - 1.5) * 0.2, [rows[(sv, lvl)]['values'].get(a_, np.nan) for sv in CIT], 0.2, color=COLS[i], label=names[i])
