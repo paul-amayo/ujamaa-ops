@@ -45,7 +45,7 @@ def live(k):
         ms = []
         for rle in ENT.get(k, []): rr = dict(rle); rr['counts'] = rr['counts'].encode(); ms.append(mu.decode(rr).astype(bool))
         if len(cache) > 300: cache.clear()
-        M = np.stack(ms) if ms else np.zeros((0, 720, 1280), bool); cache[k] = (M, M[:, ::2, ::2], M[:, ::2, ::2].reshape(len(M), -1).sum(1), {})
+        M = np.stack(ms) if ms else np.zeros((0, 720, 1280), bool); cache[k] = (M, M[:, ::2, ::2], M[:, ::2, ::2].sum((1, 2)), {})   # A100 fix 20:36 UTC: reshape(0, -1) failed on a stop frame with no mask
     return cache[k]
 def name_of(k, i):
     """the revisit census bag m* is named as: of the bags projecting inside mask i at keyframe k, the nearest to the camera"""

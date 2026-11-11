@@ -1,0 +1,2734 @@
+{
+ "label": "SENSITIVITY, NOT ADOPTED (JS-2, 12 Nov 2026): the verdicts of record are the as-registered column",
+ "plot": "198",
+ "created_utc": "2026-11-11 19:49:29",
+ "script": "/mnt/shared2/must-c/plot198/census/sensitivity_20261112/bin/mustc_sens.py",
+ "design": "automation/mustc_sensitivity/DESIGN_20261112.md",
+ "record_created": {
+  "ct": "2026-11-11 16:46:51",
+  "led": "2026-11-11 16:46:51",
+  "gr": "2026-11-11 16:46:51"
+ },
+ "rows": [
+  "T1 reprojection <= 0.70 px",
+  "T2 check (soil residual, yaw)",
+  "T2 stops entering the ledger",
+  "T2 scale flag |s-1| > 1 %",
+  "T3 association resolvable at the 9.5 cm cap",
+  "T3 laser ceiling, same clause (beside)",
+  "T3 growth threshold g <= 8 cm",
+  "T3 flag on growth from 230601",
+  "T4 230601 splat recall >= 0.9 x laser recall",
+  "T4 230613 splat recall >= 0.9 x laser recall",
+  "T5 SB8_020623 removal clause (restated 4 Nov)",
+  "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)",
+  "T5 SB8_020623 specificity clause, splat",
+  "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)",
+  "T5 SB8_020623 overall",
+  "T6 230601->230613",
+  "T6 230613->230621",
+  "T6 230621->230628",
+  "T6 long span 230601->230621 (beside; not a T6 interval)",
+  "T7 soil clause (after the M2d offset is removed; by construction)",
+  "T7 plant clause"
+ ],
+ "columns": {
+  "as registered": {
+   "_settings": {
+    "exclusion": "registration_ok",
+    "stops_entering": [
+     "230601_pos00",
+     "230601_pos01",
+     "230601_pos02",
+     "230601_pos03",
+     "230613_pos00",
+     "230613_pos01",
+     "230613_pos02",
+     "230613_pos03",
+     "230621_pos00",
+     "230621_pos01",
+     "230621_pos02",
+     "230621_pos03",
+     "230628_pos04",
+     "230628_pos05"
+    ],
+    "r_assoc_m": 0.08748315002782564,
+    "g_m": 0.03220425210893153,
+    "g_laser_m": 0.028084319829503095,
+    "method": "b",
+    "items_applied": [],
+    "r_assoc_source": "plot 198 noise_floor.json T3_adopted['230613'].r_assoc_m",
+    "g_source": "plot 198 noise_floor.json T3_adopted['230613'].g_m"
+   },
+   "T1 reprojection <= 0.70 px": {
+    "verdict": "pass",
+    "basis": "18 of 18 stops, 0.43-0.58 px",
+    "n_pass": 18,
+    "n": 18
+   },
+   "T2 check (soil residual, yaw)": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 stops pass the T2 check; 7 of 18 also pass the plant-pattern check",
+    "n_pass": 14,
+    "n": 18,
+    "n_also_plant_pattern": 7
+   },
+   "T2 stops entering the ledger": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 under 'registration_ok'; per day 230601 4, 230613 4, 230621 4, 230628 2",
+    "n": 14
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "verdict": "11 of 18 flagged",
+    "basis": "days with every stop flagged: 230621, 230628",
+    "n_flag": 11,
+    "n": 18
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "verdict": "not resolvable",
+    "basis": "230613 same-day position p95 8.7 cm at 0.10 m (n 12), 12.1 cm at 0.15 m (n 18), 16.2 cm at 0.20 m (n 23); cap 9.5 cm; read at 0.15 and 0.20 m together",
+    "verdict_text": "not resolvable at the 0.095 m cap: uncensored same-day position p95 0.121 m (radius 0.15, n 18) and 0.162 m (radius 0.20, n 23) both exceed it"
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "verdict": "not resolvable",
+    "basis": "laser two-scanner same-day position p95 9.7 cm at the 0.15 m cap (n 145, pooled 230601/13/21)"
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "verdict": "pass",
+    "basis": "230613 same-day |dh95| p95 3.2 cm (n 12); g in force 3.2 cm"
+   },
+   "T3 flag on growth from 230601": {
+    "verdict": "flagged",
+    "basis": "230601 own same-day |dh95| p95 10.3 cm (n 5) against 8 cm"
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "verdict": "fail",
+    "provisional": true,
+    "ratio": 0.6779661016949152,
+    "basis": "ratio 0.678: splat 40 of 63 marks, laser 59 of 63; PROVISIONAL marks"
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "verdict": "pass",
+    "provisional": true,
+    "ratio": 0.9047619047619048,
+    "basis": "ratio 0.905: splat 38 of 60 marks, laser 42 of 60; PROVISIONAL marks"
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "verdict": "not met",
+    "value": 4,
+    "bar": 8,
+    "n_laser_inside_in_splat_region_k1": 9,
+    "basis": "splat calls 4 removed of the 5 plants both sensors record inside; bar = the laser's 8 of 10; truth 10 removed; the later day's stops entering image 9 of the 10 laser plants inside"
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "verdict": "not met",
+    "basis": "4 against 9",
+    "value": 4
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "verdict": "met",
+    "basis": "9 of 28 unchanged on-row plants called removed; bound 20.1 at the same-day rate 0.72 (56 of 78)"
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "verdict": "not met",
+    "basis": "15 of 43 unchanged on-row plants called removed; bound 5.7 at the same-day rate 0.13 (10 of 76)"
+   },
+   "T5 SB8_020623 overall": {
+    "verdict": "fail",
+    "basis": "removal clause not met (4 against 8), specificity clause met; detection-limited (fewer plants recorded by both than the bar)",
+    "verdict_text": "fail; only 5 of the 10 laser plants inside are recorded by the splat too, so the bar of 8 cannot be met by construction: a detection (T4) limit, not a change-rule failure"
+   },
+   "T6 230601->230613": {
+    "verdict": "pass",
+    "basis": "n 12 plants paired in both sensors; median |dh splat - dh laser| 1.3 cm against g 3.2 cm; calls agree 12 of 12 (need 0.9); flagged by the T3 clause on 230601",
+    "n": 12,
+    "median_m": 0.013452110035899523,
+    "agreement": 1.0
+   },
+   "T6 230613->230621": {
+    "verdict": "fail",
+    "basis": "n 9 plants paired in both sensors; median |dh splat - dh laser| 3.0 cm (0.4 cm with the M2e bound subtracted) against g 3.2 cm; calls agree 7 of 9 (need 0.9)",
+    "n": 9,
+    "median_m": 0.00420469805249013,
+    "agreement": 0.7777777777777778
+   },
+   "T6 230621->230628": {
+    "verdict": "not evaluable",
+    "basis": "no laser within 13 days of the 230628 stops (design: against UAV2 only)"
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "verdict": "pass",
+    "basis": "n 10; median 4.7 cm (2.2 cm with the bound); calls agree 9 of 10"
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "verdict": "12 of 12",
+    "basis": "soil bias within the M2d soil floor on 12 of 12 stops"
+   },
+   "T7 plant clause": {
+    "verdict": "fail",
+    "basis": "0 of 12 stops with p95 <= 2 g = 6.4 cm; per-plant |dh95| p95 7.4-14.9 cm; median difference -8.6 to -2.8 cm; 2 entering stop(s) without a laser date not evaluable",
+    "n_pass": 0,
+    "n": 12,
+    "two_g_m": 0.06440850421786307
+   }
+  },
+  "item 30": {
+   "_settings": {
+    "exclusion": "registration_ok",
+    "stops_entering": [
+     "230601_pos00",
+     "230601_pos01",
+     "230601_pos02",
+     "230601_pos03",
+     "230613_pos00",
+     "230613_pos01",
+     "230613_pos02",
+     "230613_pos03",
+     "230621_pos00",
+     "230621_pos01",
+     "230621_pos02",
+     "230621_pos03",
+     "230628_pos04",
+     "230628_pos05"
+    ],
+    "r_assoc_m": 0.08748315002782564,
+    "g_m": 0.03220425210893153,
+    "g_laser_m": 0.028084319829503095,
+    "method": "b",
+    "items_applied": [
+     "30"
+    ],
+    "r_assoc_source": "plot 198 noise_floor.json T3_adopted['230613'].r_assoc_m",
+    "g_source": "plot 198 noise_floor.json T3_adopted['230613'].g_m"
+   },
+   "T1 reprojection <= 0.70 px": {
+    "verdict": "pass",
+    "basis": "18 of 18 stops, 0.43-0.58 px",
+    "n_pass": 18,
+    "n": 18
+   },
+   "T2 check (soil residual, yaw)": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 stops pass the T2 check; 7 of 18 also pass the plant-pattern check",
+    "n_pass": 14,
+    "n": 18,
+    "n_also_plant_pattern": 7
+   },
+   "T2 stops entering the ledger": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 under 'registration_ok'; per day 230601 4, 230613 4, 230621 4, 230628 2",
+    "n": 14
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "verdict": "11 of 18 flagged",
+    "basis": "days with every stop flagged: 230621, 230628",
+    "n_flag": 11,
+    "n": 18
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "verdict": "not resolvable",
+    "basis": "230613 same-day position p95 8.7 cm at 0.10 m (n 12), 12.1 cm at 0.15 m (n 18), 16.2 cm at 0.20 m (n 23); cap 9.5 cm; read at 0.15 and 0.20 m together",
+    "verdict_text": "not resolvable at the 0.095 m cap: uncensored same-day position p95 0.121 m (radius 0.15, n 18) and 0.162 m (radius 0.20, n 23) both exceed it"
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "verdict": "not resolvable",
+    "basis": "laser two-scanner same-day position p95 9.7 cm at the 0.15 m cap (n 145, pooled 230601/13/21)"
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "verdict": "pass",
+    "basis": "230613 same-day |dh95| p95 3.2 cm (n 12); g in force 3.2 cm"
+   },
+   "T3 flag on growth from 230601": {
+    "verdict": "flagged",
+    "basis": "230601 own same-day |dh95| p95 10.3 cm (n 5) against 8 cm"
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "verdict": "fail",
+    "provisional": true,
+    "ratio": 0.6779661016949152,
+    "basis": "ratio 0.678: splat 40 of 63 marks, laser 59 of 63; PROVISIONAL marks"
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "verdict": "pass",
+    "provisional": true,
+    "ratio": 0.9047619047619048,
+    "basis": "ratio 0.905: splat 38 of 60 marks, laser 42 of 60; PROVISIONAL marks"
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "verdict": "not met",
+    "value": 4,
+    "bar": 8,
+    "n_laser_inside_in_splat_region_k1": 9,
+    "basis": "splat calls 4 removed of the 5 plants both sensors record inside; bar = the laser's 8 of 10; truth 10 removed; the later day's stops entering image 9 of the 10 laser plants inside"
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "verdict": "not met",
+    "basis": "4 against 9",
+    "value": 4
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "verdict": "no verdict",
+    "basis": "9 of 28 unchanged on-row plants called removed; bound 20.1 at the same-day rate 0.72 (56 of 78); false-removal rate 0.32 (95 % interval 0.18-0.51), same-day rate interval 0.61-0.81",
+    "item30": {
+     "sensor": "splat",
+     "n_candidates": 28,
+     "n_removed_called": 9,
+     "false_removal_rate": 0.32142857142857145,
+     "false_removal_wilson95": [
+      0.1793324692249496,
+      0.5066115681914238
+     ],
+     "false_removal_clopper_pearson95": [
+      0.15877603788615388,
+      0.5235164067096185
+     ],
+     "same_day_rate": 0.717948717948718,
+     "same_day_counts": {
+      "n_unmatched": 56,
+      "n_in": 78,
+      "n_matched": 11
+     },
+     "bound_as_written": 20.102564102564102,
+     "met_as_written": true,
+     "interval_note": "binomial intervals; the plants share a registration and a row structure, so the true uncertainty is wider",
+     "same_day_wilson95": [
+      0.6096907122939889,
+      0.8057466527032598
+     ],
+     "verdict": "no verdict (same-day rate > 0.5)",
+     "other_reading_rate_is_false_removal_rate": "met"
+    }
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "verdict": "not met",
+    "basis": "15 of 43 unchanged on-row plants called removed; bound 5.7 at the same-day rate 0.13 (10 of 76); false-removal rate 0.35 (95 % interval 0.22-0.50), same-day rate interval 0.07-0.23",
+    "item30": {
+     "sensor": "laser",
+     "n_candidates": 43,
+     "n_removed_called": 15,
+     "false_removal_rate": 0.3488372093023256,
+     "false_removal_wilson95": [
+      0.22418589997352706,
+      0.49828218007147956
+     ],
+     "false_removal_clopper_pearson95": [
+      0.21007815700666987,
+      0.5092663604753611
+     ],
+     "same_day_rate": 0.13236313236313235,
+     "same_day_counts": {
+      "n_unmatched": 10,
+      "n_in": 76,
+      "note": "two scanners pooled (the rate of record is the mean of the two scanners' fractions)"
+     },
+     "bound_as_written": 5.691614691614691,
+     "met_as_written": false,
+     "interval_note": "binomial intervals; the plants share a registration and a row structure, so the true uncertainty is wider",
+     "same_day_wilson95": [
+      0.07306881567918964,
+      0.22554119436880626
+     ],
+     "verdict": "not met",
+     "other_reading_rate_is_false_removal_rate": "not met"
+    }
+   },
+   "T5 SB8_020623 overall": {
+    "verdict": "fail",
+    "basis": "removal clause not met (4 against 8); specificity clause not judged (no verdict); detection-limited (fewer plants recorded by both than the bar)"
+   },
+   "T6 230601->230613": {
+    "verdict": "pass",
+    "basis": "n 12 plants paired in both sensors; median |dh splat - dh laser| 1.3 cm against g 3.2 cm; calls agree 12 of 12 (need 0.9); flagged by the T3 clause on 230601",
+    "n": 12,
+    "median_m": 0.013452110035899523,
+    "agreement": 1.0
+   },
+   "T6 230613->230621": {
+    "verdict": "fail",
+    "basis": "n 9 plants paired in both sensors; median |dh splat - dh laser| 3.0 cm (0.4 cm with the M2e bound subtracted) against g 3.2 cm; calls agree 7 of 9 (need 0.9)",
+    "n": 9,
+    "median_m": 0.00420469805249013,
+    "agreement": 0.7777777777777778
+   },
+   "T6 230621->230628": {
+    "verdict": "not evaluable",
+    "basis": "no laser within 13 days of the 230628 stops (design: against UAV2 only)"
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "verdict": "pass",
+    "basis": "n 10; median 4.7 cm (2.2 cm with the bound); calls agree 9 of 10"
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "verdict": "12 of 12",
+    "basis": "soil bias within the M2d soil floor on 12 of 12 stops"
+   },
+   "T7 plant clause": {
+    "verdict": "fail",
+    "basis": "0 of 12 stops with p95 <= 2 g = 6.4 cm; per-plant |dh95| p95 7.4-14.9 cm; median difference -8.6 to -2.8 cm; 2 entering stop(s) without a laser date not evaluable",
+    "n_pass": 0,
+    "n": 12,
+    "two_g_m": 0.06440850421786307
+   }
+  },
+  "item 31": {
+   "_settings": {
+    "exclusion": "registration_ok",
+    "stops_entering": [
+     "230601_pos00",
+     "230601_pos01",
+     "230601_pos02",
+     "230601_pos03",
+     "230613_pos00",
+     "230613_pos01",
+     "230613_pos02",
+     "230613_pos03",
+     "230621_pos00",
+     "230621_pos01",
+     "230621_pos02",
+     "230621_pos03",
+     "230628_pos04",
+     "230628_pos05"
+    ],
+    "r_assoc_m": 0.08748315002782564,
+    "g_m": 0.03220425210893153,
+    "g_laser_m": 0.028084319829503095,
+    "method": "b",
+    "items_applied": [
+     "31"
+    ],
+    "r_assoc_source": "plot 198 noise_floor.json T3_adopted['230613'].r_assoc_m",
+    "g_source": "plot 198 noise_floor.json T3_adopted['230613'].g_m"
+   },
+   "T1 reprojection <= 0.70 px": {
+    "verdict": "pass",
+    "basis": "18 of 18 stops, 0.43-0.58 px",
+    "n_pass": 18,
+    "n": 18
+   },
+   "T2 check (soil residual, yaw)": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 stops pass the T2 check; 7 of 18 also pass the plant-pattern check",
+    "n_pass": 14,
+    "n": 18,
+    "n_also_plant_pattern": 7
+   },
+   "T2 stops entering the ledger": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 under 'registration_ok'; per day 230601 4, 230613 4, 230621 4, 230628 2",
+    "n": 14
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "verdict": "11 of 18 flagged",
+    "basis": "days with every stop flagged: 230621, 230628",
+    "n_flag": 11,
+    "n": 18
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "verdict": "not resolvable",
+    "basis": "230613 same-day position p95 8.7 cm at 0.10 m (n 12), 12.1 cm at 0.15 m (n 18), 16.2 cm at 0.20 m (n 23); cap 9.5 cm; read at 0.15 and 0.20 m together",
+    "verdict_text": "not resolvable at the 0.095 m cap: uncensored same-day position p95 0.121 m (radius 0.15, n 18) and 0.162 m (radius 0.20, n 23) both exceed it"
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "verdict": "not resolvable",
+    "basis": "laser two-scanner same-day position p95 9.7 cm at the 0.15 m cap (n 145, pooled 230601/13/21)"
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "verdict": "pass",
+    "basis": "230613 same-day |dh95| p95 3.2 cm (n 12); g in force 3.2 cm"
+   },
+   "T3 flag on growth from 230601": {
+    "verdict": "flagged",
+    "basis": "230601 own same-day |dh95| p95 10.3 cm (n 5) against 8 cm"
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "verdict": "fail",
+    "provisional": true,
+    "ratio": 0.6779661016949152,
+    "basis": "ratio 0.678: splat 40 of 63 marks, laser 59 of 63; PROVISIONAL marks"
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "verdict": "pass",
+    "provisional": true,
+    "ratio": 0.9047619047619048,
+    "basis": "ratio 0.905: splat 38 of 60 marks, laser 42 of 60; PROVISIONAL marks"
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "verdict": "not met",
+    "value": 4,
+    "bar": 8,
+    "n_laser_inside_in_splat_region_k1": 9,
+    "basis": "splat calls 4 removed of the 5 plants both sensors record inside; bar = the laser's 8 of 10; truth 10 removed; the later day's stops entering image 9 of the 10 laser plants inside"
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "verdict": "not met",
+    "basis": "4 against 9",
+    "value": 4
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "verdict": "met",
+    "basis": "9 of 28 unchanged on-row plants called removed; bound 20.1 at the same-day rate 0.72 (56 of 78)"
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "verdict": "not met",
+    "basis": "15 of 43 unchanged on-row plants called removed; bound 5.7 at the same-day rate 0.13 (10 of 76)"
+   },
+   "T5 SB8_020623 overall": {
+    "verdict": "fail",
+    "basis": "removal clause not met (4 against 8), specificity clause met; detection-limited (fewer plants recorded by both than the bar)",
+    "verdict_text": "fail; only 5 of the 10 laser plants inside are recorded by the splat too, so the bar of 8 cannot be met by construction: a detection (T4) limit, not a change-rule failure"
+   },
+   "T6 230601->230613": {
+    "verdict": "pass",
+    "basis": "n 12 plants paired in both sensors; median |dh splat - dh laser| 1.3 cm against g 3.2 cm; calls agree 12 of 12 (need 0.9); flagged by the T3 clause on 230601",
+    "n": 12,
+    "median_m": 0.013452110035899523,
+    "agreement": 1.0
+   },
+   "T6 230613->230621": {
+    "verdict": "fail",
+    "basis": "n 9 plants paired in both sensors; median |dh splat - dh laser| 3.0 cm (0.4 cm with the M2e bound subtracted) against g 3.2 cm; calls agree 7 of 9 (need 0.9)",
+    "n": 9,
+    "median_m": 0.00420469805249013,
+    "agreement": 0.7777777777777778
+   },
+   "T6 230621->230628": {
+    "verdict": "not evaluable",
+    "basis": "no laser within 13 days of the 230628 stops (design: against UAV2 only)"
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "verdict": "pass",
+    "basis": "n 10; median 4.7 cm (2.2 cm with the bound); calls agree 9 of 10"
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "verdict": "12 of 12",
+    "basis": "soil bias within the M2d soil floor on 12 of 12 stops"
+   },
+   "T7 plant clause": {
+    "verdict": "fail",
+    "basis": "4 of 12 stops at or below the M2d per-plant floor (230601: 5.7 cm, 230613: 7.5 cm, 230621: 14.4 cm); per-plant |dh95| p95 7.4-14.9 cm; median difference -8.6 to -2.8 cm; 2 entering stop(s) not evaluable",
+    "item31": {
+     "per_stop": {
+      "230601_pos00": {
+       "per_plant_n": 22,
+       "per_plant_absdiff_p95_m": 0.09046940966649117,
+       "per_plant_diff_median_m": -0.07559933026305998,
+       "m2d_pair": "laser_230601_vs_uav1_230602",
+       "m2d_per_plant_abs_diff_p95_m": 0.05742115296836515,
+       "m2d_per_plant_diff_median_m": -0.031225476719413336,
+       "m2d_n_plants": 79,
+       "within_floor": false
+      },
+      "230601_pos01": {
+       "per_plant_n": 18,
+       "per_plant_absdiff_p95_m": 0.1065425286523876,
+       "per_plant_diff_median_m": -0.07663373688752984,
+       "m2d_pair": "laser_230601_vs_uav1_230602",
+       "m2d_per_plant_abs_diff_p95_m": 0.05742115296836515,
+       "m2d_per_plant_diff_median_m": -0.031225476719413336,
+       "m2d_n_plants": 79,
+       "within_floor": false
+      },
+      "230601_pos02": {
+       "per_plant_n": 19,
+       "per_plant_absdiff_p95_m": 0.08847344597129163,
+       "per_plant_diff_median_m": -0.06357718226479392,
+       "m2d_pair": "laser_230601_vs_uav1_230602",
+       "m2d_per_plant_abs_diff_p95_m": 0.05742115296836515,
+       "m2d_per_plant_diff_median_m": -0.031225476719413336,
+       "m2d_n_plants": 79,
+       "within_floor": false
+      },
+      "230601_pos03": {
+       "per_plant_n": 18,
+       "per_plant_absdiff_p95_m": 0.08702132242644467,
+       "per_plant_diff_median_m": -0.07080575811932022,
+       "m2d_pair": "laser_230601_vs_uav1_230602",
+       "m2d_per_plant_abs_diff_p95_m": 0.05742115296836515,
+       "m2d_per_plant_diff_median_m": -0.031225476719413336,
+       "m2d_n_plants": 79,
+       "within_floor": false
+      },
+      "230613_pos00": {
+       "per_plant_n": 14,
+       "per_plant_absdiff_p95_m": 0.0768765830129709,
+       "per_plant_diff_median_m": -0.04251740611310595,
+       "m2d_pair": "laser_230613_vs_uav1_230614",
+       "m2d_per_plant_abs_diff_p95_m": 0.07487809449559676,
+       "m2d_per_plant_diff_median_m": -0.028656989957198675,
+       "m2d_n_plants": 68,
+       "within_floor": false
+      },
+      "230613_pos01": {
+       "per_plant_n": 19,
+       "per_plant_absdiff_p95_m": 0.07427710802161866,
+       "per_plant_diff_median_m": -0.04791306415576457,
+       "m2d_pair": "laser_230613_vs_uav1_230614",
+       "m2d_per_plant_abs_diff_p95_m": 0.07487809449559676,
+       "m2d_per_plant_diff_median_m": -0.028656989957198675,
+       "m2d_n_plants": 68,
+       "within_floor": true
+      },
+      "230613_pos02": {
+       "per_plant_n": 25,
+       "per_plant_absdiff_p95_m": 0.1105845326069584,
+       "per_plant_diff_median_m": -0.06288710843608669,
+       "m2d_pair": "laser_230613_vs_uav1_230614",
+       "m2d_per_plant_abs_diff_p95_m": 0.07487809449559676,
+       "m2d_per_plant_diff_median_m": -0.028656989957198675,
+       "m2d_n_plants": 68,
+       "within_floor": false
+      },
+      "230613_pos03": {
+       "per_plant_n": 20,
+       "per_plant_absdiff_p95_m": 0.10622501691315309,
+       "per_plant_diff_median_m": -0.05727484565439056,
+       "m2d_pair": "laser_230613_vs_uav1_230614",
+       "m2d_per_plant_abs_diff_p95_m": 0.07487809449559676,
+       "m2d_per_plant_diff_median_m": -0.028656989957198675,
+       "m2d_n_plants": 68,
+       "within_floor": false
+      },
+      "230621_pos00": {
+       "per_plant_n": 13,
+       "per_plant_absdiff_p95_m": 0.09324415895946454,
+       "per_plant_diff_median_m": -0.028426366356569588,
+       "m2d_pair": "laser_230621_vs_uav1_230623",
+       "m2d_per_plant_abs_diff_p95_m": 0.14433154453579533,
+       "m2d_per_plant_diff_median_m": -0.05908157324164165,
+       "m2d_n_plants": 76,
+       "within_floor": true
+      },
+      "230621_pos01": {
+       "per_plant_n": 10,
+       "per_plant_absdiff_p95_m": 0.10871582583973234,
+       "per_plant_diff_median_m": -0.06712750139685397,
+       "m2d_pair": "laser_230621_vs_uav1_230623",
+       "m2d_per_plant_abs_diff_p95_m": 0.14433154453579533,
+       "m2d_per_plant_diff_median_m": -0.05908157324164165,
+       "m2d_n_plants": 76,
+       "within_floor": true
+      },
+      "230621_pos02": {
+       "per_plant_n": 11,
+       "per_plant_absdiff_p95_m": 0.14220109734714015,
+       "per_plant_diff_median_m": -0.06506573745238597,
+       "m2d_pair": "laser_230621_vs_uav1_230623",
+       "m2d_per_plant_abs_diff_p95_m": 0.14433154453579533,
+       "m2d_per_plant_diff_median_m": -0.05908157324164165,
+       "m2d_n_plants": 76,
+       "within_floor": true
+      },
+      "230621_pos03": {
+       "per_plant_n": 13,
+       "per_plant_absdiff_p95_m": 0.14866466017245727,
+       "per_plant_diff_median_m": -0.08557581420232907,
+       "m2d_pair": "laser_230621_vs_uav1_230623",
+       "m2d_per_plant_abs_diff_p95_m": 0.14433154453579533,
+       "m2d_per_plant_diff_median_m": -0.05908157324164165,
+       "m2d_n_plants": 76,
+       "within_floor": false
+      }
+     },
+     "n_evaluated": 12,
+     "n_within_floor": 4,
+     "stops_not_evaluable": [
+      "230628_pos04",
+      "230628_pos05"
+     ],
+     "not_evaluable_reason": "no laser date for the stop's rig day (230628), or no M2d pair for the stop's laser date and reference",
+     "floor_source": "own cross_sensor_floor.json",
+     "bias_median_range_m": [
+      -0.08557581420232907,
+      -0.028426366356569588
+     ],
+     "verdict": "fail"
+    }
+   }
+  },
+  "item 32": {
+   "_settings": {
+    "exclusion": "plant_pattern",
+    "stops_entering": [
+     "230601_pos00",
+     "230601_pos01",
+     "230601_pos02",
+     "230601_pos03",
+     "230613_pos03",
+     "230621_pos00",
+     "230621_pos01"
+    ],
+    "r_assoc_m": 0.095,
+    "g_m": 0.028084319829503095,
+    "g_laser_m": 0.028084319829503095,
+    "method": "b",
+    "items_applied": [
+     "32"
+    ],
+    "r_assoc_source": "laser same-day p95 (lmi_assoc same_day_floor pooled cap 0.15), capped at 0.095",
+    "g_source": "laser same-day |dh95| p95 (pooled cap 0.15), capped at 0.08"
+   },
+   "T1 reprojection <= 0.70 px": {
+    "verdict": "pass",
+    "basis": "18 of 18 stops, 0.43-0.58 px",
+    "n_pass": 18,
+    "n": 18
+   },
+   "T2 check (soil residual, yaw)": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 stops pass the T2 check; 7 of 18 also pass the plant-pattern check",
+    "n_pass": 14,
+    "n": 18,
+    "n_also_plant_pattern": 7
+   },
+   "T2 stops entering the ledger": {
+    "verdict": "7 of 18",
+    "basis": "7 of 18 under 'plant_pattern'; per day 230601 4, 230613 1, 230621 2, 230628 0",
+    "n": 7
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "verdict": "11 of 18 flagged",
+    "basis": "days with every stop flagged: 230621, 230628",
+    "n_flag": 11,
+    "n": 18
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "verdict": "undecidable",
+    "basis": "230613: no matched same-day plants (no overlapping pair, no instances in the overlap, or fewer than two stops pass the exclusion rule) (0 matched plants); read at 0.15 and 0.20 m together",
+    "verdict_text": "undecidable (fewer than 5 matched same-day plants at 0.1 m)"
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "verdict": "not resolvable",
+    "basis": "laser two-scanner same-day position p95 9.7 cm at the 0.15 m cap (n 145, pooled 230601/13/21)"
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "verdict": "undecidable",
+    "basis": "230613 same-day floor not measurable under this stop set; g in force 2.8 cm (laser same-day |dh95| p95 (pooled cap 0.15), capped at 0.08)"
+   },
+   "T3 flag on growth from 230601": {
+    "verdict": "flagged",
+    "basis": "230601 own same-day |dh95| p95 10.3 cm (n 5) against 8 cm"
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "verdict": "fail",
+    "provisional": true,
+    "ratio": 0.6666666666666666,
+    "basis": "ratio 0.667: splat 40 of 63 marks, laser 60 of 63; PROVISIONAL marks"
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "verdict": "fail",
+    "provisional": true,
+    "ratio": 0.6666666666666666,
+    "basis": "ratio 0.667: splat 12 of 20 marks, laser 18 of 20; PROVISIONAL marks"
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "verdict": "not met",
+    "value": 0,
+    "bar": 8,
+    "n_laser_inside_in_splat_region_k1": 0,
+    "basis": "splat calls 0 removed of the 5 plants both sensors record inside; bar = the laser's 8 of 10; truth 10 removed; the later day's stops entering image 0 of the 10 laser plants inside (NO COVERAGE of the polygon: not a test of the change rule)"
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "verdict": "not met",
+    "basis": "0 against 9",
+    "value": 0
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "verdict": "not evaluable",
+    "basis": "7 of 14 unchanged on-row plants called removed; same-day rate not measurable"
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "verdict": "not met",
+    "basis": "13 of 43 unchanged on-row plants called removed; bound 5.7 at the same-day rate 0.13 (10 of 76)"
+   },
+   "T5 SB8_020623 overall": {
+    "verdict": "fail",
+    "basis": "removal clause not met (0 against 8), specificity clause not evaluable; detection-limited (fewer plants recorded by both than the bar)",
+    "verdict_text": "fail; only 5 of the 10 laser plants inside are recorded by the splat too, so the bar of 8 cannot be met by construction: a detection (T4) limit, not a change-rule failure"
+   },
+   "T6 230601->230613": {
+    "verdict": "undecidable",
+    "basis": "n 2 plants paired in both sensors; median |dh splat - dh laser| 2.4 cm against g 2.8 cm; calls agree 2 of 2 (need 0.9); flagged by the T3 clause on 230601",
+    "n": 2,
+    "median_m": 0.023732626471229423,
+    "agreement": 1.0
+   },
+   "T6 230613->230621": {
+    "verdict": "undecidable",
+    "basis": "undecidable (fewer than 5 plants paired in both sensors)"
+   },
+   "T6 230621->230628": {
+    "verdict": "not evaluable",
+    "basis": "no laser within 13 days of the 230628 stops (design: against UAV2 only)"
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "verdict": "undecidable",
+    "basis": "n 2; median 4.4 cm (1.9 cm with the bound); calls agree 1 of 2"
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "verdict": "7 of 7",
+    "basis": "soil bias within the M2d soil floor on 7 of 7 stops"
+   },
+   "T7 plant clause": {
+    "verdict": "fail",
+    "basis": "0 of 7 stops with p95 <= 2 g = 5.6 cm; per-plant |dh95| p95 8.7-10.9 cm; median difference -7.7 to -2.8 cm",
+    "n_pass": 0,
+    "n": 7,
+    "two_g_m": 0.05616863965900619
+   }
+  },
+  "item 33": {
+   "_settings": {
+    "exclusion": "registration_ok",
+    "stops_entering": [
+     "230601_pos00",
+     "230601_pos01",
+     "230601_pos02",
+     "230601_pos03",
+     "230613_pos00",
+     "230613_pos01",
+     "230613_pos02",
+     "230613_pos03",
+     "230621_pos00",
+     "230621_pos01",
+     "230621_pos02",
+     "230621_pos03",
+     "230628_pos04",
+     "230628_pos05"
+    ],
+    "r_assoc_m": 0.08748315002782564,
+    "g_m": 0.03220425210893153,
+    "g_laser_m": 0.028084319829503095,
+    "method": "b",
+    "items_applied": [
+     "33"
+    ],
+    "r_assoc_source": "plot 198 noise_floor.json T3_adopted['230613'].r_assoc_m",
+    "g_source": "plot 198 noise_floor.json T3_adopted['230613'].g_m"
+   },
+   "T1 reprojection <= 0.70 px": {
+    "verdict": "pass",
+    "basis": "18 of 18 stops, 0.43-0.58 px",
+    "n_pass": 18,
+    "n": 18
+   },
+   "T2 check (soil residual, yaw)": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 stops pass the T2 check; 7 of 18 also pass the plant-pattern check",
+    "n_pass": 14,
+    "n": 18,
+    "n_also_plant_pattern": 7
+   },
+   "T2 stops entering the ledger": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 under 'registration_ok'; per day 230601 4, 230613 4, 230621 4, 230628 2",
+    "n": 14
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "verdict": "11 of 18 flagged",
+    "basis": "days with every stop flagged: 230621, 230628",
+    "n_flag": 11,
+    "n": 18
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "verdict": "not resolvable",
+    "basis": "230613 same-day position p95 8.7 cm at 0.10 m (n 12), 12.1 cm at 0.15 m (n 18), 16.2 cm at 0.20 m (n 23); cap 9.5 cm; read at 0.15 m alone",
+    "item33": {
+     "p95_at_0.15_m": 0.12072308998917625,
+     "n_at_0.15": 18,
+     "p95_at_0.20_m": 0.16215219884358834,
+     "n_at_0.20": 23,
+     "p95_at_0.10_m": 0.08748315002782564,
+     "n_at_0.10": 12,
+     "cap_m": 0.095,
+     "laser_pooled_p95_cap_0.15_m": 0.09693686752400565,
+     "laser_n_matched": 145,
+     "laser_verdict_same_rule": "not resolvable",
+     "verdict": "not resolvable"
+    }
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "verdict": "not resolvable",
+    "basis": "laser two-scanner same-day position p95 9.7 cm at the 0.15 m cap (n 145, pooled 230601/13/21)"
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "verdict": "pass",
+    "basis": "230613 same-day |dh95| p95 3.2 cm (n 12); g in force 3.2 cm"
+   },
+   "T3 flag on growth from 230601": {
+    "verdict": "flagged",
+    "basis": "230601 own same-day |dh95| p95 10.3 cm (n 5) against 8 cm"
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "verdict": "fail",
+    "provisional": true,
+    "ratio": 0.6779661016949152,
+    "basis": "ratio 0.678: splat 40 of 63 marks, laser 59 of 63; PROVISIONAL marks"
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "verdict": "pass",
+    "provisional": true,
+    "ratio": 0.9047619047619048,
+    "basis": "ratio 0.905: splat 38 of 60 marks, laser 42 of 60; PROVISIONAL marks"
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "verdict": "not met",
+    "value": 4,
+    "bar": 8,
+    "n_laser_inside_in_splat_region_k1": 9,
+    "basis": "splat calls 4 removed of the 5 plants both sensors record inside; bar = the laser's 8 of 10; truth 10 removed; the later day's stops entering image 9 of the 10 laser plants inside"
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "verdict": "not met",
+    "basis": "4 against 9",
+    "value": 4
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "verdict": "met",
+    "basis": "9 of 28 unchanged on-row plants called removed; bound 20.1 at the same-day rate 0.72 (56 of 78)"
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "verdict": "not met",
+    "basis": "15 of 43 unchanged on-row plants called removed; bound 5.7 at the same-day rate 0.13 (10 of 76)"
+   },
+   "T5 SB8_020623 overall": {
+    "verdict": "fail",
+    "basis": "removal clause not met (4 against 8), specificity clause met; detection-limited (fewer plants recorded by both than the bar)",
+    "verdict_text": "fail; only 5 of the 10 laser plants inside are recorded by the splat too, so the bar of 8 cannot be met by construction: a detection (T4) limit, not a change-rule failure"
+   },
+   "T6 230601->230613": {
+    "verdict": "pass",
+    "basis": "n 12 plants paired in both sensors; median |dh splat - dh laser| 1.3 cm against g 3.2 cm; calls agree 12 of 12 (need 0.9); flagged by the T3 clause on 230601",
+    "n": 12,
+    "median_m": 0.013452110035899523,
+    "agreement": 1.0
+   },
+   "T6 230613->230621": {
+    "verdict": "fail",
+    "basis": "n 9 plants paired in both sensors; median |dh splat - dh laser| 3.0 cm (0.4 cm with the M2e bound subtracted) against g 3.2 cm; calls agree 7 of 9 (need 0.9)",
+    "n": 9,
+    "median_m": 0.00420469805249013,
+    "agreement": 0.7777777777777778
+   },
+   "T6 230621->230628": {
+    "verdict": "not evaluable",
+    "basis": "no laser within 13 days of the 230628 stops (design: against UAV2 only)"
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "verdict": "pass",
+    "basis": "n 10; median 4.7 cm (2.2 cm with the bound); calls agree 9 of 10"
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "verdict": "12 of 12",
+    "basis": "soil bias within the M2d soil floor on 12 of 12 stops"
+   },
+   "T7 plant clause": {
+    "verdict": "fail",
+    "basis": "0 of 12 stops with p95 <= 2 g = 6.4 cm; per-plant |dh95| p95 7.4-14.9 cm; median difference -8.6 to -2.8 cm; 2 entering stop(s) without a laser date not evaluable",
+    "n_pass": 0,
+    "n": 12,
+    "two_g_m": 0.06440850421786307
+   }
+  },
+  "all four (a: item 32 = T2 check)": {
+   "_settings": {
+    "exclusion": "registration_ok",
+    "stops_entering": [
+     "230601_pos00",
+     "230601_pos01",
+     "230601_pos02",
+     "230601_pos03",
+     "230613_pos00",
+     "230613_pos01",
+     "230613_pos02",
+     "230613_pos03",
+     "230621_pos00",
+     "230621_pos01",
+     "230621_pos02",
+     "230621_pos03",
+     "230628_pos04",
+     "230628_pos05"
+    ],
+    "r_assoc_m": 0.08748315002782564,
+    "g_m": 0.03220425210893153,
+    "g_laser_m": 0.028084319829503095,
+    "method": "b",
+    "items_applied": [
+     "30",
+     "31",
+     "33"
+    ],
+    "r_assoc_source": "plot 198 noise_floor.json T3_adopted['230613'].r_assoc_m",
+    "g_source": "plot 198 noise_floor.json T3_adopted['230613'].g_m"
+   },
+   "T1 reprojection <= 0.70 px": {
+    "verdict": "pass",
+    "basis": "18 of 18 stops, 0.43-0.58 px",
+    "n_pass": 18,
+    "n": 18
+   },
+   "T2 check (soil residual, yaw)": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 stops pass the T2 check; 7 of 18 also pass the plant-pattern check",
+    "n_pass": 14,
+    "n": 18,
+    "n_also_plant_pattern": 7
+   },
+   "T2 stops entering the ledger": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 under 'registration_ok'; per day 230601 4, 230613 4, 230621 4, 230628 2",
+    "n": 14
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "verdict": "11 of 18 flagged",
+    "basis": "days with every stop flagged: 230621, 230628",
+    "n_flag": 11,
+    "n": 18
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "verdict": "not resolvable",
+    "basis": "230613 same-day position p95 8.7 cm at 0.10 m (n 12), 12.1 cm at 0.15 m (n 18), 16.2 cm at 0.20 m (n 23); cap 9.5 cm; read at 0.15 m alone",
+    "item33": {
+     "p95_at_0.15_m": 0.12072308998917625,
+     "n_at_0.15": 18,
+     "p95_at_0.20_m": 0.16215219884358834,
+     "n_at_0.20": 23,
+     "p95_at_0.10_m": 0.08748315002782564,
+     "n_at_0.10": 12,
+     "cap_m": 0.095,
+     "laser_pooled_p95_cap_0.15_m": 0.09693686752400565,
+     "laser_n_matched": 145,
+     "laser_verdict_same_rule": "not resolvable",
+     "verdict": "not resolvable"
+    }
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "verdict": "not resolvable",
+    "basis": "laser two-scanner same-day position p95 9.7 cm at the 0.15 m cap (n 145, pooled 230601/13/21)"
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "verdict": "pass",
+    "basis": "230613 same-day |dh95| p95 3.2 cm (n 12); g in force 3.2 cm"
+   },
+   "T3 flag on growth from 230601": {
+    "verdict": "flagged",
+    "basis": "230601 own same-day |dh95| p95 10.3 cm (n 5) against 8 cm"
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "verdict": "fail",
+    "provisional": true,
+    "ratio": 0.6779661016949152,
+    "basis": "ratio 0.678: splat 40 of 63 marks, laser 59 of 63; PROVISIONAL marks"
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "verdict": "pass",
+    "provisional": true,
+    "ratio": 0.9047619047619048,
+    "basis": "ratio 0.905: splat 38 of 60 marks, laser 42 of 60; PROVISIONAL marks"
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "verdict": "not met",
+    "value": 4,
+    "bar": 8,
+    "n_laser_inside_in_splat_region_k1": 9,
+    "basis": "splat calls 4 removed of the 5 plants both sensors record inside; bar = the laser's 8 of 10; truth 10 removed; the later day's stops entering image 9 of the 10 laser plants inside"
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "verdict": "not met",
+    "basis": "4 against 9",
+    "value": 4
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "verdict": "no verdict",
+    "basis": "9 of 28 unchanged on-row plants called removed; bound 20.1 at the same-day rate 0.72 (56 of 78); false-removal rate 0.32 (95 % interval 0.18-0.51), same-day rate interval 0.61-0.81",
+    "item30": {
+     "sensor": "splat",
+     "n_candidates": 28,
+     "n_removed_called": 9,
+     "false_removal_rate": 0.32142857142857145,
+     "false_removal_wilson95": [
+      0.1793324692249496,
+      0.5066115681914238
+     ],
+     "false_removal_clopper_pearson95": [
+      0.15877603788615388,
+      0.5235164067096185
+     ],
+     "same_day_rate": 0.717948717948718,
+     "same_day_counts": {
+      "n_unmatched": 56,
+      "n_in": 78,
+      "n_matched": 11
+     },
+     "bound_as_written": 20.102564102564102,
+     "met_as_written": true,
+     "interval_note": "binomial intervals; the plants share a registration and a row structure, so the true uncertainty is wider",
+     "same_day_wilson95": [
+      0.6096907122939889,
+      0.8057466527032598
+     ],
+     "verdict": "no verdict (same-day rate > 0.5)",
+     "other_reading_rate_is_false_removal_rate": "met"
+    }
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "verdict": "not met",
+    "basis": "15 of 43 unchanged on-row plants called removed; bound 5.7 at the same-day rate 0.13 (10 of 76); false-removal rate 0.35 (95 % interval 0.22-0.50), same-day rate interval 0.07-0.23",
+    "item30": {
+     "sensor": "laser",
+     "n_candidates": 43,
+     "n_removed_called": 15,
+     "false_removal_rate": 0.3488372093023256,
+     "false_removal_wilson95": [
+      0.22418589997352706,
+      0.49828218007147956
+     ],
+     "false_removal_clopper_pearson95": [
+      0.21007815700666987,
+      0.5092663604753611
+     ],
+     "same_day_rate": 0.13236313236313235,
+     "same_day_counts": {
+      "n_unmatched": 10,
+      "n_in": 76,
+      "note": "two scanners pooled (the rate of record is the mean of the two scanners' fractions)"
+     },
+     "bound_as_written": 5.691614691614691,
+     "met_as_written": false,
+     "interval_note": "binomial intervals; the plants share a registration and a row structure, so the true uncertainty is wider",
+     "same_day_wilson95": [
+      0.07306881567918964,
+      0.22554119436880626
+     ],
+     "verdict": "not met",
+     "other_reading_rate_is_false_removal_rate": "not met"
+    }
+   },
+   "T5 SB8_020623 overall": {
+    "verdict": "fail",
+    "basis": "removal clause not met (4 against 8); specificity clause not judged (no verdict); detection-limited (fewer plants recorded by both than the bar)"
+   },
+   "T6 230601->230613": {
+    "verdict": "pass",
+    "basis": "n 12 plants paired in both sensors; median |dh splat - dh laser| 1.3 cm against g 3.2 cm; calls agree 12 of 12 (need 0.9); flagged by the T3 clause on 230601",
+    "n": 12,
+    "median_m": 0.013452110035899523,
+    "agreement": 1.0
+   },
+   "T6 230613->230621": {
+    "verdict": "fail",
+    "basis": "n 9 plants paired in both sensors; median |dh splat - dh laser| 3.0 cm (0.4 cm with the M2e bound subtracted) against g 3.2 cm; calls agree 7 of 9 (need 0.9)",
+    "n": 9,
+    "median_m": 0.00420469805249013,
+    "agreement": 0.7777777777777778
+   },
+   "T6 230621->230628": {
+    "verdict": "not evaluable",
+    "basis": "no laser within 13 days of the 230628 stops (design: against UAV2 only)"
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "verdict": "pass",
+    "basis": "n 10; median 4.7 cm (2.2 cm with the bound); calls agree 9 of 10"
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "verdict": "12 of 12",
+    "basis": "soil bias within the M2d soil floor on 12 of 12 stops"
+   },
+   "T7 plant clause": {
+    "verdict": "fail",
+    "basis": "4 of 12 stops at or below the M2d per-plant floor (230601: 5.7 cm, 230613: 7.5 cm, 230621: 14.4 cm); per-plant |dh95| p95 7.4-14.9 cm; median difference -8.6 to -2.8 cm; 2 entering stop(s) not evaluable",
+    "item31": {
+     "per_stop": {
+      "230601_pos00": {
+       "per_plant_n": 22,
+       "per_plant_absdiff_p95_m": 0.09046940966649117,
+       "per_plant_diff_median_m": -0.07559933026305998,
+       "m2d_pair": "laser_230601_vs_uav1_230602",
+       "m2d_per_plant_abs_diff_p95_m": 0.05742115296836515,
+       "m2d_per_plant_diff_median_m": -0.031225476719413336,
+       "m2d_n_plants": 79,
+       "within_floor": false
+      },
+      "230601_pos01": {
+       "per_plant_n": 18,
+       "per_plant_absdiff_p95_m": 0.1065425286523876,
+       "per_plant_diff_median_m": -0.07663373688752984,
+       "m2d_pair": "laser_230601_vs_uav1_230602",
+       "m2d_per_plant_abs_diff_p95_m": 0.05742115296836515,
+       "m2d_per_plant_diff_median_m": -0.031225476719413336,
+       "m2d_n_plants": 79,
+       "within_floor": false
+      },
+      "230601_pos02": {
+       "per_plant_n": 19,
+       "per_plant_absdiff_p95_m": 0.08847344597129163,
+       "per_plant_diff_median_m": -0.06357718226479392,
+       "m2d_pair": "laser_230601_vs_uav1_230602",
+       "m2d_per_plant_abs_diff_p95_m": 0.05742115296836515,
+       "m2d_per_plant_diff_median_m": -0.031225476719413336,
+       "m2d_n_plants": 79,
+       "within_floor": false
+      },
+      "230601_pos03": {
+       "per_plant_n": 18,
+       "per_plant_absdiff_p95_m": 0.08702132242644467,
+       "per_plant_diff_median_m": -0.07080575811932022,
+       "m2d_pair": "laser_230601_vs_uav1_230602",
+       "m2d_per_plant_abs_diff_p95_m": 0.05742115296836515,
+       "m2d_per_plant_diff_median_m": -0.031225476719413336,
+       "m2d_n_plants": 79,
+       "within_floor": false
+      },
+      "230613_pos00": {
+       "per_plant_n": 14,
+       "per_plant_absdiff_p95_m": 0.0768765830129709,
+       "per_plant_diff_median_m": -0.04251740611310595,
+       "m2d_pair": "laser_230613_vs_uav1_230614",
+       "m2d_per_plant_abs_diff_p95_m": 0.07487809449559676,
+       "m2d_per_plant_diff_median_m": -0.028656989957198675,
+       "m2d_n_plants": 68,
+       "within_floor": false
+      },
+      "230613_pos01": {
+       "per_plant_n": 19,
+       "per_plant_absdiff_p95_m": 0.07427710802161866,
+       "per_plant_diff_median_m": -0.04791306415576457,
+       "m2d_pair": "laser_230613_vs_uav1_230614",
+       "m2d_per_plant_abs_diff_p95_m": 0.07487809449559676,
+       "m2d_per_plant_diff_median_m": -0.028656989957198675,
+       "m2d_n_plants": 68,
+       "within_floor": true
+      },
+      "230613_pos02": {
+       "per_plant_n": 25,
+       "per_plant_absdiff_p95_m": 0.1105845326069584,
+       "per_plant_diff_median_m": -0.06288710843608669,
+       "m2d_pair": "laser_230613_vs_uav1_230614",
+       "m2d_per_plant_abs_diff_p95_m": 0.07487809449559676,
+       "m2d_per_plant_diff_median_m": -0.028656989957198675,
+       "m2d_n_plants": 68,
+       "within_floor": false
+      },
+      "230613_pos03": {
+       "per_plant_n": 20,
+       "per_plant_absdiff_p95_m": 0.10622501691315309,
+       "per_plant_diff_median_m": -0.05727484565439056,
+       "m2d_pair": "laser_230613_vs_uav1_230614",
+       "m2d_per_plant_abs_diff_p95_m": 0.07487809449559676,
+       "m2d_per_plant_diff_median_m": -0.028656989957198675,
+       "m2d_n_plants": 68,
+       "within_floor": false
+      },
+      "230621_pos00": {
+       "per_plant_n": 13,
+       "per_plant_absdiff_p95_m": 0.09324415895946454,
+       "per_plant_diff_median_m": -0.028426366356569588,
+       "m2d_pair": "laser_230621_vs_uav1_230623",
+       "m2d_per_plant_abs_diff_p95_m": 0.14433154453579533,
+       "m2d_per_plant_diff_median_m": -0.05908157324164165,
+       "m2d_n_plants": 76,
+       "within_floor": true
+      },
+      "230621_pos01": {
+       "per_plant_n": 10,
+       "per_plant_absdiff_p95_m": 0.10871582583973234,
+       "per_plant_diff_median_m": -0.06712750139685397,
+       "m2d_pair": "laser_230621_vs_uav1_230623",
+       "m2d_per_plant_abs_diff_p95_m": 0.14433154453579533,
+       "m2d_per_plant_diff_median_m": -0.05908157324164165,
+       "m2d_n_plants": 76,
+       "within_floor": true
+      },
+      "230621_pos02": {
+       "per_plant_n": 11,
+       "per_plant_absdiff_p95_m": 0.14220109734714015,
+       "per_plant_diff_median_m": -0.06506573745238597,
+       "m2d_pair": "laser_230621_vs_uav1_230623",
+       "m2d_per_plant_abs_diff_p95_m": 0.14433154453579533,
+       "m2d_per_plant_diff_median_m": -0.05908157324164165,
+       "m2d_n_plants": 76,
+       "within_floor": true
+      },
+      "230621_pos03": {
+       "per_plant_n": 13,
+       "per_plant_absdiff_p95_m": 0.14866466017245727,
+       "per_plant_diff_median_m": -0.08557581420232907,
+       "m2d_pair": "laser_230621_vs_uav1_230623",
+       "m2d_per_plant_abs_diff_p95_m": 0.14433154453579533,
+       "m2d_per_plant_diff_median_m": -0.05908157324164165,
+       "m2d_n_plants": 76,
+       "within_floor": false
+      }
+     },
+     "n_evaluated": 12,
+     "n_within_floor": 4,
+     "stops_not_evaluable": [
+      "230628_pos04",
+      "230628_pos05"
+     ],
+     "not_evaluable_reason": "no laser date for the stop's rig day (230628), or no M2d pair for the stop's laser date and reference",
+     "floor_source": "own cross_sensor_floor.json",
+     "bias_median_range_m": [
+      -0.08557581420232907,
+      -0.028426366356569588
+     ],
+     "verdict": "fail"
+    }
+   }
+  },
+  "all four (b: item 32 = T2 and plant-pattern)": {
+   "_settings": {
+    "exclusion": "plant_pattern",
+    "stops_entering": [
+     "230601_pos00",
+     "230601_pos01",
+     "230601_pos02",
+     "230601_pos03",
+     "230613_pos03",
+     "230621_pos00",
+     "230621_pos01"
+    ],
+    "r_assoc_m": 0.095,
+    "g_m": 0.028084319829503095,
+    "g_laser_m": 0.028084319829503095,
+    "method": "b",
+    "items_applied": [
+     "30",
+     "31",
+     "32",
+     "33"
+    ],
+    "r_assoc_source": "laser same-day p95 (lmi_assoc same_day_floor pooled cap 0.15), capped at 0.095",
+    "g_source": "laser same-day |dh95| p95 (pooled cap 0.15), capped at 0.08"
+   },
+   "T1 reprojection <= 0.70 px": {
+    "verdict": "pass",
+    "basis": "18 of 18 stops, 0.43-0.58 px",
+    "n_pass": 18,
+    "n": 18
+   },
+   "T2 check (soil residual, yaw)": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 stops pass the T2 check; 7 of 18 also pass the plant-pattern check",
+    "n_pass": 14,
+    "n": 18,
+    "n_also_plant_pattern": 7
+   },
+   "T2 stops entering the ledger": {
+    "verdict": "7 of 18",
+    "basis": "7 of 18 under 'plant_pattern'; per day 230601 4, 230613 1, 230621 2, 230628 0",
+    "n": 7
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "verdict": "11 of 18 flagged",
+    "basis": "days with every stop flagged: 230621, 230628",
+    "n_flag": 11,
+    "n": 18
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "verdict": "undecidable",
+    "basis": "230613: no matched same-day plants (no overlapping pair, no instances in the overlap, or fewer than two stops pass the exclusion rule) (0 matched plants); read at 0.15 m alone",
+    "item33": {
+     "p95_at_0.15_m": null,
+     "n_at_0.15": 0,
+     "p95_at_0.20_m": null,
+     "n_at_0.20": 0,
+     "p95_at_0.10_m": null,
+     "n_at_0.10": 0,
+     "cap_m": 0.095,
+     "laser_pooled_p95_cap_0.15_m": 0.09693686752400565,
+     "laser_n_matched": 145,
+     "laser_verdict_same_rule": "not resolvable",
+     "verdict": "undecidable (fewer than 5 matched same-day plants at 0.10 m)"
+    }
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "verdict": "not resolvable",
+    "basis": "laser two-scanner same-day position p95 9.7 cm at the 0.15 m cap (n 145, pooled 230601/13/21)"
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "verdict": "undecidable",
+    "basis": "230613 same-day floor not measurable under this stop set; g in force 2.8 cm (laser same-day |dh95| p95 (pooled cap 0.15), capped at 0.08)"
+   },
+   "T3 flag on growth from 230601": {
+    "verdict": "flagged",
+    "basis": "230601 own same-day |dh95| p95 10.3 cm (n 5) against 8 cm"
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "verdict": "fail",
+    "provisional": true,
+    "ratio": 0.6666666666666666,
+    "basis": "ratio 0.667: splat 40 of 63 marks, laser 60 of 63; PROVISIONAL marks"
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "verdict": "fail",
+    "provisional": true,
+    "ratio": 0.6666666666666666,
+    "basis": "ratio 0.667: splat 12 of 20 marks, laser 18 of 20; PROVISIONAL marks"
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "verdict": "not met",
+    "value": 0,
+    "bar": 8,
+    "n_laser_inside_in_splat_region_k1": 0,
+    "basis": "splat calls 0 removed of the 5 plants both sensors record inside; bar = the laser's 8 of 10; truth 10 removed; the later day's stops entering image 0 of the 10 laser plants inside (NO COVERAGE of the polygon: not a test of the change rule)"
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "verdict": "not met",
+    "basis": "0 against 9",
+    "value": 0
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "verdict": "not evaluable",
+    "basis": "7 of 14 unchanged on-row plants called removed; same-day rate not measurable; false-removal rate 0.50 (95 % interval 0.27-0.73)",
+    "item30": {
+     "sensor": "splat",
+     "n_candidates": 14,
+     "n_removed_called": 7,
+     "false_removal_rate": 0.5,
+     "false_removal_wilson95": [
+      0.26799202452413634,
+      0.7320079754758637
+     ],
+     "false_removal_clopper_pearson95": [
+      0.23036054144806234,
+      0.7696394585519376
+     ],
+     "same_day_rate": null,
+     "same_day_counts": {
+      "n_unmatched": 0,
+      "n_in": 0,
+      "n_matched": 0
+     },
+     "bound_as_written": null,
+     "met_as_written": null,
+     "interval_note": "binomial intervals; the plants share a registration and a row structure, so the true uncertainty is wider",
+     "verdict": "not evaluable (same-day rate not measurable: no overlapping same-day pair under this stop set)",
+     "other_reading_rate_is_false_removal_rate": "not evaluable"
+    }
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "verdict": "not met",
+    "basis": "13 of 43 unchanged on-row plants called removed; bound 5.7 at the same-day rate 0.13 (10 of 76); false-removal rate 0.30 (95 % interval 0.19-0.45), same-day rate interval 0.07-0.23",
+    "item30": {
+     "sensor": "laser",
+     "n_candidates": 43,
+     "n_removed_called": 13,
+     "false_removal_rate": 0.3023255813953488,
+     "false_removal_wilson95": [
+      0.1860200013584818,
+      0.45105364177729607
+     ],
+     "false_removal_clopper_pearson95": [
+      0.17182499248521346,
+      0.46125330573403234
+     ],
+     "same_day_rate": 0.13236313236313235,
+     "same_day_counts": {
+      "n_unmatched": 10,
+      "n_in": 76,
+      "note": "two scanners pooled (the rate of record is the mean of the two scanners' fractions)"
+     },
+     "bound_as_written": 5.691614691614691,
+     "met_as_written": false,
+     "interval_note": "binomial intervals; the plants share a registration and a row structure, so the true uncertainty is wider",
+     "same_day_wilson95": [
+      0.07306881567918964,
+      0.22554119436880626
+     ],
+     "verdict": "not met",
+     "other_reading_rate_is_false_removal_rate": "not met"
+    }
+   },
+   "T5 SB8_020623 overall": {
+    "verdict": "fail",
+    "basis": "removal clause not met (0 against 8); specificity clause not judged (not evaluable); detection-limited (fewer plants recorded by both than the bar)"
+   },
+   "T6 230601->230613": {
+    "verdict": "undecidable",
+    "basis": "n 2 plants paired in both sensors; median |dh splat - dh laser| 2.4 cm against g 2.8 cm; calls agree 2 of 2 (need 0.9); flagged by the T3 clause on 230601",
+    "n": 2,
+    "median_m": 0.023732626471229423,
+    "agreement": 1.0
+   },
+   "T6 230613->230621": {
+    "verdict": "undecidable",
+    "basis": "undecidable (fewer than 5 plants paired in both sensors)"
+   },
+   "T6 230621->230628": {
+    "verdict": "not evaluable",
+    "basis": "no laser within 13 days of the 230628 stops (design: against UAV2 only)"
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "verdict": "undecidable",
+    "basis": "n 2; median 4.4 cm (1.9 cm with the bound); calls agree 1 of 2"
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "verdict": "7 of 7",
+    "basis": "soil bias within the M2d soil floor on 7 of 7 stops"
+   },
+   "T7 plant clause": {
+    "verdict": "fail",
+    "basis": "2 of 7 stops at or below the M2d per-plant floor (230601: 5.7 cm, 230613: 7.5 cm, 230621: 14.4 cm); per-plant |dh95| p95 8.7-10.9 cm; median difference -7.7 to -2.8 cm",
+    "item31": {
+     "per_stop": {
+      "230601_pos00": {
+       "per_plant_n": 22,
+       "per_plant_absdiff_p95_m": 0.09046940966649117,
+       "per_plant_diff_median_m": -0.07559933026305998,
+       "m2d_pair": "laser_230601_vs_uav1_230602",
+       "m2d_per_plant_abs_diff_p95_m": 0.05742115296836515,
+       "m2d_per_plant_diff_median_m": -0.031225476719413336,
+       "m2d_n_plants": 79,
+       "within_floor": false
+      },
+      "230601_pos01": {
+       "per_plant_n": 18,
+       "per_plant_absdiff_p95_m": 0.1065425286523876,
+       "per_plant_diff_median_m": -0.07663373688752984,
+       "m2d_pair": "laser_230601_vs_uav1_230602",
+       "m2d_per_plant_abs_diff_p95_m": 0.05742115296836515,
+       "m2d_per_plant_diff_median_m": -0.031225476719413336,
+       "m2d_n_plants": 79,
+       "within_floor": false
+      },
+      "230601_pos02": {
+       "per_plant_n": 19,
+       "per_plant_absdiff_p95_m": 0.08847344597129163,
+       "per_plant_diff_median_m": -0.06357718226479392,
+       "m2d_pair": "laser_230601_vs_uav1_230602",
+       "m2d_per_plant_abs_diff_p95_m": 0.05742115296836515,
+       "m2d_per_plant_diff_median_m": -0.031225476719413336,
+       "m2d_n_plants": 79,
+       "within_floor": false
+      },
+      "230601_pos03": {
+       "per_plant_n": 18,
+       "per_plant_absdiff_p95_m": 0.08702132242644467,
+       "per_plant_diff_median_m": -0.07080575811932022,
+       "m2d_pair": "laser_230601_vs_uav1_230602",
+       "m2d_per_plant_abs_diff_p95_m": 0.05742115296836515,
+       "m2d_per_plant_diff_median_m": -0.031225476719413336,
+       "m2d_n_plants": 79,
+       "within_floor": false
+      },
+      "230613_pos03": {
+       "per_plant_n": 20,
+       "per_plant_absdiff_p95_m": 0.10622501691315309,
+       "per_plant_diff_median_m": -0.05727484565439056,
+       "m2d_pair": "laser_230613_vs_uav1_230614",
+       "m2d_per_plant_abs_diff_p95_m": 0.07487809449559676,
+       "m2d_per_plant_diff_median_m": -0.028656989957198675,
+       "m2d_n_plants": 68,
+       "within_floor": false
+      },
+      "230621_pos00": {
+       "per_plant_n": 13,
+       "per_plant_absdiff_p95_m": 0.09324415895946454,
+       "per_plant_diff_median_m": -0.028426366356569588,
+       "m2d_pair": "laser_230621_vs_uav1_230623",
+       "m2d_per_plant_abs_diff_p95_m": 0.14433154453579533,
+       "m2d_per_plant_diff_median_m": -0.05908157324164165,
+       "m2d_n_plants": 76,
+       "within_floor": true
+      },
+      "230621_pos01": {
+       "per_plant_n": 10,
+       "per_plant_absdiff_p95_m": 0.10871582583973234,
+       "per_plant_diff_median_m": -0.06712750139685397,
+       "m2d_pair": "laser_230621_vs_uav1_230623",
+       "m2d_per_plant_abs_diff_p95_m": 0.14433154453579533,
+       "m2d_per_plant_diff_median_m": -0.05908157324164165,
+       "m2d_n_plants": 76,
+       "within_floor": true
+      }
+     },
+     "n_evaluated": 7,
+     "n_within_floor": 2,
+     "stops_not_evaluable": [],
+     "not_evaluable_reason": "no laser date for the stop's rig day (230628), or no M2d pair for the stop's laser date and reference",
+     "floor_source": "own cross_sensor_floor.json",
+     "bias_median_range_m": [
+      -0.07663373688752984,
+      -0.028426366356569588
+     ],
+     "verdict": "fail"
+    }
+   }
+  }
+ },
+ "beside": {
+  "item 32 line (a): stricter stop set, registered thresholds": {
+   "_settings": {
+    "exclusion": "plant_pattern",
+    "stops_entering": [
+     "230601_pos00",
+     "230601_pos01",
+     "230601_pos02",
+     "230601_pos03",
+     "230613_pos03",
+     "230621_pos00",
+     "230621_pos01"
+    ],
+    "r_assoc_m": 0.08748315002782564,
+    "g_m": 0.03220425210893153,
+    "g_laser_m": 0.028084319829503095,
+    "method": "b",
+    "items_applied": [
+     "32"
+    ],
+    "r_assoc_source": "plot 198 noise_floor.json T3_adopted['230613'].r_assoc_m",
+    "g_source": "plot 198 noise_floor.json T3_adopted['230613'].g_m"
+   },
+   "T1 reprojection <= 0.70 px": {
+    "verdict": "pass",
+    "basis": "18 of 18 stops, 0.43-0.58 px",
+    "n_pass": 18,
+    "n": 18
+   },
+   "T2 check (soil residual, yaw)": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 stops pass the T2 check; 7 of 18 also pass the plant-pattern check",
+    "n_pass": 14,
+    "n": 18,
+    "n_also_plant_pattern": 7
+   },
+   "T2 stops entering the ledger": {
+    "verdict": "7 of 18",
+    "basis": "7 of 18 under 'plant_pattern'; per day 230601 4, 230613 1, 230621 2, 230628 0",
+    "n": 7
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "verdict": "11 of 18 flagged",
+    "basis": "days with every stop flagged: 230621, 230628",
+    "n_flag": 11,
+    "n": 18
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "verdict": "not resolvable",
+    "basis": "230613 same-day position p95 8.7 cm at 0.10 m (n 12), 12.1 cm at 0.15 m (n 18), 16.2 cm at 0.20 m (n 23); cap 9.5 cm; read at 0.15 and 0.20 m together",
+    "verdict_text": "not resolvable at the 0.095 m cap: uncensored same-day position p95 0.121 m (radius 0.15, n 18) and 0.162 m (radius 0.20, n 23) both exceed it"
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "verdict": "not resolvable",
+    "basis": "laser two-scanner same-day position p95 9.7 cm at the 0.15 m cap (n 145, pooled 230601/13/21)"
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "verdict": "pass",
+    "basis": "230613 same-day |dh95| p95 3.2 cm (n 12); g in force 3.2 cm"
+   },
+   "T3 flag on growth from 230601": {
+    "verdict": "flagged",
+    "basis": "230601 own same-day |dh95| p95 10.3 cm (n 5) against 8 cm"
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "verdict": "fail",
+    "provisional": true,
+    "ratio": 0.6779661016949152,
+    "basis": "ratio 0.678: splat 40 of 63 marks, laser 59 of 63; PROVISIONAL marks"
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "verdict": "fail",
+    "provisional": true,
+    "ratio": 0.5555555555555556,
+    "basis": "ratio 0.556: splat 10 of 20 marks, laser 18 of 20; PROVISIONAL marks"
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "verdict": "not met",
+    "value": 0,
+    "bar": 8,
+    "n_laser_inside_in_splat_region_k1": 0,
+    "basis": "splat calls 0 removed of the 5 plants both sensors record inside; bar = the laser's 8 of 10; truth 10 removed; the later day's stops entering image 0 of the 10 laser plants inside (NO COVERAGE of the polygon: not a test of the change rule)"
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "verdict": "not met",
+    "basis": "0 against 9",
+    "value": 0
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "verdict": "not evaluable",
+    "basis": "8 of 14 unchanged on-row plants called removed; same-day rate not measurable"
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "verdict": "not met",
+    "basis": "15 of 43 unchanged on-row plants called removed; bound 5.7 at the same-day rate 0.13 (10 of 76)"
+   },
+   "T5 SB8_020623 overall": {
+    "verdict": "fail",
+    "basis": "removal clause not met (0 against 8), specificity clause not evaluable; detection-limited (fewer plants recorded by both than the bar)",
+    "verdict_text": "fail; only 5 of the 10 laser plants inside are recorded by the splat too, so the bar of 8 cannot be met by construction: a detection (T4) limit, not a change-rule failure"
+   },
+   "T6 230601->230613": {
+    "verdict": "undecidable",
+    "basis": "n 2 plants paired in both sensors; median |dh splat - dh laser| 2.4 cm against g 3.2 cm; calls agree 2 of 2 (need 0.9); flagged by the T3 clause on 230601",
+    "n": 2,
+    "median_m": 0.023732626471229423,
+    "agreement": 1.0
+   },
+   "T6 230613->230621": {
+    "verdict": "undecidable",
+    "basis": "undecidable (fewer than 5 plants paired in both sensors)"
+   },
+   "T6 230621->230628": {
+    "verdict": "not evaluable",
+    "basis": "no laser within 13 days of the 230628 stops (design: against UAV2 only)"
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "verdict": "undecidable",
+    "basis": "n 2; median 4.4 cm (1.9 cm with the bound); calls agree 1 of 2"
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "verdict": "7 of 7",
+    "basis": "soil bias within the M2d soil floor on 7 of 7 stops"
+   },
+   "T7 plant clause": {
+    "verdict": "fail",
+    "basis": "0 of 7 stops with p95 <= 2 g = 6.4 cm; per-plant |dh95| p95 8.7-10.9 cm; median difference -7.7 to -2.8 cm",
+    "n_pass": 0,
+    "n": 7,
+    "two_g_m": 0.06440850421786307
+   }
+  },
+  "marks withheld (as registered otherwise)": {
+   "_settings": {
+    "exclusion": "registration_ok",
+    "stops_entering": [
+     "230601_pos00",
+     "230601_pos01",
+     "230601_pos02",
+     "230601_pos03",
+     "230613_pos00",
+     "230613_pos01",
+     "230613_pos02",
+     "230613_pos03",
+     "230621_pos00",
+     "230621_pos01",
+     "230621_pos02",
+     "230621_pos03",
+     "230628_pos04",
+     "230628_pos05"
+    ],
+    "r_assoc_m": 0.08748315002782564,
+    "g_m": 0.03220425210893153,
+    "g_laser_m": 0.028084319829503095,
+    "method": "b",
+    "items_applied": [],
+    "r_assoc_source": "plot 198 noise_floor.json T3_adopted['230613'].r_assoc_m",
+    "g_source": "plot 198 noise_floor.json T3_adopted['230613'].g_m"
+   },
+   "T1 reprojection <= 0.70 px": {
+    "verdict": "pass",
+    "basis": "18 of 18 stops, 0.43-0.58 px",
+    "n_pass": 18,
+    "n": 18
+   },
+   "T2 check (soil residual, yaw)": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 stops pass the T2 check; 7 of 18 also pass the plant-pattern check",
+    "n_pass": 14,
+    "n": 18,
+    "n_also_plant_pattern": 7
+   },
+   "T2 stops entering the ledger": {
+    "verdict": "14 of 18",
+    "basis": "14 of 18 under 'registration_ok'; per day 230601 4, 230613 4, 230621 4, 230628 2",
+    "n": 14
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "verdict": "11 of 18 flagged",
+    "basis": "days with every stop flagged: 230621, 230628",
+    "n_flag": 11,
+    "n": 18
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "verdict": "not resolvable",
+    "basis": "230613 same-day position p95 8.7 cm at 0.10 m (n 12), 12.1 cm at 0.15 m (n 18), 16.2 cm at 0.20 m (n 23); cap 9.5 cm; read at 0.15 and 0.20 m together",
+    "verdict_text": "not resolvable at the 0.095 m cap: uncensored same-day position p95 0.121 m (radius 0.15, n 18) and 0.162 m (radius 0.20, n 23) both exceed it"
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "verdict": "not resolvable",
+    "basis": "laser two-scanner same-day position p95 9.7 cm at the 0.15 m cap (n 145, pooled 230601/13/21)"
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "verdict": "pass",
+    "basis": "230613 same-day |dh95| p95 3.2 cm (n 12); g in force 3.2 cm"
+   },
+   "T3 flag on growth from 230601": {
+    "verdict": "flagged",
+    "basis": "230601 own same-day |dh95| p95 10.3 cm (n 5) against 8 cm"
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "verdict": "undecidable",
+    "basis": "undecidable (no splat census or marks)"
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "verdict": "undecidable",
+    "basis": "undecidable (no splat census or marks)"
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "verdict": "not met",
+    "value": 4,
+    "bar": 8,
+    "n_laser_inside_in_splat_region_k1": 9,
+    "basis": "splat calls 4 removed of the 5 plants both sensors record inside; bar = the laser's 8 of 10; truth 10 removed; the later day's stops entering image 9 of the 10 laser plants inside"
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "verdict": "not met",
+    "basis": "4 against 9",
+    "value": 4
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "verdict": "met",
+    "basis": "9 of 28 unchanged on-row plants called removed; bound 20.1 at the same-day rate 0.72 (56 of 78)"
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "verdict": "not met",
+    "basis": "15 of 43 unchanged on-row plants called removed; bound 5.7 at the same-day rate 0.13 (10 of 76)"
+   },
+   "T5 SB8_020623 overall": {
+    "verdict": "fail",
+    "basis": "removal clause not met (4 against 8), specificity clause met; detection-limited (fewer plants recorded by both than the bar)",
+    "verdict_text": "fail; only 5 of the 10 laser plants inside are recorded by the splat too, so the bar of 8 cannot be met by construction: a detection (T4) limit, not a change-rule failure"
+   },
+   "T6 230601->230613": {
+    "verdict": "pass",
+    "basis": "n 12 plants paired in both sensors; median |dh splat - dh laser| 1.3 cm against g 3.2 cm; calls agree 12 of 12 (need 0.9); flagged by the T3 clause on 230601",
+    "n": 12,
+    "median_m": 0.013452110035899523,
+    "agreement": 1.0
+   },
+   "T6 230613->230621": {
+    "verdict": "fail",
+    "basis": "n 9 plants paired in both sensors; median |dh splat - dh laser| 3.0 cm (0.4 cm with the M2e bound subtracted) against g 3.2 cm; calls agree 7 of 9 (need 0.9)",
+    "n": 9,
+    "median_m": 0.00420469805249013,
+    "agreement": 0.7777777777777778
+   },
+   "T6 230621->230628": {
+    "verdict": "not evaluable",
+    "basis": "no laser within 13 days of the 230628 stops (design: against UAV2 only)"
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "verdict": "pass",
+    "basis": "n 10; median 4.7 cm (2.2 cm with the bound); calls agree 9 of 10"
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "verdict": "12 of 12",
+    "basis": "soil bias within the M2d soil floor on 12 of 12 stops"
+   },
+   "T7 plant clause": {
+    "verdict": "fail",
+    "basis": "0 of 12 stops with p95 <= 2 g = 6.4 cm; per-plant |dh95| p95 7.4-14.9 cm; median difference -8.6 to -2.8 cm; 2 entering stop(s) without a laser date not evaluable",
+    "n_pass": 0,
+    "n": 12,
+    "two_g_m": 0.06440850421786307
+   }
+  }
+ },
+ "moved": {
+  "item 30": {
+   "T1 reprojection <= 0.70 px": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 check (soil residual, yaw)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 stops entering the ledger": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 flag on growth from 230601": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 overall": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T6 230601->230613": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 230613->230621": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 230621->230628": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T7 plant clause": {
+    "moves_verdict": false,
+    "moves_basis": false
+   }
+  },
+  "item 31": {
+   "T1 reprojection <= 0.70 px": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 check (soil residual, yaw)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 stops entering the ledger": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 flag on growth from 230601": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 overall": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 230601->230613": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 230613->230621": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 230621->230628": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T7 plant clause": {
+    "moves_verdict": false,
+    "moves_basis": true
+   }
+  },
+  "item 32": {
+   "T1 reprojection <= 0.70 px": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 check (soil residual, yaw)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 stops entering the ledger": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T3 flag on growth from 230601": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 overall": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T6 230601->230613": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T6 230613->230621": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T6 230621->230628": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T7 plant clause": {
+    "moves_verdict": false,
+    "moves_basis": true
+   }
+  },
+  "item 33": {
+   "T1 reprojection <= 0.70 px": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 check (soil residual, yaw)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 stops entering the ledger": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 flag on growth from 230601": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 overall": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 230601->230613": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 230613->230621": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 230621->230628": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T7 plant clause": {
+    "moves_verdict": false,
+    "moves_basis": false
+   }
+  },
+  "all four (a: item 32 = T2 check)": {
+   "T1 reprojection <= 0.70 px": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 check (soil residual, yaw)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 stops entering the ledger": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 flag on growth from 230601": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 overall": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T6 230601->230613": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 230613->230621": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 230621->230628": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T7 plant clause": {
+    "moves_verdict": false,
+    "moves_basis": true
+   }
+  },
+  "all four (b: item 32 = T2 and plant-pattern)": {
+   "T1 reprojection <= 0.70 px": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 check (soil residual, yaw)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T2 stops entering the ledger": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T2 scale flag |s-1| > 1 %": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 association resolvable at the 9.5 cm cap": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T3 laser ceiling, same clause (beside)": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T3 growth threshold g <= 8 cm": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T3 flag on growth from 230601": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T4 230601 splat recall >= 0.9 x laser recall": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T4 230613 splat recall >= 0.9 x laser recall": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 removal clause (restated 4 Nov)": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 specificity clause, splat": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T5 SB8_020623 overall": {
+    "moves_verdict": false,
+    "moves_basis": true
+   },
+   "T6 230601->230613": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T6 230613->230621": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T6 230621->230628": {
+    "moves_verdict": false,
+    "moves_basis": false
+   },
+   "T6 long span 230601->230621 (beside; not a T6 interval)": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T7 soil clause (after the M2d offset is removed; by construction)": {
+    "moves_verdict": true,
+    "moves_basis": true
+   },
+   "T7 plant clause": {
+    "moves_verdict": false,
+    "moves_basis": true
+   }
+  }
+ },
+ "faithfulness_as_registered_vs_record": {
+  "gates_diffs": {
+   "ct": [],
+   "led": [],
+   "gr": []
+  },
+  "ledger_pairs_polygons_tracks_diffs": [],
+  "n_diffs": 0
+ },
+ "item32_line_a_vs_stored_sensitivity": {
+  "diffs": [],
+  "n_diffs": 0
+ },
+ "marks_withheld_gate_diffs": {
+  "T1": [],
+  "T2": [],
+  "T3": [],
+  "T4": [
+   "/230601: only in rerun",
+   "/230613: only in rerun",
+   "/230621: only in rerun",
+   "/verdict/230601: 'fail' vs 'undecidable (no splat census or marks)'",
+   "/verdict/230613: 'pass' vs 'undecidable (no splat census or marks)'"
+  ],
+  "T5": [],
+  "T6": [],
+  "T7": []
+ },
+ "marks_rows": {
+  "T1 reprojection <= 0.70 px": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T2 check (soil residual, yaw)": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T2 stops entering the ledger": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T2 scale flag |s-1| > 1 %": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T3 association resolvable at the 9.5 cm cap": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T3 laser ceiling, same clause (beside)": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T3 growth threshold g <= 8 cm": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T3 flag on growth from 230601": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T4 230601 splat recall >= 0.9 x laser recall": {
+   "verdict_changes_without_marks": true,
+   "basis_changes_without_marks": true
+  },
+  "T4 230613 splat recall >= 0.9 x laser recall": {
+   "verdict_changes_without_marks": true,
+   "basis_changes_without_marks": true
+  },
+  "T5 SB8_020623 removal clause (restated 4 Nov)": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T5 SB8_020623 removal clause, pre-registered >= 9 (beside)": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T5 SB8_020623 specificity clause, splat": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict)": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T5 SB8_020623 overall": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T6 230601->230613": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T6 230613->230621": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T6 230621->230628": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T6 long span 230601->230621 (beside; not a T6 interval)": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T7 soil clause (after the M2d offset is removed; by construction)": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  },
+  "T7 plant clause": {
+   "verdict_changes_without_marks": false,
+   "basis_changes_without_marks": false
+  }
+ },
+ "record_r_assoc_sensitivity_quoted_beside_item33": {
+  "0.085": {
+   "T4": {
+    "230601": {
+     "splat_recall": 0.6349206349206349,
+     "laser_recall_same_marks": 0.9365079365079365,
+     "ratio": 0.6779661016949152,
+     "gate_ge_0.9": false,
+     "n_truth_marks_in_footprint": 63
+    },
+    "230613": {
+     "splat_recall": 0.6166666666666667,
+     "laser_recall_same_marks": 0.7,
+     "ratio": 0.880952380952381,
+     "gate_ge_0.9": false,
+     "n_truth_marks_in_footprint": 60
+    },
+    "230621": {
+     "splat_recall": 0.25,
+     "laser_recall_same_marks": 0.125,
+     "ratio": 2.0,
+     "gate_ge_0.9": true,
+     "n_truth_marks_in_footprint": 8
+    }
+   },
+   "T4_verdict": {
+    "230601": "fail",
+    "230613": "fail"
+   },
+   "T5": {
+    "T5": {
+     "polygon": "SB8_020623",
+     "splat_n_inside_k": 5,
+     "splat_removed_called_inside_dilated": 5,
+     "n_laser_inside_k": 10,
+     "laser_removed_called_inside_dilated": 8,
+     "n_both_sensors_recorded": 5,
+     "splat_removed_among_both": 5,
+     "laser_removed_among_both": 5,
+     "verdict": "fail; only 5 of the 10 laser plants inside are recorded by the splat too, so the bar of 8 cannot be met by construction: a detection (T4) limit, not a change-rule failure",
+     "specificity": {
+      "n_candidates": 28,
+      "n_removed_called": 9,
+      "expected": 20.102564102564102,
+      "met": true
+     }
+    }
+   },
+   "T6": {
+    "230601->230613": {
+     "n": 12,
+     "median_abs_diff_m": 0.013452110035899523,
+     "agreement_frac": 1.0,
+     "verdict": "pass"
+    },
+    "230613->230621": {
+     "n": 7,
+     "median_abs_diff_m": 0.024914649645211284,
+     "agreement_frac": 0.8571428571428571,
+     "verdict": "fail",
+     "median_abs_diff_minus_bound_m": 0.0,
+     "agreement_frac_signed_corrected": 0.8571428571428571
+    },
+    "230621->230628": {
+     "verdict": "undecidable (splat or laser census missing at one date)",
+     "n": 0
+    }
+   }
+  },
+  "0.095": {
+   "T4": {
+    "230601": {
+     "splat_recall": 0.6349206349206349,
+     "laser_recall_same_marks": 0.9523809523809523,
+     "ratio": 0.6666666666666666,
+     "gate_ge_0.9": false,
+     "n_truth_marks_in_footprint": 63
+    },
+    "230613": {
+     "splat_recall": 0.6666666666666666,
+     "laser_recall_same_marks": 0.7,
+     "ratio": 0.9523809523809524,
+     "gate_ge_0.9": true,
+     "n_truth_marks_in_footprint": 60
+    },
+    "230621": {
+     "splat_recall": 0.25,
+     "laser_recall_same_marks": 0.125,
+     "ratio": 2.0,
+     "gate_ge_0.9": true,
+     "n_truth_marks_in_footprint": 8
+    }
+   },
+   "T4_verdict": {
+    "230601": "fail",
+    "230613": "pass"
+   },
+   "T5": {
+    "T5": {
+     "polygon": "SB8_020623",
+     "splat_n_inside_k": 5,
+     "splat_removed_called_inside_dilated": 4,
+     "n_laser_inside_k": 10,
+     "laser_removed_called_inside_dilated": 8,
+     "n_both_sensors_recorded": 5,
+     "splat_removed_among_both": 4,
+     "laser_removed_among_both": 5,
+     "verdict": "fail; only 5 of the 10 laser plants inside are recorded by the splat too, so the bar of 8 cannot be met by construction: a detection (T4) limit, not a change-rule failure",
+     "specificity": {
+      "n_candidates": 28,
+      "n_removed_called": 8,
+      "expected": 19.384615384615383,
+      "met": true
+     }
+    }
+   },
+   "T6": {
+    "230601->230613": {
+     "n": 14,
+     "median_abs_diff_m": 0.019300773205841892,
+     "agreement_frac": 1.0,
+     "verdict": "pass"
+    },
+    "230613->230621": {
+     "n": 10,
+     "median_abs_diff_m": 0.03955603829918175,
+     "agreement_frac": 0.8,
+     "verdict": "fail",
+     "median_abs_diff_minus_bound_m": 0.014186346807420591,
+     "agreement_frac_signed_corrected": 0.8
+    },
+    "230621->230628": {
+     "verdict": "undecidable (splat or laser census missing at one date)",
+     "n": 0
+    }
+   }
+  },
+  "0.100": {
+   "T4": {
+    "230601": {
+     "splat_recall": 0.6349206349206349,
+     "laser_recall_same_marks": 0.9523809523809523,
+     "ratio": 0.6666666666666666,
+     "gate_ge_0.9": false,
+     "n_truth_marks_in_footprint": 63
+    },
+    "230613": {
+     "splat_recall": 0.6666666666666666,
+     "laser_recall_same_marks": 0.7,
+     "ratio": 0.9523809523809524,
+     "gate_ge_0.9": true,
+     "n_truth_marks_in_footprint": 60
+    },
+    "230621": {
+     "splat_recall": 0.25,
+     "laser_recall_same_marks": 0.125,
+     "ratio": 2.0,
+     "gate_ge_0.9": true,
+     "n_truth_marks_in_footprint": 8
+    }
+   },
+   "T4_verdict": {
+    "230601": "fail",
+    "230613": "pass"
+   },
+   "T5": {
+    "T5": {
+     "polygon": "SB8_020623",
+     "splat_n_inside_k": 5,
+     "splat_removed_called_inside_dilated": 4,
+     "n_laser_inside_k": 10,
+     "laser_removed_called_inside_dilated": 8,
+     "n_both_sensors_recorded": 5,
+     "splat_removed_among_both": 4,
+     "laser_removed_among_both": 5,
+     "verdict": "fail; only 5 of the 10 laser plants inside are recorded by the splat too, so the bar of 8 cannot be met by construction: a detection (T4) limit, not a change-rule failure",
+     "specificity": {
+      "n_candidates": 28,
+      "n_removed_called": 6,
+      "expected": 19.384615384615383,
+      "met": true
+     }
+    }
+   },
+   "T6": {
+    "230601->230613": {
+     "n": 15,
+     "median_abs_diff_m": 0.022623151455320567,
+     "agreement_frac": 0.9333333333333333,
+     "verdict": "pass"
+    },
+    "230613->230621": {
+     "n": 10,
+     "median_abs_diff_m": 0.03955603829918175,
+     "agreement_frac": 0.8,
+     "verdict": "fail",
+     "median_abs_diff_minus_bound_m": 0.014186346807420591,
+     "agreement_frac_signed_corrected": 0.8
+    },
+    "230621->230628": {
+     "verdict": "undecidable (splat or laser census missing at one date)",
+     "n": 0
+    }
+   }
+  },
+  "0.150": {
+   "T4": {
+    "230601": {
+     "splat_recall": 0.6507936507936508,
+     "laser_recall_same_marks": 0.9523809523809523,
+     "ratio": 0.6833333333333333,
+     "gate_ge_0.9": false,
+     "n_truth_marks_in_footprint": 63
+    },
+    "230613": {
+     "splat_recall": 0.6666666666666666,
+     "laser_recall_same_marks": 0.7166666666666667,
+     "ratio": 0.9302325581395349,
+     "gate_ge_0.9": true,
+     "n_truth_marks_in_footprint": 60
+    },
+    "230621": {
+     "splat_recall": 0.375,
+     "laser_recall_same_marks": 0.375,
+     "ratio": 1.0,
+     "gate_ge_0.9": true,
+     "n_truth_marks_in_footprint": 8
+    }
+   },
+   "T4_verdict": {
+    "230601": "fail",
+    "230613": "pass"
+   },
+   "T5": {
+    "T5": {
+     "polygon": "SB8_020623",
+     "splat_n_inside_k": 5,
+     "splat_removed_called_inside_dilated": 4,
+     "n_laser_inside_k": 10,
+     "laser_removed_called_inside_dilated": 7,
+     "n_both_sensors_recorded": 5,
+     "splat_removed_among_both": 4,
+     "laser_removed_among_both": 4,
+     "verdict": "fail; only 5 of the 10 laser plants inside are recorded by the splat too, so the bar of 7 cannot be met by construction: a detection (T4) limit, not a change-rule failure",
+     "specificity": {
+      "n_candidates": 28,
+      "n_removed_called": 5,
+      "expected": 15.076923076923077,
+      "met": true
+     }
+    }
+   },
+   "T6": {
+    "230601->230613": {
+     "n": 16,
+     "median_abs_diff_m": 0.023114566409219606,
+     "agreement_frac": 0.9375,
+     "verdict": "pass"
+    },
+    "230613->230621": {
+     "n": 15,
+     "median_abs_diff_m": 0.04305229220256024,
+     "agreement_frac": 0.8,
+     "verdict": "fail",
+     "median_abs_diff_minus_bound_m": 0.01768260071079908,
+     "agreement_frac_signed_corrected": 0.8666666666666667
+    },
+    "230621->230628": {
+     "verdict": "undecidable (splat or laser census missing at one date)",
+     "n": 0
+    }
+   }
+  }
+ },
+ "runtime_s": 1.9
+}

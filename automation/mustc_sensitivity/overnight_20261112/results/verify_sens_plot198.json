@@ -1,0 +1,1350 @@
+{
+ "label": "SENSITIVITY, NOT ADOPTED: independent recount",
+ "plot": "198",
+ "comparisons": [
+  {
+   "what": "stops entering, T2 check (from the raw registration fields)",
+   "recount": [
+    "230601_pos00",
+    "230601_pos01",
+    "230601_pos02",
+    "230601_pos03",
+    "230613_pos00",
+    "230613_pos01",
+    "230613_pos02",
+    "230613_pos03",
+    "230621_pos00",
+    "230621_pos01",
+    "230621_pos02",
+    "230621_pos03",
+    "230628_pos04",
+    "230628_pos05"
+   ],
+   "table": [
+    "230601_pos00",
+    "230601_pos01",
+    "230601_pos02",
+    "230601_pos03",
+    "230613_pos00",
+    "230613_pos01",
+    "230613_pos02",
+    "230613_pos03",
+    "230621_pos00",
+    "230621_pos01",
+    "230621_pos02",
+    "230621_pos03",
+    "230628_pos04",
+    "230628_pos05"
+   ],
+   "agree": true
+  },
+  {
+   "what": "stops entering, T2 and plant-pattern check",
+   "recount": [
+    "230601_pos00",
+    "230601_pos01",
+    "230601_pos02",
+    "230601_pos03",
+    "230613_pos03",
+    "230621_pos00",
+    "230621_pos01"
+   ],
+   "table": [
+    "230601_pos00",
+    "230601_pos01",
+    "230601_pos02",
+    "230601_pos03",
+    "230613_pos03",
+    "230621_pos00",
+    "230621_pos01"
+   ],
+   "agree": true
+  },
+  {
+   "what": "as registered r_assoc = own 230613 same-day position p95 at 0.10 m (cap 0.095)",
+   "recount": 0.08748315002782564,
+   "table": 0.08748315002782564,
+   "agree": true
+  },
+  {
+   "what": "as registered g = own 230613 same-day |dh95| p95 (cap 0.08)",
+   "recount": 0.03220425210893153,
+   "table": 0.03220425210893153,
+   "agree": true
+  },
+  {
+   "what": "stricter set: 230613 same-day matched plants",
+   "recount": 0,
+   "table": 0,
+   "agree": true
+  },
+  {
+   "what": "stricter set r_assoc = laser pooled p95 capped at 0.095",
+   "recount": 0.095,
+   "table": 0.095,
+   "agree": true
+  },
+  {
+   "what": "stricter set g = laser pooled |dh95| p95 capped at 0.08",
+   "recount": 0.028084319829503095,
+   "table": 0.028084319829503095,
+   "agree": true
+  },
+  {
+   "what": "item 33: 230613 p95 at 0.15 m",
+   "recount": 0.12072308998917625,
+   "table": 0.12072308998917625,
+   "agree": true
+  },
+  {
+   "what": "item 33: n at 0.15 m",
+   "recount": 18,
+   "table": 18,
+   "agree": true
+  },
+  {
+   "what": "item 33: p95 at 0.20 m (beside)",
+   "recount": 0.16215219884358834,
+   "table": 0.16215219884358834,
+   "agree": true
+  },
+  {
+   "what": "item 33: n at 0.20 m",
+   "recount": 23,
+   "table": 23,
+   "agree": true
+  },
+  {
+   "what": "item 33: verdict",
+   "recount": "not resolvable",
+   "table": "not resolvable",
+   "agree": true
+  },
+  {
+   "what": "as registered T3 reading (0.15 and 0.20 m together)",
+   "recount": "not resolvable",
+   "table": "not resolvable",
+   "agree": true
+  },
+  {
+   "what": "as registered | T4 230601 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.6779661016949152,
+   "table": 0.6779661016949152,
+   "agree": true
+  },
+  {
+   "what": "as registered | T4 230601 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "as registered | T4 230601 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "as registered | T4 230613 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.9047619047619048,
+   "table": 0.9047619047619048,
+   "agree": true
+  },
+  {
+   "what": "as registered | T4 230613 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "as registered | T4 230613 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "pass",
+   "table": "pass",
+   "agree": true
+  },
+  {
+   "what": "as registered | T5 SB8_020623 removal clause (restated 4 Nov): splat removed among both",
+   "recount": 4,
+   "table": 4,
+   "agree": true
+  },
+  {
+   "what": "as registered | T5 SB8_020623 removal clause (restated 4 Nov): bar (laser removed inside)",
+   "recount": 8,
+   "table": 8,
+   "agree": true
+  },
+  {
+   "what": "as registered | T5 SB8_020623 removal clause (restated 4 Nov): n both in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "as registered | T5 SB8_020623 removal clause (restated 4 Nov): laser plants inside imaged by the later day's stops",
+   "recount": 9,
+   "table": 9,
+   "agree": true
+  },
+  {
+   "what": "as registered | T5 SB8_020623 specificity clause, splat: counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "as registered | T5 SB8_020623 specificity clause, splat: verdict as written",
+   "recount": "met",
+   "table": "met",
+   "agree": true
+  },
+  {
+   "what": "as registered | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "as registered | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): verdict as written",
+   "recount": "not met",
+   "table": "not met",
+   "agree": true
+  },
+  {
+   "what": "as registered | T6 230601->230613: n",
+   "recount": 12,
+   "table": 12,
+   "agree": true
+  },
+  {
+   "what": "as registered | T6 230601->230613: median",
+   "recount": 0.013452110035899523,
+   "table": 0.013452110035899523,
+   "agree": true
+  },
+  {
+   "what": "as registered | T6 230601->230613: agreement",
+   "recount": 1.0,
+   "table": 1.0,
+   "agree": true
+  },
+  {
+   "what": "as registered | T6 230601->230613: verdict",
+   "recount": "pass",
+   "table": "pass",
+   "agree": true
+  },
+  {
+   "what": "as registered | T6 230613->230621: n",
+   "recount": 9,
+   "table": 9,
+   "agree": true
+  },
+  {
+   "what": "as registered | T6 230613->230621: median",
+   "recount": 0.00420469805249013,
+   "table": 0.00420469805249013,
+   "agree": true
+  },
+  {
+   "what": "as registered | T6 230613->230621: agreement",
+   "recount": 0.7777777777777778,
+   "table": 0.7777777777777778,
+   "agree": true
+  },
+  {
+   "what": "as registered | T6 230613->230621: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "as registered | T7 plant clause (2 g): stops with p95 <= 2 g",
+   "recount": 0,
+   "table": 0,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T4 230601 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.6779661016949152,
+   "table": 0.6779661016949152,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T4 230601 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T4 230601 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "item 30 | T4 230613 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.9047619047619048,
+   "table": 0.9047619047619048,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T4 230613 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T4 230613 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "pass",
+   "table": "pass",
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 removal clause (restated 4 Nov): splat removed among both",
+   "recount": 4,
+   "table": 4,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 removal clause (restated 4 Nov): bar (laser removed inside)",
+   "recount": 8,
+   "table": 8,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 removal clause (restated 4 Nov): n both in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 removal clause (restated 4 Nov): laser plants inside imaged by the later day's stops",
+   "recount": 9,
+   "table": 9,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity clause, splat: counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity clause, splat: same-day rate",
+   "recount": 0.717948717948718,
+   "table": 0.717948717948718,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity clause, splat: same-day counts",
+   "recount": [
+    56,
+    78
+   ],
+   "table": [
+    56,
+    78
+   ],
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity clause, splat: Wilson low",
+   "recount": 0.1793324692249496,
+   "table": 0.1793324692249496,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity clause, splat: Wilson high",
+   "recount": 0.5066115681914238,
+   "table": 0.5066115681914238,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity clause, splat: Wilson (scipy) low",
+   "recount": 0.17933246922494958,
+   "table": 0.1793324692249496,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity clause, splat: Clopper-Pearson (scipy) high",
+   "recount": 0.5235164067098602,
+   "table": 0.5235164067096185,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity clause, splat: item-30 verdict",
+   "recount": "no verdict",
+   "table": "no verdict",
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): same-day rate",
+   "recount": 0.13236313236313235,
+   "table": 0.13236313236313235,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): same-day counts",
+   "recount": [
+    10,
+    76
+   ],
+   "table": [
+    10,
+    76
+   ],
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): Wilson low",
+   "recount": 0.22418589997352706,
+   "table": 0.22418589997352706,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): Wilson high",
+   "recount": 0.49828218007147956,
+   "table": 0.49828218007147956,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): Wilson (scipy) low",
+   "recount": 0.2241858999735271,
+   "table": 0.22418589997352706,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): Clopper-Pearson (scipy) high",
+   "recount": 0.5092663604753673,
+   "table": 0.5092663604753611,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): item-30 verdict",
+   "recount": "not met",
+   "table": "not met",
+   "agree": true
+  },
+  {
+   "what": "item 30 | T6 230601->230613: n",
+   "recount": 12,
+   "table": 12,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T6 230601->230613: median",
+   "recount": 0.013452110035899523,
+   "table": 0.013452110035899523,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T6 230601->230613: agreement",
+   "recount": 1.0,
+   "table": 1.0,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T6 230601->230613: verdict",
+   "recount": "pass",
+   "table": "pass",
+   "agree": true
+  },
+  {
+   "what": "item 30 | T6 230613->230621: n",
+   "recount": 9,
+   "table": 9,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T6 230613->230621: median",
+   "recount": 0.00420469805249013,
+   "table": 0.00420469805249013,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T6 230613->230621: agreement",
+   "recount": 0.7777777777777778,
+   "table": 0.7777777777777778,
+   "agree": true
+  },
+  {
+   "what": "item 30 | T6 230613->230621: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "item 30 | T7 plant clause (2 g): stops with p95 <= 2 g",
+   "recount": 0,
+   "table": 0,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T4 230601 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.6779661016949152,
+   "table": 0.6779661016949152,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T4 230601 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T4 230601 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "item 31 | T4 230613 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.9047619047619048,
+   "table": 0.9047619047619048,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T4 230613 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T4 230613 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "pass",
+   "table": "pass",
+   "agree": true
+  },
+  {
+   "what": "item 31 | T5 SB8_020623 removal clause (restated 4 Nov): splat removed among both",
+   "recount": 4,
+   "table": 4,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T5 SB8_020623 removal clause (restated 4 Nov): bar (laser removed inside)",
+   "recount": 8,
+   "table": 8,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T5 SB8_020623 removal clause (restated 4 Nov): n both in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T5 SB8_020623 removal clause (restated 4 Nov): laser plants inside imaged by the later day's stops",
+   "recount": 9,
+   "table": 9,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T5 SB8_020623 specificity clause, splat: counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T5 SB8_020623 specificity clause, splat: verdict as written",
+   "recount": "met",
+   "table": "met",
+   "agree": true
+  },
+  {
+   "what": "item 31 | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): verdict as written",
+   "recount": "not met",
+   "table": "not met",
+   "agree": true
+  },
+  {
+   "what": "item 31 | T6 230601->230613: n",
+   "recount": 12,
+   "table": 12,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T6 230601->230613: median",
+   "recount": 0.013452110035899523,
+   "table": 0.013452110035899523,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T6 230601->230613: agreement",
+   "recount": 1.0,
+   "table": 1.0,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T6 230601->230613: verdict",
+   "recount": "pass",
+   "table": "pass",
+   "agree": true
+  },
+  {
+   "what": "item 31 | T6 230613->230621: n",
+   "recount": 9,
+   "table": 9,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T6 230613->230621: median",
+   "recount": 0.00420469805249013,
+   "table": 0.00420469805249013,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T6 230613->230621: agreement",
+   "recount": 0.7777777777777778,
+   "table": 0.7777777777777778,
+   "agree": true
+  },
+  {
+   "what": "item 31 | T6 230613->230621: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "item 31 | T7 plant clause (item 31): stops within the M2d floor",
+   "recount": [
+    4,
+    12
+   ],
+   "table": [
+    4,
+    12
+   ],
+   "agree": true
+  },
+  {
+   "what": "item 31 | M2d per-plant |diff| p95 recomputed from the plant list, laser_230601_vs_uav1_230602",
+   "recount": 0.05742115296836515,
+   "table": 0.05742115296836515,
+   "agree": true
+  },
+  {
+   "what": "item 31 | M2d per-plant |diff| p95 recomputed from the plant list, laser_230613_vs_uav1_230614",
+   "recount": 0.07487809449559676,
+   "table": 0.07487809449559676,
+   "agree": true
+  },
+  {
+   "what": "item 31 | M2d per-plant |diff| p95 recomputed from the plant list, laser_230621_vs_uav1_230623",
+   "recount": 0.14433154453579533,
+   "table": 0.14433154453579533,
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T4 230601 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.6666666666666666,
+   "table": 0.6666666666666666,
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T4 230601 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T4 230601 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T4 230613 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.6666666666666666,
+   "table": 0.6666666666666666,
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T4 230613 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T4 230613 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T5 SB8_020623 removal clause (restated 4 Nov): splat removed among both",
+   "recount": 0,
+   "table": 0,
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T5 SB8_020623 removal clause (restated 4 Nov): bar (laser removed inside)",
+   "recount": 8,
+   "table": 8,
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T5 SB8_020623 removal clause (restated 4 Nov): n both in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T5 SB8_020623 removal clause (restated 4 Nov): laser plants inside imaged by the later day's stops",
+   "recount": 0,
+   "table": 0,
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T5 SB8_020623 specificity clause, splat: counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T5 SB8_020623 specificity clause, splat: verdict as written",
+   "recount": "not evaluable",
+   "table": "not evaluable",
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): verdict as written",
+   "recount": "not met",
+   "table": "not met",
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T6 230601->230613: undecidable with n",
+   "recount": [
+    "undecidable",
+    2
+   ],
+   "table": [
+    "undecidable",
+    2
+   ],
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T6 230613->230621: undecidable with n",
+   "recount": [
+    "undecidable",
+    0
+   ],
+   "table": [
+    "undecidable",
+    0
+   ],
+   "agree": true
+  },
+  {
+   "what": "item 32 (b) | T7 plant clause (2 g): stops with p95 <= 2 g",
+   "recount": 0,
+   "table": 0,
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T4 230601 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.6779661016949152,
+   "table": 0.6779661016949152,
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T4 230601 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T4 230601 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T4 230613 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.5555555555555556,
+   "table": 0.5555555555555556,
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T4 230613 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T4 230613 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T5 SB8_020623 removal clause (restated 4 Nov): splat removed among both",
+   "recount": 0,
+   "table": 0,
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T5 SB8_020623 removal clause (restated 4 Nov): bar (laser removed inside)",
+   "recount": 8,
+   "table": 8,
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T5 SB8_020623 removal clause (restated 4 Nov): n both in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T5 SB8_020623 removal clause (restated 4 Nov): laser plants inside imaged by the later day's stops",
+   "recount": 0,
+   "table": 0,
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T5 SB8_020623 specificity clause, splat: counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T5 SB8_020623 specificity clause, splat: verdict as written",
+   "recount": "not evaluable",
+   "table": "not evaluable",
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): verdict as written",
+   "recount": "not met",
+   "table": "not met",
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T6 230601->230613: undecidable with n",
+   "recount": [
+    "undecidable",
+    2
+   ],
+   "table": [
+    "undecidable",
+    2
+   ],
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T6 230613->230621: undecidable with n",
+   "recount": [
+    "undecidable",
+    0
+   ],
+   "table": [
+    "undecidable",
+    0
+   ],
+   "agree": true
+  },
+  {
+   "what": "item 32 (a) | T7 plant clause (2 g): stops with p95 <= 2 g",
+   "recount": 0,
+   "table": 0,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T4 230601 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.6779661016949152,
+   "table": 0.6779661016949152,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T4 230601 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T4 230601 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T4 230613 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.9047619047619048,
+   "table": 0.9047619047619048,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T4 230613 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T4 230613 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "pass",
+   "table": "pass",
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 removal clause (restated 4 Nov): splat removed among both",
+   "recount": 4,
+   "table": 4,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 removal clause (restated 4 Nov): bar (laser removed inside)",
+   "recount": 8,
+   "table": 8,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 removal clause (restated 4 Nov): n both in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 removal clause (restated 4 Nov): laser plants inside imaged by the later day's stops",
+   "recount": 9,
+   "table": 9,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity clause, splat: counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity clause, splat: same-day rate",
+   "recount": 0.717948717948718,
+   "table": 0.717948717948718,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity clause, splat: same-day counts",
+   "recount": [
+    56,
+    78
+   ],
+   "table": [
+    56,
+    78
+   ],
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity clause, splat: Wilson low",
+   "recount": 0.1793324692249496,
+   "table": 0.1793324692249496,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity clause, splat: Wilson high",
+   "recount": 0.5066115681914238,
+   "table": 0.5066115681914238,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity clause, splat: Wilson (scipy) low",
+   "recount": 0.17933246922494958,
+   "table": 0.1793324692249496,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity clause, splat: Clopper-Pearson (scipy) high",
+   "recount": 0.5235164067098602,
+   "table": 0.5235164067096185,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity clause, splat: item-30 verdict",
+   "recount": "no verdict",
+   "table": "no verdict",
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): same-day rate",
+   "recount": 0.13236313236313235,
+   "table": 0.13236313236313235,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): same-day counts",
+   "recount": [
+    10,
+    76
+   ],
+   "table": [
+    10,
+    76
+   ],
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): Wilson low",
+   "recount": 0.22418589997352706,
+   "table": 0.22418589997352706,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): Wilson high",
+   "recount": 0.49828218007147956,
+   "table": 0.49828218007147956,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): Wilson (scipy) low",
+   "recount": 0.2241858999735271,
+   "table": 0.22418589997352706,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): Clopper-Pearson (scipy) high",
+   "recount": 0.5092663604753673,
+   "table": 0.5092663604753611,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): item-30 verdict",
+   "recount": "not met",
+   "table": "not met",
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T6 230601->230613: n",
+   "recount": 12,
+   "table": 12,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T6 230601->230613: median",
+   "recount": 0.013452110035899523,
+   "table": 0.013452110035899523,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T6 230601->230613: agreement",
+   "recount": 1.0,
+   "table": 1.0,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T6 230601->230613: verdict",
+   "recount": "pass",
+   "table": "pass",
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T6 230613->230621: n",
+   "recount": 9,
+   "table": 9,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T6 230613->230621: median",
+   "recount": 0.00420469805249013,
+   "table": 0.00420469805249013,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T6 230613->230621: agreement",
+   "recount": 0.7777777777777778,
+   "table": 0.7777777777777778,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T6 230613->230621: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "all four (a) | T7 plant clause (item 31): stops within the M2d floor",
+   "recount": [
+    4,
+    12
+   ],
+   "table": [
+    4,
+    12
+   ],
+   "agree": true
+  },
+  {
+   "what": "all four (a) | M2d per-plant |diff| p95 recomputed from the plant list, laser_230601_vs_uav1_230602",
+   "recount": 0.05742115296836515,
+   "table": 0.05742115296836515,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | M2d per-plant |diff| p95 recomputed from the plant list, laser_230613_vs_uav1_230614",
+   "recount": 0.07487809449559676,
+   "table": 0.07487809449559676,
+   "agree": true
+  },
+  {
+   "what": "all four (a) | M2d per-plant |diff| p95 recomputed from the plant list, laser_230621_vs_uav1_230623",
+   "recount": 0.14433154453579533,
+   "table": 0.14433154453579533,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T4 230601 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.6666666666666666,
+   "table": 0.6666666666666666,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T4 230601 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T4 230601 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T4 230613 splat recall >= 0.9 x laser recall: ratio",
+   "recount": 0.6666666666666666,
+   "table": 0.6666666666666666,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T4 230613 splat recall >= 0.9 x laser recall: counts in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T4 230613 splat recall >= 0.9 x laser recall: verdict",
+   "recount": "fail",
+   "table": "fail",
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 removal clause (restated 4 Nov): splat removed among both",
+   "recount": 0,
+   "table": 0,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 removal clause (restated 4 Nov): bar (laser removed inside)",
+   "recount": 8,
+   "table": 8,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 removal clause (restated 4 Nov): n both in basis",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 removal clause (restated 4 Nov): laser plants inside imaged by the later day's stops",
+   "recount": 0,
+   "table": 0,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity clause, splat: counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity clause, splat: same-day rate",
+   "recount": null,
+   "table": null,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity clause, splat: same-day counts",
+   "recount": [
+    0,
+    0
+   ],
+   "table": [
+    0,
+    0
+   ],
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity clause, splat: Wilson low",
+   "recount": 0.26799202452413634,
+   "table": 0.26799202452413634,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity clause, splat: Wilson high",
+   "recount": 0.7320079754758637,
+   "table": 0.7320079754758637,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity clause, splat: Wilson (scipy) low",
+   "recount": 0.2679920245241364,
+   "table": 0.26799202452413634,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity clause, splat: Clopper-Pearson (scipy) high",
+   "recount": 0.769639458551949,
+   "table": 0.7696394585519376,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity clause, splat: item-30 verdict",
+   "recount": "not evaluable",
+   "table": "not evaluable",
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): counts",
+   "recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): same-day rate",
+   "recount": 0.13236313236313235,
+   "table": 0.13236313236313235,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): same-day counts",
+   "recount": [
+    10,
+    76
+   ],
+   "table": [
+    10,
+    76
+   ],
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): Wilson low",
+   "recount": 0.18602000135848176,
+   "table": 0.1860200013584818,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): Wilson high",
+   "recount": 0.4510536417772961,
+   "table": 0.45105364177729607,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): Wilson (scipy) low",
+   "recount": 0.1860200013584818,
+   "table": 0.1860200013584818,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): Clopper-Pearson (scipy) high",
+   "recount": 0.46125330573440304,
+   "table": 0.46125330573403234,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T5 SB8_020623 specificity, laser ceiling (beside; not in the verdict): item-30 verdict",
+   "recount": "not met",
+   "table": "not met",
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T6 230601->230613: undecidable with n",
+   "recount": [
+    "undecidable",
+    2
+   ],
+   "table": [
+    "undecidable",
+    2
+   ],
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T6 230613->230621: undecidable with n",
+   "recount": [
+    "undecidable",
+    0
+   ],
+   "table": [
+    "undecidable",
+    0
+   ],
+   "agree": true
+  },
+  {
+   "what": "all four (b) | T7 plant clause (item 31): stops within the M2d floor",
+   "recount": [
+    2,
+    7
+   ],
+   "table": [
+    2,
+    7
+   ],
+   "agree": true
+  },
+  {
+   "what": "all four (b) | M2d per-plant |diff| p95 recomputed from the plant list, laser_230601_vs_uav1_230602",
+   "recount": 0.05742115296836515,
+   "table": 0.05742115296836515,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | M2d per-plant |diff| p95 recomputed from the plant list, laser_230613_vs_uav1_230614",
+   "recount": 0.07487809449559676,
+   "table": 0.07487809449559676,
+   "agree": true
+  },
+  {
+   "what": "all four (b) | M2d per-plant |diff| p95 recomputed from the plant list, laser_230621_vs_uav1_230623",
+   "recount": 0.14433154453579533,
+   "table": 0.14433154453579533,
+   "agree": true
+  }
+ ],
+ "n_comparisons": 201,
+ "n_diff": 0
+}

@@ -1,0 +1,448 @@
+{
+ "label": "SENSITIVITY, NOT ADOPTED: A100 transcription check against the records of record",
+ "checks": [
+  {
+   "what": "T1 basis (n pass of n, swap px range from rig_ws_summary.csv)",
+   "record_or_recount": "11 of 11 stops, 0.46-0.55 px",
+   "table": "11 of 11 stops, 0.46-0.55 px",
+   "agree": true
+  },
+  {
+   "what": "T2 check count",
+   "record_or_recount": "9 of 11",
+   "table": "9 of 11",
+   "agree": true
+  },
+  {
+   "what": "T2 + plant-pattern count (item 32 stop set size)",
+   "record_or_recount": "1 of 11",
+   "table": "1 of 11",
+   "agree": true
+  },
+  {
+   "what": "item 32 stop set (names)",
+   "record_or_recount": [
+    "230601_pos01"
+   ],
+   "table": [
+    "230601_pos01"
+   ],
+   "agree": true
+  },
+  {
+   "what": "as-registered stop set (names)",
+   "record_or_recount": [
+    "230601_pos01",
+    "230601_pos02",
+    "230601_pos03",
+    "230613_pos01",
+    "230613_pos02",
+    "230613_pos03",
+    "230616_pos00",
+    "230616_pos01",
+    "230616_pos02"
+   ],
+   "table": [
+    "230601_pos01",
+    "230601_pos02",
+    "230601_pos03",
+    "230613_pos01",
+    "230613_pos02",
+    "230613_pos03",
+    "230616_pos00",
+    "230616_pos01",
+    "230616_pos02"
+   ],
+   "agree": true
+  },
+  {
+   "what": "T2 scale flag count",
+   "record_or_recount": "1 of 11 flagged",
+   "table": "1 of 11 flagged",
+   "agree": true
+  },
+  {
+   "what": "T3 as registered (0.15 and 0.20 m together)",
+   "record_or_recount": "radius-dependent",
+   "table": "radius-dependent",
+   "agree": true
+  },
+  {
+   "what": "T3 item 33 (0.15 m alone)",
+   "record_or_recount": "resolvable",
+   "table": "resolvable",
+   "agree": true
+  },
+  {
+   "what": "T3 p95 at 0.15 m",
+   "record_or_recount": 0.09075534620038697,
+   "table": 0.09075534620038697,
+   "agree": true
+  },
+  {
+   "what": "T3 n at 0.15 / 0.20 m",
+   "record_or_recount": [
+    18,
+    19
+   ],
+   "table": [
+    18,
+    19
+   ],
+   "agree": true
+  },
+  {
+   "what": "T3 laser ceiling verdict",
+   "record_or_recount": "resolvable",
+   "table": "resolvable",
+   "agree": true
+  },
+  {
+   "what": "T5 removal clause value/bar",
+   "record_or_recount": [
+    9,
+    14
+   ],
+   "table": [
+    9,
+    14
+   ],
+   "agree": true
+  },
+  {
+   "what": "item 30 splat: counts in basis",
+   "record_or_recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 30 splat: same-day rate",
+   "record_or_recount": 0.5,
+   "table": 0.5,
+   "agree": true
+  },
+  {
+   "what": "item 30 splat: Wilson low",
+   "record_or_recount": 0.21380798904474121,
+   "table": 0.21380798904474121,
+   "agree": true
+  },
+  {
+   "what": "item 30 splat: Wilson high",
+   "record_or_recount": 0.6740935542034926,
+   "table": 0.6740935542034926,
+   "agree": true
+  },
+  {
+   "what": "item 30 splat: verdict",
+   "record_or_recount": "met",
+   "table": "met",
+   "agree": true
+  },
+  {
+   "what": "as registered splat: verdict",
+   "record_or_recount": "met",
+   "table": "met",
+   "agree": true
+  },
+  {
+   "what": "item 30 splat: Wilson low (scipy cross-check of my formula)",
+   "record_or_recount": 0.21380798904474121,
+   "table": 0.21380798904474121,
+   "agree": true
+  },
+  {
+   "what": "item 30 laser: counts in basis",
+   "record_or_recount": true,
+   "table": true,
+   "agree": true
+  },
+  {
+   "what": "item 30 laser: same-day rate",
+   "record_or_recount": 0.20970695970695968,
+   "table": 0.20970695970695968,
+   "agree": true
+  },
+  {
+   "what": "item 30 laser: Wilson low",
+   "record_or_recount": 0.2554444331365656,
+   "table": 0.2554444331365656,
+   "agree": true
+  },
+  {
+   "what": "item 30 laser: Wilson high",
+   "record_or_recount": 0.6105138625340828,
+   "table": 0.6105138625340828,
+   "agree": true
+  },
+  {
+   "what": "item 30 laser: verdict",
+   "record_or_recount": "not met",
+   "table": "not met",
+   "agree": true
+  },
+  {
+   "what": "as registered laser: verdict",
+   "record_or_recount": "not met",
+   "table": "not met",
+   "agree": true
+  },
+  {
+   "what": "item 30 laser: Wilson low (scipy cross-check of my formula)",
+   "record_or_recount": 0.2554444331365656,
+   "table": 0.2554444331365656,
+   "agree": true
+  },
+  {
+   "what": "T7 230601_pos01 per-plant p95 recomputed vs ledger record",
+   "record_or_recount": 0.12448370797885389,
+   "table": 0.12448370797885389,
+   "agree": true
+  },
+  {
+   "what": "T7 230601_pos02 per-plant p95 recomputed vs ledger record",
+   "record_or_recount": 0.0789506713297925,
+   "table": 0.0789506713297925,
+   "agree": true
+  },
+  {
+   "what": "T7 230601_pos03 per-plant p95 recomputed vs ledger record",
+   "record_or_recount": 0.0884650383749033,
+   "table": 0.0884650383749033,
+   "agree": true
+  },
+  {
+   "what": "T7 230613_pos01 per-plant p95 recomputed vs ledger record",
+   "record_or_recount": 0.09652017207808399,
+   "table": 0.09652017207808399,
+   "agree": true
+  },
+  {
+   "what": "T7 230613_pos02 per-plant p95 recomputed vs ledger record",
+   "record_or_recount": 0.12395697894128688,
+   "table": 0.12395697894128688,
+   "agree": true
+  },
+  {
+   "what": "T7 230613_pos03 per-plant p95 recomputed vs ledger record",
+   "record_or_recount": 0.12861208101902552,
+   "table": 0.12861208101902552,
+   "agree": true
+  },
+  {
+   "what": "T7 230616_pos00 per-plant p95 recomputed vs ledger record",
+   "record_or_recount": 0.18627182030753886,
+   "table": 0.18627182030753886,
+   "agree": true
+  },
+  {
+   "what": "T7 230616_pos01 per-plant p95 recomputed vs ledger record",
+   "record_or_recount": 0.10788416527392997,
+   "table": 0.10788416527392997,
+   "agree": true
+  },
+  {
+   "what": "T7 230616_pos02 per-plant p95 recomputed vs ledger record",
+   "record_or_recount": 0.07392050213840097,
+   "table": 0.07392050213840097,
+   "agree": true
+  },
+  {
+   "what": "T7 as registered: stops with p95 <= 2 g",
+   "record_or_recount": [
+    8,
+    9
+   ],
+   "table": [
+    8,
+    9
+   ],
+   "agree": true
+  },
+  {
+   "what": "item 31: stops at or below the M2d floor",
+   "record_or_recount": [
+    1,
+    9
+   ],
+   "table": [
+    1,
+    9
+   ],
+   "agree": true
+  }
+ ],
+ "post_hoc": {
+  "t7_230616_vs_230613_laser_across_harvest": {
+   "label": "post hoc, not a rule",
+   "per_stop": {
+    "230616_pos00": {
+     "n_plants": 26,
+     "n_inside_SB7_150623_dilated_0.10": 10,
+     "diff_inside_m": [
+      0.034,
+      -0.173,
+      -0.207,
+      -0.16,
+      -0.101,
+      -0.136,
+      -0.128,
+      -0.187,
+      -0.183,
+      -0.094
+     ],
+     "p95_all_m": 0.18627182030753886,
+     "p95_without_inside_m": 0.06999400559559632,
+     "n_without_inside": 16
+    },
+    "230616_pos01": {
+     "n_plants": 26,
+     "n_inside_SB7_150623_dilated_0.10": 0,
+     "diff_inside_m": [],
+     "p95_all_m": 0.10788416527392997,
+     "p95_without_inside_m": 0.10788416527392997,
+     "n_without_inside": 26
+    },
+    "230616_pos02": {
+     "n_plants": 20,
+     "n_inside_SB7_150623_dilated_0.10": 0,
+     "diff_inside_m": [],
+     "p95_all_m": 0.07392050213840097,
+     "p95_without_inside_m": 0.07392050213840097,
+     "n_without_inside": 20
+    }
+   }
+  }
+ },
+ "t3_numbers": {
+  "p95_by_radius_m": {
+   "0.085": 0.07564678606026376,
+   "0.095": 0.07854789492395793,
+   "0.100": 0.09075534620038697,
+   "0.150": 0.09075534620038697,
+   "0.200": 0.10409728001835136
+  },
+  "n_by_radius": {
+   "0.085": 16,
+   "0.095": 17,
+   "0.100": 18,
+   "0.150": 18,
+   "0.200": 19
+  },
+  "laser_pooled_p95_m": 0.0757365954592108,
+  "laser_n": 151,
+  "g_p95_m": 0.1185989495366809
+ },
+ "item30": {
+  "splat": {
+   "k": 6,
+   "n": 14,
+   "false_removal_rate": 0.42857142857142855,
+   "wilson95": [
+    0.21380798904474121,
+    0.6740935542034926
+   ],
+   "same_day_rate": 0.5,
+   "bound": 7.0,
+   "verdict_item30": "met"
+  },
+  "laser": {
+   "k": 11,
+   "n": 26,
+   "false_removal_rate": 0.4230769230769231,
+   "wilson95": [
+    0.2554444331365656,
+    0.6105138625340828
+   ],
+   "same_day_rate": 0.20970695970695968,
+   "bound": 5.452380952380952,
+   "verdict_item30": "not met"
+  }
+ },
+ "t7_per_stop": {
+  "230601_pos01": {
+   "p95_m": 0.12448370797885389,
+   "n": 21,
+   "pair": "laser_230601_vs_uav1_230602",
+   "floor_m": 0.05742115296836515,
+   "le_2g": true,
+   "le_floor": false,
+   "record_p95_m": 0.12448370797885389
+  },
+  "230601_pos02": {
+   "p95_m": 0.0789506713297925,
+   "n": 19,
+   "pair": "laser_230601_vs_uav1_230602",
+   "floor_m": 0.05742115296836515,
+   "le_2g": true,
+   "le_floor": false,
+   "record_p95_m": 0.0789506713297925
+  },
+  "230601_pos03": {
+   "p95_m": 0.0884650383749033,
+   "n": 19,
+   "pair": "laser_230601_vs_uav1_230602",
+   "floor_m": 0.05742115296836515,
+   "le_2g": true,
+   "le_floor": false,
+   "record_p95_m": 0.0884650383749033
+  },
+  "230613_pos01": {
+   "p95_m": 0.09652017207808399,
+   "n": 25,
+   "pair": "laser_230613_vs_uav1_230614",
+   "floor_m": 0.07487809449559676,
+   "le_2g": true,
+   "le_floor": false,
+   "record_p95_m": 0.09652017207808399
+  },
+  "230613_pos02": {
+   "p95_m": 0.12395697894128688,
+   "n": 26,
+   "pair": "laser_230613_vs_uav1_230614",
+   "floor_m": 0.07487809449559676,
+   "le_2g": true,
+   "le_floor": false,
+   "record_p95_m": 0.12395697894128688
+  },
+  "230613_pos03": {
+   "p95_m": 0.12861208101902552,
+   "n": 20,
+   "pair": "laser_230613_vs_uav1_230614",
+   "floor_m": 0.07487809449559676,
+   "le_2g": true,
+   "le_floor": false,
+   "record_p95_m": 0.12861208101902552
+  },
+  "230616_pos00": {
+   "p95_m": 0.18627182030753886,
+   "n": 26,
+   "pair": "laser_230613_vs_uav1_230614",
+   "floor_m": 0.07487809449559676,
+   "le_2g": false,
+   "le_floor": false,
+   "record_p95_m": 0.18627182030753886
+  },
+  "230616_pos01": {
+   "p95_m": 0.10788416527392997,
+   "n": 26,
+   "pair": "laser_230613_vs_uav1_230614",
+   "floor_m": 0.07487809449559676,
+   "le_2g": true,
+   "le_floor": false,
+   "record_p95_m": 0.10788416527392997
+  },
+  "230616_pos02": {
+   "p95_m": 0.07392050213840097,
+   "n": 20,
+   "pair": "laser_230613_vs_uav1_230614",
+   "floor_m": 0.07487809449559676,
+   "le_2g": true,
+   "le_floor": true,
+   "record_p95_m": 0.07392050213840097
+  }
+ },
+ "two_g_m": 0.16,
+ "n_checks": 37,
+ "n_diff": 0
+}

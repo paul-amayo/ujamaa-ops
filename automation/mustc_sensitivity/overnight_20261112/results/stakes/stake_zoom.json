@@ -1,0 +1,153 @@
+{
+ "targets": {
+  "230621_id41_in_SB7_080723": {
+   "laser_date": "230621",
+   "id": 41,
+   "x": 357418.05610731296,
+   "y": 5610204.160921589,
+   "h95_m": 0.21221679410317051,
+   "area_cm2": 19.0,
+   "row": 6,
+   "in_polygon": [
+    "SB7_080723"
+   ],
+   "orthos": {
+    "230614": {
+     "path": "/mnt/shared2/must-c/plot178/plot-wise/plot178/230613-15/raster_data/UAV1-RGB/230614.tif",
+     "moved_xy": [
+      357418.06393864675,
+      5610204.114212993
+     ],
+     "pixel_m": 0.0009857530000001089,
+     "link": "two-pass plant NN (soil texture ambiguous)"
+    },
+    "230623": {
+     "path": "/mnt/shared2/must-c/plot178/plot-wise/plot178/230621-23/raster_data/UAV1-RGB/230623.tif",
+     "moved_xy": [
+      357418.06198665686,
+      5610204.160962452
+     ],
+     "pixel_m": 0.0009760229999998461,
+     "link": "two-pass plant NN (soil texture ambiguous)"
+    },
+    "230708": {
+     "path": "/mnt/shared2/must-c/plot178/plot-wise/plot178/230705-08/raster_data/UAV1-RGB/230708.tif",
+     "moved_xy": null,
+     "pixel_m": 0.000872965999999872,
+     "link": "two-pass plant NN (soil texture ambiguous)"
+    }
+   },
+   "sheet": "/mnt/shared2/must-c/plot178/census/sensitivity_20261112/stakes/zoom/zoom_230621_id41_in_SB7_080723.jpg"
+  },
+  "230525_id4_in_SB7_240623": {
+   "laser_date": "230525",
+   "id": 4,
+   "x": 357419.170356479,
+   "y": 5610204.39574321,
+   "h95_m": 0.31382038165108384,
+   "area_cm2": 6.0,
+   "row": -1,
+   "in_polygon": [
+    "SB7_240623"
+   ],
+   "orthos": {
+    "230517": {
+     "path": "/mnt/shared2/must-c/plot178/plot-wise/plot178/230516-17/raster_data/UAV1-RGB/230517.tif",
+     "moved_xy": null,
+     "pixel_m": 0.0008703020000001208,
+     "link": null
+    },
+    "230526": {
+     "path": "/mnt/shared2/must-c/plot178/plot-wise/plot178/230525-26/raster_data/UAV1-RGB/230526.tif",
+     "moved_xy": null,
+     "pixel_m": 0.0008912289999999023,
+     "link": null
+    },
+    "230602": {
+     "path": "/mnt/shared2/must-c/plot178/plot-wise/plot178/230601-02/raster_data/UAV1-RGB/230602.tif",
+     "moved_xy": null,
+     "pixel_m": 0.000992311999999856,
+     "link": null
+    }
+   },
+   "sheet": "/mnt/shared2/must-c/plot178/census/sensitivity_20261112/stakes/zoom/zoom_230525_id4_in_SB7_240623.jpg"
+  },
+  "reference_rod_230621_id1_in_SB7_150623": {
+   "laser_date": "230621",
+   "id": 1,
+   "x": 357421.23881744605,
+   "y": 5610203.993673546,
+   "h95_m": 0.36334484586100757,
+   "area_cm2": 23.0,
+   "row": -1,
+   "in_polygon": [
+    "SB7_150623"
+   ],
+   "orthos": {
+    "230614": {
+     "path": "/mnt/shared2/must-c/plot178/plot-wise/plot178/230613-15/raster_data/UAV1-RGB/230614.tif",
+     "moved_xy": [
+      357421.24664877984,
+      5610203.94696495
+     ],
+     "pixel_m": 0.0009857530000001089,
+     "link": "two-pass plant NN (soil texture ambiguous)"
+    },
+    "230623": {
+     "path": "/mnt/shared2/must-c/plot178/plot-wise/plot178/230621-23/raster_data/UAV1-RGB/230623.tif",
+     "moved_xy": [
+      357421.24469678995,
+      5610203.99371441
+     ],
+     "pixel_m": 0.0009760229999998461,
+     "link": "two-pass plant NN (soil texture ambiguous)"
+    },
+    "230708": {
+     "path": "/mnt/shared2/must-c/plot178/plot-wise/plot178/230705-08/raster_data/UAV1-RGB/230708.tif",
+     "moved_xy": null,
+     "pixel_m": 0.000872965999999872,
+     "link": "two-pass plant NN (soil texture ambiguous)"
+    }
+   },
+   "sheet": "/mnt/shared2/must-c/plot178/census/sensitivity_20261112/stakes/zoom/zoom_reference_rod_230621_id1_in_SB7_150623.jpg"
+  }
+ },
+ "l2o": {
+  "230601": {
+   "ortho": "230602",
+   "dE": 0.08532527152915884,
+   "dN": -0.04583355595782002,
+   "how": "soil texture"
+  },
+  "230613": {
+   "ortho": "230614",
+   "dE": 0.050757293974390896,
+   "dN": -0.0553014151287118,
+   "how": "soil texture"
+  },
+  "230621": {
+   "ortho": "230623",
+   "dE": 0.005879343894775957,
+   "dN": 4.086364060640335e-05,
+   "how": "two-pass plant NN (soil texture ambiguous)"
+  }
+ },
+ "ortho_to_230602": {
+  "230602": [
+   0.0,
+   0.0
+  ],
+  "230614": [
+   -0.02392936732066387,
+   0.0375854044632493
+  ],
+  "230623": [
+   -0.0219773774313872,
+   -0.009164054416241782
+  ],
+  "230526": [
+   -0.03188832618100833,
+   -3.407219048077922e-05
+  ]
+ }
+}

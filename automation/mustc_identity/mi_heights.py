@@ -66,13 +66,31 @@ def mutual_nn(ax, ay, bx, by, max_d):
     dab, jab = ta.query(np.column_stack([bx, by]), k=1, distance_upper_bound=max_d); dba, jba = tb.query(np.column_stack([ax, ay]), k=1, distance_upper_bound=max_d)
     ia = np.arange(len(ax)); okb = np.isfinite(dba); jj = np.where(okb, jba, 0); ok = okb & (jab[jj] == ia)
     return ia[ok], jba[ok], dba[ok]
-iS, iL, d = mutual_nn(sx_, sy_, lx, ly, a.r); raw_n = int(len(iS)); tr = None
-if len(iS) >= 5:
-    tr = [float(np.median(lx[iL] - sx_[iS])), float(np.median(ly[iL] - sy_[iS]))]; iS, iL, d = mutual_nn(sx_ + tr[0], sy_ + tr[1], lx, ly, a.r)
-c1 = {int(plants[j]['id']): (int(i), float(dd)) for i, j, dd in zip(iS, iL, d)}
+# A100 session, 11-11 20:15 UTC, before any score: the laser set is xs_match's A["in_region"] = the ledger's LASER_BAND (raw laser UTM)
+# minus the stake-rule ids of the date (mustc_ledger.load_laser); the splat set is every instance of this stop (the ledger's splat in_region).
+# The Mac version matched against all laser instances; that variant is kept below only as a labelled check (c1_check_all_laser_instances).
+LASER_BAND = {'x': (357415.6, 357421.7), 'y': (5610200.3, 5610201.95)}   # mustc_ledger.py line 159
+date = a.stop.split('_')[0]; raw = {int(p['id']): p for p in json.load(open(f'{a.census}/lmi_{date}.json'))['plants']}
+stakes = set(int(i) for i in json.load(open(f'{a.census}/lmi_assoc.json')).get('stake_rule', {}).get('per_date', {}).get(date, {}).get('ids', []))
+in_band = np.array([LASER_BAND['x'][0] <= raw[p['id']]['x'] <= LASER_BAND['x'][1] and LASER_BAND['y'][0] <= raw[p['id']]['y'] <= LASER_BAND['y'][1] and p['id'] not in stakes for p in plants])
+def xs(sel):   # xs_match on the laser subset sel: mutual NN within r, first-pass median translation removed if >= 5 pairs, match repeated
+    sa = np.flatnonzero(sel); iS, iL, d = mutual_nn(sx_, sy_, lx[sa], ly[sa], a.r); n1 = int(len(iS)); tr = None
+    if len(iS) >= 5:
+        tr = [float(np.median(lx[sa][iL] - sx_[iS])), float(np.median(ly[sa][iL] - sy_[iS]))]; iS, iL, d = mutual_nn(sx_ + tr[0], sy_ + tr[1], lx[sa], ly[sa], a.r)
+    return {int(plants[sa[j]]['id']): (int(i), float(dd)) for i, j, dd in zip(iS, iL, d)}, n1, tr
+c1, raw_n, tr = xs(in_band)
+c1_all, raw_n_all, tr_all = xs(np.ones(len(plants), bool))
 # c2: the record's laser-footprint h95
 try:
-    DV = json.load(open(f'{a.census}/dsm_vs_laser.json'))[a.stop]['vs_laser']['by_footprint']['nview6']['b']['per_plant']; c2 = {int(p['id']): p for p in DV['plants']}
+    DV = json.load(open(f'{a.census}/dsm_vs_laser.json'))[a.stop]['vs_laser']['by_footprint']['nview6']['b']['per_plant']
+    # A100 session 11-11 20:20 UTC: the record numbers its plants with its own local ids (2, 4, 5, ...), not the lmi census ids; the first run
+    # joined by id and found 0 of 11. Join by the raw laser position (<= 1 mm) and an identical laser h95 (<= 1e-6 m) instead; unmatched counted.
+    c2, c2_unmatched = {}, []
+    for q in DV['plants']:
+        hit = [i for i, p in raw.items() if abs(p['x'] - q['x']) <= 1e-3 and abs(p['y'] - q['y']) <= 1e-3 and abs(p['height_p95'] - q['laser_h95']) <= 1e-6]
+        if len(hit) == 1: c2[hit[0]] = q
+        else: c2_unmatched.append(int(q['id']))
+    DV['join'] = {'rule': 'record plant -> lmi id by raw position <= 1 mm and identical laser h95', 'matched': {str(int(q['id'])): i for i, q in c2.items()}, 'unmatched_record_ids': c2_unmatched}
 except Exception as e:  # noqa: BLE001
     DV, c2 = {'error': repr(e)[:200]}, {}
 sup = {}
@@ -99,8 +117,10 @@ summ = {'stop': a.stop, 'pred': a.pred, 'points': {'total': int(len(xyz)), 'keep
         'S': {'n': len(S), 'ids': [p['id'] for p in S], 'with_census_supervision': int(sum(1 for r in rows if r['census_views_labelled'] > 0))},
         'address': {'found': int(sum(1 for r in rows if r['address_h95_m'] != '')), **st('address_h95_m')},
         'c1_splat_census_b': {'found': int(sum(1 for r in rows if r['c1_h95_m'] != '')), **st('c1_h95_m'), 'n_splat_instances': len(inst), 'n_laser_instances': len(plants), 'first_pass_pairs': raw_n, 'translation_applied_to_splat_en_m': tr, 'match_radius_m': a.r,
-                              'matched_all_laser_instances': len(c1)},
-        'c2_laser_footprint_record': {'found': int(sum(1 for r in rows if r['c2_h95_m'] != '')), 'in_record': int(sum(r['c2_in_record'] for r in rows)), **st('c2_h95_m'), 'record_raw': DV.get('raw') if isinstance(DV, dict) else None},
+                              'matched_all_laser_instances': len(c1), 'laser_set': f'xs_match in_region: LASER_BAND and not stake ({int(in_band.sum())} of {len(plants)} instances; excluded ids {[p["id"] for p, b in zip(plants, in_band) if not b]})'},
+        'c1_check_all_laser_instances': {'note': 'check only (the Mac version of this script): xs_match against all laser instances, no band', 'first_pass_pairs': raw_n_all, 'translation_applied_to_splat_en_m': tr_all,
+                                         'S_plants_whose_match_differs': sorted(int(p['id']) for p in S if c1.get(p['id']) != c1_all.get(p['id']))},
+        'c2_laser_footprint_record': {'found': int(sum(1 for r in rows if r['c2_h95_m'] != '')), 'in_record': int(sum(r['c2_in_record'] for r in rows)), **st('c2_h95_m'), 'record_raw': DV.get('raw') if isinstance(DV, dict) else None, 'join': DV.get('join') if isinstance(DV, dict) else None},
         'paired_all_three': {'n': len(common), 'address': st('address_h95_m', common), 'c1': st('c1_h95_m', common), 'c2': st('c2_h95_m', common)},
         'paired_address_c1': {'n': len(common2), 'address': st('address_h95_m', common2), 'c1': st('c1_h95_m', common2)},
         'address_ids_outside_S': {str(i): v for i, v in apts.items() if i not in {p['id'] for p in S}}}

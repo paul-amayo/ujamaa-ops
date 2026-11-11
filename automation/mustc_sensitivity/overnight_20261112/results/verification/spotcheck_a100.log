@@ -1,0 +1,86 @@
+OK   plot 198 | T1 basis (n pass of n, swap px range from rig_ws_summary.csv): record/recount 18 of 18 stops, 0.43-0.58 px | table 18 of 18 stops, 0.43-0.58 px
+OK   plot 198 | T2 check count: record/recount 14 of 18 | table 14 of 18
+OK   plot 198 | T2 + plant-pattern count (item 32 stop set size): record/recount 7 of 18 | table 7 of 18
+OK   plot 198 | item 32 stop set (names): record/recount ['230601_pos00', '230601_pos01', '230601_pos02', '230601_pos03', '230613_pos03', '230621_pos00', '230621_pos01'] | table ['230601_pos00', '230601_pos01', '230601_pos02', '230601_pos03', '230613_pos03', '230621_pos00', '230621_pos01']
+OK   plot 198 | as-registered stop set (names): record/recount ['230601_pos00', '230601_pos01', '230601_pos02', '230601_pos03', '230613_pos00', '230613_pos01', '230613_pos02', '230613_pos03', '230621_pos00', '230621_pos01', '230621_pos02', '230621_pos03', '230628_pos04', '230628_pos05'] | table ['230601_pos00', '230601_pos01', '230601_pos02', '230601_pos03', '230613_pos00', '230613_pos01', '230613_pos02', '230613_pos03', '230621_pos00', '230621_pos01', '230621_pos02', '230621_pos03', '230628_pos04', '230628_pos05']
+OK   plot 198 | T2 scale flag count: record/recount 11 of 18 flagged | table 11 of 18 flagged
+OK   plot 198 | T3 as registered (0.15 and 0.20 m together): record/recount not resolvable | table not resolvable
+OK   plot 198 | T3 item 33 (0.15 m alone): record/recount not resolvable | table not resolvable
+OK   plot 198 | T3 p95 at 0.15 m: record/recount 0.12072308998917625 | table 0.12072308998917625
+OK   plot 198 | T3 n at 0.15 / 0.20 m: record/recount (18, 23) | table (18, 23)
+OK   plot 198 | T3 laser ceiling verdict: record/recount not resolvable | table not resolvable
+OK   plot 198 | T4 230601 ratio: record/recount 0.6779661016949152 | table 0.6779661016949152
+OK   plot 198 | T4 230601 verdict: record/recount fail | table fail
+OK   plot 198 | T4 230613 ratio: record/recount 0.9047619047619048 | table 0.9047619047619048
+OK   plot 198 | T4 230613 verdict: record/recount pass | table pass
+OK   plot 198 | T5 removal clause value/bar: record/recount (4, 8) | table (4, 8)
+OK   plot 198 | item 30 splat: counts in basis: record/recount True | table True
+OK   plot 198 | item 30 splat: same-day rate: record/recount 0.717948717948718 | table 0.717948717948718
+OK   plot 198 | item 30 splat: Wilson low: record/recount 0.1793324692249496 | table 0.1793324692249496
+OK   plot 198 | item 30 splat: Wilson high: record/recount 0.5066115681914238 | table 0.5066115681914238
+OK   plot 198 | item 30 splat: verdict: record/recount no verdict | table no verdict
+OK   plot 198 | as registered splat: verdict: record/recount met | table met
+OK   plot 198 | item 30 splat: Wilson low (scipy cross-check of my formula): record/recount 0.17933246922494958 | table 0.1793324692249496
+OK   plot 198 | item 30 laser: counts in basis: record/recount True | table True
+OK   plot 198 | item 30 laser: same-day rate: record/recount 0.13236313236313235 | table 0.13236313236313235
+OK   plot 198 | item 30 laser: Wilson low: record/recount 0.22418589997352706 | table 0.22418589997352706
+OK   plot 198 | item 30 laser: Wilson high: record/recount 0.49828218007147956 | table 0.49828218007147956
+OK   plot 198 | item 30 laser: verdict: record/recount not met | table not met
+OK   plot 198 | as registered laser: verdict: record/recount not met | table not met
+OK   plot 198 | item 30 laser: Wilson low (scipy cross-check of my formula): record/recount 0.2241858999735271 | table 0.22418589997352706
+OK   plot 198 | T7 230601_pos00 per-plant p95 recomputed vs ledger record: record/recount 0.09046940966649117 | table 0.09046940966649117
+OK   plot 198 | T7 230601_pos01 per-plant p95 recomputed vs ledger record: record/recount 0.1065425286523876 | table 0.1065425286523876
+OK   plot 198 | T7 230601_pos02 per-plant p95 recomputed vs ledger record: record/recount 0.08847344597129163 | table 0.08847344597129163
+OK   plot 198 | T7 230601_pos03 per-plant p95 recomputed vs ledger record: record/recount 0.08702132242644467 | table 0.08702132242644467
+OK   plot 198 | T7 230613_pos00 per-plant p95 recomputed vs ledger record: record/recount 0.0768765830129709 | table 0.0768765830129709
+OK   plot 198 | T7 230613_pos01 per-plant p95 recomputed vs ledger record: record/recount 0.07427710802161866 | table 0.07427710802161866
+OK   plot 198 | T7 230613_pos02 per-plant p95 recomputed vs ledger record: record/recount 0.1105845326069584 | table 0.1105845326069584
+OK   plot 198 | T7 230613_pos03 per-plant p95 recomputed vs ledger record: record/recount 0.10622501691315309 | table 0.10622501691315309
+OK   plot 198 | T7 230621_pos00 per-plant p95 recomputed vs ledger record: record/recount 0.09324415895946454 | table 0.09324415895946454
+OK   plot 198 | T7 230621_pos01 per-plant p95 recomputed vs ledger record: record/recount 0.10871582583973234 | table 0.10871582583973234
+OK   plot 198 | T7 230621_pos02 per-plant p95 recomputed vs ledger record: record/recount 0.14220109734714015 | table 0.14220109734714015
+OK   plot 198 | T7 230621_pos03 per-plant p95 recomputed vs ledger record: record/recount 0.14866466017245727 | table 0.14866466017245727
+OK   plot 198 | T7 as registered: stops with p95 <= 2 g: record/recount (0, 12) | table (0, 12)
+OK   plot 198 | item 31: stops at or below the M2d floor: record/recount (4, 12) | table (4, 12)
+plot 198: 44 checks, 0 DIFF; wrote /mnt/shared2/must-c/plot198/census/sensitivity_20261112/spotcheck_a100_plot198.json
+OK   plot 178 | T1 basis (n pass of n, swap px range from rig_ws_summary.csv): record/recount 11 of 11 stops, 0.46-0.55 px | table 11 of 11 stops, 0.46-0.55 px
+OK   plot 178 | T2 check count: record/recount 9 of 11 | table 9 of 11
+OK   plot 178 | T2 + plant-pattern count (item 32 stop set size): record/recount 1 of 11 | table 1 of 11
+OK   plot 178 | item 32 stop set (names): record/recount ['230601_pos01'] | table ['230601_pos01']
+OK   plot 178 | as-registered stop set (names): record/recount ['230601_pos01', '230601_pos02', '230601_pos03', '230613_pos01', '230613_pos02', '230613_pos03', '230616_pos00', '230616_pos01', '230616_pos02'] | table ['230601_pos01', '230601_pos02', '230601_pos03', '230613_pos01', '230613_pos02', '230613_pos03', '230616_pos00', '230616_pos01', '230616_pos02']
+OK   plot 178 | T2 scale flag count: record/recount 1 of 11 flagged | table 1 of 11 flagged
+OK   plot 178 | T3 as registered (0.15 and 0.20 m together): record/recount radius-dependent | table radius-dependent
+OK   plot 178 | T3 item 33 (0.15 m alone): record/recount resolvable | table resolvable
+OK   plot 178 | T3 p95 at 0.15 m: record/recount 0.09075534620038697 | table 0.09075534620038697
+OK   plot 178 | T3 n at 0.15 / 0.20 m: record/recount (18, 19) | table (18, 19)
+OK   plot 178 | T3 laser ceiling verdict: record/recount resolvable | table resolvable
+OK   plot 178 | T5 removal clause value/bar: record/recount (9, 14) | table (9, 14)
+OK   plot 178 | item 30 splat: counts in basis: record/recount True | table True
+OK   plot 178 | item 30 splat: same-day rate: record/recount 0.5 | table 0.5
+OK   plot 178 | item 30 splat: Wilson low: record/recount 0.21380798904474121 | table 0.21380798904474121
+OK   plot 178 | item 30 splat: Wilson high: record/recount 0.6740935542034926 | table 0.6740935542034926
+OK   plot 178 | item 30 splat: verdict: record/recount met | table met
+OK   plot 178 | as registered splat: verdict: record/recount met | table met
+OK   plot 178 | item 30 splat: Wilson low (scipy cross-check of my formula): record/recount 0.21380798904474121 | table 0.21380798904474121
+OK   plot 178 | item 30 laser: counts in basis: record/recount True | table True
+OK   plot 178 | item 30 laser: same-day rate: record/recount 0.20970695970695968 | table 0.20970695970695968
+OK   plot 178 | item 30 laser: Wilson low: record/recount 0.2554444331365656 | table 0.2554444331365656
+OK   plot 178 | item 30 laser: Wilson high: record/recount 0.6105138625340828 | table 0.6105138625340828
+OK   plot 178 | item 30 laser: verdict: record/recount not met | table not met
+OK   plot 178 | as registered laser: verdict: record/recount not met | table not met
+OK   plot 178 | item 30 laser: Wilson low (scipy cross-check of my formula): record/recount 0.2554444331365656 | table 0.2554444331365656
+OK   plot 178 | T7 230601_pos01 per-plant p95 recomputed vs ledger record: record/recount 0.12448370797885389 | table 0.12448370797885389
+OK   plot 178 | T7 230601_pos02 per-plant p95 recomputed vs ledger record: record/recount 0.0789506713297925 | table 0.0789506713297925
+OK   plot 178 | T7 230601_pos03 per-plant p95 recomputed vs ledger record: record/recount 0.0884650383749033 | table 0.0884650383749033
+OK   plot 178 | T7 230613_pos01 per-plant p95 recomputed vs ledger record: record/recount 0.09652017207808399 | table 0.09652017207808399
+OK   plot 178 | T7 230613_pos02 per-plant p95 recomputed vs ledger record: record/recount 0.12395697894128688 | table 0.12395697894128688
+OK   plot 178 | T7 230613_pos03 per-plant p95 recomputed vs ledger record: record/recount 0.12861208101902552 | table 0.12861208101902552
+OK   plot 178 | T7 230616_pos00 per-plant p95 recomputed vs ledger record: record/recount 0.18627182030753886 | table 0.18627182030753886
+OK   plot 178 | T7 230616_pos01 per-plant p95 recomputed vs ledger record: record/recount 0.10788416527392997 | table 0.10788416527392997
+OK   plot 178 | T7 230616_pos02 per-plant p95 recomputed vs ledger record: record/recount 0.07392050213840097 | table 0.07392050213840097
+OK   plot 178 | T7 as registered: stops with p95 <= 2 g: record/recount (8, 9) | table (8, 9)
+OK   plot 178 | item 31: stops at or below the M2d floor: record/recount (1, 9) | table (1, 9)
+POST HOC plot 178 230616_pos00: 10 of 26 compared laser-230613 plants lie inside SB7_150623 (dilated 0.10 m); p95 0.1863 m with them, 0.0700 m without; differences inside [0.034, -0.173, -0.207, -0.16, -0.101, -0.136, -0.128, -0.187, -0.183, -0.094]
+POST HOC plot 178 230616_pos01: 0 of 26 compared laser-230613 plants lie inside SB7_150623 (dilated 0.10 m); p95 0.1079 m with them, 0.1079 m without; differences inside []
+POST HOC plot 178 230616_pos02: 0 of 20 compared laser-230613 plants lie inside SB7_150623 (dilated 0.10 m); p95 0.0739 m with them, 0.0739 m without; differences inside []
+plot 178: 37 checks, 0 DIFF; wrote /mnt/shared2/must-c/plot178/census/sensitivity_20261112/spotcheck_a100_plot178.json
