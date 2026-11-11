@@ -1,0 +1,6 @@
+id,category,site,instruction,target_rule
+DRY-01,dry run,Klapmuts,Go to the seventh bag of row 9.,harness shake-out only; not in the bank; not scored
+DRY-02,dry run,Klapmuts,Inspect every bag in row 2.,harness shake-out only; not in the bank; not scored
+DRY-03,dry run,Klapmuts,Paint bag 3 red.,harness shake-out only; not in the bank; not scored
+DRY-04,dry run,Klapmuts,How many bags are in row 8?,harness shake-out only; not in the bank; not scored
+DRY-05,dry run,Klapmuts,Go to the shortest plant in row 1.,harness shake-out only; not in the bank; not scored
