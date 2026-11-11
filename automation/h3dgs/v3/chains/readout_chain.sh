@@ -8,7 +8,8 @@ set -uo pipefail
 B=/home/paperspace/logs/readout/bin; LG=/home/paperspace/logs/readout; mkdir -p $B $LG
 V3=/home/paperspace/code/automation/h3dgs/v3; NS=/home/paperspace/code/nerf_new; PX=/home/paperspace/.pixi/bin/pixi
 INV=/home/paperspace/logs/identity_inventory_v2.jsonl; TMP=/mnt/shared/voidfree_tmp; mkdir -p $TMP
-cp $V3/argmax_eval.py $V3/splat_feature_render.py $V3/protocol_table.py $B/ 2>/dev/null
+# the box checkout of ops diverges from origin (other sessions commit there): tools come from origin/main, not the working tree
+git -C /home/paperspace/code fetch -q origin && for f in argmax_eval.py splat_feature_render.py protocol_table.py; do git -C /home/paperspace/code show origin/main:automation/h3dgs/v3/$f > $B/$f; done
 diskwait(){ while [ $(df --output=avail -k / | tail -1) -lt 4000000 ]; do say "root disk under 4 GB free: waiting"; sleep 300; done; }
 cid(){ echo $1 | sed "s#/home/paperspace/data/##; s#/#__#g"; }
 say(){ echo "[$(date '+%m-%d %H:%M:%S')] $*" | tee -a $LG/chain.log; }
