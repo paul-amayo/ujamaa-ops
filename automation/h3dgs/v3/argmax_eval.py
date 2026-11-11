@@ -92,6 +92,10 @@ if SPACE == 'hyper_walk' and tree_ids:   # tree-level radius for category words:
 CAT = [(kv.split('=')[0], kv.split('=')[1] if '=' in kv else 'ALL') for kv in a.category.split(',') if kv]
 if CAT:   # category protocol: the vocabulary is the category words; LERF relevancy (min over the canonical negatives) replaces the cosine
     LS_NEG = ('object', 'things', 'stuff', 'texture'); E_CAT = encode([w for w, _ in CAT]); E_NEG = encode(list(LS_NEG))
+    if SPACE == 'hyper_tangent':   # the category words and negatives through the encoder (raw CLIP text, as the census seeds)
+        with torch.no_grad():
+            _raw = lambda ws: clip.encode_text(tok(ws).to(dev)).float()
+            _n = lambda x: x / x.norm(dim=-1, keepdim=True); G_CAT = _n(hyper.encode_features(_raw([w for w, _ in CAT]), project=False)); G_NEG = _n(hyper.encode_features(_raw(list(LS_NEG)), project=False))
     def rel_from_cos(cp, cn): return torch.sigmoid(10.0 * (cp.unsqueeze(-1) - cn.unsqueeze(-2))).min(-1).values   # cp [..., c], cn [..., k] -> [..., c]
 if SPACE == 'langsplat': E_NEG = encode(list(LS_NEG))
 def relevancy(dec):   # LangSplat/eval get_relevancy, vectorised over the vocabulary: min over negatives of softmax(10 * [pos, neg])[pos]
@@ -145,6 +149,8 @@ for fr in frames:
             elif SPACE == 'flat': dec = nrm(sl.view(-1, 3, K) @ comp + bmean)                       # [n, 3, 512]: a category may live in any block -> max over blocks
             elif SPACE == 'euclid': dec = nrm(hyper.decode_features(sl, project=True))[:, None]
             elif SPACE == 'langsplat': dec = nrm(AE.decode(sl[:, 3 * (a.ls_level - 1):3 * a.ls_level]))[:, None]
+            elif SPACE == 'hyper_tangent':   # encoder path for a category word (11-11): cosines of the pixel direction to g(word) and g(negatives), LERF relevancy on those
+                n_ = nrm(sl); S[j:j + 8192] = rel_from_cos(n_ @ G_CAT.T, n_ @ G_NEG.T); continue
             elif SPACE == 'hyper_walk':   # decoder path for a category word: the pixel walked to the tree level's radius, decoded (11-11, letter v39 Section III-D)
                 dec = nrm(hyper.decode_features(L.exp_map0(nrm(sl) * R_TREE_WALK, curv=curv), project=True))[:, None]
             else:
