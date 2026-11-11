@@ -9,7 +9,7 @@ oracle as a check and adds, from ONE decode per frame, the protocols the paper r
   nesting   fraction of non-void pixels whose row-level argmax is the row of their tree-level argmax (cross-level consistency);
             for ROW heads also 'argmax_union' = the row as the union of its member trees' argmax pixels (scene graph, no row words)
 Spaces (--space, the ablation arms of the paper): hyper = containment (exp_map0 -> 4-step walk, extrapolated steps masked, own point,
-cosine to CLIP text, max; containment_eval's decode, void pixels -1); hyper_own = the pixel's own point only (arm D, what the ancestors
+cosine to CLIP text, max; containment_eval's decode, void pixels -1); hyper_walk = the decoder path (11-11): the pixel's direction walked to the radius of the queried level (median |g(t)| of the level's addresses), decoded, cosine to CLIP text; hyper_tangent = the encoder path: cos(f, g(t_q)), no decoding; hyper_own = the pixel's own point only (arm D, what the ancestors
 add); euclid = a Euclidean embedder's field decoded at its own point (arm B); flat = three PCA-32 blocks tree|row|fruit decoded by the
 inverse PCA (arm C, --basis). Inputs resolve from the cell itself: text_bank.npz meta (supervision manifest -> id maps; hierarchy json),
 features_B.bin.json (the embedder the seed was built against — embedder-era pairing) unless overridden. Writes
@@ -28,7 +28,7 @@ import open_clip
 FRUIT_ID_BASE, UNLAB, VOID_NORM, MAX_DIST, STEPS = 10000, 65535, 0.5, 11.1, 4
 THR = np.concatenate([np.linspace(0.4, 0.95, 45), np.linspace(0.955, 0.999, 12)])   # containment_eval.best_mask's sweep
 ap = argparse.ArgumentParser(); ap.add_argument('--identity', required=True); ap.add_argument('--tag', default='v3'); ap.add_argument('--maps', default='maps_v3/%s.npz')
-ap.add_argument('--space', default='auto', choices=['auto', 'hyper', 'hyper_own', 'euclid', 'flat', 'langsplat']); ap.add_argument('--basis', default='', help='--space flat: <features>.basis.npz from build_flat_seed.py')
+ap.add_argument('--space', default='auto', choices=['auto', 'hyper', 'hyper_own', 'hyper_walk', 'hyper_tangent', 'euclid', 'flat', 'langsplat']); ap.add_argument('--basis', default='', help='--space flat: <features>.basis.npz from build_flat_seed.py')
 ap.add_argument('--ae-ckpt', default='', help='--space langsplat: the cell autoencoder (3 -> 512) LangSplat trained'); ap.add_argument('--ls-level', type=int, default=1, help='--space langsplat: which of the 3 rendered levels to score')
 ap.add_argument('--category', default='', help="category protocol (E3): 'word=GROUP,...' with GROUP in ALL (every labelled px), TREES (tree ids), FRUIT (fruit ids), e.g. tree=ALL,orange=FRUIT — scored with LERF relevancy against the canonical negatives, same for every space")
 ap.add_argument('--fruit-rule', default='mixed', choices=['mixed', 'level'], help="FRUIT heads: 'mixed' = argmax over fruit + tree words (a leaf-dominated blend decodes to the tree); 'level' = the same rule as every other level — argmax among fruit words only, presence where the pixel's tangent norm sits at fruit depth (>= the midpoint between the tree and fruit target norms: depth == radius)")
@@ -68,7 +68,7 @@ hyper = build_hyper_embedder(EMB, dev) if a.space not in ('flat', 'langsplat') e
 EUCLID = bool(getattr(hyper.config, 'euclidean', False)) if hyper is not None else False
 SPACE = a.space if a.space != 'auto' else ('euclid' if EUCLID else 'hyper')
 if SPACE == 'euclid' and not EUCLID: sys.exit('[space] --space euclid needs a Euclidean embedder (config euclidean=True)')
-if SPACE in ('hyper', 'hyper_own') and EUCLID: sys.exit('[space] this embedder is Euclidean; use --space euclid')
+if SPACE in ('hyper', 'hyper_own', 'hyper_walk', 'hyper_tangent') and EUCLID: sys.exit('[space] this embedder is Euclidean; use --space euclid')
 if SPACE == 'flat':
     if not a.basis: sys.exit('[space] --space flat needs --basis')
     _B = np.load(a.basis); comp = torch.from_numpy(_B['components']).float().to(dev); bmean = torch.from_numpy(_B['mean']).float().to(dev); K = comp.shape[0]
@@ -113,7 +113,7 @@ def sweep(heat, gt, extra=None):   # IoU / precision / recall at EVERY threshold
     iou = TP / (P_ + G - TP).clamp(min=1); return iou.cpu().numpy(), (TP / P_.clamp(min=1)).cpu().numpy(), (TP / max(G, 1)).cpu().numpy()
 def curve(heat, gt, extra=None): return sweep(heat, gt, extra)[0].tolist()
 nrm = lambda x: x / x.norm(dim=-1, keepdim=True).clamp(min=1e-8)
-lines = []; parity = []
+lines = []; parity = []; G_cache = [None]
 for fr in frames:
     stem = fr.replace('.png', ''); z = np.load(N / (a.maps % stem)); feat = torch.from_numpy(z['features'].astype(np.float32)).to(dev); H, W, D = feat.shape
     ft = feat.reshape(-1, D); P = ft.shape[0]; void = (ft[:, 3 * (a.ls_level - 1):3 * a.ls_level] if SPACE == 'langsplat' else ft).norm(dim=-1) < VOID_NORM
@@ -161,6 +161,12 @@ for fr in frames:
         print(f'[{a.tag} {fr}] void {100 * void.float().mean().item():.1f}% | {len(heads)} category heads | {time.time() - t0:.0f}s', flush=True); continue
     for k, i, _ in heads: column(k, i)
     V = E.shape[0]; S = torch.full((P, V), -1.0, device=dev)
+    if SPACE in ('hyper_walk', 'hyper_tangent') and (G_cache[0] is None or G_cache[0].shape[0] != V):   # the addresses' tangent vectors g(t) from RAW CLIP text, as the census seeds
+        with torch.no_grad(): G_cache[0] = hyper.encode_features(clip.encode_text(tok(words).to(dev)).float(), project=False)
+        Gn = G_cache[0].norm(dim=-1); LVL = {}
+        for kname, idl in (('TREE', tree_ids), ('FRUIT', fruit_ids), ('ROW', row_ids)):
+            if idl: cs = torch.tensor([col[(kname, i)] for i in idl], device=dev, dtype=torch.long); LVL[kname] = (cs, Gn[cs].median().item())
+        print('[walk] level radii ' + ', '.join(f'{k} {r:.2f}' for k, (_, r) in LVL.items()), flush=True)
     T_cols = torch.tensor([col[('TREE', t)] for t in tree_ids], device=dev, dtype=torch.long); R_cols = torch.tensor([col[('ROW', r)] for r in row_ids], device=dev, dtype=torch.long)
     F_cols = torch.tensor([col[('FRUIT', f)] for f in fruit_ids], device=dev, dtype=torch.long); FT_cols = torch.cat([F_cols, T_cols])
     for j in range(0, P, 8192):
@@ -175,6 +181,10 @@ for fr in frames:
             continue
         if SPACE == 'euclid': S[j:j + 8192] = nrm(hyper.decode_features(sl, project=True)) @ E.T; continue
         if SPACE == 'langsplat': S[j:j + 8192] = relevancy(AE.decode(sl[:, 3 * (a.ls_level - 1):3 * a.ls_level])); continue
+        if SPACE == 'hyper_tangent': S[j:j + 8192] = nrm(sl) @ nrm(G_cache[0]).T; continue   # encoder path: direction of the pixel vs direction of g(t_q)
+        if SPACE == 'hyper_walk':   # decoder path: the pixel's geodesic walked to the radius of the queried level, decoded, cosine to the anchor
+            for kname, (cs, r) in LVL.items(): S[j:j + 8192, cs] = nrm(hyper.decode_features(L.exp_map0(nrm(sl) * r, curv=curv), project=True)) @ E[cs].T
+            continue
         h = L.exp_map0(sl, curv=curv); own = nrm(hyper.decode_features(h, project=True)) @ E.T
         if SPACE == 'hyper_own': S[j:j + 8192] = own; continue
         path, mask = L.get_interpolated_hyperbolic_features(h, steps=STEPS, curv=curv, max_dist=MAX_DIST, return_mask=True)
