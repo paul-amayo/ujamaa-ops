@@ -15,7 +15,7 @@ import argparse, json, subprocess
 from pathlib import Path
 import numpy as np
 ap = argparse.ArgumentParser(); ap.add_argument('paper'); ap.add_argument('--surveys', default='01_13B_Jackal,dec_2025_ten_rows,nov_2025_a300,apr_2026_zed,IMG_7993_s0,IMG_7990_s1')
-ap.add_argument('--out', default='fig_sites.png'); ap.add_argument('--cols', type=int, default=0, help='panels per row (0: one strip); draft 36 uses 2 at column width'); ap.add_argument('--width', type=float, default=7.2); ap.add_argument('--fs', type=float, default=6.5); ap.add_argument('--stage', default='both', choices=['both', '1', '2'])
+ap.add_argument('--out', default='fig_sites.png'); ap.add_argument('--keep-picks', action='store_true', help='v39: use sites/picks.json and <survey>_all.npz as written by sites_pick_tangent.py (encoder-path readout, sharpest typical render)'); ap.add_argument('--cols', type=int, default=0, help='panels per row (0: one strip); draft 36 uses 2 at column width'); ap.add_argument('--width', type=float, default=7.2); ap.add_argument('--fs', type=float, default=6.5); ap.add_argument('--stage', default='both', choices=['both', '1', '2'])
 ap.add_argument('--layout', default='frame', choices=['frame', 'zoom'], help="frame: full frames dimmed to 50 %% (drafts <= 36); zoom: each panel cropped to the bounding box of every scored pixel "
                 "(prediction | supervision, so nothing that enters the IoU is cut off), background desaturated and brightened, title above, colour legend below")
 ap.add_argument('--aspect', type=float, default=1.7, help='zoom layout: panel width / height'); ap.add_argument('--dpi', type=int, default=220)
@@ -28,7 +28,7 @@ KIND = {'dec_2025_ten_rows': 'plant', 'IMG_7990_s1': 'plant', 'IMG_7993_s0': 'pl
 SHORT = {'01_13B_Jackal': 'citrus 01', '02_13B_Jackal': 'citrus 02', '03_13B_Jackal': 'citrus 03', '04_13D_Jackal': 'citrus 04', '05_13D_Jackal': 'citrus 05', 'apr_2026_zed': 'Klapmuts Apr', 'dec_2025_ten_rows': 'Klapmuts Dec', 'nov_2025_a300': 'Lindendhof', 'IMG_7993_s0': 'cabbage', 'IMG_7990_s1': 'pepper'}
 inv = [json.loads(l) for l in open('/home/paperspace/logs/identity_inventory_v2.jsonl')]
 picks = []
-for sv in a.surveys.split(','):
+for sv in ([] if a.keep_picks else a.surveys.split(',')):
     heads = []
     for c in [c for c in inv if c['survey'] == sv]:
         pth = Path(c['identity']) / 'protocol_v3.jsonl'
@@ -40,7 +40,8 @@ for sv in a.surveys.split(','):
     med = float(np.median([h['argmax']['iou'] for h in heads])); h = min(heads, key=lambda h: abs(h['argmax']['iou'] - med))
     picks.append({'survey': sv, 'identity': h['identity'], 'frame': h['frame'], 'word': h['word'], 'id': int(h['id']), 'argmax_iou': h['argmax']['iou'], 'median': med, 'n': len(heads), 'gt_frac': h['gt_frac']})
     print(f"[sites] {sv}: {len(heads)} heads >= 3 %, median argmax IoU {med:.3f}; shown {h['frame']} id {h['id']} '{h['word']}' at {h['argmax']['iou']:.3f} ({100 * h['gt_frac']:.1f} % of the frame)")
-json.dump(picks, open(FIG / 'sites' / 'picks.json', 'w'), indent=1)
+if a.keep_picks: picks = json.load(open(FIG / 'sites' / 'picks.json'))
+else: json.dump(picks, open(FIG / 'sites' / 'picks.json', 'w'), indent=1)
 if a.stage in ('both', '1'):
     for pk in picks:
         out = FIG / 'sites' / f"{pk['survey']}_all.npz"
