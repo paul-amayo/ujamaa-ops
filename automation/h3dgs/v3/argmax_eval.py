@@ -86,6 +86,9 @@ if a.fruit_rule == 'level' and hyper is not None and not EUCLID and fruit_ids:  
         _ce = clip.encode_text(tok([WORD('TREE', t) for t in tree_ids] + [WORD('FRUIT', f) for f in fruit_ids]).to(dev)).float()
         _nt = torch.tensor([0] * len(tree_ids) + [4] * len(fruit_ids), device=dev); _tl = L.log_map0(hyper.encode_features(_ce, project=True, node_types=_nt), curv=curv).norm(dim=-1)
     R_MID = 0.5 * (_tl[:len(tree_ids)].median().item() + _tl[len(tree_ids):].median().item()); print(f'[fruit-rule] level: tree targets median norm {_tl[:len(tree_ids)].median().item():.2f}, fruit {_tl[len(tree_ids):].median().item():.2f} -> fruit depth >= {R_MID:.2f}', flush=True)
+R_TREE_WALK = None
+if SPACE == 'hyper_walk' and tree_ids:   # tree-level radius for category words: median |g(t)| of the cell's tree addresses (raw CLIP text, as the census seeds)
+    with torch.no_grad(): R_TREE_WALK = hyper.encode_features(clip.encode_text(tok([WORD('TREE', t) for t in tree_ids]).to(dev)).float(), project=False).norm(dim=-1).median().item()
 CAT = [(kv.split('=')[0], kv.split('=')[1] if '=' in kv else 'ALL') for kv in a.category.split(',') if kv]
 if CAT:   # category protocol: the vocabulary is the category words; LERF relevancy (min over the canonical negatives) replaces the cosine
     LS_NEG = ('object', 'things', 'stuff', 'texture'); E_CAT = encode([w for w, _ in CAT]); E_NEG = encode(list(LS_NEG))
@@ -142,6 +145,8 @@ for fr in frames:
             elif SPACE == 'flat': dec = nrm(sl.view(-1, 3, K) @ comp + bmean)                       # [n, 3, 512]: a category may live in any block -> max over blocks
             elif SPACE == 'euclid': dec = nrm(hyper.decode_features(sl, project=True))[:, None]
             elif SPACE == 'langsplat': dec = nrm(AE.decode(sl[:, 3 * (a.ls_level - 1):3 * a.ls_level]))[:, None]
+            elif SPACE == 'hyper_walk':   # decoder path for a category word: the pixel walked to the tree level's radius, decoded (11-11, letter v39 Section III-D)
+                dec = nrm(hyper.decode_features(L.exp_map0(nrm(sl) * R_TREE_WALK, curv=curv), project=True))[:, None]
             else:
                 h = L.exp_map0(sl, curv=curv); own = nrm(hyper.decode_features(h, project=True))[:, None]
                 if SPACE == 'hyper_own': dec = own
