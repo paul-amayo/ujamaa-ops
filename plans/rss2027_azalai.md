@@ -1,4 +1,13 @@
-# RSS 2027 — Azalai: sending a robot back to the plant the twin names (plan, draft 20 Oct 2026)
+# RSS 2027 — Azalai: sending a robot back to the plant the twin names (plan, draft 20 Oct 2026; revised 11 Nov 2026)
+
+**Status 11 Nov 2026:** HiGH is submitted (RA-L, v40.1), so Azalai has the box until Stage 1 (Fri 4 Dec; target Thu 3 Dec).
+Pilots H2 and H3-positional are done (section 6c); H1 v1 and H3 with the twin render were started today (section 6d).
+**Boundary correction from the HiGH work (11 Nov):** HiGH supplies *addresses*, not word meaning. Its addresses are
+arbitrary far-apart words, the reported readout is the encoder-path cosine cos(f(p), g(t_q)) with the argmax among the
+addresses of one level, and a category word such as "tree" is not answered (encoder path 0.00; the earlier 0.78-0.87 was
+the void check). Azalai therefore never routes free text through HiGH: the LLM decomposes the instruction, the registry
+resolves what-it-is / count / change terms to node addresses, and HiGH turns an address into pixels, a best view and an
+arrival render.
 
 Paul, 20 Oct: "there is much to be explored combining HiGH with something else"; the paper is one of the new agents,
 **Azalai** (navigation). Papers ↔ agents: HiGH = Tassili, JIRS 4D twin = Sankofa, RSS = Azalai; Spoor (the live
@@ -25,7 +34,7 @@ rule now; Stage 2 reports them whichever way they fall.
 
 | Work | Status | What Azalai takes from it | What Azalai must not re-claim |
 |---|---|---|---|
-| HiGH (Tassili) | RA-L, submit 13 Nov | open-vocabulary identity, containment, argmax query rule, census weights, fruit registry, E1 IoU protocol | the embedding or any new ablation of it |
+| HiGH (Tassili) | RA-L, **submitted 11 Nov (v40.1)** | addressed identity (a node's address -> its pixels; no open-vocabulary words), the encoder-path containment score with the argmax among one level's addresses, census weights, fruit registry, the held-out IoU protocol | the embedding or any new ablation of it; any open-vocabulary claim |
 | Language-enabled scene graph + robot layer + VT&R3 (Mukuddem, Speed-Andrews, Amayo) | **published, ICRA 2026** | robot layer (keyframe ↔ object edges), LLM instruction decomposition, VT&R3 multi-experience repeat | enumerated addressing, the repeat results |
 | SANA row following (Travi et al.) | ICRA, under review | optional in-row driving between keyframes | row following itself |
 | JIRS 4D twin (Sankofa) | JIRS, submit Feb 2027 | a registry entry (e.g. "missing since December") as a *target* | farm-scale found-again rates, the survey-to-survey ledger |
@@ -53,7 +62,8 @@ Working titles: "Go to the one that changed: sending field robots back to plants
 1. **Twin and registry** (exists): H3DGS model with HiGH identity; plant registry (Klapmuts ledger v5 grow bags; citrus
    fruit registry). Robot-layer keyframes are the survey's own training views.
 2. **Grounding** (new combination): the LLM only decomposes the instruction into sub-tasks (as in the ICRA system);
-   each sub-task's target is resolved by HiGH containment + argmax, or by a registry lookup for count/change terms.
+   each sub-task's target is resolved to a node address by a registry lookup (numbered, what-it-is, count and change
+   terms alike; 11 Nov: HiGH carries no word meaning), and HiGH containment + argmax turns the address into pixels.
    No per-object thresholds (memory: relevancy-not-fitted-cuts).
 3. **Goal keyframe** (new): HiGH's census weights already say how much each training view sees of each object;
    read as robot-layer edges, the goal is the keyframe that sees the target best, not the first that saw it.
@@ -139,6 +149,16 @@ localisation results from the pose-graph bags).
   twin lists where one was asked); the enumerated arm rejects what it cannot express (change 7 of 9). **v1:** both arms get the
   same lookup tools over their registry (the ICRA architecture: LLM decomposes, graph resolves), so only expressiveness differs.
 
+## 6d. Pilots started 11 Nov (after the HiGH submission)
+
+- **H1 v1** (`automation/azalai/pilots/`, records `Azalai_RSS/numbers/pilots_20261111/`): both arms get the same lookup
+  tools over their own registry (LLM decomposes, graph resolves); the frozen bank v0 and its gold are unchanged; tools and
+  prompts are fixed before scoring. Decision rule = H1 of section 5.
+- **H3 with the twin**: on the 552 pairs of the positional pilot, the December twin's rendered mask of the target and of
+  its row neighbours against the segmented April frame, arrival by the argmax among target and neighbours, no tuned
+  threshold; the rule is written down before any score is read. Known risk: Klapmuts Dec held-out renders ~17 dB and
+  plant IoU 0.56 (0.71 above 3 % of the frame), so neighbours may still alias; Stage 1 reports whichever way it falls.
+
 ## 7. Stage 1 evidence (offline, from logs, by 27 Nov)
 
 Stage 1 does not need results; a small pilot makes the hypotheses credible.
@@ -165,10 +185,10 @@ Every number in the abstract resolves to a provenance file (paper-latex number a
 | 20 Oct | this plan; Paul + Adam: lead author, team, farm | HiGH has priority until 13 Nov |
 | 27 Oct | data checks (stereo, Klapmuts masks); instruction bank v0 written and frozen | |
 | 3 Nov | grounding harness on the A100 (reuse Adinkra panel + HiGH query) | |
-| 9 Nov | — | **HiGH submits 13 Nov** |
-| 16 Nov | pilots H1–H3 on logs; numbers files | |
+| 9 Nov | **HiGH submitted 11 Nov**; H1 v1 and H3-twin started 11 Nov | |
+| 16 Nov | H1 v1 and H3-twin results read; numbers files; figures (system overview, H2, H3 confusion matrix) | JIRS MuST-C experiment closes in parallel |
 | 23 Nov | 5-page draft (how-paul-writes, paper-latex, RSS template) | |
-| 30 Nov | Paul's claim pass; build, anon check; **submit Fri 4 Dec** | |
+| 30 Nov | Paul's claim pass; build, number audit, anon check; **submit Thu 3 Dec** (deadline Fri 4 Dec) | |
 | Feb 2027 | 5 Feb decision; rebuttal by 12 Feb; Charter 26 Feb | JIRS submits in Feb |
 | Mar–Apr | field sessions at Klapmuts; Stage 2 by 16 Apr | |
 
